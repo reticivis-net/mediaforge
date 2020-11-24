@@ -1,1 +1,3 @@
-discord.py
+Wand~=0.6.4
+discord.py~=1.5.1
+Pillow~=8.0.1
