@@ -44,7 +44,8 @@ async def on_ready():
 
 
 @bot.command()
-async def caption(ctx, *, cap):
+async def esmcaption(ctx, *, cap):
+    await ctx.channel.trigger_typing()
     if len(ctx.message.attachments):
         file = await saveattachment(ctx.message.attachments[0])
         result = await improcessing.imcaption(file, cap)
@@ -54,6 +55,8 @@ async def caption(ctx, *, cap):
         if file:
             result = await improcessing.imcaption(file, cap)
             await ctx.send(file=discord.File(result))
+            os.remove(file)
+            os.remove(result)
         else:
             await ctx.send("❌ Message has no attachment.")
 
