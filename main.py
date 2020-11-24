@@ -8,7 +8,6 @@ import discord
 from discord.ext import commands
 import improcessing
 
-
 logging.basicConfig(format='%(levelname)s:[%(asctime)s] %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p',
                     level=logging.INFO)
 logging.info(f"Discord Version {discord.__version__}")
@@ -29,6 +28,14 @@ async def saveattachment(attachment: discord.Attachment):
             await attachment.save(name)
             return name
 
+
+async def attachmentsearch(ctx):
+    async for m in ctx.channel.history(limit=20):
+        if len(m.attachments):
+            return await saveattachment(m.attachments[0])
+    return False
+
+
 @bot.event
 async def on_ready():
     logging.info(f"Logged in as {bot.user.name}!")
@@ -43,7 +50,13 @@ async def caption(ctx, *, cap):
         result = await improcessing.imcaption(file, cap)
         await ctx.send(file=discord.File(result))
     else:
-        await ctx.send("❌ Message has no attachment.")
+        file = await attachmentsearch(ctx)
+        if file:
+            result = await improcessing.imcaption(file, cap)
+            await ctx.send(file=discord.File(result))
+        else:
+            await ctx.send("❌ Message has no attachment.")
+
 
 @bot.command()
 @commands.is_owner()
