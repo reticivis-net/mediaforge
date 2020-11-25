@@ -7,6 +7,8 @@ import traceback
 import discord
 from discord.ext import commands
 import improcessing
+import aiohttp
+import aiofiles
 
 logging.basicConfig(format='%(levelname)s:[%(asctime)s] %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p',
                     level=logging.INFO)
@@ -20,19 +22,31 @@ def get_random_string(length):
     return ''.join(random.choice(string.ascii_letters) for i in range(length))
 
 
-async def saveattachment(attachment: discord.Attachment):
-    extension = attachment.filename.split(".")[-1]
+async def saveurl(url):
+    logging.info(f"Saving url {url}")
+    extension = url.split(".")[-1]
     while True:
         name = f"temp/{get_random_string(8)}.{extension}"
         if not os.path.exists(name):
-            await attachment.save(name)
+            async with aiohttp.ClientSession() as session:
+                async with session.get(url) as resp:
+                    if resp.status == 200:
+                        f = await aiofiles.open(name, mode='wb')
+                        await f.write(await resp.read())
+                        await f.close()
+                    else:
+                        logging.error(f"aiohttp status {resp.status}")
             return name
 
 
-async def attachmentsearch(ctx):
-    async for m in ctx.channel.history(limit=20):
-        if len(m.attachments):
-            return await saveattachment(m.attachments[0])
+async def imagesearch(ctx):
+    async for m in ctx.channel.history(limit=50):
+        if len(m.embeds):
+            if m.embeds[0].type == "image" or m.embeds[0].type == "video":
+                return await saveurl(m.embeds[0].url)
+        elif len(m.attachments):
+            if m.attachments[0].width:
+                return await saveurl(m.attachments[0].url)
     return False
 
 
@@ -46,19 +60,11 @@ async def on_ready():
 @bot.command()
 async def esmcaption(ctx, *, cap):
     await ctx.channel.trigger_typing()
-    if len(ctx.message.attachments):
-        file = await saveattachment(ctx.message.attachments[0])
-        result = await improcessing.imcaption(file, cap)
-        await ctx.send(file=discord.File(result))
-    else:
-        file = await attachmentsearch(ctx)
-        if file:
-            result = await improcessing.imcaption(file, cap)
-            await ctx.send(file=discord.File(result))
-            os.remove(file)
-            os.remove(result)
-        else:
-            await ctx.send("❌ Message has no attachment.")
+    file = await imagesearch(ctx)
+    result = await improcessing.imcaption(file, cap)
+    await ctx.send(file=discord.File(result))
+    os.remove(file)
+    os.remove(result)
 
 
 @bot.command()

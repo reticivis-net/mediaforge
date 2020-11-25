@@ -3,7 +3,7 @@ import random
 import string
 
 import wand
-from PIL import Image, ImageFont, ImageDraw
+from PIL import Image, ImageFont, ImageDraw, GifImagePlugin
 
 futura = ImageFont.truetype("fonts/caption.otf")
 
@@ -44,6 +44,15 @@ async def imsave(image):
             return name
 
 
+async def gifsave(image: list):
+    extension = "gif"
+    while True:
+        name = f"temp/{get_random_string(8)}.{extension}"
+        if not os.path.exists(name):
+            image[0].save(name, save_all=True, append_images=image[1:], duration=100, loop=0)
+            return name
+
+
 def get_concat_v(im1, im2):
     dst = Image.new('RGBA', (im1.width, im1.height + im2.height))
     dst.paste(im1, (0, 0))
@@ -61,6 +70,12 @@ async def imcaption(image, cap):  # `image` is a file path and `cap` is a str
     imcap = Image.new("RGB", (im.width, capsize[1] + (im.width // 8)), "#fff")
     d = ImageDraw.Draw(imcap)
     d.multiline_text(((im.width - capsize[0]) // 2, (imcap.height - capsize[1]) // 2 - (futuralocal.size // 8)), cap,
-                     (0, 0, 0), font=futuralocal,
-                     align='center', spacing=(futuralocal.size // 4))
-    return await imsave(get_concat_v(imcap, im))
+                     (0, 0, 0), font=futuralocal, align='center', spacing=(futuralocal.size // 4))
+    if im.is_animated:
+        frames = []
+        for frame in range(0, im.n_frames):
+            frames.append(get_concat_v(imcap, im.seek(frame)))
+        return await gifsave(frames)
+    else:
+        final = get_concat_v(imcap, im)
+        return await imsave(final)
