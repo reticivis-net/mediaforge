@@ -9,6 +9,10 @@
             font-family: caption;
             src: url(rendering/fonts/caption.otf);
         }
+        /*@font-face {
+            font-family: twemoji;
+            src: url(rendering/fonts/twemoji.ttf);
+        }*/
 
         * {
             margin: 0;
@@ -17,7 +21,6 @@
             outline: 0;
             font-size: 100%;
             vertical-align: baseline;
-            background: transparent;
         }
 
         body {
@@ -25,10 +28,9 @@
         }
 
         .caption {
-            font-smooth: always;
             -webkit-font-smoothing: antialiased;
             background: white;
-            font-family: caption, sans-serif;
+            font-family: caption, /*twemoji,*/ sans-serif;
             text-align: center;
             word-wrap: break-word;
             font-size: calc((100vw / 13) * (16 / 12));
