@@ -1,5 +1,6 @@
-Wand~=0.6.4
-discord.py~=1.5.1
+discord.py~=1.6
 Pillow~=8.0.1
-aiohttp[speedups]
-aiofiles
+aiohttp[speedups]~=3.6.3
+aiofiles~=0.6.0
+imgkit~=1.0.2
+python-magic-win64~=0.4.13

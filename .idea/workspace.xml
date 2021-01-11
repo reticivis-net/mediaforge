@@ -26,8 +26,14 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="ef38d419-8cc3-42ef-bbef-6fd62fc27c52" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/dbnavigator.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dbnavigator.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/caption.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/gifski.exe" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/rendering/demoimage.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/rendering/speed-59.gif" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fonts/Futura Condensed Extra Bold.otf" beforeDir="false" afterPath="$PROJECT_DIR$/rendering/fonts/Futura Condensed Extra Bold.otf" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fonts/ImpactMix.ttf" beforeDir="false" afterPath="$PROJECT_DIR$/rendering/fonts/ImpactMix.ttf" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fonts/caption.otf" beforeDir="false" afterPath="$PROJECT_DIR$/rendering/fonts/caption.otf" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/improcessing.py" beforeDir="false" afterPath="$PROJECT_DIR$/improcessing.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
@@ -86,6 +92,8 @@
       <recent name="C:\Users\minec\PycharmProjects\caption bot" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\minec\PycharmProjects\CaptionX" />
+      <recent name="C:\Users\minec\PycharmProjects\CaptionX\rendering" />
       <recent name="C:\Users\minec\PycharmProjects\caption bot\fonts" />
     </key>
   </component>
@@ -153,6 +161,19 @@
       <workItem from="1606184360972" duration="7307000" />
       <workItem from="1606248027582" duration="19000" />
       <workItem from="1606283713618" duration="365000" />
+      <workItem from="1606323229855" duration="807000" />
+      <workItem from="1606328740708" duration="1603000" />
+      <workItem from="1606531733495" duration="1538000" />
+      <workItem from="1609547911238" duration="18000" />
+      <workItem from="1609557725363" duration="7000" />
+      <workItem from="1609658053369" duration="16000" />
+      <workItem from="1609704284950" duration="21000" />
+      <workItem from="1609950556227" duration="6000" />
+      <workItem from="1609991525326" duration="102000" />
+      <workItem from="1610147333801" duration="88000" />
+      <workItem from="1610147653862" duration="11000" />
+      <workItem from="1610150934828" duration="1461000" />
+      <workItem from="1610319542051" duration="9429000" />
     </task>
     <task id="LOCAL-00001" summary="giving up on imagemagick">
       <created>1606187690936</created>
@@ -168,7 +189,14 @@
       <option name="project" value="LOCAL" />
       <updated>1606194525939</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="redid image searching">
+      <created>1606289281424</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1606289281424</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -204,65 +232,12 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="giving up on imagemagick" />
     <MESSAGE value="$esmcaption finished" />
-    <option name="LAST_COMMIT_MESSAGE" value="$esmcaption finished" />
-  </component>
-  <component name="WindowStateProjectService">
-    <state x="414" y="174" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1606174642756">
-      <screen x="0" y="0" width="1920" height="1040" />
-    </state>
-    <state x="414" y="174" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1920.1040/1920.164.1600.860/-1600.279.1600.860@0.0.1920.1040" timestamp="1606174642756" />
-    <state x="721" y="321" key="#com.intellij.fileTypes.FileTypeChooser" timestamp="1606172901136">
-      <screen x="0" y="0" width="1920" height="1040" />
-    </state>
-    <state x="721" y="321" key="#com.intellij.fileTypes.FileTypeChooser/0.0.1920.1040/1920.164.1600.860/-1600.279.1600.860@0.0.1920.1040" timestamp="1606172901136" />
-    <state x="576" y="88" key="CommitChangelistDialog2" timestamp="1606194525585">
-      <screen x="0" y="0" width="1920" height="1040" />
-    </state>
-    <state x="576" y="88" key="CommitChangelistDialog2/0.0.1920.1040/1920.164.1600.860/-1600.279.1600.860@0.0.1920.1040" timestamp="1606194525585" />
-    <state x="827" y="274" key="EnvironmentVariablesDialog" timestamp="1606174641102">
-      <screen x="0" y="0" width="1920" height="1040" />
-    </state>
-    <state x="827" y="274" key="EnvironmentVariablesDialog/0.0.1920.1040/1920.164.1600.860/-1600.279.1600.860@0.0.1920.1040" timestamp="1606174641102" />
-    <state x="835" y="417" key="Github.ShareDialog" timestamp="1606172773619">
-      <screen x="0" y="0" width="1920" height="1040" />
-    </state>
-    <state x="835" y="417" key="Github.ShareDialog/0.0.1920.1040/1920.164.1600.860/-1600.279.1600.860@0.0.1920.1040" timestamp="1606172773619" />
-    <state x="768" y="224" key="Github.UntrackedFilesDialog" timestamp="1606172777756">
-      <screen x="0" y="0" width="1920" height="1040" />
-    </state>
-    <state x="768" y="224" key="Github.UntrackedFilesDialog/0.0.1920.1040/1920.164.1600.860/-1600.279.1600.860@0.0.1920.1040" timestamp="1606172777756" />
-    <state width="1877" height="282" key="GridCell.Tab.0.bottom" timestamp="1606287951711">
-      <screen x="0" y="0" width="1920" height="1040" />
-    </state>
-    <state width="1877" height="282" key="GridCell.Tab.0.bottom/0.0.1920.1040/1920.164.1600.860/-1600.279.1600.860@0.0.1920.1040" timestamp="1606287951711" />
-    <state width="1877" height="282" key="GridCell.Tab.0.center" timestamp="1606287951711">
-      <screen x="0" y="0" width="1920" height="1040" />
-    </state>
-    <state width="1877" height="282" key="GridCell.Tab.0.center/0.0.1920.1040/1920.164.1600.860/-1600.279.1600.860@0.0.1920.1040" timestamp="1606287951711" />
-    <state width="1877" height="282" key="GridCell.Tab.0.left" timestamp="1606287951711">
-      <screen x="0" y="0" width="1920" height="1040" />
-    </state>
-    <state width="1877" height="282" key="GridCell.Tab.0.left/0.0.1920.1040/1920.164.1600.860/-1600.279.1600.860@0.0.1920.1040" timestamp="1606287951711" />
-    <state width="1877" height="282" key="GridCell.Tab.0.right" timestamp="1606287951711">
-      <screen x="0" y="0" width="1920" height="1040" />
-    </state>
-    <state width="1877" height="282" key="GridCell.Tab.0.right/0.0.1920.1040/1920.164.1600.860/-1600.279.1600.860@0.0.1920.1040" timestamp="1606287951711" />
-    <state x="461" y="164" key="SettingsEditor" timestamp="1606172827168">
-      <screen x="0" y="0" width="1920" height="1040" />
-    </state>
-    <state x="461" y="164" key="SettingsEditor/0.0.1920.1040/1920.164.1600.860/-1600.279.1600.860@0.0.1920.1040" timestamp="1606172827168" />
-    <state x="552" y="252" key="Vcs.Push.Dialog.v2" timestamp="1606284917627">
-      <screen x="0" y="0" width="1920" height="1040" />
-    </state>
-    <state x="552" y="252" key="Vcs.Push.Dialog.v2/0.0.1920.1040/1920.164.1600.860/-1600.279.1600.860@0.0.1920.1040" timestamp="1606284917627" />
-    <state x="623" y="225" width="672" height="678" key="search.everywhere.popup" timestamp="1606173653926">
-      <screen x="0" y="0" width="1920" height="1040" />
-    </state>
-    <state x="623" y="225" width="672" height="678" key="search.everywhere.popup/0.0.1920.1040/1920.164.1600.860/-1600.279.1600.860@0.0.1920.1040" timestamp="1606173653926" />
+    <MESSAGE value="redid image searching" />
+    <option name="LAST_COMMIT_MESSAGE" value="redid image searching" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/caption_bot$main.coverage" NAME="main Coverage Results" MODIFIED="1606184268706" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/CaptionX$improcessing.coverage" NAME="improcessing Coverage Results" MODIFIED="1606284753774" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/CaptionX$main.coverage" NAME="main Coverage Results" MODIFIED="1606287951704" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/caption_bot$main.coverage" NAME="main Coverage Results" MODIFIED="1606184268706" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/CaptionX$main.coverage" NAME="main Coverage Results" MODIFIED="1610328615621" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>

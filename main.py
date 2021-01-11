@@ -9,6 +9,7 @@ from discord.ext import commands
 import improcessing
 import aiohttp
 import aiofiles
+import imgkit
 
 logging.basicConfig(format='%(levelname)s:[%(asctime)s] %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p',
                     level=logging.INFO)
@@ -24,7 +25,7 @@ def get_random_string(length):
 
 async def saveurl(url):
     logging.info(f"Saving url {url}")
-    extension = url.split(".")[-1]
+    extension = url.split(".")[-1].split("?")[0]
     while True:
         name = f"temp/{get_random_string(8)}.{extension}"
         if not os.path.exists(name):
@@ -36,6 +37,8 @@ async def saveurl(url):
                         await f.close()
                     else:
                         logging.error(f"aiohttp status {resp.status}")
+                        logging.error(f"aiohttp status {await resp.read()}")
+
             return name
 
 
@@ -60,11 +63,17 @@ async def on_ready():
 @bot.command()
 async def esmcaption(ctx, *, cap):
     await ctx.channel.trigger_typing()
+    logging.info("Getting image...")
     file = await imagesearch(ctx)
-    result = await improcessing.imcaption(file, cap)
-    await ctx.send(file=discord.File(result))
-    os.remove(file)
-    os.remove(result)
+    if file:
+        logging.info("Processing image...")
+        result = await improcessing.handleanimated(file, cap, improcessing.imcaption)
+        logging.info("Uploading image...")
+        await ctx.send(file=discord.File(result))
+        os.remove(file)
+        os.remove(result)
+    else:
+        await ctx.send("❌ No file found.")
 
 
 @bot.command()
