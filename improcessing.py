@@ -6,13 +6,15 @@ import random
 import string
 import subprocess
 import sys
-
+import discord.ext
 import imgkit
 from PIL import Image
 import re
 from winmagic import magic
 from multiprocessing import Pool
 import functools
+import captionfunctions
+import humanize
 
 
 def disable_logging(func):
@@ -140,6 +142,21 @@ async def splitaudio(video):
     await run_command(f"ffmpeg -i {video} -vn -acodec copy {name}")
     return name
 
+
+async def assurefilesize(image: str, ctx: discord.ext.commands.Context):
+    for i in range(5):
+        # https://www.reddit.com/r/discordapp/comments/aflp3p/the_truth_about_discord_file_upload_limits/
+        size = os.path.getsize(image)
+        if size >= 8388119:
+            logging.info("Image too big!")
+            msg = await ctx.send(f"Resulting file too big! ({humanize.naturalsize(size)}) Downsizing result...")
+            await ctx.trigger_typing()
+            image = await handleanimated(image, "", captionfunctions.halfsize)
+            await msg.delete()
+        if os.path.getsize(image) < 8388119:
+            return image
+    await ctx.send(f"Max downsizes reached. File is way too big.")
+    return False
 
 async def handleanimated(image: str, caption: str, capfunction):
     try:
