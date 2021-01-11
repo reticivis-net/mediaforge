@@ -47,13 +47,22 @@ if __name__ == '__main__':
 
 
     async def imagesearch(ctx):
-        async for m in ctx.channel.history(limit=50):
+        if ctx.message.reference:
+            m = ctx.message.reference.resolved
             if len(m.embeds):
                 if m.embeds[0].type == "image" or m.embeds[0].type == "video":
                     return await saveurl(m.embeds[0].url)
             elif len(m.attachments):
                 if m.attachments[0].width:
                     return await saveurl(m.attachments[0].url)
+        else:
+            async for m in ctx.channel.history(limit=50):
+                if len(m.embeds):
+                    if m.embeds[0].type == "image" or m.embeds[0].type == "video":
+                        return await saveurl(m.embeds[0].url)
+                elif len(m.attachments):
+                    if m.attachments[0].width:
+                        return await saveurl(m.attachments[0].url)
         return False
 
 
@@ -84,6 +93,7 @@ if __name__ == '__main__':
         else:
             await ctx.send("❌ No file found.")
 
+
     @bot.command()
     async def motivate(ctx, *, cap):
         cap = cap.split(",")
@@ -96,6 +106,29 @@ if __name__ == '__main__':
             msg = await ctx.send("Processing...")
             await ctx.channel.trigger_typing()
             result = await improcessing.handleanimated(file, cap, captionfunctions.motivate)
+            await ctx.channel.trigger_typing()
+            logging.info("Uploading image...")
+            await ctx.send(file=discord.File(result))
+            await msg.delete()
+            os.remove(file)
+            os.remove(result)
+            logging.info("Complete!")
+        else:
+            await ctx.send("❌ No file found.")
+
+
+    @bot.command()
+    async def meme(ctx, *, cap):
+        cap = cap.split(",")
+        if len(cap) == 1:
+            cap.append("")
+        logging.info("Getting image...")
+        file = await imagesearch(ctx)
+        if file:
+            logging.info("Processing image...")
+            msg = await ctx.send("Processing...")
+            await ctx.channel.trigger_typing()
+            result = await improcessing.handleanimated(file, cap, captionfunctions.meme)
             await ctx.channel.trigger_typing()
             logging.info("Uploading image...")
             await ctx.send(file=discord.File(result))

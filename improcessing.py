@@ -6,6 +6,7 @@ import random
 import string
 import subprocess
 import sys
+
 import imgkit
 from PIL import Image
 import re
@@ -140,7 +141,7 @@ async def splitaudio(video):
     return name
 
 
-async def handleanimated(image, caption, capfunction):
+async def handleanimated(image: str, caption: str, capfunction):
     try:
         with Image.open(image) as im:
             anim = getattr(im, "is_animated", False)
@@ -207,4 +208,4 @@ async def handleanimated(image, caption, capfunction):
                 os.remove(f)
             return outname
         else:  # normal image
-            await capfunction(image, caption)
+            return capfunction(image, caption)
