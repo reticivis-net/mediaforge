@@ -140,22 +140,6 @@ async def splitaudio(video):
     return name
 
 
-def imcaption(image, caption, tosavename=None):
-    logging.info(f"[improcessing] Rendering {image}...")
-    with Image.open(image) as im:
-        imagewidth = im.size[0]  # seems ineffecient but apparently fast?
-    replacedict = {
-        "calc((100vw / 13) * (16 / 12))": f"{(imagewidth / 13)}pt",
-        "calc((100vw / 2) / 13)": f"{(imagewidth / 2) / 13}px",
-        "<base href='./'>": f"<base href='file://{'/' if sys.platform == 'win32' else ''}{os.path.abspath('rendering')}'> ",
-        "CaptionText": caption,
-        "rendering/demoimage.png": image
-    }
-    torender = replaceall(filetostring("caption.html"), replacedict)
-    rendered = imgkitstring(torender, tosavename)
-    return rendered
-
-
 async def handleanimated(image, caption, capfunction):
     try:
         with Image.open(image) as im:
@@ -174,8 +158,8 @@ async def handleanimated(image, caption, capfunction):
             capargs = []
             for i, frame in enumerate(frames):
                 capargs.append((frame, caption, frame.replace('.png', '_rendered.png')))
-            pool = Pool(16)
-            pool.starmap_async(imcaption, capargs)
+            pool = Pool(32)
+            pool.starmap_async(capfunction, capargs)
             pool.close()
             pool.join()
             logging.info("[improcessing] Joining frames...")
@@ -207,7 +191,7 @@ async def handleanimated(image, caption, capfunction):
             for i, frame in enumerate(frames):
                 capargs.append((frame, caption, frame.replace('.png', '_rendered.png')))
             pool = Pool(32)
-            pool.starmap(imcaption, capargs)
+            pool.starmap(capfunction, capargs)
             pool.close()
             pool.join()
             logging.info("[improcessing] Joining frames...")

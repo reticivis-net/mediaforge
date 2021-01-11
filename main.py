@@ -7,6 +7,7 @@ import sys
 import traceback
 import discord
 from discord.ext import commands
+import captionfunctions
 import improcessing
 import aiohttp
 import aiofiles
@@ -71,13 +72,37 @@ if __name__ == '__main__':
         if file:
             logging.info("Processing image...")
             msg = await ctx.send("Processing...")
-            result = await improcessing.handleanimated(file, cap, improcessing.imcaption)
+            await ctx.channel.trigger_typing()
+            result = await improcessing.handleanimated(file, cap, captionfunctions.imcaption)
             await ctx.channel.trigger_typing()
             logging.info("Uploading image...")
             await ctx.send(file=discord.File(result))
             await msg.delete()
             os.remove(file)
             os.remove(result)
+            logging.info("Complete!")
+        else:
+            await ctx.send("❌ No file found.")
+
+    @bot.command()
+    async def motivate(ctx, *, cap):
+        cap = cap.split(",")
+        if len(cap) == 1:
+            cap.append("")
+        logging.info("Getting image...")
+        file = await imagesearch(ctx)
+        if file:
+            logging.info("Processing image...")
+            msg = await ctx.send("Processing...")
+            await ctx.channel.trigger_typing()
+            result = await improcessing.handleanimated(file, cap, captionfunctions.motivate)
+            await ctx.channel.trigger_typing()
+            logging.info("Uploading image...")
+            await ctx.send(file=discord.File(result))
+            await msg.delete()
+            os.remove(file)
+            os.remove(result)
+            logging.info("Complete!")
         else:
             await ctx.send("❌ No file found.")
 
