@@ -68,7 +68,7 @@ async def run_command(args):
     )
 
     # Status
-    print("Started: %s, pid=%s" % (args, process.pid), flush=True)
+    print(f"Started: {args}, pid={process.pid}", flush=True)
 
     # Wait for the subprocess to finish
     stdout, stderr = await process.communicate()
@@ -76,19 +76,18 @@ async def run_command(args):
     # Progress
     if process.returncode == 0:
         print(
-            "Done: %s, pid=%s, result: %s"
-            % (args, process.pid, stdout.decode().strip()),
+            f"Done: {args}, pid={process.pid}, result: {stdout.decode().strip()}",
             flush=True,
         )
+        result = stdout.decode().strip()
     else:
         print(
-            "Failed: %s, pid=%s, result: %s"
-            % (args, process.pid, stderr.decode().strip()),
+            f"Failed: {args}, pid={process.pid}, result: {stderr.decode().strip()}",
             flush=True,
         )
+        result = stderr.decode().strip()
 
     # Result
-    result = stdout.decode().strip()
 
     # Return stdout
     return result
@@ -139,7 +138,10 @@ async def splitaudio(video):
         name = f"temp/{get_random_string(8)}.{extension}"
         if not os.path.exists(name):
             break
-    await run_command(f"ffmpeg -i {video} -vn -acodec copy {name}")
+    result = await run_command(f"ffmpeg -i {video} -vn -acodec copy {name}")
+    logging.info(result)
+    if "Output file #0 does not contain any stream" in result:
+        return False
     return name
 
 
@@ -149,14 +151,15 @@ async def assurefilesize(image: str, ctx: discord.ext.commands.Context):
         size = os.path.getsize(image)
         if size >= 8388119:
             logging.info("Image too big!")
-            msg = await ctx.send(f"Resulting file too big! ({humanize.naturalsize(size)}) Downsizing result...")
+            msg = await ctx.send(f"⚠ Resulting file too big! ({humanize.naturalsize(size)}) Downsizing result...")
             await ctx.trigger_typing()
             image = await handleanimated(image, "", captionfunctions.halfsize)
             await msg.delete()
         if os.path.getsize(image) < 8388119:
             return image
-    await ctx.send(f"Max downsizes reached. File is way too big.")
+    await ctx.send(f"⚠ Max downsizes reached. File is way too big.")
     return False
+
 
 async def handleanimated(image: str, caption: str, capfunction):
     try:
@@ -168,7 +171,6 @@ async def handleanimated(image: str, caption: str, capfunction):
         filename = mime.from_file(image)
         if filename.find('video') != -1:
             logging.warning("[improcessing] Video detected.")
-            logging.info("[improcessing] Splitting frames...")
             frames, name = await ffmpegsplit(image)
             audio = await splitaudio(image)
             fps = get_frame_rate(image)
@@ -186,15 +188,21 @@ async def handleanimated(image: str, caption: str, capfunction):
                 outname = f"temp/{get_random_string(8)}.{extension}"
                 if not os.path.exists(outname):
                     break
-            await run_command(f"ffmpeg -r {fps} -start_number 1 -i {name.replace('.png', '_rendered.png')} "
-                              f"-i {audio} -c:a aac -shortest "
-                              f"-c:v libx264 -crf 25 -pix_fmt yuv420p "
-                              f"-vf \"crop=trunc(iw/2)*2:trunc(ih/2)*2\" {outname}")
+            if audio:
+                await run_command(f"ffmpeg -r {fps} -start_number 1 -i {name.replace('.png', '_rendered.png')} "
+                                  f"-i {audio} -c:a aac -shortest "
+                                  f"-c:v libx264 -crf 25 -pix_fmt yuv420p "
+                                  f"-vf \"crop=trunc(iw/2)*2:trunc(ih/2)*2\" {outname}")
+                os.remove(audio)
+            else:
+                await run_command(f"ffmpeg -r {fps} -start_number 1 -i {name.replace('.png', '_rendered.png')} "
+                                  f"-c:v libx264 -crf 25 -pix_fmt yuv420p "
+                                  f"-vf \"crop=trunc(iw/2)*2:trunc(ih/2)*2\" {outname}")
             # cleanup
             logging.info("[improcessing] Cleaning files...")
             for f in glob.glob(name.replace('%09d', '*')):
                 os.remove(f)
-            os.remove(audio)
+
             return outname
         else:
             raise Exception("File given is not valid image or video.")
@@ -226,3 +234,30 @@ async def handleanimated(image: str, caption: str, capfunction):
             return outname
         else:  # normal image
             return capfunction(image, caption)
+
+
+async def mp4togif(mp4):
+    mime = magic.Magic(mime=True)
+    filename = mime.from_file(mp4)
+    if filename.find('video') == -1:
+        return False
+    frames, name = await ffmpegsplit(mp4)
+    fps = get_frame_rate(mp4)
+    extension = "gif"
+    while True:
+        outname = f"temp/{get_random_string(8)}.{extension}"
+        if not os.path.exists(outname):
+            break
+    await run_command(f"gifski -o {outname} --fps {fps} {name.replace('%09d', '*')}")
+    return outname
+
+
+async def giftomp4(gif):
+    extension = "mp4"
+    while True:
+        outname = f"temp/{get_random_string(8)}.{extension}"
+        if not os.path.exists(outname):
+            break
+    await run_command(
+        f"ffmpeg -i {gif} -movflags faststart -pix_fmt yuv420p -vf \"scale=trunc(iw/2)*2:trunc(ih/2)*2\" {outname}")
+    return outname
