@@ -28,8 +28,8 @@ def motivate(image, caption, tosavename=None):
     with Image.open(image) as im:
         imagewidth = im.size[0] * 1.1 + 16  # weird adding is to estimate final size based on styling
     replacedict = {
-        "margin: 30px;": f"margin: {imagewidth*0.05}px;",
-        "font-size: 80px;": f"font-size: {imagewidth*0.133}px;",
+        "margin: 30px;": f"margin: {imagewidth * 0.05}px;",
+        "font-size: 80px;": f"font-size: {imagewidth * 0.133}px;",
         "font-size: 40px;": f"font-size: {imagewidth * 0.067}px;",
         "<base href='./'>": f"<base href='file://{'/' if sys.platform == 'win32' else ''}{os.path.abspath('rendering')}'> ",
         "CaptionText1": caption[0],
@@ -37,5 +37,21 @@ def motivate(image, caption, tosavename=None):
         "rendering/demoimage.png": image
     }
     torender = replaceall(filetostring("motivate.html"), replacedict)
+    rendered = imgkitstring(torender, tosavename)
+    return rendered
+
+
+def meme(image, caption, tosavename=None):
+    logging.info(f"[improcessing] Rendering {image}...")
+    with Image.open(image) as im:
+        imagewidth = im.size[0]
+    replacedict = {
+        "font-size: 10vw;": f"font-size: {imagewidth / 10}px;",
+        "<base href='./'>": f"<base href='file://{'/' if sys.platform == 'win32' else ''}{os.path.abspath('rendering')}'> ",
+        "CaptionText1": caption[0],
+        "CaptionText2": caption[1],
+        "rendering/demoimage.png": image
+    }
+    torender = replaceall(filetostring("meme.html"), replacedict)
     rendered = imgkitstring(torender, tosavename)
     return rendered

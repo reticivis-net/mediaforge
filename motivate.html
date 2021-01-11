@@ -4,6 +4,7 @@
     <base href='./'>
     <meta charset="UTF-8">
     <title>motivate</title>
+    <script src="rendering/twemoji/twemoji.js"></script>
     <style>
         * {
             background: black;
@@ -16,7 +17,14 @@
             margin: 0;
         }
 
-        img {
+        img.emoji {
+            height: 1em;
+            width: 1em;
+            margin: 0 .05em 0 .1em;
+            vertical-align: -0.1em;
+        }
+
+        .img {
             border: 3px solid white;
             padding: 5px;
             object-fit: fill;
@@ -25,6 +33,7 @@
             margin-left: 0;
             margin-right: 0;
         }
+
         .wrap {
             margin: 30px;
             margin-bottom: 0;
@@ -41,7 +50,7 @@
             font-size: 40px;
             font-family: "Times New Roman", sans-serif;
             color: white;
-            margin-bottom: 10px;
+            margin-bottom: 20px;
         }
 
 
@@ -49,9 +58,10 @@
 </head>
 <body>
 <div class="wrap">
-    <img src="rendering/demoimage.png" alt="An error has occurred loading your image.">
+    <img class=img src="rendering/demoimage.png" alt="An error has occurred loading your image.">
     <div class="caption">CaptionText1</div>
     <div class="captionsmall">CaptionText2</div>
 </div>
 </body>
+<script>twemoji.parse(document.body);</script>
 </html>
