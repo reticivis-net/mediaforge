@@ -102,7 +102,8 @@ if __name__ == '__main__':
         game = discord.Activity(name=f"with your files",
                                 type=discord.ActivityType.watching)
 
-
+    # TODO: speed command
+    # TODO: compress command
     @bot.command()
     async def videotogif(ctx):
         logging.info("Getting image...")
