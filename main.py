@@ -24,7 +24,6 @@ if __name__ == '__main__':
         os.remove(f)
     with open('tenorkey.txt') as f:  # not on github for obvious reasons
         tenorkey = f.read()
-        print(tenorkey)
 
 
     def get_random_string(length):
@@ -40,7 +39,7 @@ if __name__ == '__main__':
 
 
     async def saveurl(url, extension=None):
-        logging.info(f"Saving url {url}")
+
         if extension is None:
             extension = url.split(".")[-1].split("?")[0]
         while True:
@@ -49,6 +48,7 @@ if __name__ == '__main__':
                 async with aiohttp.ClientSession() as session:
                     async with session.get(url) as resp:
                         if resp.status == 200:
+                            logging.info(f"Saving url {url} as {name}")
                             f = await aiofiles.open(name, mode='wb')
                             await f.write(await resp.read())
                             await f.close()
@@ -120,12 +120,12 @@ if __name__ == '__main__':
                 await msg.delete()
                 os.remove(file)
                 os.remove(result)
-                logging.info("Complete!")
             else:
                 await ctx.send("Detected file is not a valid video.")
             logging.info("Complete!")
         else:
             await ctx.send("❌ No file found.")
+
 
     @bot.command()
     async def giftovideo(ctx):
@@ -216,6 +216,18 @@ if __name__ == '__main__':
             os.remove(file)
             os.remove(result)
             logging.info("Complete!")
+        else:
+            await ctx.send("❌ No file found.")
+
+
+    @bot.command()
+    async def info(ctx):
+        file = await imagesearch(ctx)
+        if file:
+            await ctx.channel.trigger_typing()
+            result = await improcessing.ffprobe(file)
+            await ctx.reply(f"```{result}```")
+            # os.remove(file)
         else:
             await ctx.send("❌ No file found.")
 

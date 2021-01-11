@@ -57,7 +57,7 @@ def replaceall(text, rep):
     return text
 
 
-async def run_command(args):
+async def run_command(args):  # TODO: sanitize this... this means change all str inputs to lists... ugh
     """Run command in subprocess.
     Example from:
         http://asyncio.readthedocs.io/en/latest/subprocess.html
@@ -79,14 +79,12 @@ async def run_command(args):
             f"Done: {args}, pid={process.pid}, result: {stdout.decode().strip()}",
             flush=True,
         )
-        result = stdout.decode().strip()
     else:
         print(
             f"Failed: {args}, pid={process.pid}, result: {stderr.decode().strip()}",
             flush=True,
         )
-        result = stderr.decode().strip()
-
+    result = stdout.decode().strip() + stderr.decode().strip()
     # Result
 
     # Return stdout
@@ -143,6 +141,17 @@ async def splitaudio(video):
     if "Output file #0 does not contain any stream" in result:
         return False
     return name
+
+
+async def compresspng(png):
+    extension = "png"
+    while True:
+        outname = f"temp/{get_random_string(8)}.{extension}"
+        if not os.path.exists(outname):
+            break
+    await run_command(f"pngquant --quality=0-80 --o {outname} {png} ")
+    os.remove(png)
+    return outname
 
 
 async def assurefilesize(image: str, ctx: discord.ext.commands.Context):
@@ -233,7 +242,7 @@ async def handleanimated(image: str, caption: str, capfunction):
                 os.remove(f)
             return outname
         else:  # normal image
-            return capfunction(image, caption)
+            return await compresspng(capfunction(image, caption))
 
 
 async def mp4togif(mp4):
@@ -249,6 +258,9 @@ async def mp4togif(mp4):
         if not os.path.exists(outname):
             break
     await run_command(f"gifski -o {outname} --fps {fps} {name.replace('%09d', '*')}")
+    logging.info("[improcessing] Cleaning files...")
+    for f in glob.glob(name.replace('%09d', '*')):
+        os.remove(f)
     return outname
 
 
@@ -260,4 +272,9 @@ async def giftomp4(gif):
             break
     await run_command(
         f"ffmpeg -i {gif} -movflags faststart -pix_fmt yuv420p -vf \"scale=trunc(iw/2)*2:trunc(ih/2)*2\" {outname}")
+
     return outname
+
+
+async def ffprobe(file):
+    return await run_command(f"ffprobe -hide_banner {file}")
