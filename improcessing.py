@@ -9,7 +9,6 @@ import sys
 import discord.ext
 import imgkit
 from PIL import Image
-import re
 from winmagic import magic
 from multiprocessing import Pool
 import functools
@@ -54,40 +53,27 @@ def temp_file(extension="png"):
             return name
 
 
-# stolen code https://stackoverflow.com/questions/6116978/how-to-replace-multiple-substrings-of-a-string
-def replaceall(text, rep):
-    # use these three lines to do the replacement
-    rep = dict((re.escape(k), v) for k, v in rep.items())
-    # Python 3 renamed dict.iteritems to dict.items so use rep.items() for latest versions
-    pattern = re.compile("|".join(rep.keys()))
-    text = pattern.sub(lambda m: rep[re.escape(m.group(0))], text)
-    return text
-
-
-async def run_command(args):  # TODO: sanitize this... this means change all str inputs to lists... ugh
-    """Run command in subprocess.
-    Example from:
-        http://asyncio.readthedocs.io/en/latest/subprocess.html
-    """
+# https://fredrikaverpil.github.io/2017/06/20/async-and-await-with-subprocesses/
+async def run_command(*args):  # TODO: sanitize this... this means change all str inputs to lists... ugh
     # Create subprocess
-    process = await asyncio.create_subprocess_shell(
-        args, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
+    process = await asyncio.create_subprocess_exec(
+        *args, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
     )
 
     # Status
-    print(f"Started: {args}, pid={process.pid}", flush=True)
+    logging.info(f"Started: {args}, pid={process.pid}", flush=True)
 
     # Wait for the subprocess to finish
     stdout, stderr = await process.communicate()
 
     # Progress
     if process.returncode == 0:
-        print(
+        logging.info(
             f"Done: {args}, pid={process.pid}, result: {stdout.decode().strip()}",
             flush=True,
         )
     else:
-        print(
+        logging.error(
             f"Failed: {args}, pid={process.pid}, result: {stderr.decode().strip()}",
             flush=True,
         )
@@ -128,7 +114,7 @@ def get_frame_rate(filename):
 
 async def ffmpegsplit(image):
     logging.info("[improcessing] Splitting frames...")
-    await run_command(f"ffmpeg -i {image} -vsync 1 {image.split('.')[0]}%09d.png")
+    await run_command("ffmpeg", "-i", image, "-vsync", "1", f"{image.split('.')[0]}%09d.png")
     files = glob.glob(f"{image.split('.')[0]}*.png")
     return files, f"{image.split('.')[0]}%09d.png"
 
@@ -136,7 +122,7 @@ async def ffmpegsplit(image):
 async def splitaudio(video):
     logging.info("[improcessing] Splitting audio...")
     name = temp_file("aac")
-    result = await run_command(f"ffmpeg -i {video} -vn -acodec copy {name}")
+    result = await run_command("ffmpeg", "-i", video, "-vn", "-acodec", "copy", name)
     logging.info(result)
     if "Output file #0 does not contain any stream" in result:
         return False
@@ -146,7 +132,7 @@ async def splitaudio(video):
 async def compresspng(png):
     extension = "png"
     outname = temp_file("png")
-    await run_command(f"pngquant --quality=0-80 --o {outname} {png} ")
+    await run_command("pngquant", "--quality=0-80", "--o", outname, png)
     os.remove(png)
     return outname
 
@@ -155,6 +141,7 @@ async def assurefilesize(image: str, ctx: discord.ext.commands.Context):
     for i in range(5):
         # https://www.reddit.com/r/discordapp/comments/aflp3p/the_truth_about_discord_file_upload_limits/
         size = os.path.getsize(image)
+        logging.info(f"Resulting file is {humanize.naturalsize(size)}")
         if size >= 8388119:
             logging.info("Image too big!")
             msg = await ctx.send(f"⚠ Resulting file too big! ({humanize.naturalsize(size)}) Downsizing result...")
@@ -167,7 +154,7 @@ async def assurefilesize(image: str, ctx: discord.ext.commands.Context):
     return False
 
 
-async def handleanimated(image: str, caption: str, capfunction):
+async def handleanimated(image: str, caption, capfunction):
     try:
         with Image.open(image) as im:
             anim = getattr(im, "is_animated", False)
@@ -191,15 +178,17 @@ async def handleanimated(image: str, caption: str, capfunction):
             logging.info("[improcessing] Joining frames...")
             outname = temp_file("mp4")
             if audio:
-                await run_command(f"ffmpeg -r {fps} -start_number 1 -i {name.replace('.png', '_rendered.png')} "
-                                  f"-i {audio} -c:a aac -shortest "
-                                  f"-c:v libx264 -crf 25 -pix_fmt yuv420p "
-                                  f"-vf \"crop=trunc(iw/2)*2:trunc(ih/2)*2\" {outname}")
+                await run_command("ffmpeg", "-r", str(fps), "-start_number", "1", "-i",
+                                  name.replace('.png', '_rendered.png'),
+                                  "-i", audio, "-c:a", "aac", "-shortest",
+                                  "-c:v", "libx264", "-crf", "25", "-pix_fmt", "yuv420p",
+                                  "-vf", "crop=trunc(iw/2)*2:trunc(ih/2)*2", outname)
                 os.remove(audio)
             else:
-                await run_command(f"ffmpeg -r {fps} -start_number 1 -i {name.replace('.png', '_rendered.png')} "
-                                  f"-c:v libx264 -crf 25 -pix_fmt yuv420p "
-                                  f"-vf \"crop=trunc(iw/2)*2:trunc(ih/2)*2\" {outname}")
+                await run_command("ffmpeg", "-r", str(fps), "-start_number", "1", "-i",
+                                  name.replace('.png', '_rendered.png'),
+                                  "-c:v", "libx264", "-crf", "25", "-pix_fmt", "yuv420p",
+                                  "-vf", "crop=trunc(iw/2)*2:trunc(ih/2)*2", outname)
             # cleanup
             logging.info("[improcessing] Cleaning files...")
             for f in glob.glob(name.replace('%09d', '*')):
@@ -225,7 +214,7 @@ async def handleanimated(image: str, caption: str, capfunction):
             logging.info("[improcessing] Joining frames...")
             outname = temp_file("gif")
             await run_command(
-                f"gifski -o {outname} --fps {fps} {name.replace('.png', '_rendered.png').replace('%09d', '*')}")
+                "gifski", "-o", outname, "--fps", str(fps), name.replace('.png', '_rendered.png').replace('%09d', '*'))
             logging.info("[improcessing] Cleaning files...")
             for f in glob.glob(name.replace('%09d', '*')):
                 os.remove(f)
@@ -242,7 +231,7 @@ async def mp4togif(mp4):
     frames, name = await ffmpegsplit(mp4)
     fps = get_frame_rate(mp4)
     outname = temp_file("gif")
-    await run_command(f"gifski -o {outname} --fps {fps} {name.replace('%09d', '*')}")
+    await run_command("gifski", "-o", outname, "--fps", str(fps), name.replace('%09d', '*'))
     logging.info("[improcessing] Cleaning files...")
     for f in glob.glob(name.replace('%09d', '*')):
         os.remove(f)
@@ -251,18 +240,18 @@ async def mp4togif(mp4):
 
 async def giftomp4(gif):
     outname = temp_file("mp4")
-    await run_command(
-        f"ffmpeg -i {gif} -movflags faststart -pix_fmt yuv420p -vf \"scale=trunc(iw/2)*2:trunc(ih/2)*2\" {outname}")
+    await run_command("ffmpeg", "-i", gif, "-movflags", "faststart", "-pix_fmt", "yuv420p", "-vf",
+                      "scale=trunc(iw/2)*2:trunc(ih/2)*2", outname)
 
     return outname
 
 
 async def mediatopng(media):
     outname = temp_file("png")
-    await run_command(f"ffmpeg -i {media} -frames:v 1 {outname}")
+    await run_command("ffmpeg", "-i", media, "-frames:v", "1", outname)
 
     return outname
 
 
 async def ffprobe(file):
-    return await run_command(f"ffprobe -hide_banner {file}")
+    return await run_command("ffprobe", "-hide_banner", file)
