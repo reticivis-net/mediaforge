@@ -18,8 +18,8 @@ logging.basicConfig(format='%(levelname)s:[%(asctime)s] %(message)s', datefmt='%
 if __name__ == '__main__':
     logging.info(f"Discord Version {discord.__version__}")
     logging.info("Initalizing")
-    bot = commands.Bot(command_prefix='$', description='captionbot')
-    bot.remove_command('help')
+    bot = commands.Bot(command_prefix='$', description='CaptionX')
+    # bot.remove_command('help')
     for f in glob.glob('temp/*'):
         os.remove(f)
     with open('tenorkey.txt') as f:  # not on github for obvious reasons
@@ -104,8 +104,20 @@ if __name__ == '__main__':
 
     # TODO: speed command
     # TODO: compress command
+    # TODO: better help command
+    # TODO: jpegify command
+    # TODO: make bot a fuckin pfp
+    # TODO: emoji link command
+    # TODO: stitch media command
+    # TODO: attach audio to video command
     @bot.command()
     async def videotogif(ctx):
+        """
+        Converts a video to a GIF.
+
+        Parameters:
+            video - any video format FFMPEG supports.
+        """
         logging.info("Getting image...")
         file = await imagesearch(ctx)
         if file:
@@ -122,7 +134,7 @@ if __name__ == '__main__':
                 os.remove(file)
                 os.remove(result)
             else:
-                await ctx.send("Detected file is not a valid video.")
+                await ctx.send("❌ Detected file is not a valid video.")
             logging.info("Complete!")
         else:
             await ctx.send("❌ No file found.")
@@ -130,6 +142,12 @@ if __name__ == '__main__':
 
     @bot.command()
     async def giftovideo(ctx):
+        """
+        Converts a GIF to a video.
+
+        Parameters:
+            gif - a gif file
+        """
         logging.info("Getting image...")
         file = await imagesearch(ctx)
         if file:
@@ -151,16 +169,48 @@ if __name__ == '__main__':
         else:
             await ctx.send("❌ No file found.")
 
-
     @bot.command()
-    async def esmcaption(ctx, *, cap):
+    async def mediatopng(ctx):
+        """
+        Converts media to PNG
+
+        Parameters:
+            media - any valid media file.
+        """
         logging.info("Getting image...")
         file = await imagesearch(ctx)
         if file:
             logging.info("Processing image...")
             msg = await ctx.send("⚙ Processing...")
             await ctx.channel.trigger_typing()
-            result = await improcessing.handleanimated(file, cap, captionfunctions.imcaption)
+            result = await improcessing.mediatopng(file)
+            result = await improcessing.assurefilesize(result, ctx)
+            await ctx.channel.trigger_typing()
+            logging.info("Uploading image...")
+            await ctx.reply(file=discord.File(result))
+            await msg.delete()
+            os.remove(file)
+            os.remove(result)
+        else:
+            await ctx.send("❌ No file found.")
+
+
+    @bot.command()
+    async def esmcaption(ctx, *, caption):
+        """
+        Captions media in the style of Essem's esmBot.
+
+        Parameters:
+            media - any valid media file
+            caption - the caption text
+        """
+        logging.info("Getting image...")
+        file = await imagesearch(ctx)
+        if file:
+            logging.info("Processing image...")
+            msg = await ctx.send("⚙ Processing...")
+            await ctx.channel.trigger_typing()
+            result = await improcessing.handleanimated(file, caption, captionfunctions.imcaption)
             result = await improcessing.assurefilesize(result, ctx)
             await ctx.channel.trigger_typing()
             logging.info("Uploading image...")
@@ -174,17 +224,24 @@ if __name__ == '__main__':
 
 
     @bot.command()
-    async def motivate(ctx, *, cap):
-        cap = cap.split(",")
-        if len(cap) == 1:
-            cap.append("")
+    async def motivate(ctx, *, caption):
+        """
+        Captions media in the style of demotivational posters.
+
+        Parameters:
+            media - any valid media file
+            caption - the caption texts. divide the top text from the bottom text with a comma.
+        """
+        caption = caption.split(",")
+        if len(caption) == 1:
+            caption.append("")
         logging.info("Getting image...")
         file = await imagesearch(ctx)
         if file:
             logging.info("Processing image...")
             msg = await ctx.send("⚙ Processing...")
             await ctx.channel.trigger_typing()
-            result = await improcessing.handleanimated(file, cap, captionfunctions.motivate)
+            result = await improcessing.handleanimated(file, caption, captionfunctions.motivate)
             result = await improcessing.assurefilesize(result, ctx)
             await ctx.channel.trigger_typing()
             logging.info("Uploading image...")
@@ -199,6 +256,13 @@ if __name__ == '__main__':
 
     @bot.command()
     async def meme(ctx, *, cap):
+        """
+        Captions media in the style of top text + bottom text memes.
+
+        Parameters:
+            media - any valid media file
+            caption - the caption texts. divide the top text from the bottom text with a comma.
+        """
         cap = cap.split(",")
         if len(cap) == 1:
             cap.append("")
@@ -223,6 +287,13 @@ if __name__ == '__main__':
 
     @bot.command()
     async def info(ctx):
+        """
+        Provides info on a media file.
+        Info provided is from ffprobe.
+
+        Parameters:
+            media - any valid media file
+        """
         file = await imagesearch(ctx)
         if file:
             await ctx.channel.trigger_typing()
@@ -233,14 +304,14 @@ if __name__ == '__main__':
             await ctx.send("❌ No file found.")
 
 
-    @bot.command()
+    @bot.command(hidden=True)
     @commands.is_owner()
     async def say(ctx, *, msg):
         await ctx.message.delete()
         await ctx.channel.send(msg)
 
 
-    @bot.command()
+    @bot.command(hidden=True)
     @commands.is_owner()
     async def shutdown(ctx):
         await ctx.send("✅ Shutting Down...")
