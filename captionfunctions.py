@@ -5,7 +5,7 @@ import sys
 
 from PIL import Image
 
-from improcessing import replaceall, filetostring, imgkitstring, get_random_string, run_command
+from improcessing import replaceall, filetostring, imgkitstring, get_random_string, run_command, temp_file
 
 
 def imcaption(image, caption, tosavename=None):
@@ -58,14 +58,10 @@ def meme(image, caption, tosavename=None):
     return rendered
 
 
-def halfsize(image, caption, tosavename=None):
+def halfsize(image, caption, tosavename=None):  # caption arg kept here for compatibility with handleanimated()
     logging.info(f"[improcessing] Downsizing {image}...")
     if tosavename is None:
-        extension = "png"
-        while True:
-            name = f"temp/{get_random_string(8)}.{extension}"
-            if not os.path.exists(name):
-                break
+        name = temp_file("png")
     else:
         name = tosavename
     subprocess.call(f"ffmpeg -i {image} -vf scale=iw/2:ih/2 {name}",

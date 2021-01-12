@@ -47,6 +47,13 @@ def get_random_string(length):
     return ''.join(random.choice(string.ascii_letters) for i in range(length))
 
 
+def temp_file(extension="png"):
+    while True:
+        name = f"temp/{get_random_string(8)}.{extension}"
+        if not os.path.exists(name):
+            return name
+
+
 # stolen code https://stackoverflow.com/questions/6116978/how-to-replace-multiple-substrings-of-a-string
 def replaceall(text, rep):
     # use these three lines to do the replacement
@@ -94,12 +101,9 @@ async def run_command(args):  # TODO: sanitize this... this means change all str
 @disable_logging
 def imgkitstring(torender, tosavename=None):
     if tosavename is None:
-        extension = "png"
-        while True:
-            name = f"temp/{get_random_string(8)}.{extension}"
-            if not os.path.exists(name):
-                imgkit.from_string(torender, name, options=options)
-                return name
+        name = temp_file("png")
+        imgkit.from_string(torender, name, options=options)
+        return name
     else:
         imgkit.from_string(torender, tosavename, options=options)
         return tosavename
@@ -131,11 +135,7 @@ async def ffmpegsplit(image):
 
 async def splitaudio(video):
     logging.info("[improcessing] Splitting audio...")
-    extension = "aac"
-    while True:
-        name = f"temp/{get_random_string(8)}.{extension}"
-        if not os.path.exists(name):
-            break
+    name = temp_file("aac")
     result = await run_command(f"ffmpeg -i {video} -vn -acodec copy {name}")
     logging.info(result)
     if "Output file #0 does not contain any stream" in result:
@@ -145,10 +145,7 @@ async def splitaudio(video):
 
 async def compresspng(png):
     extension = "png"
-    while True:
-        outname = f"temp/{get_random_string(8)}.{extension}"
-        if not os.path.exists(outname):
-            break
+    outname = temp_file("png")
     await run_command(f"pngquant --quality=0-80 --o {outname} {png} ")
     os.remove(png)
     return outname
@@ -192,11 +189,7 @@ async def handleanimated(image: str, caption: str, capfunction):
             pool.close()
             pool.join()
             logging.info("[improcessing] Joining frames...")
-            extension = "mp4"
-            while True:
-                outname = f"temp/{get_random_string(8)}.{extension}"
-                if not os.path.exists(outname):
-                    break
+            outname = temp_file("mp4")
             if audio:
                 await run_command(f"ffmpeg -r {fps} -start_number 1 -i {name.replace('.png', '_rendered.png')} "
                                   f"-i {audio} -c:a aac -shortest "
@@ -230,11 +223,7 @@ async def handleanimated(image: str, caption: str, capfunction):
             pool.close()
             pool.join()
             logging.info("[improcessing] Joining frames...")
-            extension = "gif"
-            while True:
-                outname = f"temp/{get_random_string(8)}.{extension}"
-                if not os.path.exists(outname):
-                    break
+            outname = temp_file("gif")
             await run_command(
                 f"gifski -o {outname} --fps {fps} {name.replace('.png', '_rendered.png').replace('%09d', '*')}")
             logging.info("[improcessing] Cleaning files...")
@@ -252,11 +241,7 @@ async def mp4togif(mp4):
         return False
     frames, name = await ffmpegsplit(mp4)
     fps = get_frame_rate(mp4)
-    extension = "gif"
-    while True:
-        outname = f"temp/{get_random_string(8)}.{extension}"
-        if not os.path.exists(outname):
-            break
+    outname = temp_file("gif")
     await run_command(f"gifski -o {outname} --fps {fps} {name.replace('%09d', '*')}")
     logging.info("[improcessing] Cleaning files...")
     for f in glob.glob(name.replace('%09d', '*')):
@@ -265,13 +250,16 @@ async def mp4togif(mp4):
 
 
 async def giftomp4(gif):
-    extension = "mp4"
-    while True:
-        outname = f"temp/{get_random_string(8)}.{extension}"
-        if not os.path.exists(outname):
-            break
+    outname = temp_file("mp4")
     await run_command(
         f"ffmpeg -i {gif} -movflags faststart -pix_fmt yuv420p -vf \"scale=trunc(iw/2)*2:trunc(ih/2)*2\" {outname}")
+
+    return outname
+
+
+async def mediatopng(media):
+    outname = temp_file("png")
+    await run_command(f"ffmpeg -i {media} -frames:v 1 {outname}")
 
     return outname
 
