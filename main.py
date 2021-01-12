@@ -6,6 +6,7 @@ import random
 import string
 import sys
 import traceback
+import coloredlogs
 import discord
 from discord.ext import commands
 import captionfunctions
@@ -14,8 +15,7 @@ import aiohttp
 import aiofiles
 import humanize
 
-logging.basicConfig(format='%(levelname)s [%(asctime)s] %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p',
-                    level=logging.INFO)
+coloredlogs.install(level='INFO', fmt='[%(asctime)s] %(levelname)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
 
 if __name__ == '__main__':
     logging.info(f"Discord Version {discord.__version__}")
