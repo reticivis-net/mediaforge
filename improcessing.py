@@ -61,7 +61,7 @@ async def run_command(*args):  # TODO: sanitize this... this means change all st
     )
 
     # Status
-    logging.info(f"Started: {args}, pid={process.pid}", flush=True)
+    logging.info(f"Started: {args}, pid={process.pid}", )
 
     # Wait for the subprocess to finish
     stdout, stderr = await process.communicate()
@@ -70,12 +70,10 @@ async def run_command(*args):  # TODO: sanitize this... this means change all st
     if process.returncode == 0:
         logging.info(
             f"Done: {args}, pid={process.pid}, result: {stdout.decode().strip()}",
-            flush=True,
         )
     else:
         logging.error(
             f"Failed: {args}, pid={process.pid}, result: {stderr.decode().strip()}",
-            flush=True,
         )
     result = stdout.decode().strip() + stderr.decode().strip()
     # Result
@@ -214,7 +212,8 @@ async def handleanimated(image: str, caption, capfunction):
             logging.info("[improcessing] Joining frames...")
             outname = temp_file("gif")
             await run_command(
-                "gifski", "-o", outname, "--fps", str(fps), name.replace('.png', '_rendered.png').replace('%09d', '*'))
+                "gifski", "--quiet", "-o", outname, "--fps", str(fps),
+                name.replace('.png', '_rendered.png').replace('%09d', '*'))
             logging.info("[improcessing] Cleaning files...")
             for f in glob.glob(name.replace('%09d', '*')):
                 os.remove(f)
@@ -231,7 +230,7 @@ async def mp4togif(mp4):
     frames, name = await ffmpegsplit(mp4)
     fps = get_frame_rate(mp4)
     outname = temp_file("gif")
-    await run_command("gifski", "-o", outname, "--fps", str(fps), name.replace('%09d', '*'))
+    await run_command("gifski", "--quiet", "-o", outname, "--fps", str(fps), name.replace('%09d', '*'))
     logging.info("[improcessing] Cleaning files...")
     for f in glob.glob(name.replace('%09d', '*')):
         os.remove(f)
