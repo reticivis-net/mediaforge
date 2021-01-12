@@ -12,9 +12,11 @@ import captionfunctions
 import improcessing
 import aiohttp
 import aiofiles
+import humanize
 
-logging.basicConfig(format='%(levelname)s:[%(asctime)s] %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p',
+logging.basicConfig(format='%(levelname)s [%(asctime)s] %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p',
                     level=logging.INFO)
+
 if __name__ == '__main__':
     logging.info(f"Discord Version {discord.__version__}")
     logging.info("Initalizing")
@@ -46,6 +48,17 @@ if __name__ == '__main__':
             name = f"temp/{get_random_string(8)}.{extension}"
             if not os.path.exists(name):
                 async with aiohttp.ClientSession() as session:
+                    async with session.head(url) as resp:
+                        if resp.status == 200:
+                            if "Content-Length" not in resp.headers:
+                                raise Exception("Cannot determine filesize!")
+                            size = int(resp.headers["Content-Length"])
+                            logging.info(f"Url {url} is {humanize.naturalsize(size)}")
+                            if 50000000 < size:
+                                raise Exception(f"File is too big ({humanize.naturalsize(size)})!")
+                        else:
+                            logging.error(f"aiohttp status {resp.status}")
+                            logging.error(f"aiohttp status {await resp.read()}")
                     async with session.get(url) as resp:
                         if resp.status == 200:
                             logging.info(f"Saving url {url} as {name}")
@@ -101,6 +114,7 @@ if __name__ == '__main__':
         logging.info(f"Logged in as {bot.user.name}!")
         game = discord.Activity(name=f"with your files",
                                 type=discord.ActivityType.watching)
+
 
     # TODO: speed command
     # TODO: compress command
@@ -164,10 +178,11 @@ if __name__ == '__main__':
                 os.remove(file)
                 os.remove(result)
             else:
-                await ctx.send("Detected file is not a valid gif.")
+                await ctx.send("⚠ Detected file is not a valid gif.")
             logging.info("Complete!")
         else:
             await ctx.send("❌ No file found.")
+
 
     @bot.command()
     async def mediatopng(ctx):
@@ -211,6 +226,45 @@ if __name__ == '__main__':
             msg = await ctx.send("⚙ Processing...")
             await ctx.channel.trigger_typing()
             result = await improcessing.handleanimated(file, caption, captionfunctions.imcaption)
+            result = await improcessing.assurefilesize(result, ctx)
+            await ctx.channel.trigger_typing()
+            logging.info("Uploading image...")
+            await ctx.reply(file=discord.File(result))
+            await msg.delete()
+            os.remove(file)
+            os.remove(result)
+            logging.info("Complete!")
+        else:
+            await ctx.send("❌ No file found.")
+
+
+    @bot.command()
+    async def jpeg(ctx, strength: int = 30, stretch: int = 20, quality: int = 6):
+        """
+        Makes media into a low quality jpeg
+
+        Parameters:
+            media - any valid media file
+            strength - amount of times to jpegify image. must be between 1 and 100. defaults to 30.
+            stretch - randomly stretch the image by this number on each jpegification. can cause strange effects on videos. must be between 0 and 40. defaults to 20.
+            quality - quality of JPEG compression. must be between 1 and 95. defaults to 6.
+        """
+        if not 0 < strength <= 100:
+            await ctx.send("⚠ Strength must be between 0 and 100.")
+            return
+        if not 0 <= stretch <= 40:
+            await ctx.send("⚠ Stretch must be between 0 and 40.")
+            return
+        if not 1 <= quality <= 95:
+            await ctx.send("⚠ Quality must be between 1 and 95.")
+            return
+        logging.info("Getting image...")
+        file = await imagesearch(ctx)
+        if file:
+            logging.info("Processing image...")
+            msg = await ctx.send("⚙ Processing...")
+            await ctx.channel.trigger_typing()
+            result = await improcessing.handleanimated(file, [strength, stretch, quality], captionfunctions.jpeg)
             result = await improcessing.assurefilesize(result, ctx)
             await ctx.channel.trigger_typing()
             logging.info("Uploading image...")
