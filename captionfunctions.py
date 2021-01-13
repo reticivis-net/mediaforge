@@ -40,6 +40,7 @@ def imcaption(image, caption, tosavename=None):
 
 def motivate(image, caption, tosavename=None):
     logging.info(f"[improcessing] Rendering {image}...")
+
     with Image.open(image) as im:
         imagewidth = im.size[0] * 1.1 + 16  # weird adding is to estimate final size based on styling
     replacedict = {

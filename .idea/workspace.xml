@@ -25,15 +25,11 @@
     </select>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ef38d419-8cc3-42ef-bbef-6fd62fc27c52" name="Default Changelist" comment="better error handling">
-      <change afterPath="$PROJECT_DIR$/imgkit/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/imgkit/api.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/imgkit/config.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/imgkit/imgkit.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/imgkit/source.py" afterDir="false" />
+    <list default="true" id="ef38d419-8cc3-42ef-bbef-6fd62fc27c52" name="Default Changelist" comment="FIXED THE STGUPID FUCKING SPAM BUG FINALLY OMFG&#10;https://github.com/jarrekk/imgkit/issues/52">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/captionfunctions.py" beforeDir="false" afterPath="$PROJECT_DIR$/captionfunctions.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/improcessing.py" beforeDir="false" afterPath="$PROJECT_DIR$/improcessing.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/motivate.html" beforeDir="false" afterPath="$PROJECT_DIR$/motivate.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -180,7 +176,7 @@
       <workItem from="1610478459150" duration="1405000" />
       <workItem from="1610508663503" duration="5815000" />
       <workItem from="1610550398008" duration="2417000" />
-      <workItem from="1610554178948" duration="1857000" />
+      <workItem from="1610554178948" duration="3533000" />
     </task>
     <task id="LOCAL-00001" summary="giving up on imagemagick">
       <created>1606187690936</created>
@@ -308,7 +304,14 @@
       <option name="project" value="LOCAL" />
       <updated>1610514693809</updated>
     </task>
-    <option name="localTasksCounter" value="19" />
+    <task id="LOCAL-00019" summary="FIXED THE STGUPID FUCKING SPAM BUG FINALLY OMFG&#10;https://github.com/jarrekk/imgkit/issues/52">
+      <created>1610556053376</created>
+      <option name="number" value="00019" />
+      <option name="presentableId" value="LOCAL-00019" />
+      <option name="project" value="LOCAL" />
+      <updated>1610556053376</updated>
+    </task>
+    <option name="localTasksCounter" value="20" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -316,6 +319,16 @@
   </component>
   <component name="UnknownFeatures">
     <option featureType="com.intellij.fileTypeFactory" implementationName="requirements.txt" />
+  </component>
+  <component name="Vcs.Log.History.Properties">
+    <option name="COLUMN_ID_ORDER">
+      <list>
+        <option value="Default.Root" />
+        <option value="Default.Author" />
+        <option value="Default.Date" />
+        <option value="Default.Subject" />
+      </list>
+    </option>
   </component>
   <component name="Vcs.Log.Tabs.Properties">
     <option name="TAB_STATES">
@@ -359,11 +372,12 @@
     <MESSAGE value="colored logs lol" />
     <MESSAGE value="minimum image witdh of 200 lol" />
     <MESSAGE value="better error handling" />
-    <option name="LAST_COMMIT_MESSAGE" value="better error handling" />
+    <MESSAGE value="FIXED THE STGUPID FUCKING SPAM BUG FINALLY OMFG&#10;https://github.com/jarrekk/imgkit/issues/52" />
+    <option name="LAST_COMMIT_MESSAGE" value="FIXED THE STGUPID FUCKING SPAM BUG FINALLY OMFG&#10;https://github.com/jarrekk/imgkit/issues/52" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/CaptionX$improcessing.coverage" NAME="improcessing Coverage Results" MODIFIED="1606284753774" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/caption_bot$main.coverage" NAME="main Coverage Results" MODIFIED="1606184268706" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/CaptionX$main.coverage" NAME="main Coverage Results" MODIFIED="1610555588986" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/CaptionX$main.coverage" NAME="main Coverage Results" MODIFIED="1610557704677" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>

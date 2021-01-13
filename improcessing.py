@@ -68,17 +68,6 @@ async def run_command(*args):  # TODO: sanitize this... this means change all st
     return result
 
 
-def mute():
-    devnull = open(os.devnull, 'w')
-    sys.stdout = devnull
-    sys.__stdout__ = devnull
-    sys.stderr = devnull
-    sys.__stderr__ = devnull
-
-
-# @supress_stdout
-
-
 # https://askubuntu.com/questions/110264/how-to-find-frames-per-second-of-any-video-file
 def get_frame_rate(filename):
     logging.info("[improcessing] Getting FPS...")
@@ -101,6 +90,7 @@ async def ffmpegsplit(image):
     await run_command("ffmpeg", "-i", image, "-vsync", "1", "-vf", "scale='max(200,iw)':-1",
                       f"{image.split('.')[0]}%09d.png")
     files = glob.glob(f"{image.split('.')[0]}*.png")
+
     return files, f"{image.split('.')[0]}%09d.png"
 
 
@@ -127,6 +117,7 @@ async def assurefilesize(image: str, ctx: discord.ext.commands.Context):
         # https://www.reddit.com/r/discordapp/comments/aflp3p/the_truth_about_discord_file_upload_limits/
         size = os.path.getsize(image)
         logging.info(f"Resulting file is {humanize.naturalsize(size)}")
+        logging.info(size)
         if size >= 8388119:
             logging.info("Image too big!")
             msg = await ctx.send(f"⚠ Resulting file too big! ({humanize.naturalsize(size)}) Downsizing result...")
@@ -160,19 +151,19 @@ async def handleanimated(image: str, caption, capfunction):
         mime = magic.Magic(mime=True)
         filename = mime.from_file(image)
         if filename.find('video') != -1:
-            logging.warning("[improcessing] Video detected.")
+            logging.info("[improcessing] Video detected.")
             frames, name = await ffmpegsplit(image)
             audio = await splitaudio(image)
             fps = get_frame_rate(image)
-            logging.info("[improcessing] Processing frames...")
+            logging.info(f"[improcessing] Processing {len(frames)} frames...")
             capargs = []
             for i, frame in enumerate(frames):
                 capargs.append((frame, caption, frame.replace('.png', '_rendered.png')))
-            pool = Pool(1)  # , initializer=mute)
+            pool = Pool(32)
             pool.starmap_async(capfunction, capargs)
             pool.close()
             pool.join()
-            logging.info("[improcessing] Joining frames...")
+            logging.info(f"[improcessing] Joining {len(frames)} frames...")
             outname = temp_file("mp4")
             if audio:
                 await run_command("ffmpeg", "-r", str(fps), "-start_number", "1", "-i",
@@ -197,10 +188,9 @@ async def handleanimated(image: str, caption, capfunction):
     else:
         if anim:  # gif
             logging.info("[improcessing] Gif or similair detected.")
-            logging.info("[improcessing] Splitting frames...")
             frames, name = await ffmpegsplit(image)
             fps = get_frame_rate(image)
-            logging.info("[improcessing] Processing frames...")
+            logging.info(f"[improcessing] Processing {len(frames)} frames...")
             capargs = []
             for i, frame in enumerate(frames):
                 capargs.append((frame, caption, frame.replace('.png', '_rendered.png')))
@@ -208,14 +198,14 @@ async def handleanimated(image: str, caption, capfunction):
             pool.starmap(capfunction, capargs)
             pool.close()
             pool.join()
-            logging.info("[improcessing] Joining frames...")
+            logging.info(f"[improcessing] Joining {len(frames)} frames...")
             outname = temp_file("gif")
             await run_command(
-                "gifski", "--quiet", "-o", outname, "--fps", str(fps),
+                "gifski", "--quiet", "-o", outname, "--fps", str(fps), "--width", "1000",
                 name.replace('.png', '_rendered.png').replace('%09d', '*'))
-            logging.info("[improcessing] Cleaning files...")
-            for f in glob.glob(name.replace('%09d', '*')):
-                os.remove(f)
+            # logging.info("[improcessing] Cleaning files...")
+            # for f in glob.glob(name.replace('%09d', '*')):
+            #     os.remove(f)
             return outname
         else:  # normal image
             return await compresspng(capfunction(minimagesize(image, 200), caption))
