@@ -116,8 +116,6 @@ if __name__ == '__main__':  # if i don't have this multiprocessing breaks idfk
     # TODO: speed command
     # TODO: compress command
     # TODO: better help command
-    # TODO: jpegify command
-    # TODO: make bot a fuckin pfp
     # TODO: emoji link command
     # TODO: stitch media command
     # TODO: attach audio to video command
