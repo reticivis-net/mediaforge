@@ -114,10 +114,9 @@ async def compresspng(png):
 
 async def assurefilesize(image: str, ctx: discord.ext.commands.Context):
     for i in range(5):
-        # https://www.reddit.com/r/discordapp/comments/aflp3p/the_truth_about_discord_file_upload_limits/
         size = os.path.getsize(image)
         logging.info(f"Resulting file is {humanize.naturalsize(size)}")
-        logging.info(size)
+        # https://www.reddit.com/r/discordapp/comments/aflp3p/the_truth_about_discord_file_upload_limits/
         if size >= 8388119:
             logging.info("Image too big!")
             msg = await ctx.send(f"⚠ Resulting file too big! ({humanize.naturalsize(size)}) Downsizing result...")
