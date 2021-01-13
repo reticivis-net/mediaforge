@@ -155,11 +155,9 @@ async def assurefilesize(image: str, ctx: discord.ext.commands.Context):
 
 def minimagesize(image, minsize):
     im = Image.open(image)
-    logging.info(im.size)
     if im.size[0] < minsize:
-        logging.info("[improcessing] Upscaling image...")
+        logging.info(f"[improcessing] Image is {im.size}, Upscaling image...")
         im = im.resize((minsize, round(im.size[1] * (minsize / im.size[0]))), Image.BICUBIC)
-        logging.info(im.size)
         name = temp_file("png")
         im.save(name)
         return name
