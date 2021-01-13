@@ -1,3 +1,4 @@
+import contextlib
 import io
 import logging
 import os
@@ -6,7 +7,9 @@ import re
 import subprocess
 import sys
 from PIL import Image
-from improcessing import filetostring, imgkitstring, temp_file
+
+import imgkit
+from improcessing import filetostring, temp_file, options
 
 
 # stolen code https://stackoverflow.com/questions/6116978/how-to-replace-multiple-substrings-of-a-string
@@ -105,3 +108,10 @@ def jpeg(image, params: list, tosavename=None):
 
 def speed(media):
     pass
+
+
+def imgkitstring(torender, tosavename=None):
+    if tosavename is None:
+        tosavename = temp_file("png")
+    imgkit.from_string(torender, tosavename, options=options)
+    return tosavename

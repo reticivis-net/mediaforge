@@ -7,25 +7,11 @@ import string
 import subprocess
 import sys
 import discord.ext
-import imgkit
 from PIL import Image
 from winmagic import magic
 from multiprocessing import Pool
-import functools
 import captionfunctions
 import humanize
-
-
-def disable_logging(func):
-    @functools.wraps(func)
-    def wrapper(*args, **kwargs):
-        logging.disable(logging.INFO)
-        result = func(*args, **kwargs)
-        logging.disable(logging.NOTSET)
-        return result
-
-    return wrapper
-
 
 options = {
     "enable-local-file-access": None,
@@ -82,22 +68,22 @@ async def run_command(*args):  # TODO: sanitize this... this means change all st
     return result
 
 
-@disable_logging
-def imgkitstring(torender, tosavename=None):
-    if tosavename is None:
-        name = temp_file("png")
-        imgkit.from_string(torender, name, options=options)
-        return name
-    else:
-        imgkit.from_string(torender, tosavename, options=options)
-        return tosavename
+def mute():
+    devnull = open(os.devnull, 'w')
+    sys.stdout = devnull
+    sys.__stdout__ = devnull
+    sys.stderr = devnull
+    sys.__stderr__ = devnull
+
+
+# @supress_stdout
 
 
 # https://askubuntu.com/questions/110264/how-to-find-frames-per-second-of-any-video-file
 def get_frame_rate(filename):
     logging.info("[improcessing] Getting FPS...")
     if not os.path.exists(filename):
-        sys.stderr.write("ERROR: filename %r was not found!" % (filename,))
+        logging.error("ERROR: filename %r was not found!" % (filename,))
         return -1
     out = subprocess.check_output(
         ["ffprobe", filename, "-v", "0", "-select_streams", "v", "-print_format", "flat", "-show_entries",
@@ -121,8 +107,8 @@ async def ffmpegsplit(image):
 async def splitaudio(video):
     logging.info("[improcessing] Splitting audio...")
     name = temp_file("aac")
-    result = await run_command("ffmpeg", "-i", video, "-vn", "-acodec", "copy", name)
-    logging.info(result)
+    result = await run_command("ffmpeg", "-hide_banner", "-i", video, "-vn", "-acodec", "copy",
+                               name)
     if "Output file #0 does not contain any stream" in result:
         return False
     return name
@@ -182,7 +168,7 @@ async def handleanimated(image: str, caption, capfunction):
             capargs = []
             for i, frame in enumerate(frames):
                 capargs.append((frame, caption, frame.replace('.png', '_rendered.png')))
-            pool = Pool(32)
+            pool = Pool(1)  # , initializer=mute)
             pool.starmap_async(capfunction, capargs)
             pool.close()
             pool.join()
