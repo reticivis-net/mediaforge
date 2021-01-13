@@ -111,14 +111,14 @@ if __name__ == '__main__':  # if i don't have this multiprocessing breaks idfk
         logging.info(f"Logged in as {bot.user.name}!")
         game = discord.Activity(name=f"with your files",
                                 type=discord.ActivityType.watching)
-
-
     # TODO: speed command
     # TODO: compress command
     # TODO: better help command
     # TODO: emoji link command
     # TODO: stitch media command
     # TODO: attach audio to video command
+
+
     @bot.command()
     async def videotogif(ctx):
         """
