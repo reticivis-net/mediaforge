@@ -364,6 +364,11 @@ if __name__ == '__main__':
         await ctx.message.delete()
         await ctx.channel.send(msg)
 
+    @bot.command(hidden=True)
+    @commands.is_owner()
+    async def error(ctx, *, msg):
+        await ctx.send("run comand with no args to make error lol!")
+
 
     @bot.command(hidden=True)
     @commands.is_owner()
@@ -394,7 +399,8 @@ if __name__ == '__main__':
             logging.warning(err)
             await ctx.send(err)
         else:
-            traceback.print_exception(type(error), error, error.__traceback__, file=sys.stderr)
+            logging.error(error, exc_info=(type(error), error, error.__traceback__))
+            # traceback.print_exception(type(error), error, error.__traceback__, file=sys.stderr)
             await ctx.send("‼ `" + str(error).replace("@", "\\@") + "`")
 
 
