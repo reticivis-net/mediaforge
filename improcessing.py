@@ -112,7 +112,8 @@ def get_frame_rate(filename):
 
 async def ffmpegsplit(image):
     logging.info("[improcessing] Splitting frames...")
-    await run_command("ffmpeg", "-i", image, "-vsync", "1", f"{image.split('.')[0]}%09d.png")
+    await run_command("ffmpeg", "-i", image, "-vsync", "1", "-vf", "scale='min(200,iw)':-1",
+                      f"{image.split('.')[0]}%09d.png")
     files = glob.glob(f"{image.split('.')[0]}*.png")
     return files, f"{image.split('.')[0]}%09d.png"
 
@@ -150,6 +151,20 @@ async def assurefilesize(image: str, ctx: discord.ext.commands.Context):
             return image
     await ctx.send(f"⚠ Max downsizes reached. File is way too big.")
     return False
+
+
+def minimagesize(image, minsize):
+    im = Image.open(image)
+    logging.info(im.size)
+    if im.size[0] < minsize:
+        logging.info("[improcessing] Upscaling image...")
+        im = im.resize((minsize, round(im.size[1] * (minsize / im.size[0]))), Image.BICUBIC)
+        logging.info(im.size)
+        name = temp_file("png")
+        im.save(name)
+        return name
+    else:
+        return image
 
 
 async def handleanimated(image: str, caption, capfunction):
@@ -219,7 +234,7 @@ async def handleanimated(image: str, caption, capfunction):
                 os.remove(f)
             return outname
         else:  # normal image
-            return await compresspng(capfunction(image, caption))
+            return await compresspng(capfunction(minimagesize(image, 200), caption))
 
 
 async def mp4togif(mp4):
