@@ -40,7 +40,7 @@ def temp_file(extension="png"):
 
 
 # https://fredrikaverpil.github.io/2017/06/20/async-and-await-with-subprocesses/
-async def run_command(*args):  # TODO: sanitize this... this means change all str inputs to lists... ugh
+async def run_command(*args):
     # Create subprocess
     process = await asyncio.create_subprocess_exec(
         *args, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
@@ -94,7 +94,7 @@ async def ffmpegsplit(image):
     return files, f"{image.split('.')[0]}%09d.png"
 
 
-async def splitaudio(video):
+async def splitaudio(video):  # TODO: change this to ffprobe to avoid console spam from error
     logging.info("[improcessing] Splitting audio...")
     name = temp_file("aac")
     result = await run_command("ffmpeg", "-hide_banner", "-i", video, "-vn", "-acodec", "copy",
@@ -187,7 +187,7 @@ async def handleanimated(image: str, caption, capfunction):
             raise Exception("File given is not valid image or video.")
     else:
         if anim:  # gif
-            logging.info("[improcessing] Gif or similair detected.")
+            logging.info("[improcessing] GIF detected.")
             frames, name = await ffmpegsplit(image)
             fps = get_frame_rate(image)
             logging.info(f"[improcessing] Processing {len(frames)} frames...")
