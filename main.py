@@ -4,8 +4,6 @@ import logging
 import os
 import random
 import string
-import sys
-import traceback
 import coloredlogs
 import discord
 from discord.ext import commands
@@ -15,9 +13,8 @@ import aiohttp
 import aiofiles
 import humanize
 
-coloredlogs.install(level='INFO', fmt='[%(asctime)s] %(levelname)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
-
-if __name__ == '__main__':
+if __name__ == '__main__':  # if i don't have this multiprocessing breaks idfk
+    coloredlogs.install(level='INFO', fmt='[%(asctime)s] %(levelname)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
     logging.info(f"Discord Version {discord.__version__}")
     logging.info("Initalizing")
     bot = commands.Bot(command_prefix='$', description='CaptionX')
@@ -364,6 +361,7 @@ if __name__ == '__main__':
         await ctx.message.delete()
         await ctx.channel.send(msg)
 
+
     @bot.command(hidden=True)
     @commands.is_owner()
     async def error(ctx, *, msg):
@@ -400,7 +398,6 @@ if __name__ == '__main__':
             await ctx.send(err)
         else:
             logging.error(error, exc_info=(type(error), error, error.__traceback__))
-            # traceback.print_exception(type(error), error, error.__traceback__, file=sys.stderr)
             await ctx.send("‼ `" + str(error).replace("@", "\\@") + "`")
 
 

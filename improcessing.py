@@ -112,7 +112,7 @@ def get_frame_rate(filename):
 
 async def ffmpegsplit(image):
     logging.info("[improcessing] Splitting frames...")
-    await run_command("ffmpeg", "-i", image, "-vsync", "1", "-vf", "scale='min(200,iw)':-1",
+    await run_command("ffmpeg", "-i", image, "-vsync", "1", "-vf", "scale='max(200,iw)':-1",
                       f"{image.split('.')[0]}%09d.png")
     files = glob.glob(f"{image.split('.')[0]}*.png")
     return files, f"{image.split('.')[0]}%09d.png"
