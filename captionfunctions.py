@@ -107,10 +107,6 @@ def jpeg(image, params: list, tosavename=None):
     return name
 
 
-def speed(media):
-    pass
-
-
 def imgkitstring(torender, tosavename=None):
     if tosavename is None:
         tosavename = temp_file("png")
