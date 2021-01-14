@@ -157,27 +157,32 @@ async def imagetype(image):
 
 
 async def handleanimated(image: str, caption, capfunction):
-    try:
-        with Image.open(image) as im:
-            anim = getattr(im, "is_animated", False)
-    except IOError:  # either invalid file or a valid video
-        # https://stackoverflow.com/a/56526114/9044183
-        mime = magic.Magic(mime=True)
-        filename = mime.from_file(image)
-        if filename.find('video') != -1:
-            logging.info("[improcessing] Video detected.")
-            frames, name = await ffmpegsplit(image)
-            audio = await splitaudio(image)
-            fps = get_frame_rate(image)
-            logging.info(f"[improcessing] Processing {len(frames)} frames...")
-            capargs = []
-            for i, frame in enumerate(frames):
-                capargs.append((frame, caption, frame.replace('.png', '_rendered.png')))
-            pool = Pool(32)
-            pool.starmap_async(capfunction, capargs)
-            pool.close()
-            pool.join()
-            logging.info(f"[improcessing] Joining {len(frames)} frames...")
+    imty = imagetype(image)
+    logging.info(f"[improcessing] Detected type {imty}.")
+    if imty is None:
+        raise Exception(f"File {image} is invalid!")
+    elif imty == "IMAGE":
+        logging.info(f"[improcessing] Processing frame...")
+        return await compresspng(capfunction(minimagesize(image, 200), caption))
+    else:
+        frames, name = await ffmpegsplit(image)
+        audio = await splitaudio(image)
+        fps = get_frame_rate(image)
+        logging.info(f"[improcessing] Processing {len(frames)} frames...")
+        capargs = []
+        for i, frame in enumerate(frames):
+            capargs.append((frame, caption, frame.replace('.png', '_rendered.png')))
+        pool = Pool(32)
+        pool.starmap_async(capfunction, capargs)
+        pool.close()
+        pool.join()
+        logging.info(f"[improcessing] Joining {len(frames)} frames...")
+        if imty == "GIF":
+            outname = temp_file("gif")
+            await run_command(
+                "gifski", "--quiet", "-o", outname, "--fps", str(fps), "--width", "1000",
+                name.replace('.png', '_rendered.png').replace('%09d', '*'))
+        else:  # imty == "VIDEO":
             outname = temp_file("mp4")
             if audio:
                 await run_command("ffmpeg", "-r", str(fps), "-start_number", "1", "-i",
@@ -191,38 +196,12 @@ async def handleanimated(image: str, caption, capfunction):
                                   name.replace('.png', '_rendered.png'),
                                   "-c:v", "libx264", "-crf", "25", "-pix_fmt", "yuv420p",
                                   "-vf", "crop=trunc(iw/2)*2:trunc(ih/2)*2", outname)
-            # cleanup
-            logging.info("[improcessing] Cleaning files...")
-            for f in glob.glob(name.replace('%09d', '*')):
-                os.remove(f)
+        # cleanup
+        logging.info("[improcessing] Cleaning files...")
+        for f in glob.glob(name.replace('%09d', '*')):
+            os.remove(f)
 
-            return outname
-        else:
-            raise Exception("File given is not valid image or video.")
-    else:
-        if anim:  # gif
-            logging.info("[improcessing] GIF detected.")
-            frames, name = await ffmpegsplit(image)
-            fps = get_frame_rate(image)
-            logging.info(f"[improcessing] Processing {len(frames)} frames...")
-            capargs = []
-            for i, frame in enumerate(frames):
-                capargs.append((frame, caption, frame.replace('.png', '_rendered.png')))
-            pool = Pool(32)
-            pool.starmap(capfunction, capargs)
-            pool.close()
-            pool.join()
-            logging.info(f"[improcessing] Joining {len(frames)} frames...")
-            outname = temp_file("gif")
-            await run_command(
-                "gifski", "--quiet", "-o", outname, "--fps", str(fps), "--width", "1000",
-                name.replace('.png', '_rendered.png').replace('%09d', '*'))
-            # logging.info("[improcessing] Cleaning files...")
-            # for f in glob.glob(name.replace('%09d', '*')):
-            #     os.remove(f)
-            return outname
-        else:  # normal image
-            return await compresspng(capfunction(minimagesize(image, 200), caption))
+        return outname
 
 
 async def mp4togif(mp4):
