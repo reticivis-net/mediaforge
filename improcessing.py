@@ -5,8 +5,8 @@ import os
 import random
 import string
 import subprocess
-import sys
 import discord.ext
+import typing
 from PIL import Image
 from winmagic import magic
 from multiprocessing import Pool
@@ -55,7 +55,7 @@ async def run_command(*args):
     # Progress
     if process.returncode == 0:
         logging.info(
-            f"PID {process.pid} Done: {stdout.decode().strip()}",
+            f"PID {process.pid} Done.",
         )
     else:
         logging.error(
@@ -94,12 +94,12 @@ async def ffmpegsplit(image):
     return files, f"{image.split('.')[0]}%09d.png"
 
 
-async def splitaudio(video):  # TODO: change this to ffprobe to avoid console spam from error
+async def splitaudio(video):
     ifaudio = await run_command("ffprobe", "-i", video, "-show_streams", "-select_streams", "a", "-loglevel", "error")
     if ifaudio:
         logging.info("[improcessing] Splitting audio...")
         name = temp_file("aac")
-        result = await run_command("ffmpeg", "-hide_banner", "-i", video, "-vn", "-acodec", "copy", name)
+        await run_command("ffmpeg", "-hide_banner", "-i", video, "-vn", "-acodec", "copy", name)
         return name
     else:
         logging.info("[improcessing] No audio detected.")
@@ -156,7 +156,7 @@ def imagetype(image):
     return None
 
 
-async def handleanimated(image: str, caption, capfunction):
+async def handleanimated(image: str, caption, capfunction: typing.Callable):
     imty = imagetype(image)
     logging.info(f"[improcessing] Detected type {imty}.")
     if imty is None:
@@ -172,7 +172,7 @@ async def handleanimated(image: str, caption, capfunction):
         capargs = []
         for i, frame in enumerate(frames):
             capargs.append((frame, caption, frame.replace('.png', '_rendered.png')))
-        pool = Pool(32)
+        pool = Pool(64)
         pool.starmap_async(capfunction, capargs)
         pool.close()
         pool.join()
@@ -237,3 +237,27 @@ async def mediatopng(media):
 async def ffprobe(file):
     return [await run_command("ffprobe", "-hide_banner", file), magic.from_file(file, mime=False),
             magic.from_file(file, mime=True)]
+
+
+async def speed(file, sp):
+    outname = temp_file("mp4")
+    ifaudio = await run_command("ffprobe", "-i", file, "-show_streams", "-select_streams", "a", "-loglevel", "error")
+    if ifaudio:
+        await run_command("ffmpeg", "-i", file, "-filter_complex",
+                          f"[0:v]setpts={1 / sp}*PTS[v];[0:a]atempo={sp}[a]",
+                          "-map", "[v]", "-map", "[a]", outname)
+    else:
+        await run_command("ffmpeg", "-i", file, "-filter_complex",
+                          f"[0:v]setpts={1 / sp}*PTS[v]",
+                          "-map", "[v]", outname)
+    if imagetype(file) == "GIF":
+        outname = await mp4togif(outname)
+    return outname
+
+
+async def changefps(file, fps):
+    outname = temp_file("mp4")
+    await run_command("ffmpeg", "-i", file, "-filter:v", f"fps=fps={fps}", outname)
+    if imagetype(file) == "GIF":
+        outname = await mp4togif(outname)
+    return outname

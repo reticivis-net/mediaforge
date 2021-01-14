@@ -14,7 +14,6 @@ import aiohttp
 import aiofiles
 import humanize
 
-# TODO: speed command
 # TODO: compress command
 # TODO: better help command
 # TODO: stitch media command
@@ -83,7 +82,7 @@ if __name__ == '__main__':  # if i don't have this multiprocessing breaks idfk
                 tenor = json.loads(tenor)
                 if 'error' in tenor:
                     print(tenor['error'])
-                    await ctx.send(f":bangbang: Tenor Error! {tenor['error']}")
+                    await ctx.send(f":bangbang: Tenor Error! `{tenor['error']}`")
                     return False
                 else:
                     return await saveurl(tenor['results'][0]['media'][0]['mp4']['url'], "mp4")
@@ -111,18 +110,54 @@ if __name__ == '__main__':  # if i don't have this multiprocessing breaks idfk
         return False
 
 
+    async def handletenor(m, ctx, gif=False):
+        if len(m.embeds):
+            if m.embeds[0].type == "gifv":
+                # https://github.com/esmBot/esmBot/blob/master/utils/imagedetect.js#L34
+                tenor = await fetch(
+                    f"https://api.tenor.com/v1/gifs?ids={m.embeds[0].url.split('-').pop()}&key={tenorkey}")
+                tenor = json.loads(tenor)
+                if 'error' in tenor:
+                    print(tenor['error'])
+                    await ctx.send(f":bangbang: Tenor Error! `{tenor['error']}`")
+                    return False
+                else:
+                    if gif:
+                        return tenor['results'][0]['media'][0]['gif']['url']
+                    else:
+                        return tenor['results'][0]['media'][0]['mp4']['url']
+        return None
+
+
+    async def tenorsearch(ctx, gif=False):
+        if ctx.message.reference:
+            m = ctx.message.reference.resolved
+            hm = await handletenor(m, ctx, gif)
+            if hm is None:
+                return False
+            else:
+                return hm
+        else:
+            async for m in ctx.channel.history(limit=50):
+                hm = await handletenor(m, ctx, gif)
+                if hm is not None:
+                    return hm
+        return False
+
+
     @bot.event
     async def on_ready():
         logging.info(f"Logged in as {bot.user.name}!")
         game = discord.Activity(name=f"with your files",
                                 type=discord.ActivityType.watching)
+        await bot.change_presence(activity=game)
 
 
     @bot.command()
     async def emojiurl(ctx, *, msg):
         """
         Extracts the raw file from up to 5 custom emojis.
-        Each emoji is sent as a separate message intentionally to allow replying to any given emoji with a media command.
+        Each emoji is sent as a separate message intentionally to allow replying with a media command.
 
         Parameters:
             msg - any text that contains at least one custom emoji.
@@ -141,6 +176,25 @@ if __name__ == '__main__':  # if i don't have this multiprocessing breaks idfk
                 await ctx.send(url)
         else:
             await ctx.send("⚠ Your message doesn't contain any custom emojis!")
+
+
+    @bot.command()
+    async def tenorgif(ctx, *, gif=""):
+        """
+        Sends the GIF url for a tenor gif.
+        By default, tenor gifs are interpreted as MP4 files due to their superior quality.
+        This command gets the gif straight from tenor, making it faster than $videotogif.
+
+        Parameters:
+            gif - a valid tenor URL
+        """
+        logging.info("Getting tenor gif...")
+        file = await tenorsearch(ctx, True)
+        if file:
+            await ctx.send(file)
+            logging.info("Complete!")
+        else:
+            await ctx.send("❌ No tenor gif found.")
 
 
     @bot.command()
@@ -218,6 +272,70 @@ if __name__ == '__main__':  # if i don't have this multiprocessing breaks idfk
             msg = await ctx.send("⚙ Processing...")
             await ctx.channel.trigger_typing()
             result = await improcessing.mediatopng(file)
+            result = await improcessing.assurefilesize(result, ctx)
+            await ctx.channel.trigger_typing()
+            logging.info("Uploading image...")
+            await ctx.reply(file=discord.File(result))
+            await msg.delete()
+            os.remove(file)
+            os.remove(result)
+        else:
+            await ctx.send("❌ No file found.")
+
+
+    @bot.command(name="speed")
+    async def spcommand(ctx, speed: float = 2):
+        """
+        Changes the speed of media.
+        This command preserves the original FPS.
+
+        Parameters:
+            media - any valid media file.
+            speed - speed to multiply the video by. must be between 0.25 and 10. defaults to 2.
+        """
+        if not 0.25 <= speed <= 10:
+            await ctx.send("⚠ Speed must be between 0.25 and 10")
+            return
+        logging.info("Getting image...")
+        file = await imagesearch(ctx)
+        if file:
+            logging.info("Processing image...")
+            msg = await ctx.send("⚙ Processing...")
+            await ctx.channel.trigger_typing()
+            result = await improcessing.speed(file, speed)
+            result = await improcessing.assurefilesize(result, ctx)
+            await ctx.channel.trigger_typing()
+            logging.info("Uploading image...")
+            await ctx.reply(file=discord.File(result))
+            await msg.delete()
+            os.remove(file)
+            os.remove(result)
+        else:
+            await ctx.send("❌ No file found.")
+
+
+    @bot.command(name="fps")
+    async def fpschange(ctx, fps: float = 30):
+        """
+        Changes the FPS of media.
+        This command keeps the speed the same.
+        BEWARE: GIFs become unpredictable at higher frame rates due to GIFs not being designed for video.
+        It is not recommended to make a gif more than 30fps.
+
+        Parameters:
+            media - any valid media file.
+            fps - FPS to change the video to. must be between 1 and 60. defaults to 30.
+        """
+        if not 1 <= fps <= 60:
+            await ctx.send("⚠ FPS must be between 1 and 60.")
+            return
+        logging.info("Getting image...")
+        file = await imagesearch(ctx)
+        if file:
+            logging.info("Processing image...")
+            msg = await ctx.send("⚙ Processing...")
+            await ctx.channel.trigger_typing()
+            result = await improcessing.changefps(file, fps)
             result = await improcessing.assurefilesize(result, ctx)
             await ctx.channel.trigger_typing()
             logging.info("Uploading image...")
@@ -407,7 +525,8 @@ if __name__ == '__main__':  # if i don't have this multiprocessing breaks idfk
     @bot.listen()
     async def on_command_error(ctx, error):
         if isinstance(error, discord.ext.commands.errors.CommandNotFound):
-            err = f"⁉ Command `{ctx.message.content}` does not exist."
+            msg = ctx.message.content.replace("@", "\\@")
+            err = f"⁉ Command `{msg}` does not exist."
             logging.warning(err)
             await ctx.send(err)
         elif isinstance(error, discord.ext.commands.errors.NotOwner):
