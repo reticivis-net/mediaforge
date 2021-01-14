@@ -3,6 +3,7 @@ import json
 import logging
 import os
 import random
+import re
 import string
 import coloredlogs
 import discord
@@ -13,11 +14,15 @@ import aiohttp
 import aiofiles
 import humanize
 
+# TODO: speed command
+# TODO: compress command
+# TODO: better help command
+# TODO: stitch media command
+# TODO: attach audio to video command
 if __name__ == '__main__':  # if i don't have this multiprocessing breaks idfk
     coloredlogs.install(level='INFO', fmt='[%(asctime)s] %(levelname)s %(message)s',
                         datefmt='%m/%d/%Y %I:%M:%S %p')
-    logging.info(f"Discord Version {discord.__version__}")
-    logging.info("Initalizing")
+    logging.info(f"discord.py {discord.__version__}")
     bot = commands.Bot(command_prefix='$', description='CaptionX')
     # bot.remove_command('help')
     for f in glob.glob('temp/*'):
@@ -39,7 +44,6 @@ if __name__ == '__main__':  # if i don't have this multiprocessing breaks idfk
 
 
     async def saveurl(url, extension=None):
-
         if extension is None:
             extension = url.split(".")[-1].split("?")[0]
         while True:
@@ -114,12 +118,30 @@ if __name__ == '__main__':  # if i don't have this multiprocessing breaks idfk
                                 type=discord.ActivityType.watching)
 
 
-    # TODO: speed command
-    # TODO: compress command
-    # TODO: better help command
-    # TODO: emoji link command
-    # TODO: stitch media command
-    # TODO: attach audio to video command
+    @bot.command()
+    async def emojiurl(ctx, *, msg):
+        """
+        Extracts the raw file from up to 5 custom emojis.
+        Each emoji is sent as a separate message intentionally to allow replying to any given emoji with a media command.
+
+        Parameters:
+            msg - any text that contains at least one custom emoji.
+        """
+        urls = []
+        emojiregex = "<(?P<animated>a?):(?P<name>[a-zA-Z0-9_]{2,32}):(?P<id>[0-9]{18,22})>"
+        for i, match in enumerate(re.finditer(emojiregex, msg)):
+            if i == 5:
+                break
+            emojiid = int(match.group(3))
+            anim = bool(match.group(1))
+            url = str(discord.PartialEmoji(id=emojiid, name="", animated=anim).url)
+            urls.append(url)
+        if urls:
+            for url in urls:
+                await ctx.send(url)
+        else:
+            await ctx.send("⚠ Your message doesn't contain any custom emojis!")
+
 
     @bot.command()
     async def videotogif(ctx):
@@ -236,7 +258,7 @@ if __name__ == '__main__':  # if i don't have this multiprocessing breaks idfk
 
 
     @bot.command()
-    async def jpeg(ctx, strength: int = 30, stretch: int = 20, quality: int = 6):
+    async def jpeg(ctx, strength: int = 30, stretch: int = 20, quality: int = 10):
         """
         Makes media into a low quality jpeg
 
@@ -244,7 +266,7 @@ if __name__ == '__main__':  # if i don't have this multiprocessing breaks idfk
             media - any valid media file
             strength - amount of times to jpegify image. must be between 1 and 100. defaults to 30.
             stretch - randomly stretch the image by this number on each jpegification. can cause strange effects on videos. must be between 0 and 40. defaults to 20.
-            quality - quality of JPEG compression. must be between 1 and 95. defaults to 6.
+            quality - quality of JPEG compression. must be between 1 and 95. defaults to 10.
         """
         if not 0 < strength <= 100:
             await ctx.send("⚠ Strength must be between 0 and 100.")
