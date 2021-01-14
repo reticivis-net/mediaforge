@@ -14,7 +14,8 @@ import aiofiles
 import humanize
 
 if __name__ == '__main__':  # if i don't have this multiprocessing breaks idfk
-    coloredlogs.install(level='INFO', fmt='[%(asctime)s] %(levelname)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
+    coloredlogs.install(level='INFO', fmt='[%(asctime)s] %(levelname)s %(message)s',
+                        datefmt='%m/%d/%Y %I:%M:%S %p')
     logging.info(f"Discord Version {discord.__version__}")
     logging.info("Initalizing")
     bot = commands.Bot(command_prefix='$', description='CaptionX')
@@ -111,13 +112,14 @@ if __name__ == '__main__':  # if i don't have this multiprocessing breaks idfk
         logging.info(f"Logged in as {bot.user.name}!")
         game = discord.Activity(name=f"with your files",
                                 type=discord.ActivityType.watching)
+
+
     # TODO: speed command
     # TODO: compress command
     # TODO: better help command
     # TODO: emoji link command
     # TODO: stitch media command
     # TODO: attach audio to video command
-
 
     @bot.command()
     async def videotogif(ctx):
@@ -338,7 +340,7 @@ if __name__ == '__main__':  # if i don't have this multiprocessing breaks idfk
     async def info(ctx):
         """
         Provides info on a media file.
-        Info provided is from ffprobe.
+        Info provided is from ffprobe and libmagic.
 
         Parameters:
             media - any valid media file
@@ -347,7 +349,7 @@ if __name__ == '__main__':  # if i don't have this multiprocessing breaks idfk
         if file:
             await ctx.channel.trigger_typing()
             result = await improcessing.ffprobe(file)
-            await ctx.reply(f"```{result}```")
+            await ctx.reply(f"`{result[1]}` `{result[2]}`\n```{result[0]}```")
             # os.remove(file)
         else:
             await ctx.send("❌ No file found.")

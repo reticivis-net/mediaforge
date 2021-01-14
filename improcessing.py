@@ -95,17 +95,18 @@ async def ffmpegsplit(image):
 
 
 async def splitaudio(video):  # TODO: change this to ffprobe to avoid console spam from error
-    logging.info("[improcessing] Splitting audio...")
-    name = temp_file("aac")
-    result = await run_command("ffmpeg", "-hide_banner", "-i", video, "-vn", "-acodec", "copy",
-                               name)
-    if "Output file #0 does not contain any stream" in result:
+    ifaudio = await run_command("ffprobe", "-i", video, "-show_streams", "-select_streams", "a", "-loglevel", "error")
+    if ifaudio:
+        logging.info("[improcessing] Splitting audio...")
+        name = temp_file("aac")
+        result = await run_command("ffmpeg", "-hide_banner", "-i", video, "-vn", "-acodec", "copy", name)
+        return name
+    else:
+        logging.info("[improcessing] No audio detected.")
         return False
-    return name
 
 
 async def compresspng(png):
-    extension = "png"
     outname = temp_file("png")
     await run_command("pngquant", "--quality=0-80", "--o", outname, png)
     os.remove(png)
@@ -139,6 +140,20 @@ def minimagesize(image, minsize):
         return name
     else:
         return image
+
+
+async def imagetype(image):
+    mime = magic.from_file(image, mime=True)
+    if "video" in mime:
+        return "VIDEO"
+    elif "image" in mime:
+        with Image.open(image) as im:
+            anim = getattr(im, "is_animated", False)
+        if anim:
+            return "GIF"  # gifs dont have to be animated but if they aren't its easier to treat them like pngs
+        else:
+            return "IMAGE"
+    return None
 
 
 async def handleanimated(image: str, caption, capfunction):
@@ -241,4 +256,5 @@ async def mediatopng(media):
 
 
 async def ffprobe(file):
-    return await run_command("ffprobe", "-hide_banner", file)
+    return [await run_command("ffprobe", "-hide_banner", file), magic.from_file(file, mime=False),
+            magic.from_file(file, mime=True)]
