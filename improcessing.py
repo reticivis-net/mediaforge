@@ -47,7 +47,7 @@ async def run_command(*args):
     )
 
     # Status
-    logging.info(f"Started: {args}, pid={process.pid}", )
+    logging.info(f"PID {process.pid} Started: {args}")
 
     # Wait for the subprocess to finish
     stdout, stderr = await process.communicate()
@@ -55,11 +55,11 @@ async def run_command(*args):
     # Progress
     if process.returncode == 0:
         logging.info(
-            f"Done: {args}, pid={process.pid}, result: {stdout.decode().strip()}",
+            f"PID {process.pid} Done: {stdout.decode().strip()}",
         )
     else:
         logging.error(
-            f"Failed: {args}, pid={process.pid}, result: {stderr.decode().strip()}",
+            f"PID {process.pid} Failed: {args} result: {stderr.decode().strip()}",
         )
     result = stdout.decode().strip() + stderr.decode().strip()
     # Result
@@ -142,7 +142,7 @@ def minimagesize(image, minsize):
         return image
 
 
-async def imagetype(image):
+def imagetype(image):
     mime = magic.from_file(image, mime=True)
     if "video" in mime:
         return "VIDEO"
