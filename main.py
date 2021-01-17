@@ -363,8 +363,9 @@ if __name__ == '__main__':  # if i don't have this multiprocessing breaks idfk
         """
         Changes the FPS of media.
         This command keeps the speed the same.
-        BEWARE: GIFs become unpredictable at higher frame rates due to GIFs not being designed for video.
-        It is not recommended to make a gif more than 30fps.
+        BEWARE: Changing the FPS of gifs can create strange results due to the strange way GIFs store FPS data.
+        GIFs are only stable at certain FPS values. These include 50, 30, 15, 10, and others.
+        An important reminder that by default tenor "gifs" are interpreted as mp4s, which do not suffer this problem.
 
         Parameters:
             media - any valid media file.
