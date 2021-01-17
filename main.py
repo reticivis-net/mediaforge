@@ -18,6 +18,8 @@ import humanize
 # TODO: custom style caption
 # TODO: better help command
 # TODO: stitch media command
+# TODO: concat media command
+# TODO: end video with motivate freeze frame command
 # TODO: attach audio to video command
 # TODO: credits command
 # TODO: enforce image types better lol!
