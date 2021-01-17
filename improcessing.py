@@ -151,7 +151,7 @@ def imagetype(image):
     if "video" in mime:
         return "VIDEO"
     elif "image" in mime:
-        with Image.open(image) as im:
+        with Image.open(image) as im:  # TODO: add a try catch just in case PIL doesn't support something
             anim = getattr(im, "is_animated", False)
         if anim:
             return "GIF"  # gifs dont have to be animated but if they aren't its easier to treat them like pngs
