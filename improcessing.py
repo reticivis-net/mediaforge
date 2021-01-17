@@ -69,20 +69,24 @@ async def run_command(*args):
 
 
 # https://askubuntu.com/questions/110264/how-to-find-frames-per-second-of-any-video-file
-def get_frame_rate(filename):
+async def get_frame_rate(filename):
     logging.info("[improcessing] Getting FPS...")
-    if not os.path.exists(filename):
-        logging.error("ERROR: filename %r was not found!" % (filename,))
-        return -1
-    out = subprocess.check_output(
-        ["ffprobe", filename, "-v", "0", "-select_streams", "v", "-print_format", "flat", "-show_entries",
-         "stream=r_frame_rate"])
-    rate = out.split(b'=')[1].strip()[1:-1].split(b'/')  # had to change to byte for some reason lol!
+    out = await run_command("ffprobe", filename, "-v", "0", "-select_streams", "v", "-print_format", "flat",
+                            "-show_entries", "stream=r_frame_rate")
+    rate = out.split('=')[1].strip()[1:-1].split('/')
     if len(rate) == 1:
         return float(rate[0])
     if len(rate) == 2:
         return float(rate[0]) / float(rate[1])
     return -1
+
+
+# https://superuser.com/questions/650291/how-to-get-video-duration-in-seconds
+async def get_duration(filename):
+    logging.info("[improcessing] Getting FPS...")
+    out = await run_command("ffprobe", "-v", "error", "-show_entries", "format=duration", "-of",
+                            "default=noprint_wrappers=1:nokey=1", filename)
+    return float(out)
 
 
 async def ffmpegsplit(image):
@@ -167,12 +171,12 @@ async def handleanimated(image: str, caption, capfunction: typing.Callable):
     else:
         frames, name = await ffmpegsplit(image)
         audio = await splitaudio(image)
-        fps = get_frame_rate(image)
-        logging.info(f"[improcessing] Processing {len(frames)} frames...")
+        fps = await get_frame_rate(image)
+        logging.info(f"[improcessing] Processing {len(frames)} frames with {min(len(frames), 60)} processes...")
         capargs = []
         for i, frame in enumerate(frames):
             capargs.append((frame, caption, frame.replace('.png', '_rendered.png')))
-        pool = Pool(64)
+        pool = Pool(min(len(frames), 60))  # cap processes
         pool.starmap_async(capfunction, capargs)
         pool.close()
         pool.join()
@@ -210,7 +214,7 @@ async def mp4togif(mp4):
     if filename.find('video') == -1:
         return False
     frames, name = await ffmpegsplit(mp4)
-    fps = get_frame_rate(mp4)
+    fps = await get_frame_rate(mp4)
     outname = temp_file("gif")
     await run_command("gifski", "--quiet", "-o", outname, "--fps", str(fps), name.replace('%09d', '*'))
     logging.info("[improcessing] Cleaning files...")
@@ -239,17 +243,33 @@ async def ffprobe(file):
             magic.from_file(file, mime=True)]
 
 
+# https://stackoverflow.com/questions/65728616/how-to-get-ffmpeg-to-consistently-apply-speed-effect-to-first-few-frames
+# TODO: some way to preserve gif transparency?
 async def speed(file, sp):
     outname = temp_file("mp4")
+    fps = await get_frame_rate(file)
+    duration = await get_duration(file)
     ifaudio = await run_command("ffprobe", "-i", file, "-show_streams", "-select_streams", "a", "-loglevel", "error")
     if ifaudio:
         await run_command("ffmpeg", "-i", file, "-filter_complex",
-                          f"[0:v]setpts={1 / sp}*PTS[v];[0:a]atempo={sp}[a]",
-                          "-map", "[v]", "-map", "[a]", outname)
+                          f"[0:v]setpts=PTS/{sp},fps={fps}[v];[0:a]atempo={sp}[a]",
+                          "-map", "[v]", "-map", "[a]", "-t", str(duration / float(sp)), outname)
     else:
         await run_command("ffmpeg", "-i", file, "-filter_complex",
-                          f"[0:v]setpts={1 / sp}*PTS[v]",
-                          "-map", "[v]", outname)
+                          f"[0:v]setpts=PTS/{sp},fps={fps}[v]",
+                          "-map", "[v]", "-t", str(duration / float(sp)), outname)
+    if imagetype(file) == "GIF":
+        outname = await mp4togif(outname)
+    return outname
+
+
+async def quality(file, crf, qa):
+    outname = temp_file("mp4")
+    ifaudio = await run_command("ffprobe", "-i", file, "-show_streams", "-select_streams", "a", "-loglevel", "error")
+    if ifaudio:
+        await run_command("ffmpeg", "-i", file, "-crf", str(crf), "-c:a", "aac", "-q:a", str(qa), outname)
+    else:
+        await run_command("ffmpeg", "-i", file, "-crf", str(crf), outname)
     if imagetype(file) == "GIF":
         outname = await mp4togif(outname)
     return outname

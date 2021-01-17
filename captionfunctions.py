@@ -8,7 +8,7 @@ import subprocess
 import sys
 from PIL import Image
 
-import imgkit
+import imgkit  # TODO: maybe at some point get a better html renderer...
 from improcessing import filetostring, temp_file, options
 
 

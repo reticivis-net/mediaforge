@@ -14,10 +14,13 @@ import aiohttp
 import aiofiles
 import humanize
 
-# TODO: compress command
+# TODO: twitter style caption
+# TODO: custom style caption
 # TODO: better help command
 # TODO: stitch media command
 # TODO: attach audio to video command
+# TODO: credits command
+# TODO: enforce image types better lol!
 if __name__ == '__main__':  # if i don't have this multiprocessing breaks idfk
     coloredlogs.install(level='INFO', fmt='[%(asctime)s] %(levelname)s %(message)s',
                         datefmt='%m/%d/%Y %I:%M:%S %p')
@@ -149,7 +152,7 @@ if __name__ == '__main__':  # if i don't have this multiprocessing breaks idfk
     async def on_ready():
         logging.info(f"Logged in as {bot.user.name}!")
         game = discord.Activity(name=f"with your files",
-                                type=discord.ActivityType.watching)
+                                type=discord.ActivityType.playing)
         await bot.change_presence(activity=game)
 
 
@@ -293,6 +296,7 @@ if __name__ == '__main__':  # if i don't have this multiprocessing breaks idfk
             media - any valid media file.
             speed - speed to multiply the video by. must be between 0.25 and 10. defaults to 2.
         """
+        # raise NotImplementedError("i fucking hate ffmpeg")
         if not 0.25 <= speed <= 10:
             await ctx.send("⚠ Speed must be between 0.25 and 10")
             return
@@ -303,6 +307,44 @@ if __name__ == '__main__':  # if i don't have this multiprocessing breaks idfk
             msg = await ctx.send("⚙ Processing...")
             await ctx.channel.trigger_typing()
             result = await improcessing.speed(file, speed)
+            result = await improcessing.assurefilesize(result, ctx)
+            await ctx.channel.trigger_typing()
+            logging.info("Uploading image...")
+            await ctx.reply(file=discord.File(result))
+            await msg.delete()
+            os.remove(file)
+            os.remove(result)
+        else:
+            await ctx.send("❌ No file found.")
+
+
+    @bot.command()
+    async def compressv(ctx, crf: float = 51, qa: float = 0.2):
+        """
+        Makes videos terrible quality.
+        The strange ranges on the numbers are because they are quality settings in FFmpeg's encoding.
+        CRF info is found at https://trac.ffmpeg.org/wiki/Encode/H.264#crf
+        q:a info is found at https://trac.ffmpeg.org/wiki/Encode/AAC#NativeFFmpegAACEncoder
+
+        Parameters:
+            media - any valid media file.
+            crf - Controls video quality. Higher is worse quality. must be between 28 and 51. defaults to 51.
+            qa - Controls audio quality. Lower is worse quality. must be between 0.1 and 2. defaults to 0.2.
+
+        """
+        if not 28 <= crf <= 51:
+            await ctx.send("⚠ CRF must be between 28 and 51.")
+            return
+        if not 0.1 <= qa <= 2:
+            await ctx.send("⚠ qa must be between 0.1 and 2.")
+            return
+        logging.info("Getting image...")
+        file = await imagesearch(ctx)
+        if file:
+            logging.info("Processing image...")
+            msg = await ctx.send("⚙ Processing...")
+            await ctx.channel.trigger_typing()
+            result = await improcessing.quality(file, crf, qa)
             result = await improcessing.assurefilesize(result, ctx)
             await ctx.channel.trigger_typing()
             logging.info("Uploading image...")
@@ -490,7 +532,7 @@ if __name__ == '__main__':  # if i don't have this multiprocessing breaks idfk
             await ctx.channel.trigger_typing()
             result = await improcessing.ffprobe(file)
             await ctx.reply(f"`{result[1]}` `{result[2]}`\n```{result[0]}```")
-            # os.remove(file)
+            os.remove(file)
         else:
             await ctx.send("❌ No file found.")
 
