@@ -59,7 +59,7 @@ if __name__ == '__main__':  # if i don't have this multiprocessing breaks idfk
                             if "Content-Length" not in resp.headers:
                                 raise Exception("Cannot determine filesize!")
                             size = int(resp.headers["Content-Length"])
-                            logging.info(f"Url {url} is {humanize.naturalsize(size)}")
+                            logging.info(f"Url is {humanize.naturalsize(size)}")
                             if 50000000 < size:
                                 raise Exception(f"File is too big ({humanize.naturalsize(size)})!")
                         else:
@@ -150,6 +150,34 @@ if __name__ == '__main__':  # if i don't have this multiprocessing breaks idfk
         return False
 
 
+    async def improcess(ctx: discord.ext.commands.Context, func: callable, allowedtypes: list, *args,
+                        handleanimated=False):
+        async with ctx.channel.typing():
+            file = await imagesearch(ctx)
+            if file:
+                if (imtype := improcessing.imagetype(file)) not in allowedtypes:
+                    await ctx.send(f"❌ This command only accepts the following media types: {', '.join(allowedtypes)}")
+                    logging.warning(f"Image type {imtype} is not in {allowedtypes}")
+                    os.remove(file)
+                else:
+                    logging.info("Processing...")
+                    msg = await ctx.send("⚙ Processing...")
+                    if handleanimated:
+                        result = await improcessing.handleanimated(file, *args, func)
+                    else:
+                        result = await func(file, *args)
+                    result = await improcessing.assurefilesize(result, ctx)
+                    logging.info("Uploading...")
+                    await msg.edit(content="⚙ Uploading...")
+                    await ctx.reply(file=discord.File(result))
+                    await msg.delete()
+                    os.remove(file)
+                    os.remove(result)
+            else:
+                logging.warning("No media found.")
+                await ctx.send("❌ No file found.")
+
+
     @bot.event
     async def on_ready():
         logging.info(f"Logged in as {bot.user.name}!")
@@ -210,26 +238,7 @@ if __name__ == '__main__':  # if i don't have this multiprocessing breaks idfk
         Parameters:
             video - any video format FFMPEG supports.
         """
-        logging.info("Getting image...")
-        file = await imagesearch(ctx)
-        if file:
-            logging.info("Processing image...")
-            msg = await ctx.send("⚙ Processing...")
-            await ctx.channel.trigger_typing()
-            result = await improcessing.mp4togif(file)
-            if result:
-                result = await improcessing.assurefilesize(result, ctx)
-                await ctx.channel.trigger_typing()
-                logging.info("Uploading image...")
-                await ctx.reply(file=discord.File(result))
-                await msg.delete()
-                os.remove(file)
-                os.remove(result)
-            else:
-                await ctx.send("❌ Detected file is not a valid video.")
-            logging.info("Complete!")
-        else:
-            await ctx.send("❌ No file found.")
+        await improcess(ctx, improcessing.mp4togif, ["VIDEO"])
 
 
     @bot.command()
@@ -240,26 +249,7 @@ if __name__ == '__main__':  # if i don't have this multiprocessing breaks idfk
         Parameters:
             gif - a gif file
         """
-        logging.info("Getting image...")
-        file = await imagesearch(ctx)
-        if file:
-            logging.info("Processing image...")
-            msg = await ctx.send("⚙ Processing...")
-            await ctx.channel.trigger_typing()
-            result = await improcessing.giftomp4(file)
-            if result:
-                result = await improcessing.assurefilesize(result, ctx)
-                await ctx.channel.trigger_typing()
-                logging.info("Uploading image...")
-                await ctx.reply(file=discord.File(result))
-                await msg.delete()
-                os.remove(file)
-                os.remove(result)
-            else:
-                await ctx.send("⚠ Detected file is not a valid gif.")
-            logging.info("Complete!")
-        else:
-            await ctx.send("❌ No file found.")
+        await improcess(ctx, improcessing.giftomp4, ["GIF"])
 
 
     @bot.command()
@@ -270,22 +260,7 @@ if __name__ == '__main__':  # if i don't have this multiprocessing breaks idfk
         Parameters:
             media - any valid media file.
         """
-        logging.info("Getting image...")
-        file = await imagesearch(ctx)
-        if file:
-            logging.info("Processing image...")
-            msg = await ctx.send("⚙ Processing...")
-            await ctx.channel.trigger_typing()
-            result = await improcessing.mediatopng(file)
-            result = await improcessing.assurefilesize(result, ctx)
-            await ctx.channel.trigger_typing()
-            logging.info("Uploading image...")
-            await ctx.reply(file=discord.File(result))
-            await msg.delete()
-            os.remove(file)
-            os.remove(result)
-        else:
-            await ctx.send("❌ No file found.")
+        await improcess(ctx, improcessing.mediatopng, ["VIDEO", "GIF", "IMAGE"])
 
 
     @bot.command(name="speed")
@@ -302,22 +277,7 @@ if __name__ == '__main__':  # if i don't have this multiprocessing breaks idfk
         if not 0.25 <= speed <= 10:
             await ctx.send("⚠ Speed must be between 0.25 and 10")
             return
-        logging.info("Getting image...")
-        file = await imagesearch(ctx)
-        if file:
-            logging.info("Processing image...")
-            msg = await ctx.send("⚙ Processing...")
-            await ctx.channel.trigger_typing()
-            result = await improcessing.speed(file, speed)
-            result = await improcessing.assurefilesize(result, ctx)
-            await ctx.channel.trigger_typing()
-            logging.info("Uploading image...")
-            await ctx.reply(file=discord.File(result))
-            await msg.delete()
-            os.remove(file)
-            os.remove(result)
-        else:
-            await ctx.send("❌ No file found.")
+        await improcess(ctx, improcessing.speed, ["VIDEO"], speed)
 
 
     @bot.command()
@@ -340,22 +300,7 @@ if __name__ == '__main__':  # if i don't have this multiprocessing breaks idfk
         if not 0.1 <= qa <= 2:
             await ctx.send("⚠ qa must be between 0.1 and 2.")
             return
-        logging.info("Getting image...")
-        file = await imagesearch(ctx)
-        if file:
-            logging.info("Processing image...")
-            msg = await ctx.send("⚙ Processing...")
-            await ctx.channel.trigger_typing()
-            result = await improcessing.quality(file, crf, qa)
-            result = await improcessing.assurefilesize(result, ctx)
-            await ctx.channel.trigger_typing()
-            logging.info("Uploading image...")
-            await ctx.reply(file=discord.File(result))
-            await msg.delete()
-            os.remove(file)
-            os.remove(result)
-        else:
-            await ctx.send("❌ No file found.")
+        await improcess(ctx, improcessing.quality, ["VIDEO", "GIF"], crf, qa)
 
 
     @bot.command(name="fps")
@@ -374,22 +319,7 @@ if __name__ == '__main__':  # if i don't have this multiprocessing breaks idfk
         if not 1 <= fps <= 60:
             await ctx.send("⚠ FPS must be between 1 and 60.")
             return
-        logging.info("Getting image...")
-        file = await imagesearch(ctx)
-        if file:
-            logging.info("Processing image...")
-            msg = await ctx.send("⚙ Processing...")
-            await ctx.channel.trigger_typing()
-            result = await improcessing.changefps(file, fps)
-            result = await improcessing.assurefilesize(result, ctx)
-            await ctx.channel.trigger_typing()
-            logging.info("Uploading image...")
-            await ctx.reply(file=discord.File(result))
-            await msg.delete()
-            os.remove(file)
-            os.remove(result)
-        else:
-            await ctx.send("❌ No file found.")
+        await improcess(ctx, improcessing.changefps, ["VIDEO", "GIF"], fps)
 
 
     @bot.command()
@@ -401,23 +331,7 @@ if __name__ == '__main__':  # if i don't have this multiprocessing breaks idfk
             media - any valid media file
             caption - the caption text
         """
-        logging.info("Getting image...")
-        file = await imagesearch(ctx)
-        if file:
-            logging.info("Processing image...")
-            msg = await ctx.send("⚙ Processing...")
-            await ctx.channel.trigger_typing()
-            result = await improcessing.handleanimated(file, caption, captionfunctions.imcaption)
-            result = await improcessing.assurefilesize(result, ctx)
-            await ctx.channel.trigger_typing()
-            logging.info("Uploading image...")
-            await ctx.reply(file=discord.File(result))
-            await msg.delete()
-            os.remove(file)
-            os.remove(result)
-            logging.info("Complete!")
-        else:
-            await ctx.send("❌ No file found.")
+        await improcess(ctx, captionfunctions.imcaption, ["VIDEO", "GIF", "IMAGE"], caption, handleanimated=True)
 
 
     @bot.command()
@@ -440,23 +354,8 @@ if __name__ == '__main__':  # if i don't have this multiprocessing breaks idfk
         if not 1 <= quality <= 95:
             await ctx.send("⚠ Quality must be between 1 and 95.")
             return
-        logging.info("Getting image...")
-        file = await imagesearch(ctx)
-        if file:
-            logging.info("Processing image...")
-            msg = await ctx.send("⚙ Processing...")
-            await ctx.channel.trigger_typing()
-            result = await improcessing.handleanimated(file, [strength, stretch, quality], captionfunctions.jpeg)
-            result = await improcessing.assurefilesize(result, ctx)
-            await ctx.channel.trigger_typing()
-            logging.info("Uploading image...")
-            await ctx.reply(file=discord.File(result))
-            await msg.delete()
-            os.remove(file)
-            os.remove(result)
-            logging.info("Complete!")
-        else:
-            await ctx.send("❌ No file found.")
+        await improcess(ctx, captionfunctions.jpeg, ["VIDEO", "GIF", "IMAGE"], [strength, stretch, quality],
+                        handleanimated=True)
 
 
     @bot.command()
@@ -466,59 +365,29 @@ if __name__ == '__main__':  # if i don't have this multiprocessing breaks idfk
 
         Parameters:
             media - any valid media file
-            caption - the caption texts. divide the top text from the bottom text with a comma.
+            caption - the caption texts. divide the top text from the bottom text with a | character.
         """
         caption = caption.split(",")
         if len(caption) == 1:
             caption.append("")
-        logging.info("Getting image...")
-        file = await imagesearch(ctx)
-        if file:
-            logging.info("Processing image...")
-            msg = await ctx.send("⚙ Processing...")
-            await ctx.channel.trigger_typing()
-            result = await improcessing.handleanimated(file, caption, captionfunctions.motivate)
-            result = await improcessing.assurefilesize(result, ctx)
-            await ctx.channel.trigger_typing()
-            logging.info("Uploading image...")
-            await ctx.reply(file=discord.File(result))
-            await msg.delete()
-            os.remove(file)
-            os.remove(result)
-            logging.info("Complete!")
-        else:
-            await ctx.send("❌ No file found.")
+        await improcess(ctx, captionfunctions.motivate, ["VIDEO", "GIF", "IMAGE"], caption,
+                        handleanimated=True)
 
 
     @bot.command()
-    async def meme(ctx, *, cap):
+    async def meme(ctx, *, caption):
         """
         Captions media in the style of top text + bottom text memes.
 
         Parameters:
             media - any valid media file
-            caption - the caption texts. divide the top text from the bottom text with a comma.
+            caption - the caption texts. divide the top text from the bottom text with a | character.
         """
-        cap = cap.split(",")
-        if len(cap) == 1:
-            cap.append("")
-        logging.info("Getting image...")
-        file = await imagesearch(ctx)
-        if file:
-            logging.info("Processing image...")
-            msg = await ctx.send("⚙ Processing...")
-            await ctx.channel.trigger_typing()
-            result = await improcessing.handleanimated(file, cap, captionfunctions.meme)
-            result = await improcessing.assurefilesize(result, ctx)
-            await ctx.channel.trigger_typing()
-            logging.info("Uploading image...")
-            await ctx.reply(file=discord.File(result))
-            await msg.delete()
-            os.remove(file)
-            os.remove(result)
-            logging.info("Complete!")
-        else:
-            await ctx.send("❌ No file found.")
+        caption = caption.split(",")
+        if len(caption) == 1:
+            caption.append("")
+        await improcess(ctx, captionfunctions.meme, ["VIDEO", "GIF", "IMAGE"], caption,
+                        handleanimated=True)
 
 
     @bot.command()
@@ -530,14 +399,14 @@ if __name__ == '__main__':  # if i don't have this multiprocessing breaks idfk
         Parameters:
             media - any valid media file
         """
-        file = await imagesearch(ctx)
-        if file:
-            await ctx.channel.trigger_typing()
-            result = await improcessing.ffprobe(file)
-            await ctx.reply(f"`{result[1]}` `{result[2]}`\n```{result[0]}```")
-            os.remove(file)
-        else:
-            await ctx.send("❌ No file found.")
+        async with ctx.channel.typing():
+            file = await imagesearch(ctx)
+            if file:
+                result = await improcessing.ffprobe(file)
+                await ctx.reply(f"`{result[1]}` `{result[2]}`\n```{result[0]}```")
+                os.remove(file)
+            else:
+                await ctx.send("❌ No file found.")
 
 
     @bot.command(hidden=True)
