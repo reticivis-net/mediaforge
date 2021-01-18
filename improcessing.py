@@ -125,7 +125,6 @@ async def assurefilesize(image: str, ctx: discord.ext.commands.Context):
         if size >= 8388119:
             logging.info("Image too big!")
             msg = await ctx.send(f"⚠ Resulting file too big! ({humanize.naturalsize(size)}) Downsizing result...")
-            await ctx.trigger_typing()
             image = await handleanimated(image, "", captionfunctions.halfsize)
             await msg.delete()
         if os.path.getsize(image) < 8388119:
@@ -146,11 +145,18 @@ def minimagesize(image, minsize):
         return image
 
 
-def imagetype(image):
+def mediatype(image):
+    """
+    Gets basic type of media
+    :param image: filename of media
+    :return: can be VIDEO, AUDIO, GIF, IMAGE or None.
+    """
     mime = magic.from_file(image, mime=True)
-    if "video" in mime:
+    if mime.startswith("video"):
         return "VIDEO"
-    elif "image" in mime:
+    elif mime.startswith("audio"):
+        return "AUDIO"
+    elif mime.startswith("image"):
         with Image.open(image) as im:  # TODO: add a try catch just in case PIL doesn't support something
             anim = getattr(im, "is_animated", False)
         if anim:
@@ -161,7 +167,7 @@ def imagetype(image):
 
 
 async def handleanimated(image: str, caption, capfunction: typing.Callable):
-    imty = imagetype(image)
+    imty = mediatype(image)
     logging.info(f"[improcessing] Detected type {imty}.")
     if imty is None:
         raise Exception(f"File {image} is invalid!")
@@ -258,7 +264,7 @@ async def speed(file, sp):
         await run_command("ffmpeg", "-i", file, "-filter_complex",
                           f"[0:v]setpts=PTS/{sp},fps={fps}[v]",
                           "-map", "[v]", "-t", str(duration / float(sp)), outname)
-    if imagetype(file) == "GIF":
+    if mediatype(file) == "GIF":
         outname = await mp4togif(outname)
     return outname
 
@@ -270,7 +276,7 @@ async def quality(file, crf, qa):
         await run_command("ffmpeg", "-i", file, "-crf", str(crf), "-c:a", "aac", "-q:a", str(qa), outname)
     else:
         await run_command("ffmpeg", "-i", file, "-crf", str(crf), outname)
-    if imagetype(file) == "GIF":
+    if mediatype(file) == "GIF":
         outname = await mp4togif(outname)
     return outname
 
@@ -278,6 +284,6 @@ async def quality(file, crf, qa):
 async def changefps(file, fps):
     outname = temp_file("mp4")
     await run_command("ffmpeg", "-i", file, "-filter:v", f"fps=fps={fps}", outname)
-    if imagetype(file) == "GIF":
+    if mediatype(file) == "GIF":
         outname = await mp4togif(outname)
     return outname

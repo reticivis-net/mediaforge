@@ -22,12 +22,11 @@ import humanize
 # TODO: end video with motivate freeze frame command
 # TODO: attach audio to video command
 # TODO: credits command
-# TODO: enforce image types better lol!
 if __name__ == '__main__':  # if i don't have this multiprocessing breaks idfk
     coloredlogs.install(level='INFO', fmt='[%(asctime)s] %(levelname)s %(message)s',
                         datefmt='%m/%d/%Y %I:%M:%S %p')
     logging.info(f"discord.py {discord.__version__}")
-    bot = commands.Bot(command_prefix='$', description='CaptionX')
+    bot = commands.Bot(command_prefix='$', description='MelMedia')
     # bot.remove_command('help')
     for f in glob.glob('temp/*'):
         os.remove(f)
@@ -87,15 +86,15 @@ if __name__ == '__main__':  # if i don't have this multiprocessing breaks idfk
                 tenor = json.loads(tenor)
                 if 'error' in tenor:
                     print(tenor['error'])
-                    await ctx.send(f":bangbang: Tenor Error! `{tenor['error']}`")
-                    return False
+                    await ctx.reply(f":bangbang: Tenor Error! `{tenor['error']}`")
+                    logging.error(f"Tenor Error! `{tenor['error']}`")
+                    return None
                 else:
-                    return await saveurl(tenor['results'][0]['media'][0]['mp4']['url'], "mp4")
-            elif m.embeds[0].type == "image" or m.embeds[0].type == "video":
-                return await saveurl(m.embeds[0].url)
-        elif len(m.attachments):
-            if m.attachments[0].width:
-                return await saveurl(m.attachments[0].url)
+                    return await saveurl(tenor['results'][0]['media'][0]['mp4']['url'], "mp4"), m
+            elif m.embeds[0].type in ["image", "video", "audio"]:
+                return await saveurl(m.embeds[0].url), m
+        if len(m.attachments):
+            return await saveurl(m.attachments[0].url), m
         return None
 
 
@@ -134,6 +133,7 @@ if __name__ == '__main__':  # if i don't have this multiprocessing breaks idfk
         return None
 
 
+    # currently only used for 1 command, might have future uses?
     async def tenorsearch(ctx, gif=False):
         if ctx.message.reference:
             m = ctx.message.reference.resolved
@@ -153,15 +153,15 @@ if __name__ == '__main__':  # if i don't have this multiprocessing breaks idfk
     async def improcess(ctx: discord.ext.commands.Context, func: callable, allowedtypes: list, *args,
                         handleanimated=False):
         async with ctx.channel.typing():
-            file = await imagesearch(ctx)
+            file, filemsg = await imagesearch(ctx)
             if file:
-                if (imtype := improcessing.imagetype(file)) not in allowedtypes:
-                    await ctx.send(f"❌ This command only accepts the following media types: {', '.join(allowedtypes)}")
-                    logging.warning(f"Image type {imtype} is not in {allowedtypes}")
+                if (imtype := improcessing.mediatype(file)) not in allowedtypes:
+                    await filemsg.reply(f"❌ Media type is {imtype}, this command only accepts: {', '.join(allowedtypes)}")
+                    logging.warning(f"Media type {imtype} is not in {allowedtypes}")
                     os.remove(file)
                 else:
                     logging.info("Processing...")
-                    msg = await ctx.send("⚙ Processing...")
+                    msg = await filemsg.reply("⚙ Processing...", mention_author=False)
                     if handleanimated:
                         result = await improcessing.handleanimated(file, *args, func)
                     else:
@@ -277,7 +277,7 @@ if __name__ == '__main__':  # if i don't have this multiprocessing breaks idfk
         if not 0.25 <= speed <= 10:
             await ctx.send("⚠ Speed must be between 0.25 and 10")
             return
-        await improcess(ctx, improcessing.speed, ["VIDEO"], speed)
+        await improcess(ctx, improcessing.speed, ["VIDEO", "GIF"], speed)
 
 
     @bot.command()
@@ -400,7 +400,7 @@ if __name__ == '__main__':  # if i don't have this multiprocessing breaks idfk
             media - any valid media file
         """
         async with ctx.channel.typing():
-            file = await imagesearch(ctx)
+            file, filemsg = await imagesearch(ctx)
             if file:
                 result = await improcessing.ffprobe(file)
                 await ctx.reply(f"`{result[1]}` `{result[2]}`\n```{result[0]}```")
@@ -437,23 +437,29 @@ if __name__ == '__main__':  # if i don't have this multiprocessing breaks idfk
 
 
     @bot.listen()
-    async def on_command_error(ctx, error):
-        if isinstance(error, discord.ext.commands.errors.CommandNotFound):
+    async def on_command_completion(ctx):
+        logging.info(f"Command {ctx.message.content} by @{ctx.message.author.name}#{ctx.message.author.discriminator} "
+                     f"is complete!")
+
+
+    @bot.listen()
+    async def on_command_error(ctx, commanderror):
+        if isinstance(commanderror, discord.ext.commands.errors.CommandNotFound):
             msg = ctx.message.content.replace("@", "\\@")
-            err = f"⁉ Command `{msg}` does not exist."
+            err = f"⁉ Command `{msg.split(' ')[0]}` does not exist."
             logging.warning(err)
-            await ctx.send(err)
-        elif isinstance(error, discord.ext.commands.errors.NotOwner):
+            await ctx.reply(err)
+        elif isinstance(commanderror, discord.ext.commands.errors.NotOwner):
             err = "❌ You are not authorized to use this command."
             logging.warning(err)
-            await ctx.send(err)
-        elif isinstance(error, discord.ext.commands.errors.CommandOnCooldown):
-            err = "⏱ " + str(error).replace("@", "\\@")
+            await ctx.reply(err)
+        elif isinstance(commanderror, discord.ext.commands.errors.CommandOnCooldown):
+            err = "⏱ " + str(commanderror).replace("@", "\\@")
             logging.warning(err)
-            await ctx.send(err)
+            await ctx.reply(err)
         else:
-            logging.error(error, exc_info=(type(error), error, error.__traceback__))
-            await ctx.send("‼ `" + str(error).replace("@", "\\@") + "`")
+            logging.error(commanderror, exc_info=(type(commanderror), commanderror, commanderror.__traceback__))
+            await ctx.reply("‼ `" + str(commanderror).replace("@", "\\@") + "`")
 
 
     with open('token.txt') as f:  # not on github for obvious reasons
