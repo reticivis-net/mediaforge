@@ -1,5 +1,3 @@
-import asyncio
-import functools
 import glob
 import json
 import logging
@@ -24,7 +22,7 @@ import humanize
 # TODO: end video with motivate freeze frame command
 # TODO: attach audio to video command
 # TODO: credits command
-if __name__ == '__main__':  # if i don't have this multiprocessing breaks idfk
+if __name__ == '__main__':  # if i don't have this multiprocessing breaks lol!
     coloredlogs.install(level='INFO', fmt='[%(asctime)s] %(levelname)s %(message)s',
                         datefmt='%m/%d/%Y %I:%M:%S %p')
     logging.info(f"discord.py {discord.__version__}")
@@ -219,7 +217,8 @@ if __name__ == '__main__':  # if i don't have this multiprocessing breaks idfk
         """
         Sends the GIF url for a tenor gif.
         By default, tenor gifs are interpreted as MP4 files due to their superior quality.
-        This command gets the gif straight from tenor, making it faster than $videotogif.
+        This command gets the gif straight from tenor, making it faster than $videotogif,
+        however, some tenor gifs can be lower fps/quality than the converted video.
 
         Parameters:
             gif - a valid tenor URL
@@ -349,6 +348,18 @@ if __name__ == '__main__':  # if i don't have this multiprocessing breaks idfk
 
 
     @bot.command()
+    async def twittercaption(ctx, *, caption):
+        """
+        Captions media in the style of a Twitter screenshot.
+
+        Parameters:
+            media - any valid media file
+            caption - the caption text
+        """
+        await improcess(ctx, captionfunctions.twittercap, ["VIDEO", "GIF", "IMAGE"], caption, handleanimated=True)
+
+
+    @bot.command()
     async def jpeg(ctx, strength: int = 30, stretch: int = 20, quality: int = 10):
         """
         Makes media into a low quality jpeg
@@ -473,8 +484,9 @@ if __name__ == '__main__':  # if i don't have this multiprocessing breaks idfk
 
     @bot.listen()
     async def on_command_completion(ctx):
-        logging.info(f"Command {ctx.message.content} by @{ctx.message.author.name}#{ctx.message.author.discriminator} "
-                     f"is complete!")
+        logging.info(
+            f"Command '{ctx.message.content}' by @{ctx.message.author.name}#{ctx.message.author.discriminator} "
+            f"is complete!")
 
 
     @bot.listen()

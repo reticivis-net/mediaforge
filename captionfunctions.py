@@ -5,7 +5,7 @@ import re
 import subprocess
 from PIL import Image
 import qtrenderer
-from improcessing import filetostring, temp_file, options
+from improcessing import filetostring, temp_file
 
 
 # stolen code https://stackoverflow.com/questions/6116978/how-to-replace-multiple-substrings-of-a-string
@@ -27,7 +27,7 @@ def esmcaption(image, caption, tosavename=None):
         "rendering/demoimage.png": image
     }
     torender = replaceall(filetostring("caption.html"), replacedict)
-    qtrenderer.html2png(torender, tosavename)
+    qtrenderer.processhtml2png(torender, tosavename)
     return tosavename
 
 
@@ -41,7 +41,7 @@ def motivate(image, caption, tosavename=None):
         "rendering/demoimage.png": image
     }
     torender = replaceall(filetostring("motivate.html"), replacedict)
-    qtrenderer.html2png(torender, tosavename)
+    qtrenderer.processhtml2png(torender, tosavename)
     return tosavename
 
 
@@ -55,7 +55,20 @@ def meme(image, caption, tosavename=None):
         "rendering/demoimage.png": image
     }
     torender = replaceall(filetostring("meme.html"), replacedict)
-    qtrenderer.html2png(torender, tosavename)
+    qtrenderer.processhtml2png(torender, tosavename)
+    return tosavename
+
+
+def twittercap(image, caption, tosavename=None):
+    if tosavename is None:
+        tosavename = temp_file("png")
+    logging.info(f"[improcessing] Rendering {image}...")
+    replacedict = {
+        "CaptionText1": caption,
+        "rendering/demoimage.png": image
+    }
+    torender = replaceall(filetostring("twittercaption.html"), replacedict)
+    qtrenderer.processhtml2png(torender, tosavename)
     return tosavename
 
 

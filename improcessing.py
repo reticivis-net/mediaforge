@@ -5,24 +5,21 @@ import logging
 import os
 import random
 import string
-import subprocess
+import sys
 import discord.ext
-import typing
-from PIL import Image
-from winmagic import magic
+from PIL import Image, UnidentifiedImageError
 from multiprocessing import Pool
 import captionfunctions
 import humanize
+# from multiprocessing import log_to_stderr
+# log_to_stderr(logging.DEBUG)
 
-options = {
-    "enable-local-file-access": None,
-    "format": "png",
-    "transparent": None,
-    "width": 1,
-    "debug-javascript": None
-    # "quiet": None
-}
+if sys.platform == "win32":  # this hopefully wont cause any problems :>
+    from winmagic import magic
+else:
+    import magic
 
+POOLWORKERS = 20
 
 def filetostring(f):
     with open(f, 'r') as file:
@@ -159,12 +156,15 @@ def mediatype(image):
     elif mime.startswith("audio"):
         return "AUDIO"
     elif mime.startswith("image"):
-        with Image.open(image) as im:  # TODO: add a try catch just in case PIL doesn't support something
-            anim = getattr(im, "is_animated", False)
-        if anim:
-            return "GIF"  # gifs dont have to be animated but if they aren't its easier to treat them like pngs
-        else:
-            return "IMAGE"
+        try:
+            with Image.open(image) as im:
+                anim = getattr(im, "is_animated", False)
+            if anim:
+                return "GIF"  # gifs dont have to be animated but if they aren't its easier to treat them like pngs
+            else:
+                return "IMAGE"
+        except UnidentifiedImageError:
+            return None
     return None
 
 
@@ -197,12 +197,12 @@ async def handleanimated(image: str, caption, capfunction: callable):
         frames, name = await ffmpegsplit(image)
         audio = await splitaudio(image)
         fps = await get_frame_rate(image)
-        logging.info(f"[improcessing] Processing {len(frames)} frames with {min(len(frames), 60)} processes...")
+        logging.info(f"[improcessing] Processing {len(frames)} frames with {min(len(frames), POOLWORKERS)} processes...")
         capargs = []
         for i, frame in enumerate(frames):
             capargs.append((frame, caption, frame.replace('.png', '_rendered.png')))
         # to keep from blocking discord loop
-        await unblockpool(min(len(frames), 16), capfunction, capargs)  # cap processes
+        await unblockpool(min(len(frames), POOLWORKERS), capfunction, capargs)  # cap processes
         logging.info(f"[improcessing] Joining {len(frames)} frames...")
         if imty == "GIF":
             outname = temp_file("gif")

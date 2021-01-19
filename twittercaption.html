@@ -7,14 +7,15 @@
     <script src="rendering/twemoji/twemoji.js"></script>
 
     <style>
-        * {
-            background: black;
+        @font-face {
+            font-family: helveticaneue;
+            src: url(rendering/fonts/HelveticaNeue.otf);
         }
 
         body {
             font-size: 0;
-            background: black;
-            text-align: center;
+            background: white;
+            text-align: left;
             margin: 0;
         }
 
@@ -26,30 +27,21 @@
         }
 
         .img {
-            border: 0.833vw solid white;
-            padding: 0.5vw;
+            padding: 0.1vw;
             object-fit: fill;
             min-width: initial;
-            margin-bottom: 2.5vw;
+            border-radius: 4vw;
+            margin-top: 1vw;
         }
 
         .wrap {
-            margin: 5vw;
+            margin: 2vw;
             display: inline-block;
         }
 
-        .caption, .captionsmall {
-            font-family: "Times New Roman", sans-serif;
-            color: white;
-            font-size: 13.3vw;
-        }
-
-        .captionsmall {
-            font-size: 6.7vw;
-            font-family: "Times New Roman", sans-serif;
-            color: white;
-            margin-bottom: 20px;
-
+        .caption {
+            font-family: helveticaneue, sans-serif;
+            font-size: 8vw;
         }
 
 
@@ -57,9 +49,8 @@
 </head>
 <body>
 <div class="wrap">
-    <img class=img src="rendering/demoimage.png" alt="An error has occurred loading your image.">
     <div class="caption">CaptionText1</div>
-    <div class="captionsmall">CaptionText2</div>
+    <img class=img src="rendering/demoimage.png" alt="An error has occurred loading your image.">
 </div>
 </body>
 <script>twemoji.parse(document.body);</script>
