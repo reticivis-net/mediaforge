@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <base href='./'>
+
     <meta charset="UTF-8">
     <title>&caption</title>
     <script src="rendering/twemoji/twemoji.js"></script>
@@ -24,6 +24,7 @@
             outline: 0;
             font-size: 100%;
             vertical-align: baseline;
+            background: transparent;
         }
 
         body {
@@ -36,7 +37,7 @@
             font-family: caption, /*twemoji,*/ sans-serif;
             text-align: center;
             word-wrap: break-word;
-            font-size: calc((100vw / 13) * (16 / 12));
+            font-size: calc(100vw / 13 * (16 / 12));
             padding: calc((100vw / 2) / 13);
         }
 
@@ -60,7 +61,9 @@
     </style>
 </head>
 <body>
-<div class="caption"><span>CaptionText</span></div>
+
+<div class="caption"><span>CaptionText</span>
+</div>
 <img class="img" src="rendering/demoimage.png" alt="An error has occurred loading your image.">
 </body>
 <script>twemoji.parse(document.body);</script>

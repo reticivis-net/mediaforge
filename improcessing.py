@@ -1,4 +1,5 @@
 import asyncio
+import functools
 import glob
 import logging
 import os
@@ -18,7 +19,8 @@ options = {
     "format": "png",
     "transparent": None,
     "width": 1,
-    "quiet": None
+    "debug-javascript": None
+    # "quiet": None
 }
 
 
@@ -166,7 +168,24 @@ def mediatype(image):
     return None
 
 
-async def handleanimated(image: str, caption, capfunction: typing.Callable):
+def run_in_executor(f):  # wrapper to prevent intense non-async functions from blocking event loop
+    @functools.wraps(f)
+    def inner(*args, **kwargs):
+        loop = asyncio.get_running_loop()
+        return loop.run_in_executor(None, lambda: f(*args, **kwargs))
+
+    return inner
+
+
+@run_in_executor
+def unblockpool(workers, *args):
+    pool = Pool(workers)  # cap processes
+    pool.starmap_async(*args)
+    pool.close()
+    pool.join()
+
+
+async def handleanimated(image: str, caption, capfunction: callable):
     imty = mediatype(image)
     logging.info(f"[improcessing] Detected type {imty}.")
     if imty is None:
@@ -182,10 +201,8 @@ async def handleanimated(image: str, caption, capfunction: typing.Callable):
         capargs = []
         for i, frame in enumerate(frames):
             capargs.append((frame, caption, frame.replace('.png', '_rendered.png')))
-        pool = Pool(min(len(frames), 60))  # cap processes
-        pool.starmap_async(capfunction, capargs)
-        pool.close()
-        pool.join()
+        # to keep from blocking discord loop
+        await unblockpool(min(len(frames), 16), capfunction, capargs)  # cap processes
         logging.info(f"[improcessing] Joining {len(frames)} frames...")
         if imty == "GIF":
             outname = temp_file("gif")
@@ -264,6 +281,18 @@ async def speed(file, sp):
         await run_command("ffmpeg", "-i", file, "-filter_complex",
                           f"[0:v]setpts=PTS/{sp},fps={fps}[v]",
                           "-map", "[v]", "-t", str(duration / float(sp)), outname)
+    if mediatype(file) == "GIF":
+        outname = await mp4togif(outname)
+    return outname
+
+
+async def reverse(file):
+    outname = temp_file("mp4")
+    ifaudio = await run_command("ffprobe", "-i", file, "-show_streams", "-select_streams", "a", "-loglevel", "error")
+    if ifaudio:
+        await run_command("ffmpeg", "-i", file, "-vf", "reverse", "-af", "areverse", outname)
+    else:
+        await run_command("ffmpeg", "-i", file, "-vf", "reverse", outname)
     if mediatype(file) == "GIF":
         outname = await mp4togif(outname)
     return outname
