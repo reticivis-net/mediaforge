@@ -1,14 +1,10 @@
-import contextlib
 import io
 import logging
-import os
 import random
 import re
 import subprocess
-import sys
 from PIL import Image
-
-import imgkit  # TODO: maybe at some point get a better html renderer...
+import qtrenderer
 from improcessing import filetostring, temp_file, options
 
 
@@ -22,55 +18,45 @@ def replaceall(text, rep):
     return text
 
 
-def imcaption(image, caption, tosavename=None):
+def esmcaption(image, caption, tosavename=None):
+    if tosavename is None:
+        tosavename = temp_file("png")
     logging.info(f"[improcessing] Rendering {image}...")
-    with Image.open(image) as im:
-        imagewidth = im.size[0]  # seems ineffecient but apparently fast?
     replacedict = {
-        "calc((100vw / 13) * (16 / 12))": f"{(imagewidth / 13)}pt",
-        "calc((100vw / 2) / 13)": f"{(imagewidth / 2) / 13}px",
-        "<base href='./'>": f"<base href='file://{'/' if sys.platform == 'win32' else ''}{os.path.abspath('rendering')}'> ",
         "CaptionText": caption,
         "rendering/demoimage.png": image
     }
     torender = replaceall(filetostring("caption.html"), replacedict)
-    rendered = imgkitstring(torender, tosavename)
-    return rendered
+    qtrenderer.html2png(torender, tosavename)
+    return tosavename
 
 
 def motivate(image, caption, tosavename=None):
+    if tosavename is None:
+        tosavename = temp_file("png")
     logging.info(f"[improcessing] Rendering {image}...")
-
-    with Image.open(image) as im:
-        imagewidth = im.size[0] * 1.1 + 16  # weird adding is to estimate final size based on styling
     replacedict = {
-        "margin: 30px;": f"margin: {imagewidth * 0.05}px;",
-        "font-size: 80px;": f"font-size: {imagewidth * 0.133}px;",
-        "font-size: 40px;": f"font-size: {imagewidth * 0.067}px;",
-        "<base href='./'>": f"<base href='file://{'/' if sys.platform == 'win32' else ''}{os.path.abspath('rendering')}'> ",
         "CaptionText1": caption[0],
         "CaptionText2": caption[1],
         "rendering/demoimage.png": image
     }
     torender = replaceall(filetostring("motivate.html"), replacedict)
-    rendered = imgkitstring(torender, tosavename)
-    return rendered
+    qtrenderer.html2png(torender, tosavename)
+    return tosavename
 
 
 def meme(image, caption, tosavename=None):
+    if tosavename is None:
+        tosavename = temp_file("png")
     logging.info(f"[improcessing] Rendering {image}...")
-    with Image.open(image) as im:
-        imagewidth = im.size[0]
     replacedict = {
-        "font-size: 10vw;": f"font-size: {imagewidth / 10}px;",
-        "<base href='./'>": f"<base href='file://{'/' if sys.platform == 'win32' else ''}{os.path.abspath('rendering')}'> ",
         "CaptionText1": caption[0],
         "CaptionText2": caption[1],
         "rendering/demoimage.png": image
     }
     torender = replaceall(filetostring("meme.html"), replacedict)
-    rendered = imgkitstring(torender, tosavename)
-    return rendered
+    qtrenderer.html2png(torender, tosavename)
+    return tosavename
 
 
 def halfsize(image, caption, tosavename=None):  # caption arg kept here for compatibility with handleanimated()
@@ -105,10 +91,3 @@ def jpeg(image, params: list, tosavename=None):
     im = im.resize(size)
     im.save(name)
     return name
-
-
-def imgkitstring(torender, tosavename=None):
-    if tosavename is None:
-        tosavename = temp_file("png")
-    imgkit.from_string(torender, tosavename, options=options)
-    return tosavename

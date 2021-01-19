@@ -1,3 +1,5 @@
+import asyncio
+import functools
 import glob
 import json
 import logging
@@ -156,7 +158,8 @@ if __name__ == '__main__':  # if i don't have this multiprocessing breaks idfk
             file, filemsg = await imagesearch(ctx)
             if file:
                 if (imtype := improcessing.mediatype(file)) not in allowedtypes:
-                    await filemsg.reply(f"❌ Media type is {imtype}, this command only accepts: {', '.join(allowedtypes)}")
+                    await filemsg.reply(
+                        f"❌ Media type is {imtype}, this command only accepts: {', '.join(allowedtypes)}")
                     logging.warning(f"Media type {imtype} is not in {allowedtypes}")
                     os.remove(file)
                 else:
@@ -212,7 +215,7 @@ if __name__ == '__main__':  # if i don't have this multiprocessing breaks idfk
 
 
     @bot.command()
-    async def tenorgif(ctx, *, gif=""):
+    async def tenorgif(ctx):
         """
         Sends the GIF url for a tenor gif.
         By default, tenor gifs are interpreted as MP4 files due to their superior quality.
@@ -281,6 +284,17 @@ if __name__ == '__main__':  # if i don't have this multiprocessing breaks idfk
 
 
     @bot.command()
+    async def reverse(ctx, ):
+        """
+        Reverses media.
+
+        Parameters:
+            media - any valid media file.
+        """
+        await improcess(ctx, improcessing.reverse, ["VIDEO", "GIF"])
+
+
+    @bot.command()
     async def compressv(ctx, crf: float = 51, qa: float = 0.2):
         """
         Makes videos terrible quality.
@@ -331,7 +345,7 @@ if __name__ == '__main__':  # if i don't have this multiprocessing breaks idfk
             media - any valid media file
             caption - the caption text
         """
-        await improcess(ctx, captionfunctions.imcaption, ["VIDEO", "GIF", "IMAGE"], caption, handleanimated=True)
+        await improcess(ctx, captionfunctions.esmcaption, ["VIDEO", "GIF", "IMAGE"], caption, handleanimated=True)
 
 
     @bot.command()
@@ -367,7 +381,7 @@ if __name__ == '__main__':  # if i don't have this multiprocessing breaks idfk
             media - any valid media file
             caption - the caption texts. divide the top text from the bottom text with a | character.
         """
-        caption = caption.split(",")
+        caption = caption.split("|")
         if len(caption) == 1:
             caption.append("")
         await improcess(ctx, captionfunctions.motivate, ["VIDEO", "GIF", "IMAGE"], caption,
@@ -409,6 +423,23 @@ if __name__ == '__main__':  # if i don't have this multiprocessing breaks idfk
                 await ctx.send("❌ No file found.")
 
 
+    @bot.command()
+    @commands.cooldown(1, 60 * 60, commands.BucketType.user)
+    async def feedback(ctx, *, msg):
+        """
+        Give feedback for the bot.
+        This command DMs the owner of the bot. You can only use this once per hour.
+        This command will be soon substituted with a github repo.
+
+        Parameters:
+            msg - the message to send. will not send any attachments.
+        """
+        app = await bot.application_info()
+        await app.owner.send(f"User <@{ctx.author.id}> (@{ctx.author.name}#{ctx.author.discriminator}) says:"
+                             f"\n```{msg}```")
+        await ctx.reply("Sent feedback!")
+
+
     @bot.command(hidden=True)
     @commands.is_owner()
     async def say(ctx, *, msg):
@@ -431,9 +462,13 @@ if __name__ == '__main__':  # if i don't have this multiprocessing breaks idfk
 
     @bot.listen()
     async def on_command(ctx):
-        logging.info(
-            f"@{ctx.message.author.name}#{ctx.message.author.discriminator} ({ctx.message.author.display_name}) "
-            f"ran '{ctx.message.content}' in channel #{ctx.channel.name} in server {ctx.guild}")
+        if isinstance(ctx.channel, discord.DMChannel):
+            logging.info(
+                f"@{ctx.message.author.name}#{ctx.message.author.discriminator} ran '{ctx.message.content}' in DMs")
+        else:
+            logging.info(
+                f"@{ctx.message.author.name}#{ctx.message.author.discriminator} ({ctx.message.author.display_name}) "
+                f"ran '{ctx.message.content}' in channel #{ctx.channel.name} in server {ctx.guild}")
 
 
     @bot.listen()
