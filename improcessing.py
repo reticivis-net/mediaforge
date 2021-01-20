@@ -11,9 +11,6 @@ from PIL import Image, UnidentifiedImageError
 from multiprocessing import Pool
 import captionfunctions
 import humanize
-import urllib3
-
-http = urllib3.PoolManager(num_pools=50)
 # from multiprocessing import log_to_stderr
 # log_to_stderr(logging.DEBUG)
 
