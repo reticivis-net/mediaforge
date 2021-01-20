@@ -14,7 +14,6 @@ import aiohttp
 import aiofiles
 import humanize
 
-# TODO: twitter style caption
 # TODO: custom style caption
 # TODO: better help command
 # TODO: stitch media command
@@ -23,13 +22,16 @@ import humanize
 # TODO: attach audio to video command
 # TODO: https://github.com/aechaechaech/Jerma-Imposter-Message-Generator
 if __name__ == '__main__':  # if i don't have this multiprocessing breaks lol!
+    # https://coloredlogs.readthedocs.io/en/latest/api.html#id28
     field_styles = {
         'levelname': {'bold': True, 'color': 'blue'},
-        'asctime': {'color': 'green'},
+        'asctime': {'color': 4},
         'filename': {'color': 6},
         'funcName': {'color': 5},
         'lineno': {'color': 13}
     }
+    logging.addLevelName(25, "NOTICE")
+    logging.addLevelName(35, "SUCCESS")
     coloredlogs.install(level='INFO', fmt='[%(asctime)s] [%(filename)s:%(funcName)s:%(lineno)d] '
                                           '%(levelname)s %(message)s',
                         datefmt='%m/%d/%Y %I:%M:%S %p', field_styles=field_styles)
@@ -40,6 +42,14 @@ if __name__ == '__main__':  # if i don't have this multiprocessing breaks lol!
         os.remove(f)
     with open('tenorkey.txt') as f:  # not on github for obvious reasons
         tenorkey = f.read()
+
+
+    @bot.event
+    async def on_ready():
+        logging.log(35, f"Logged in as {bot.user.name}!")
+        game = discord.Activity(name=f"with your files",
+                                type=discord.ActivityType.playing)
+        await bot.change_presence(activity=game)
 
 
     def get_random_string(length):
@@ -187,19 +197,12 @@ if __name__ == '__main__':  # if i don't have this multiprocessing breaks lol!
                 await ctx.send("❌ No file found.")
 
 
-    @bot.event
-    async def on_ready():
-        logging.info(f"Logged in as {bot.user.name}!")
-        game = discord.Activity(name=f"with your files",
-                                type=discord.ActivityType.playing)
-        await bot.change_presence(activity=game)
-
-
     @bot.command()
     async def attributions(ctx):
         """Sends a list of attributions for libraries and programs this bot uses."""
         with open("attributions.txt", "r") as f:
             await ctx.send(f.read())
+
 
     @bot.command()
     async def emojiurl(ctx, *, msg):
@@ -475,8 +478,8 @@ if __name__ == '__main__':  # if i don't have this multiprocessing breaks lol!
 
     @bot.command(hidden=True)
     @commands.is_owner()
-    async def error(ctx, *, msg):
-        await ctx.send("run comand with no args to make error lol!")
+    async def error(ctx):
+        raise Exception("Exception raised by $error command")
 
 
     @bot.command(hidden=True)
@@ -489,19 +492,21 @@ if __name__ == '__main__':  # if i don't have this multiprocessing breaks lol!
     @bot.listen()
     async def on_command(ctx):
         if isinstance(ctx.channel, discord.DMChannel):
-            logging.info(
-                f"@{ctx.message.author.name}#{ctx.message.author.discriminator} ran '{ctx.message.content}' in DMs")
+            logging.log(25,
+                        f"@{ctx.message.author.name}#{ctx.message.author.discriminator} ran '{ctx.message.content}' in "
+                        f"DMs")
         else:
-            logging.info(
-                f"@{ctx.message.author.name}#{ctx.message.author.discriminator} ({ctx.message.author.display_name}) "
-                f"ran '{ctx.message.content}' in channel #{ctx.channel.name} in server {ctx.guild}")
+            logging.log(25,
+                        f"@{ctx.message.author.name}#{ctx.message.author.discriminator}"
+                        f" ({ctx.message.author.display_name}) ran '{ctx.message.content}' in channel "
+                        f"#{ctx.channel.name} in server {ctx.guild}")
 
 
     @bot.listen()
     async def on_command_completion(ctx):
-        logging.info(
-            f"Command '{ctx.message.content}' by @{ctx.message.author.name}#{ctx.message.author.discriminator} "
-            f"is complete!")
+        logging.log(35,
+                    f"Command '{ctx.message.content}' by @{ctx.message.author.name}#{ctx.message.author.discriminator} "
+                    f"is complete!")
 
 
     @bot.listen()
@@ -517,6 +522,10 @@ if __name__ == '__main__':  # if i don't have this multiprocessing breaks lol!
             await ctx.reply(err)
         elif isinstance(commanderror, discord.ext.commands.errors.CommandOnCooldown):
             err = "⏱ " + str(commanderror).replace("@", "\\@")
+            logging.warning(err)
+            await ctx.reply(err)
+        elif isinstance(commanderror, discord.ext.commands.errors.MissingRequiredArgument):
+            err = "❓ " + str(commanderror).replace("@", "\\@")
             logging.warning(err)
             await ctx.reply(err)
         else:

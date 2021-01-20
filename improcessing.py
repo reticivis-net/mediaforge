@@ -8,7 +8,7 @@ import string
 import sys
 import discord.ext
 from PIL import Image, UnidentifiedImageError
-from multiprocessing import Pool
+# from multiprocessing import Pool
 import captionfunctions
 import humanize
 # from multiprocessing import log_to_stderr
@@ -19,7 +19,7 @@ if sys.platform == "win32":  # this hopefully wont cause any problems :>
 else:
     import magic
 
-POOLWORKERS = 20
+# POOLWORKERS = 20
 
 
 def filetostring(f):
@@ -181,12 +181,12 @@ def run_in_executor(f):  # wrapper to prevent intense non-async functions from b
 renderlock = asyncio.Lock()
 
 
-@run_in_executor
-def unblockpool(workers, *args):
-    pool = Pool(workers)  # cap processes
-    pool.starmap_async(*args)
-    pool.close()
-    pool.join()
+# @run_in_executor
+# def unblockpool(workers, *args):
+#     pool = Pool(workers)  # cap processes
+#     pool.starmap_async(*args)
+#     pool.close()
+#     pool.join()
 
 
 @run_in_executor
