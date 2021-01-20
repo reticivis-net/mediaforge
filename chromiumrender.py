@@ -1,0 +1,90 @@
+import json
+import os
+import random
+import string
+import sys
+
+from selenium import webdriver
+
+
+def send(driver, cmd, params=None):
+    if params is None:
+        params = {}
+    resource = "/session/%s/chromium/send_command_and_get_result" % driver.session_id
+    url = driver.command_executor._url + resource
+    body = json.dumps({'cmd': cmd, 'params': params})
+    response = driver.command_executor._request('POST', url, body)
+    # if response['status']: raise Exception(response.get('value'))
+    return response.get('value')
+
+
+def get_random_string(length):
+    return ''.join(random.choice(string.ascii_letters) for _ in range(length))
+
+
+def temp_file(extension="png"):
+    while True:
+        name = f"temp/{get_random_string(8)}.{extension}"
+        if not os.path.exists(name):
+            return name
+
+
+def loadhtml(driver, html):
+    base = "file:///" + os.getcwd().replace("\\", "/")
+    # html = html.replace("<base href='./'>", f"<base href='{base}/'>")
+    html = f"<base href='{base}/'>" + html
+    file = temp_file("html")
+    with open(file, "w+") as f:
+        f.write(html)
+    driver.get("file:///" + os.path.abspath(file).replace("\\", "/"))
+    return file
+    # print(json.dumps(html))
+    # print(html)
+    # html_bs64 = base64.b64encode(html.encode('utf-8')).decode()
+    # driver.get("data:text/html;base64," + html_bs64)
+
+
+opts = webdriver.ChromeOptions()
+opts.headless = True
+opts.add_experimental_option('excludeSwitches', ['enable-logging'])
+opts.add_argument('--no-proxy-server')
+opts.add_argument("--window-size=0,0")
+opts.add_argument("--hide-scrollbars")
+opts.add_argument("--headless")
+opts.add_argument("--disable-web-security")
+opts.add_argument("--allow-file-access-from-files")
+opts.add_argument("--allow-file-access-from-file")
+opts.add_argument("--allow-file-access")
+opts.add_argument("--disable-extensions")
+# https://chromedriver.storage.googleapis.com/index.html?path=87.0.4280.88/
+if sys.platform == "win32":
+    driver = webdriver.Chrome("chromedriver87.exe", options=opts)
+else:
+    driver = webdriver.Chrome("chromedriver87", options=opts)
+
+
+def html2png(html, png):
+    driver.set_window_size(1, 1)
+    tempfile = loadhtml(driver, html)
+    func = """
+            function outerHeight(element) {
+        const height = element.offsetHeight,
+            style = window.getComputedStyle(element)
+
+        return ['top', 'bottom']
+            .map(function (side) {
+                return parseInt(style["margin-"+side]);
+            })
+            .reduce(function (total, side) {
+                return total + side;
+            }, height)
+    }"""
+    size = driver.execute_script(f"{func};return [document.documentElement.scrollWidth, outerHeight(document.body)];")
+    driver.set_window_size(size[0], size[1])
+    size = driver.execute_script(f"{func};return [document.documentElement.scrollWidth, outerHeight(document.body)];")
+    driver.set_window_size(size[0], size[1])
+    send(driver, "Emulation.setDefaultBackgroundColorOverride", {'color': {'r': 0, 'g': 0, 'b': 0, 'a': 0}})
+    driver.get_screenshot_as_file(png)
+    os.remove(tempfile)
+
+# html2png("<p>test</p>", "test.png")

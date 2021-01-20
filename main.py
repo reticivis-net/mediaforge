@@ -23,8 +23,16 @@ import humanize
 # TODO: attach audio to video command
 # TODO: credits command
 if __name__ == '__main__':  # if i don't have this multiprocessing breaks lol!
-    coloredlogs.install(level='INFO', fmt='[%(asctime)s] %(levelname)s %(message)s',
-                        datefmt='%m/%d/%Y %I:%M:%S %p')
+    field_styles = {
+        'levelname': {'bold': True, 'color': 'blue'},
+        'asctime': {'color': 'green'},
+        'filename': {'color': 6},
+        'funcName': {'color': 5},
+        'lineno': {'color': 13}
+    }
+    coloredlogs.install(level='INFO', fmt='[%(asctime)s] [%(filename)s:%(funcName)s:%(lineno)d] '
+                                          '%(levelname)s %(message)s',
+                        datefmt='%m/%d/%Y %I:%M:%S %p', field_styles=field_styles)
     logging.info(f"discord.py {discord.__version__}")
     bot = commands.Bot(command_prefix='$', description='MelMedia')
     # bot.remove_command('help')
@@ -35,7 +43,7 @@ if __name__ == '__main__':  # if i don't have this multiprocessing breaks lol!
 
 
     def get_random_string(length):
-        return ''.join(random.choice(string.ascii_letters) for i in range(length))
+        return ''.join(random.choice(string.ascii_letters) for _ in range(length))
 
 
     async def fetch(url):
@@ -367,7 +375,8 @@ if __name__ == '__main__':  # if i don't have this multiprocessing breaks lol!
         Parameters:
             media - any valid media file
             strength - amount of times to jpegify image. must be between 1 and 100. defaults to 30.
-            stretch - randomly stretch the image by this number on each jpegification. can cause strange effects on videos. must be between 0 and 40. defaults to 20.
+            stretch - randomly stretch the image by this number on each jpegification.
+            can cause strange effects on videos. must be between 0 and 40. defaults to 20.
             quality - quality of JPEG compression. must be between 1 and 95. defaults to 10.
         """
         if not 0 < strength <= 100:
