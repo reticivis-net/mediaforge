@@ -7,6 +7,7 @@ FFmpeg - <https://ffmpeg.org/> - handles most conversion and video processing
 Pillow - <https://python-pillow.org/> - resizes images
 python-magic - <https://github.com/ahupp/python-magic> - detects filetypes
 PyCharm - <https://www.jetbrains.com/pycharm/> - used for development
+<https://github.com/aechaechaech/Jerma-Imposter-Message-Generator> - $jermatext uses a modified version of this code.
 
 Honorable Mentions
 wkhtmltoimage - <https://wkhtmltopdf.org/> - formerly used to render captions

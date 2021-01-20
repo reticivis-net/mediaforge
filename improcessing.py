@@ -11,6 +11,7 @@ from PIL import Image, UnidentifiedImageError
 # from multiprocessing import Pool
 import captionfunctions
 import humanize
+
 # from multiprocessing import log_to_stderr
 # log_to_stderr(logging.DEBUG)
 
@@ -19,7 +20,7 @@ if sys.platform == "win32":  # this hopefully wont cause any problems :>
 else:
     import magic
 
-# POOLWORKERS = 20
+MAXFRAMES = 250  # to prevent gigantic mp4s from clogging stuff
 
 
 def filetostring(f):
@@ -47,16 +48,16 @@ async def run_command(*args):
     )
 
     # Status
-    logging.info(f"PID {process.pid} Started: {args}")
+    logging.log(21, f"PID {process.pid} Started: {args}")
 
     # Wait for the subprocess to finish
     stdout, stderr = await process.communicate()
 
     # Progress
     if process.returncode == 0:
-        logging.info(
-            f"PID {process.pid} Done.",
-        )
+        logging.log(21,
+                    f"PID {process.pid} Done.",
+                    )
     else:
         logging.error(
             f"PID {process.pid} Failed: {args} result: {stderr.decode().strip()}",
@@ -70,7 +71,7 @@ async def run_command(*args):
 
 # https://askubuntu.com/questions/110264/how-to-find-frames-per-second-of-any-video-file
 async def get_frame_rate(filename):
-    logging.info("[improcessing] Getting FPS...")
+    logging.info("Getting FPS...")
     out = await run_command("ffprobe", filename, "-v", "0", "-select_streams", "v", "-print_format", "flat",
                             "-show_entries", "stream=r_frame_rate")
     rate = out.split('=')[1].strip()[1:-1].split('/')
@@ -83,14 +84,14 @@ async def get_frame_rate(filename):
 
 # https://superuser.com/questions/650291/how-to-get-video-duration-in-seconds
 async def get_duration(filename):
-    logging.info("[improcessing] Getting FPS...")
+    logging.info("Getting FPS...")
     out = await run_command("ffprobe", "-v", "error", "-show_entries", "format=duration", "-of",
                             "default=noprint_wrappers=1:nokey=1", filename)
     return float(out)
 
 
 async def ffmpegsplit(image):
-    logging.info("[improcessing] Splitting frames...")
+    logging.info("Splitting frames...")
     await run_command("ffmpeg", "-i", image, "-vsync", "1", "-vf", "scale='max(200,iw)':-1",
                       f"{image.split('.')[0]}%09d.png")
     files = glob.glob(f"{image.split('.')[0]}*.png")
@@ -101,12 +102,12 @@ async def ffmpegsplit(image):
 async def splitaudio(video):
     ifaudio = await run_command("ffprobe", "-i", video, "-show_streams", "-select_streams", "a", "-loglevel", "error")
     if ifaudio:
-        logging.info("[improcessing] Splitting audio...")
+        logging.info("Splitting audio...")
         name = temp_file("aac")
         await run_command("ffmpeg", "-hide_banner", "-i", video, "-vn", "-acodec", "copy", name)
         return name
     else:
-        logging.info("[improcessing] No audio detected.")
+        logging.info("No audio detected.")
         return False
 
 
@@ -194,7 +195,7 @@ def run_in_exec(func, *args, **kwargs):
     func(*args, **kwargs)
 
 
-async def handleanimated(image: str, caption, capfunction: callable):
+async def handleanimated(image: str, caption, capfunction: callable, ctx: discord.ext.commands.Context):
     imty = mediatype(image)
     logging.info(f" Detected type {imty}.")
     if imty is None:
@@ -211,6 +212,10 @@ async def handleanimated(image: str, caption, capfunction: callable):
         fps = await get_frame_rate(image)
         # logging.info(
         #     f"Processing {len(frames)} frames with {min(len(frames), POOLWORKERS)} processes...")
+        if len(frames) > MAXFRAMES:
+            await ctx.reply(f"⚠ Input file has {len(frames)} frames, maximum allowed is {MAXFRAMES}.")
+            logging.warning(f"⚠ Input file has {len(frames)} frames, maximum allowed is {MAXFRAMES}.")
+            return
         logging.info(f"Processing {len(frames)} frames...")
         capargs = []
         for i, frame in enumerate(frames):
