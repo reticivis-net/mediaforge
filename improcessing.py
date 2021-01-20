@@ -8,7 +8,6 @@ import string
 import sys
 import discord.ext
 from PIL import Image, UnidentifiedImageError
-# from multiprocessing import Pool
 import captionfunctions
 import humanize
 
