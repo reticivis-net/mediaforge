@@ -4,7 +4,7 @@ import random
 import re
 import subprocess
 from PIL import Image
-import qtrenderer
+import chromiumrender
 from improcessing import filetostring, temp_file
 
 
@@ -21,59 +21,58 @@ def replaceall(text, rep):
 def esmcaption(image, caption, tosavename=None):
     if tosavename is None:
         tosavename = temp_file("png")
-    logging.info(f"[improcessing] Rendering {image}...")
+
     replacedict = {
         "CaptionText": caption,
         "rendering/demoimage.png": image
     }
     torender = replaceall(filetostring("caption.html"), replacedict)
-    qtrenderer.processhtml2png(torender, tosavename)
+    chromiumrender.html2png(torender, tosavename)
     return tosavename
 
 
 def motivate(image, caption, tosavename=None):
     if tosavename is None:
         tosavename = temp_file("png")
-    logging.info(f"[improcessing] Rendering {image}...")
+
     replacedict = {
         "CaptionText1": caption[0],
         "CaptionText2": caption[1],
         "rendering/demoimage.png": image
     }
     torender = replaceall(filetostring("motivate.html"), replacedict)
-    qtrenderer.processhtml2png(torender, tosavename)
+    chromiumrender.html2png(torender, tosavename)
     return tosavename
 
 
 def meme(image, caption, tosavename=None):
     if tosavename is None:
         tosavename = temp_file("png")
-    logging.info(f"[improcessing] Rendering {image}...")
+
     replacedict = {
         "CaptionText1": caption[0],
         "CaptionText2": caption[1],
         "rendering/demoimage.png": image
     }
     torender = replaceall(filetostring("meme.html"), replacedict)
-    qtrenderer.processhtml2png(torender, tosavename)
+    chromiumrender.html2png(torender, tosavename)
     return tosavename
 
 
 def twittercap(image, caption, tosavename=None):
     if tosavename is None:
         tosavename = temp_file("png")
-    logging.info(f"[improcessing] Rendering {image}...")
     replacedict = {
         "CaptionText1": caption,
         "rendering/demoimage.png": image
     }
     torender = replaceall(filetostring("twittercaption.html"), replacedict)
-    qtrenderer.processhtml2png(torender, tosavename)
+    chromiumrender.html2png(torender, tosavename)
     return tosavename
 
 
 def halfsize(image, caption, tosavename=None):  # caption arg kept here for compatibility with handleanimated()
-    logging.info(f"[improcessing] Downsizing {image}...")
+
     if tosavename is None:
         name = temp_file("png")
     else:

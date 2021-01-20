@@ -11,6 +11,9 @@ from PIL import Image, UnidentifiedImageError
 from multiprocessing import Pool
 import captionfunctions
 import humanize
+import urllib3
+
+http = urllib3.PoolManager(num_pools=50)
 # from multiprocessing import log_to_stderr
 # log_to_stderr(logging.DEBUG)
 
@@ -20,6 +23,7 @@ else:
     import magic
 
 POOLWORKERS = 20
+
 
 def filetostring(f):
     with open(f, 'r') as file:
@@ -135,7 +139,7 @@ async def assurefilesize(image: str, ctx: discord.ext.commands.Context):
 def minimagesize(image, minsize):
     im = Image.open(image)
     if im.size[0] < minsize:
-        logging.info(f"[improcessing] Image is {im.size}, Upscaling image...")
+        logging.info(f"Image is {im.size}, Upscaling image...")
         im = im.resize((minsize, round(im.size[1] * (minsize / im.size[0]))), Image.BICUBIC)
         name = temp_file("png")
         im.save(name)
@@ -177,6 +181,9 @@ def run_in_executor(f):  # wrapper to prevent intense non-async functions from b
     return inner
 
 
+renderlock = asyncio.Lock()
+
+
 @run_in_executor
 def unblockpool(workers, *args):
     pool = Pool(workers)  # cap processes
@@ -185,25 +192,38 @@ def unblockpool(workers, *args):
     pool.join()
 
 
+@run_in_executor
+def run_in_exec(func, *args, **kwargs):
+    func(*args, **kwargs)
+
+
 async def handleanimated(image: str, caption, capfunction: callable):
     imty = mediatype(image)
-    logging.info(f"[improcessing] Detected type {imty}.")
+    logging.info(f" Detected type {imty}.")
     if imty is None:
         raise Exception(f"File {image} is invalid!")
     elif imty == "IMAGE":
-        logging.info(f"[improcessing] Processing frame...")
-        return await compresspng(capfunction(minimagesize(image, 200), caption))
+        logging.info(f"Processing frame...")
+        image = minimagesize(image, 200)
+        async with renderlock:
+            capped = capfunction(image, caption)
+        return await compresspng(capped)
     else:
         frames, name = await ffmpegsplit(image)
         audio = await splitaudio(image)
         fps = await get_frame_rate(image)
-        logging.info(f"[improcessing] Processing {len(frames)} frames with {min(len(frames), POOLWORKERS)} processes...")
+        # logging.info(
+        #     f"Processing {len(frames)} frames with {min(len(frames), POOLWORKERS)} processes...")
+        logging.info(f"Processing {len(frames)} frames...")
         capargs = []
         for i, frame in enumerate(frames):
             capargs.append((frame, caption, frame.replace('.png', '_rendered.png')))
-        # to keep from blocking discord loop
-        await unblockpool(min(len(frames), POOLWORKERS), capfunction, capargs)  # cap processes
-        logging.info(f"[improcessing] Joining {len(frames)} frames...")
+        # # to keep from blocking discord loop
+        # await unblockpool(min(len(frames), POOLWORKERS), capfunction, capargs)  # cap processes
+        for frame in capargs:
+            async with renderlock:
+                await run_in_exec(capfunction, *frame)
+        logging.info(f"Joining {len(frames)} frames...")
         if imty == "GIF":
             outname = temp_file("gif")
             await run_command(
@@ -224,7 +244,7 @@ async def handleanimated(image: str, caption, capfunction: callable):
                                   "-c:v", "libx264", "-crf", "25", "-pix_fmt", "yuv420p",
                                   "-vf", "crop=trunc(iw/2)*2:trunc(ih/2)*2", outname)
         # cleanup
-        logging.info("[improcessing] Cleaning files...")
+        logging.info("Cleaning files...")
         for f in glob.glob(name.replace('%09d', '*')):
             os.remove(f)
 
@@ -240,7 +260,7 @@ async def mp4togif(mp4):
     fps = await get_frame_rate(mp4)
     outname = temp_file("gif")
     await run_command("gifski", "--quiet", "-o", outname, "--fps", str(fps), name.replace('%09d', '*'))
-    logging.info("[improcessing] Cleaning files...")
+    logging.info("Cleaning files...")
     for f in glob.glob(name.replace('%09d', '*')):
         os.remove(f)
     return outname
