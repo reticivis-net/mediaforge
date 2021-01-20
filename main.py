@@ -13,6 +13,7 @@ import improcessing
 import aiohttp
 import aiofiles
 import humanize
+import sus
 
 # TODO: custom style caption
 # TODO: better help command
@@ -20,21 +21,24 @@ import humanize
 # TODO: concat media command
 # TODO: end video with motivate freeze frame command
 # TODO: attach audio to video command
-# TODO: https://github.com/aechaechaech/Jerma-Imposter-Message-Generator
 if __name__ == '__main__':  # if i don't have this multiprocessing breaks lol!
     # https://coloredlogs.readthedocs.io/en/latest/api.html#id28
     field_styles = {
         'levelname': {'bold': True, 'color': 'blue'},
-        'asctime': {'color': 4},
+        'asctime': {'color': 2},
         'filename': {'color': 6},
         'funcName': {'color': 5},
         'lineno': {'color': 13}
     }
+    level_styles = coloredlogs.DEFAULT_LEVEL_STYLES
+    level_styles['COMMAND'] = {'color': 4}
     logging.addLevelName(25, "NOTICE")
     logging.addLevelName(35, "SUCCESS")
+    logging.addLevelName(21, "COMMAND")
+    # recommended level is NOTICE
     coloredlogs.install(level='INFO', fmt='[%(asctime)s] [%(filename)s:%(funcName)s:%(lineno)d] '
                                           '%(levelname)s %(message)s',
-                        datefmt='%m/%d/%Y %I:%M:%S %p', field_styles=field_styles)
+                        datefmt='%m/%d/%Y %I:%M:%S %p', field_styles=field_styles, level_styles=level_styles)
     logging.info(f"discord.py {discord.__version__}")
     bot = commands.Bot(command_prefix='$', description='MelMedia')
     # bot.remove_command('help')
@@ -182,7 +186,7 @@ if __name__ == '__main__':  # if i don't have this multiprocessing breaks lol!
                     logging.info("Processing...")
                     msg = await filemsg.reply("⚙ Processing...", mention_author=False)
                     if handleanimated:
-                        result = await improcessing.handleanimated(file, *args, func)
+                        result = await improcessing.handleanimated(file, *args, func, ctx)
                     else:
                         result = await func(file, *args)
                     result = await improcessing.assurefilesize(result, ctx)
@@ -199,9 +203,19 @@ if __name__ == '__main__':  # if i don't have this multiprocessing breaks lol!
 
     @bot.command()
     async def attributions(ctx):
-        """Sends a list of attributions for libraries and programs this bot uses."""
+        """Lists most libraries and programs this bot uses."""
         with open("attributions.txt", "r") as f:
             await ctx.send(f.read())
+
+
+    @bot.command(aliases=['sus', 'imposter'])
+    async def jermatext(ctx, *, text="when the imposter is sus!😳"):
+        """
+        Cut and slice the popular Jerma sus meme to any message
+        For any letter not in the original meme, a random slice of the face is selected.
+        Based on https://github.com/aechaechaech/Jerma-Imposter-Message-Generator
+        """
+        await ctx.reply(file=discord.File(sus.sus(text)))
 
 
     @bot.command()
@@ -290,11 +304,10 @@ if __name__ == '__main__':  # if i don't have this multiprocessing breaks lol!
 
         Parameters:
             media - any valid media file.
-            speed - speed to multiply the video by. must be between 0.25 and 10. defaults to 2.
+            speed - speed to multiply the video by. must be between 0.5 and 10. defaults to 2.
         """
-        # raise NotImplementedError("i fucking hate ffmpeg")
-        if not 0.25 <= speed <= 10:
-            await ctx.send("⚠ Speed must be between 0.25 and 10")
+        if not 0.5 <= speed <= 10:
+            await ctx.send("⚠ Speed must be between 0.5 and 10")
             return
         await improcess(ctx, improcessing.speed, ["VIDEO", "GIF"], speed)
 
