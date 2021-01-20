@@ -25,16 +25,12 @@
     </select>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ef38d419-8cc3-42ef-bbef-6fd62fc27c52" name="Default Changelist" comment="sus">
-      <change afterPath="$PROJECT_DIR$/arial.ttf" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/debug.log" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/imposter.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/sus.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/attributions.txt" beforeDir="false" afterPath="$PROJECT_DIR$/attributions.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/improcessing.py" beforeDir="false" afterPath="$PROJECT_DIR$/improcessing.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/status.json" beforeDir="false" afterPath="$PROJECT_DIR$/status.json" afterDir="false" />
+    <list default="true" id="ef38d419-8cc3-42ef-bbef-6fd62fc27c52" name="Default Changelist" comment="im not using multiprocessing anymore baby">
+      <change beforePath="$PROJECT_DIR$/imgkit/__init__.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/imgkit/api.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/imgkit/config.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/imgkit/imgkit.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/imgkit/source.py" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -292,7 +288,7 @@
       <workItem from="1611113968334" duration="1842000" />
       <workItem from="1611115824122" duration="1388000" />
       <workItem from="1611153999737" duration="2666000" />
-      <workItem from="1611168604081" duration="5870000" />
+      <workItem from="1611168604081" duration="6680000" />
     </task>
     <task id="LOCAL-00001" summary="giving up on imagemagick">
       <created>1606187690936</created>
@@ -546,7 +542,21 @@
       <option name="project" value="LOCAL" />
       <updated>1611156718300</updated>
     </task>
-    <option name="localTasksCounter" value="37" />
+    <task id="LOCAL-00037" summary="added $jermatext based on https://github.com/aechaechaech/Jerma-Imposter-Message-Generator">
+      <created>1611176004385</created>
+      <option name="number" value="00037" />
+      <option name="presentableId" value="LOCAL-00037" />
+      <option name="project" value="LOCAL" />
+      <updated>1611176004385</updated>
+    </task>
+    <task id="LOCAL-00038" summary="im not using multiprocessing anymore baby">
+      <created>1611176092422</created>
+      <option name="number" value="00038" />
+      <option name="presentableId" value="LOCAL-00038" />
+      <option name="project" value="LOCAL" />
+      <updated>1611176092422</updated>
+    </task>
+    <option name="localTasksCounter" value="39" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -591,8 +601,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="png compression" />
-    <MESSAGE value="ll" />
     <MESSAGE value="some help and todo" />
     <MESSAGE value="dont even rember" />
     <MESSAGE value="colored logs lol" />
@@ -616,7 +624,9 @@
     <MESSAGE value="moved rendering from PyQt (slow and stinky lol!) to selenium (fast when set up right)" />
     <MESSAGE value="sus" />
     <MESSAGE value="minor cleanup" />
-    <option name="LAST_COMMIT_MESSAGE" value="minor cleanup" />
+    <MESSAGE value="added $jermatext based on https://github.com/aechaechaech/Jerma-Imposter-Message-Generator" />
+    <MESSAGE value="im not using multiprocessing anymore baby" />
+    <option name="LAST_COMMIT_MESSAGE" value="im not using multiprocessing anymore baby" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/CaptionX$improcessing.coverage" NAME="improcessing Coverage Results" MODIFIED="1606284753774" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
@@ -624,6 +634,6 @@
     <SUITE FILE_PATH="coverage/caption_bot$main.coverage" NAME="main Coverage Results" MODIFIED="1606184268706" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/CaptionX$sus.coverage" NAME="sus Coverage Results" MODIFIED="1611175143620" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/CaptionX$chromiumrender.coverage" NAME="chromiumrender Coverage Results" MODIFIED="1611107683335" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/CaptionX$main.coverage" NAME="main Coverage Results" MODIFIED="1611175836555" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/CaptionX$main.coverage" NAME="main Coverage Results" MODIFIED="1611176108693" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>
