@@ -21,7 +21,7 @@ import humanize
 # TODO: concat media command
 # TODO: end video with motivate freeze frame command
 # TODO: attach audio to video command
-# TODO: credits command
+# TODO: https://github.com/aechaechaech/Jerma-Imposter-Message-Generator
 if __name__ == '__main__':  # if i don't have this multiprocessing breaks lol!
     field_styles = {
         'levelname': {'bold': True, 'color': 'blue'},
@@ -194,6 +194,12 @@ if __name__ == '__main__':  # if i don't have this multiprocessing breaks lol!
                                 type=discord.ActivityType.playing)
         await bot.change_presence(activity=game)
 
+
+    @bot.command()
+    async def attributions(ctx):
+        """Sends a list of attributions for libraries and programs this bot uses."""
+        with open("attributions.txt", "r") as f:
+            await ctx.send(f.read())
 
     @bot.command()
     async def emojiurl(ctx, *, msg):
