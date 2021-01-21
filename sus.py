@@ -48,11 +48,21 @@ bootleg_x_dict = {
     "q": [[True, False], [143, 155]],
     "b": [[False, True], [143, 157]],
     "d": [[True, True], [143, 157]],
-    "c": [[False, False], [157, 167]]
+    "c": [[False, False], [157, 167]],
 }
 
 # list of all avalable charecters
 master_char_list = list(master_x_dict.keys()) + list(bootleg_x_dict.keys())
+
+
+def get_text_dimensions(text_string, font):
+    # https://stackoverflow.com/a/46220683/9263761
+    ascent, descent = font.getmetrics()
+
+    text_width = font.getmask(text_string).getbbox()[2]
+    text_height = font.getmask(text_string).getbbox()[3] + descent
+
+    return text_width, text_height
 
 
 # get input string
@@ -103,11 +113,13 @@ def sus(input_string: str):
                 draw.rectangle([5, 13, 8, 16], fill=(255, 255, 255, 255))
 
         else:
+
             if char in cheatletters:
                 scan_line_x_coords = cheatletters[char]
             else:
+                w = get_text_dimensions(char, font)[0] + 4
                 random_x = random.randint(0, master_im.width - 13)
-                scan_line_x_coords = [random_x, random_x + 12]
+                scan_line_x_coords = [random_x, random_x + w]
                 cheatletters[char] = scan_line_x_coords
 
             face = master_im.crop((scan_line_x_coords[0], y_coord_split, scan_line_x_coords[1], master_im.height))

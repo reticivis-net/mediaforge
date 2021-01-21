@@ -3,7 +3,7 @@ import os
 import random
 import string
 import sys
-
+import multiprocessing
 from selenium import webdriver
 
 
@@ -44,47 +44,39 @@ def loadhtml(driver, html):
     # driver.get("data:text/html;base64," + html_bs64)
 
 
-opts = webdriver.ChromeOptions()
-opts.headless = True
-opts.add_experimental_option('excludeSwitches', ['enable-logging'])
-opts.add_argument('--no-proxy-server')
-opts.add_argument("--window-size=0,0")
-opts.add_argument("--hide-scrollbars")
-opts.add_argument("--headless")
-opts.add_argument("--disable-web-security")
-opts.add_argument("--allow-file-access-from-files")
-opts.add_argument("--allow-file-access-from-file")
-opts.add_argument("--allow-file-access")
-opts.add_argument("--disable-extensions")
-# https://chromedriver.storage.googleapis.com/index.html?path=87.0.4280.88/
-if sys.platform == "win32":
-    driver = webdriver.Chrome("chromedriver87.exe", options=opts)
-else:
-    driver = webdriver.Chrome("chromedriver87", options=opts)
+def initdriver():
+    global opts
+    global driver
+    opts = webdriver.ChromeOptions()
+    opts.headless = True
+    opts.add_experimental_option('excludeSwitches', ['enable-logging'])
+    opts.add_argument('--no-proxy-server')
+    opts.add_argument("--window-size=0,0")
+    opts.add_argument("--hide-scrollbars")
+    opts.add_argument("--headless")
+    opts.add_argument("--disable-web-security")
+    opts.add_argument("--allow-file-access-from-files")
+    opts.add_argument("--allow-file-access-from-file")
+    opts.add_argument("--allow-file-access")
+    opts.add_argument("--disable-extensions")
+    # https://chromedriver.storage.googleapis.com/index.html?path=87.0.4280.88/
+    if sys.platform == "win32":
+        driver = webdriver.Chrome("chromedriver87.exe", options=opts)
+    else:
+        driver = webdriver.Chrome("chromedriver87", options=opts)
 
 
 def html2png(html, png):
     driver.set_window_size(1, 1)
     tempfile = loadhtml(driver, html)
-    func = """
-            function outerHeight(element) {
-        const height = element.offsetHeight,
-            style = window.getComputedStyle(element)
-
-        return ['top', 'bottom']
-            .map(function (side) {
-                return parseInt(style["margin-"+side]);
-            })
-            .reduce(function (total, side) {
-                return total + side;
-            }, height)
-    }"""
-    size = driver.execute_script(f"{func};return [document.documentElement.scrollWidth, outerHeight(document.body)];")
-    driver.set_window_size(size[0], size[1])
-    size = driver.execute_script(f"{func};return [document.documentElement.scrollWidth, outerHeight(document.body)];")
-    driver.set_window_size(size[0], size[1])
+    for _ in range(3):
+        size = driver.execute_script(f"return [document.documentElement.scrollWidth, outerHeight(document.body)];")
+        driver.set_window_size(size[0], size[1])
+    driver.execute_script("if (typeof beforerender === \"function\") {beforerender()}")
     send(driver, "Emulation.setDefaultBackgroundColorOverride", {'color': {'r': 0, 'g': 0, 'b': 0, 'a': 0}})
     driver.get_screenshot_as_file(png)
     os.remove(tempfile)
 
+
 # html2png("<p>test</p>", "test.png")
+

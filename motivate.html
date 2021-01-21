@@ -16,6 +16,7 @@
             background: black;
             text-align: center;
             margin: 0;
+            word-break: break-word;
         }
 
         img.emoji {
@@ -62,5 +63,19 @@
     <div class="captionsmall">CaptionText2</div>
 </div>
 </body>
-<script>twemoji.parse(document.body);</script>
+<script>twemoji.parse(document.body);
+
+function beforerender() {
+    document.querySelectorAll(".wrap")[0].style.margin = "5vw auto";
+}
+
+function outerHeight(element) {
+    const height = element.offsetHeight,
+        style = window.getComputedStyle(element)
+
+    return ['top', 'bottom']
+        .map(side => parseInt(style[`margin-${side}`]))
+        .reduce((total, side) => total + side, height)
+}
+</script>
 </html>

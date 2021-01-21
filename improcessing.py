@@ -6,6 +6,8 @@ import os
 import random
 import string
 import sys
+from multiprocessing import Pool
+
 import discord.ext
 from PIL import Image, UnidentifiedImageError
 import captionfunctions
@@ -13,13 +15,19 @@ import humanize
 
 # from multiprocessing import log_to_stderr
 # log_to_stderr(logging.DEBUG)
+import chromiumrender
 
 if sys.platform == "win32":  # this hopefully wont cause any problems :>
     from winmagic import magic
 else:
     import magic
 
-MAXFRAMES = 250  # to prevent gigantic mp4s from clogging stuff
+MAXFRAMES = 500  # to prevent gigantic mp4s from clogging stuff
+# don't crank this up too high...
+# for single images, one global instance of selenium is used since it takes forever to boot
+# for videos, each pool process has to initialize its own selenium instance. typically the benefit of 16x speed
+# outweight this for videos, but like...
+POOLPROCESSES = 16
 
 
 def filetostring(f):
@@ -181,12 +189,12 @@ def run_in_executor(f):  # wrapper to prevent intense non-async functions from b
 renderlock = asyncio.Lock()
 
 
-# @run_in_executor
-# def unblockpool(workers, *args):
-#     pool = Pool(workers)  # cap processes
-#     pool.starmap_async(*args)
-#     pool.close()
-#     pool.join()
+@run_in_executor
+def unblockpool(workers, initializer, *args):
+    pool = Pool(workers, initializer=initializer)  # cap processes
+    pool.starmap_async(*args)
+    pool.close()
+    pool.join()
 
 
 @run_in_executor
@@ -215,15 +223,16 @@ async def handleanimated(image: str, caption, capfunction: callable, ctx: discor
             await ctx.reply(f"⚠ Input file has {len(frames)} frames, maximum allowed is {MAXFRAMES}.")
             logging.warning(f"⚠ Input file has {len(frames)} frames, maximum allowed is {MAXFRAMES}.")
             return
-        logging.info(f"Processing {len(frames)} frames...")
+        logging.info(f"Processing {len(frames)} frames with {min(len(frames), POOLPROCESSES)} processes...")
         capargs = []
         for i, frame in enumerate(frames):
             capargs.append((frame, caption, frame.replace('.png', '_rendered.png')))
-        # # to keep from blocking discord loop
-        # await unblockpool(min(len(frames), POOLWORKERS), capfunction, capargs)  # cap processes
-        for frame in capargs:
-            async with renderlock:
-                await run_in_exec(capfunction, *frame)
+        # to keep from blocking discord loop
+        await unblockpool(min(len(frames), POOLPROCESSES), chromiumrender.initdriver, capfunction,
+                          capargs)  # cap processes
+        # for frame in capargs:
+        #     async with renderlock:
+        #         await run_in_exec(capfunction, *frame)
         logging.info(f"Joining {len(frames)} frames...")
         if imty == "GIF":
             outname = temp_file("gif")
@@ -335,5 +344,18 @@ async def changefps(file, fps):
     outname = temp_file("mp4")
     await run_command("ffmpeg", "-i", file, "-filter:v", f"fps=fps={fps}", outname)
     if mediatype(file) == "GIF":
+        outname = await mp4togif(outname)
+    return outname
+
+
+async def pad(file):
+    mt = mediatype(file)
+    if mt == "IMAGE":
+        outname = temp_file("png")
+    else:
+        outname = temp_file("mp4")
+    await run_command("ffmpeg", "-i", file, "-vf",
+                      "pad=width='max(iw,ih)':height='max(iw,ih)':x='(ih-iw)/2':y='(iw-ih)/2':color=white", outname)
+    if mt == "GIF":
         outname = await mp4togif(outname)
     return outname
