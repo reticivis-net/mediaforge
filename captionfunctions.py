@@ -18,8 +18,12 @@ def replaceall(text, rep):
 
 
 def sanitizehtml(caption):
-    caption = caption.replace("&", '&amp;').replace("<", '&lt;').replace(">", '&gt;').replace("\"", '&quot;')\
-        .replace("'", '&#039;')
+    if isinstance(caption, list):
+        caption[:] = [c.replace("&", '&amp;').replace("<", '&lt;').replace(">", '&gt;').replace("\"", '&quot;')
+                          .replace("'", '&#039;') for c in caption]
+    else:
+        caption = caption.replace("&", '&amp;').replace("<", '&lt;').replace(">", '&gt;').replace("\"", '&quot;') \
+            .replace("'", '&#039;')
     return caption
 
 
