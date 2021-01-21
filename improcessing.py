@@ -190,8 +190,11 @@ renderlock = asyncio.Lock()
 
 
 @run_in_executor
-def unblockpool(workers, initializer, *args):
-    pool = Pool(workers, initializer=initializer)  # cap processes
+def unblockpool(workers, *args, initializer=None):
+    if initializer is None:
+        pool = Pool(workers)
+    else:
+        pool = Pool(workers, initializer=initializer)
     pool.starmap_async(*args)
     pool.close()
     pool.join()
@@ -202,7 +205,7 @@ def run_in_exec(func, *args, **kwargs):
     func(*args, **kwargs)
 
 
-async def handleanimated(image: str, caption, capfunction: callable, ctx: discord.ext.commands.Context):
+async def handleanimated(image: str, caption, capfunction: callable, ctx: discord.ext.commands.Context, webengine):
     imty = mediatype(image)
     logging.info(f" Detected type {imty}.")
     if imty is None:
@@ -228,8 +231,11 @@ async def handleanimated(image: str, caption, capfunction: callable, ctx: discor
         for i, frame in enumerate(frames):
             capargs.append((frame, caption, frame.replace('.png', '_rendered.png')))
         # to keep from blocking discord loop
-        await unblockpool(min(len(frames), POOLPROCESSES), chromiumrender.initdriver, capfunction,
-                          capargs)  # cap processes
+        if webengine:  # not every caption command requires the webengine
+            await unblockpool(min(len(frames), POOLPROCESSES), capfunction,
+                              capargs, initializer=chromiumrender.initdriver)  # cap processes
+        else:
+            await unblockpool(min(len(frames), POOLPROCESSES), capfunction, capargs)  # cap processes
         # for frame in capargs:
         #     async with renderlock:
         #         await run_in_exec(capfunction, *frame)

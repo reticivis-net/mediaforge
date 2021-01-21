@@ -169,7 +169,7 @@ if __name__ == "__main__":
 
 
     async def improcess(ctx: discord.ext.commands.Context, func: callable, allowedtypes: list, *args,
-                        handleanimated=False):
+                        handleanimated=False, webengine=False):
         async with ctx.channel.typing():
             file, filemsg = await imagesearch(ctx)
             if file:
@@ -182,7 +182,7 @@ if __name__ == "__main__":
                     logging.info("Processing...")
                     msg = await filemsg.reply("⚙ Processing...", mention_author=False)
                     if handleanimated:
-                        result = await improcessing.handleanimated(file, *args, func, ctx)
+                        result = await improcessing.handleanimated(file, *args, func, ctx, webengine)
                     else:
                         result = await func(file, *args)
                     result = await improcessing.assurefilesize(result, ctx)
@@ -381,7 +381,8 @@ if __name__ == "__main__":
             media - any valid media file
             caption - the caption text
         """
-        await improcess(ctx, captionfunctions.esmcaption, ["VIDEO", "GIF", "IMAGE"], caption, handleanimated=True)
+        await improcess(ctx, captionfunctions.esmcaption, ["VIDEO", "GIF", "IMAGE"], caption, handleanimated=True,
+                        webengine=True)
 
 
     @bot.command()
@@ -393,7 +394,7 @@ if __name__ == "__main__":
             media - any valid media file
             caption - the caption text
         """
-        await improcess(ctx, captionfunctions.twittercap, ["VIDEO", "GIF", "IMAGE"], caption, handleanimated=True)
+        await improcess(ctx, captionfunctions.twittercap, ["VIDEO", "GIF", "IMAGE"], caption, handleanimated=True, webengine=True)
 
 
     @bot.command()
@@ -434,7 +435,7 @@ if __name__ == "__main__":
         if len(caption) == 1:
             caption.append("")
         await improcess(ctx, captionfunctions.motivate, ["VIDEO", "GIF", "IMAGE"], caption,
-                        handleanimated=True)
+                        handleanimated=True, webengine=True)
 
 
     @bot.command()
@@ -450,7 +451,7 @@ if __name__ == "__main__":
         if len(caption) == 1:
             caption.append("")
         await improcess(ctx, captionfunctions.meme, ["VIDEO", "GIF", "IMAGE"], caption,
-                        handleanimated=True)
+                        handleanimated=True, webengine=True)
 
 
     @bot.command(aliases=["ffprobe"])
