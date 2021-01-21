@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <title>motivate</title>
     <script src="rendering/twemoji/twemoji.js"></script>
+    <script src="rendering/fitty.min.js"></script>
     <style>
         @font-face {
             font-family: impact;
@@ -17,6 +18,7 @@
             text-align: center;
             margin: 0;
             word-break: break-word;
+
         }
 
         img.emoji {
@@ -37,7 +39,6 @@
             font-size: 10vw;
             text-transform: uppercase;
             letter-spacing: 1px;
-
             /* https://codepen.io/MetalEscape/pen/WrYxVM */
             text-shadow: 2px 2px 0 #000,
             -2px -2px 0 #000,
@@ -50,16 +51,25 @@
             2px 2px 5px #000;
             left: 0;
             right: 0;
+            position: absolute;
+            max-height: 100%;
+            width: 100%;
+        }
+
+        .container {
+            position: absolute;
+            height: 50%;
+            width: 100%;
+            overflow: hidden;
+            /*TODO: get better text fitting,*/
         }
 
         .top {
-            position: absolute;
-            top: 8px;
+            top: 0;
         }
 
         .bottom {
-            position: absolute;
-            bottom: 8px;
+            bottom: 0;
         }
 
 
@@ -68,9 +78,30 @@
 <body>
 <div class="wrap">
     <img src="rendering/demoimage.png" alt="An error has occurred loading your image.">
-    <div class="caption top">CaptionText1</div>
-    <div class="caption bottom">CaptionText2</div>
+    <div class="top container caption">
+        <span class="caption top">CaptionText1</span>
+    </div>
+    <div class="bottom container">
+        <span class="caption bottom">CaptionText2</span>
+    </div>
+
 </div>
 </body>
+<script>
+    // function beforerender() {
+    //     fitty(".container");
+    // }
+
+    function outerHeight(element) {
+        const height = element.offsetHeight,
+            style = window.getComputedStyle(element)
+
+        return ['top', 'bottom']
+            .map(side => parseInt(style[`margin-${side}`]))
+            .reduce((total, side) => total + side, height)
+    }
+
+    // fitty(".caption");
+</script>
 <script>twemoji.parse(document.body);</script>
 </html>

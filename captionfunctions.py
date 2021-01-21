@@ -17,10 +17,16 @@ def replaceall(text, rep):
     return text
 
 
+def sanitizehtml(caption):
+    caption = caption.replace("&", '&amp;').replace("<", '&lt;').replace(">", '&gt;').replace("\"", '&quot;')\
+        .replace("'", '&#039;')
+    return caption
+
+
 def esmcaption(image, caption, tosavename=None):
     if tosavename is None:
         tosavename = temp_file("png")
-
+    caption = sanitizehtml(caption)
     replacedict = {
         "CaptionText": caption,
         "rendering/demoimage.png": image
@@ -33,7 +39,7 @@ def esmcaption(image, caption, tosavename=None):
 def motivate(image, caption, tosavename=None):
     if tosavename is None:
         tosavename = temp_file("png")
-
+    caption = sanitizehtml(caption)
     replacedict = {
         "CaptionText1": caption[0],
         "CaptionText2": caption[1],
@@ -47,7 +53,7 @@ def motivate(image, caption, tosavename=None):
 def meme(image, caption, tosavename=None):
     if tosavename is None:
         tosavename = temp_file("png")
-
+    caption = sanitizehtml(caption)
     replacedict = {
         "CaptionText1": caption[0],
         "CaptionText2": caption[1],
@@ -61,6 +67,7 @@ def meme(image, caption, tosavename=None):
 def twittercap(image, caption, tosavename=None):
     if tosavename is None:
         tosavename = temp_file("png")
+    caption = sanitizehtml(caption)
     replacedict = {
         "CaptionText1": caption,
         "rendering/demoimage.png": image

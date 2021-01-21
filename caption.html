@@ -29,6 +29,7 @@
 
         body {
             font-size: 0;
+            word-break: break-word;
         }
 
         .caption {
@@ -67,4 +68,16 @@
 <img class="img" src="rendering/demoimage.png" alt="An error has occurred loading your image.">
 </body>
 <script>twemoji.parse(document.body);</script>
+<script>
+
+
+    function outerHeight(element) {
+        const height = element.offsetHeight,
+            style = window.getComputedStyle(element)
+
+        return ['top', 'bottom']
+            .map(side => parseInt(style[`margin-${side}`]))
+            .reduce((total, side) => total + side, height)
+    }
+</script>
 </html>
