@@ -2,6 +2,7 @@ import asyncio
 import functools
 import glob
 import logging
+import multiprocessing
 import os
 import random
 import string
@@ -22,12 +23,17 @@ if sys.platform == "win32":  # this hopefully wont cause any problems :>
 else:
     import magic
 
-MAXFRAMES = 500  # to prevent gigantic mp4s from clogging stuff
-# don't crank this up too high...
-# for single images, one global instance of selenium is used since it takes forever to boot
-# for videos, each pool process has to initialize its own selenium instance. typically the benefit of 16x speed
-# outweight this for videos, but like...
-POOLPROCESSES = 16
+MAXFRAMES = 1024  # to prevent gigantic mp4s from clogging stuff
+
+# renderpool = None
+
+
+def initializerenderpool():
+    global renderpool
+    poolprocesses = 20
+    logging.info(f"Starting {poolprocesses} pool processes...")
+    renderpool = multiprocessing.Pool(poolprocesses, initializer=chromiumrender.initdriver)
+    return renderpool
 
 
 def filetostring(f):
@@ -204,10 +210,11 @@ def unblockpool(workers, *args, initializer=None):
 
 @run_in_executor
 def run_in_exec(func, *args, **kwargs):
-    func(*args, **kwargs)
+    return func(*args, **kwargs)
 
 
-async def handleanimated(image: str, caption, capfunction: callable, ctx: discord.ext.commands.Context, webengine=False):
+async def handleanimated(image: str, caption, capfunction: callable, ctx: discord.ext.commands.Context,
+                         webengine=False):
     imty = mediatype(image)
     logging.info(f"Detected type {imty}.")
     if imty is None:
@@ -216,7 +223,9 @@ async def handleanimated(image: str, caption, capfunction: callable, ctx: discor
         logging.info(f"Processing frame...")
         image = minimagesize(image, 200)
         async with renderlock:
-            capped = capfunction(image, caption)
+            result = renderpool.apply_async(capfunction, (image, caption))
+            capped = await run_in_exec(result.get)
+            print(capped)
         return await compresspng(capped)
     elif imty == "VIDEO" or imty == "GIF":
         frames, name = await ffmpegsplit(image)
@@ -228,19 +237,22 @@ async def handleanimated(image: str, caption, capfunction: callable, ctx: discor
             await ctx.reply(f"⚠ Input file has {len(frames)} frames, maximum allowed is {MAXFRAMES}.")
             logging.warning(f"⚠ Input file has {len(frames)} frames, maximum allowed is {MAXFRAMES}.")
             return
-        logging.info(f"Processing {len(frames)} frames with {min(len(frames), POOLPROCESSES)} processes...")
+        logging.info(f"Processing {len(frames)} frames...")
         capargs = []
         for i, frame in enumerate(frames):
             capargs.append((frame, caption, frame.replace('.png', '_rendered.png')))
         # to keep from blocking discord loop
-        if webengine:  # not every caption command requires the webengine
-            await unblockpool(min(len(frames), POOLPROCESSES), capfunction,
-                              capargs, initializer=chromiumrender.initdriver)  # cap processes
-        else:
-            await unblockpool(min(len(frames), POOLPROCESSES), capfunction, capargs)  # cap processes
+        # if webengine:  # not every caption command requires the webengine
+        #     await unblockpool(min(len(frames), 8), capfunction,
+        #                       capargs, initializer=chromiumrender.initdriver)
+        # else:
+        #     await unblockpool(min(len(frames), 16), capfunction, capargs)
+
         # for frame in capargs:
         #     async with renderlock:
         #         await run_in_exec(capfunction, *frame)
+        result = renderpool.starmap_async(capfunction, capargs)
+        await run_in_exec(result.get)
         logging.info(f"Joining {len(frames)} frames...")
         if imty == "GIF":
             outname = temp_file("gif")

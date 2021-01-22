@@ -1,6 +1,7 @@
 import glob
 import json
 import logging
+import multiprocessing
 import os
 import random
 import re
@@ -388,6 +389,7 @@ if __name__ == "__main__":
         await improcess(ctx, captionfunctions.caption, ["VIDEO", "GIF", "IMAGE"], caption, handleanimated=True,
                         webengine=True)
 
+
     @bot.command(aliases=["bottomcap", "botcap"])
     async def bottomcaption(ctx, *, caption):
         """
@@ -399,6 +401,7 @@ if __name__ == "__main__":
         """
         await improcess(ctx, captionfunctions.bottomcaption, ["VIDEO", "GIF", "IMAGE"], caption, handleanimated=True,
                         webengine=True)
+
 
     @bot.command()
     async def esmcaption(ctx, *, caption):
@@ -537,7 +540,7 @@ if __name__ == "__main__":
     async def shutdown(ctx):
         await ctx.send("✅ Shutting Down...")
         logging.log(25, "Shutting Down....")
-        wdriver.close()
+        renderpool.close()
         await bot.logout()
         await bot.close()
 
@@ -602,7 +605,5 @@ if __name__ == "__main__":
         tenorkey = f.read()
     with open('token.txt') as f:  # not on github for obvious reasons
         token = f.read()
-    logging.log(25, "Initializing chrome driver...")
-    wdriver = chromiumrender.initdriver()
-    logging.log(35, "Chrome driver ready!")
+    renderpool = improcessing.initializerenderpool()
     bot.run(token)

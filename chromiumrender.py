@@ -67,6 +67,11 @@ def initdriver():
     return driver
 
 
+def closedriver():
+    global driver
+    driver.close()
+
+
 def html2png(html, png):
     driver.set_window_size(1, 1)
     tempfile = loadhtml(driver, html)
@@ -78,6 +83,4 @@ def html2png(html, png):
     driver.get_screenshot_as_file(png)
     os.remove(tempfile)
 
-
 # html2png("<p>test</p>", "test.png")
-
