@@ -113,8 +113,8 @@ def halfsize(image, caption, tosavename=None):  # caption arg kept here for comp
         name = temp_file("png")
     else:
         name = tosavename
-    subprocess.Popen(["ffmpeg", "-i", image, "-vf", "scale=iw/2:ih/2", name],
-                     stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL)
+    subprocess.check_call(["ffmpeg", "-i", image, "-vf", "scale=iw/2:ih/2", name],
+                          stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL)
     return name
 
 

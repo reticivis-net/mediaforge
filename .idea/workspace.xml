@@ -25,20 +25,14 @@
     </select>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ef38d419-8cc3-42ef-bbef-6fd62fc27c52" name="Default Changelist" comment="fixed bugs">
-      <change afterPath="$PROJECT_DIR$/mycaption.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mycaptionbottom.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/rendering/fonts/Lato-Bold.ttf" afterDir="false" />
+    <list default="true" id="ef38d419-8cc3-42ef-bbef-6fd62fc27c52" name="Default Changelist" comment="who remembers?">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/caption.html" beforeDir="false" afterPath="$PROJECT_DIR$/esmcaption.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/captionfunctions.py" beforeDir="false" afterPath="$PROJECT_DIR$/captionfunctions.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/chromiumrender.py" beforeDir="false" afterPath="$PROJECT_DIR$/chromiumrender.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/improcessing.py" beforeDir="false" afterPath="$PROJECT_DIR$/improcessing.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/meme.html" beforeDir="false" afterPath="$PROJECT_DIR$/meme.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/motivate.html" beforeDir="false" afterPath="$PROJECT_DIR$/motivate.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/rendering/fonts/Futura Condensed Extra Bold.otf" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/twittercaption.html" beforeDir="false" afterPath="$PROJECT_DIR$/twittercaption.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -302,7 +296,10 @@
       <workItem from="1611252978872" duration="4471000" />
       <workItem from="1611261017384" duration="348000" />
       <workItem from="1611272661127" duration="2792000" />
-      <workItem from="1611276772494" duration="6796000" />
+      <workItem from="1611276772494" duration="7067000" />
+      <workItem from="1611324408757" duration="666000" />
+      <workItem from="1611338519633" duration="158000" />
+      <workItem from="1611345701994" duration="3467000" />
     </task>
     <task id="LOCAL-00001" summary="giving up on imagemagick">
       <created>1606187690936</created>
@@ -591,7 +588,14 @@
       <option name="project" value="LOCAL" />
       <updated>1611256915200</updated>
     </task>
-    <option name="localTasksCounter" value="42" />
+    <task id="LOCAL-00042" summary="who remembers?">
+      <created>1611295317665</created>
+      <option name="number" value="00042" />
+      <option name="presentableId" value="LOCAL-00042" />
+      <option name="project" value="LOCAL" />
+      <updated>1611295317665</updated>
+    </task>
+    <option name="localTasksCounter" value="43" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -636,7 +640,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="colored logs lol" />
     <MESSAGE value="minimum image witdh of 200 lol" />
     <MESSAGE value="better error handling" />
     <MESSAGE value="FIXED THE STGUPID FUCKING SPAM BUG FINALLY OMFG&#10;https://github.com/jarrekk/imgkit/issues/52" />
@@ -661,14 +664,15 @@
     <MESSAGE value="im not using multiprocessing anymore baby" />
     <MESSAGE value="i think i forgot to commit" />
     <MESSAGE value="fixed bugs" />
-    <option name="LAST_COMMIT_MESSAGE" value="fixed bugs" />
+    <MESSAGE value="who remembers?" />
+    <option name="LAST_COMMIT_MESSAGE" value="who remembers?" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/CaptionX$improcessing.coverage" NAME="improcessing Coverage Results" MODIFIED="1606284753774" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/CaptionX$qtrenderer.coverage" NAME="qtrenderer Coverage Results" MODIFIED="1611025320241" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/caption_bot$main.coverage" NAME="main Coverage Results" MODIFIED="1606184268706" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/CaptionX$sus.coverage" NAME="sus Coverage Results" MODIFIED="1611175143620" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/captionbot$main.coverage" NAME="main Coverage Results" MODIFIED="1611295071287" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/captionbot$main.coverage" NAME="main Coverage Results" MODIFIED="1611349179958" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/CaptionX$chromiumrender.coverage" NAME="chromiumrender Coverage Results" MODIFIED="1611107683335" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/CaptionX$main.coverage" NAME="main Coverage Results" MODIFIED="1611273027854" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>

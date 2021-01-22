@@ -50,3 +50,4 @@ there need to be 2 txt files with tokens for the bot to function properly
 
 - once you've set up all of the libraries, just run the program with `python main.py`. make sure it can read and write
   to the directory it lives in.
+- terminate the bot by running the `shutdown` command, not by terminating it in the console.
