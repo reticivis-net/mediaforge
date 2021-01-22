@@ -150,7 +150,6 @@ if __name__ == "__main__":
                         return tenor['results'][0]['media'][0]['mp4']['url']
         return None
 
-
     # currently only used for 1 command, might have future uses?
     async def tenorsearch(ctx, gif=False):
         if ctx.message.reference:
@@ -307,7 +306,7 @@ if __name__ == "__main__":
     async def spcommand(ctx, speed: float = 2):
         """
         Changes the speed of media.
-        This command preserves the original FPS.
+        This command preserves the original FPS, which means speeding up will drop frames. See $fps.
 
         Parameters:
             media - any valid media file.
@@ -320,7 +319,7 @@ if __name__ == "__main__":
 
 
     @bot.command()
-    async def reverse(ctx, ):
+    async def reverse(ctx):
         """
         Reverses media.
 
@@ -394,7 +393,8 @@ if __name__ == "__main__":
             media - any valid media file
             caption - the caption text
         """
-        await improcess(ctx, captionfunctions.twittercap, ["VIDEO", "GIF", "IMAGE"], caption, handleanimated=True, webengine=True)
+        await improcess(ctx, captionfunctions.twittercap, ["VIDEO", "GIF", "IMAGE"], caption, handleanimated=True,
+                        webengine=True)
 
 
     @bot.command()
