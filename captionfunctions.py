@@ -35,7 +35,33 @@ def esmcaption(image, caption, tosavename=None):
         "CaptionText": caption,
         "rendering/demoimage.png": image
     }
-    torender = replaceall(filetostring("caption.html"), replacedict)
+    torender = replaceall(filetostring("esmcaption.html"), replacedict)
+    chromiumrender.html2png(torender, tosavename)
+    return tosavename
+
+
+def caption(image, caption, tosavename=None):
+    if tosavename is None:
+        tosavename = temp_file("png")
+    caption = sanitizehtml(caption)
+    replacedict = {
+        "CaptionText": caption,
+        "rendering/demoimage.png": image
+    }
+    torender = replaceall(filetostring("mycaption.html"), replacedict)
+    chromiumrender.html2png(torender, tosavename)
+    return tosavename
+
+
+def bottomcaption(image, caption, tosavename=None):
+    if tosavename is None:
+        tosavename = temp_file("png")
+    caption = sanitizehtml(caption)
+    replacedict = {
+        "CaptionText": caption,
+        "rendering/demoimage.png": image
+    }
+    torender = replaceall(filetostring("mycaptionbottom.html"), replacedict)
     chromiumrender.html2png(torender, tosavename)
     return tosavename
 

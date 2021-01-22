@@ -26,11 +26,19 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="ef38d419-8cc3-42ef-bbef-6fd62fc27c52" name="Default Changelist" comment="fixed bugs">
-      <change afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/mycaption.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/mycaptionbottom.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/rendering/fonts/Lato-Bold.ttf" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/attributions.txt" beforeDir="false" afterPath="$PROJECT_DIR$/attributions.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/caption.html" beforeDir="false" afterPath="$PROJECT_DIR$/esmcaption.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/captionfunctions.py" beforeDir="false" afterPath="$PROJECT_DIR$/captionfunctions.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/chromiumrender.py" beforeDir="false" afterPath="$PROJECT_DIR$/chromiumrender.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/improcessing.py" beforeDir="false" afterPath="$PROJECT_DIR$/improcessing.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/sus.py" beforeDir="false" afterPath="$PROJECT_DIR$/sus.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/meme.html" beforeDir="false" afterPath="$PROJECT_DIR$/meme.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/motivate.html" beforeDir="false" afterPath="$PROJECT_DIR$/motivate.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/rendering/fonts/Futura Condensed Extra Bold.otf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/twittercaption.html" beforeDir="false" afterPath="$PROJECT_DIR$/twittercaption.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -83,7 +91,7 @@
     <property name="WebServerToolWindowPanel.toolwindow.show.date" value="false" />
     <property name="WebServerToolWindowPanel.toolwindow.show.permissions" value="false" />
     <property name="WebServerToolWindowPanel.toolwindow.show.size" value="false" />
-    <property name="add_unversioned_files" value="$PROJECT_DIR$/token.txt" />
+    <property name="add_unversioned_files" value="$PROJECT_DIR$/token.txt&#10;C:/Users/minec/PycharmProjects/captionbot/tenorkey.txt" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="node.js.detected.package.eslint" value="true" />
     <property name="node.js.detected.package.tslint" value="true" />
@@ -98,12 +106,15 @@
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\minec\PycharmProjects\captionbot" />
+      <recent name="C:\Users\minec\PycharmProjects\captionbot\rendering\fonts" />
       <recent name="C:\Users\minec\PycharmProjects\CaptionX" />
       <recent name="C:\Users\minec\PycharmProjects\CaptionX\rendering\fonts" />
       <recent name="C:\Users\minec\PycharmProjects\caption bot\fonts" />
-      <recent name="C:\Users\minec\PycharmProjects\caption bot" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\minec\PycharmProjects\captionbot" />
+      <recent name="C:\Users\minec\PycharmProjects\captionbot\captionhtml" />
       <recent name="C:\Users\minec\PycharmProjects\CaptionX" />
       <recent name="C:\Users\minec\PycharmProjects\CaptionX\rendering" />
       <recent name="C:\Users\minec\PycharmProjects\caption bot\fonts" />
@@ -291,6 +302,7 @@
       <workItem from="1611252978872" duration="4471000" />
       <workItem from="1611261017384" duration="348000" />
       <workItem from="1611272661127" duration="2792000" />
+      <workItem from="1611276772494" duration="6796000" />
     </task>
     <task id="LOCAL-00001" summary="giving up on imagemagick">
       <created>1606187690936</created>
@@ -656,6 +668,7 @@
     <SUITE FILE_PATH="coverage/CaptionX$qtrenderer.coverage" NAME="qtrenderer Coverage Results" MODIFIED="1611025320241" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/caption_bot$main.coverage" NAME="main Coverage Results" MODIFIED="1606184268706" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/CaptionX$sus.coverage" NAME="sus Coverage Results" MODIFIED="1611175143620" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/captionbot$main.coverage" NAME="main Coverage Results" MODIFIED="1611295071287" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/CaptionX$chromiumrender.coverage" NAME="chromiumrender Coverage Results" MODIFIED="1611107683335" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/CaptionX$main.coverage" NAME="main Coverage Results" MODIFIED="1611273027854" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>

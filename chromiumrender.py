@@ -34,7 +34,7 @@ def loadhtml(driver, html):
     # html = html.replace("<base href='./'>", f"<base href='{base}/'>")
     html = f"<base href='{base}/'>" + html
     file = temp_file("html")
-    with open(file, "w+") as f:
+    with open(file, "w+", encoding="UTF-8") as f:
         f.write(html)
     driver.get("file:///" + os.path.abspath(file).replace("\\", "/"))
     return file
@@ -64,6 +64,7 @@ def initdriver():
         driver = webdriver.Chrome("chromedriver87.exe", options=opts)
     else:
         driver = webdriver.Chrome("chromedriver87", options=opts)
+    return driver
 
 
 def html2png(html, png):

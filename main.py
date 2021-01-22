@@ -16,12 +16,12 @@ import humanize
 import sus
 import chromiumrender
 
-# TODO: custom style caption
 # TODO: better help command
 # TODO: stitch media command
 # TODO: concat media command
 # TODO: end video with motivate freeze frame command
 # TODO: attach audio to video command
+# TODO: make and run a test of number of pool workers v speed
 # https://coloredlogs.readthedocs.io/en/latest/api.html#id28
 field_styles = {
     'levelname': {'bold': True, 'color': 'blue'},
@@ -41,6 +41,8 @@ coloredlogs.install(level='INFO', fmt='[%(asctime)s] [%(filename)s:%(funcName)s:
                     datefmt='%m/%d/%Y %I:%M:%S %p', field_styles=field_styles, level_styles=level_styles)
 
 if __name__ == "__main__":
+    if not os.path.exists("temp"):  # cant fucking believe i never had this
+        os.mkdir("temp")
     bot = commands.Bot(command_prefix='$', description='MelMedia')
 
 
@@ -150,6 +152,7 @@ if __name__ == "__main__":
                         return tenor['results'][0]['media'][0]['mp4']['url']
         return None
 
+
     # currently only used for 1 command, might have future uses?
     async def tenorsearch(ctx, gif=False):
         if ctx.message.reference:
@@ -210,7 +213,9 @@ if __name__ == "__main__":
         For any letter not in the original meme, a random slice of the face is selected.
         Based on https://github.com/aechaechaech/Jerma-Imposter-Message-Generator
         """
-        await ctx.reply(file=discord.File(sus.sus(text)))
+        file = sus.sus(text)
+        await ctx.reply(file=discord.File(file))
+        os.remove(file)
 
 
     @bot.command()
@@ -371,6 +376,30 @@ if __name__ == "__main__":
         await improcess(ctx, improcessing.changefps, ["VIDEO", "GIF"], fps)
 
 
+    @bot.command(name="caption", aliases=["cap"])
+    async def captioncommand(ctx, *, caption):
+        """
+        Captions media.
+
+        Parameters:
+            media - any valid media file
+            caption - the caption text
+        """
+        await improcess(ctx, captionfunctions.caption, ["VIDEO", "GIF", "IMAGE"], caption, handleanimated=True,
+                        webengine=True)
+
+    @bot.command(aliases=["bottomcap", "botcap"])
+    async def bottomcaption(ctx, *, caption):
+        """
+        Captions underneath media.
+
+        Parameters:
+            media - any valid media file
+            caption - the caption text
+        """
+        await improcess(ctx, captionfunctions.bottomcaption, ["VIDEO", "GIF", "IMAGE"], caption, handleanimated=True,
+                        webengine=True)
+
     @bot.command()
     async def esmcaption(ctx, *, caption):
         """
@@ -503,30 +532,40 @@ if __name__ == "__main__":
         raise Exception("Exception raised by $error command")
 
 
-    @bot.command(hidden=True)
+    @bot.command(hidden=True, aliases=["stop", "close"])
     @commands.is_owner()
     async def shutdown(ctx):
         await ctx.send("✅ Shutting Down...")
+        logging.log(25, "Shutting Down....")
+        wdriver.close()
+        await bot.logout()
         await bot.close()
+
+
+    def logcommand(cmd):
+        cmd = cmd.replace("\n", "\\n")
+        if len(cmd) > 100:
+            cmd = cmd[:100] + "..."
+        return cmd
 
 
     @bot.listen()
     async def on_command(ctx):
         if isinstance(ctx.channel, discord.DMChannel):
             logging.log(25,
-                        f"@{ctx.message.author.name}#{ctx.message.author.discriminator} ran '{ctx.message.content}' in "
-                        f"DMs")
+                        f"@{ctx.message.author.name}#{ctx.message.author.discriminator} ran "
+                        f"'{logcommand(ctx.message.content)}' in DMs")
         else:
             logging.log(25,
                         f"@{ctx.message.author.name}#{ctx.message.author.discriminator}"
-                        f" ({ctx.message.author.display_name}) ran '{ctx.message.content}' in channel "
+                        f" ({ctx.message.author.display_name}) ran '{logcommand(ctx.message.content)}' in channel "
                         f"#{ctx.channel.name} in server {ctx.guild}")
 
 
     @bot.listen()
     async def on_command_completion(ctx):
         logging.log(35,
-                    f"Command '{ctx.message.content}' by @{ctx.message.author.name}#{ctx.message.author.discriminator} "
+                    f"Command '{logcommand(ctx.message.content)}' by @{ctx.message.author.name}#{ctx.message.author.discriminator} "
                     f"is complete!")
 
 
@@ -564,6 +603,6 @@ if __name__ == "__main__":
     with open('token.txt') as f:  # not on github for obvious reasons
         token = f.read()
     logging.log(25, "Initializing chrome driver...")
-    chromiumrender.initdriver()
+    wdriver = chromiumrender.initdriver()
     logging.log(35, "Chrome driver ready!")
     bot.run(token)
