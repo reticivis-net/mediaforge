@@ -19,7 +19,6 @@ def temp_file(extension="png"):
 # this codebase is FUCKED
 
 master_im = Image.open("imposter.jpg")
-master_string = "when the imposter is sus!"
 
 # the y coordinate for where the text and the face split
 y_coord_split = 22
@@ -67,6 +66,11 @@ def get_text_dimensions(text_string, font):
 
 # get input string
 def sus(input_string: str):
+    """
+    Cuts and slices the popular Jerma sus meme to any message
+    :param input_string: text to make the message with
+    :return: filename of generated image
+    """
     input_string = input_string.lower().replace(":flushed:", "😳")
 
     font = ImageFont.truetype("arial.ttf", 13)
