@@ -31,7 +31,7 @@ POOLPROCESSES = 16
 
 
 def filetostring(f):
-    with open(f, 'r') as file:
+    with open(f, 'r', encoding="UTF-8") as file:
         data = file.read()
     return data
 
@@ -91,7 +91,7 @@ async def get_frame_rate(filename):
 
 # https://superuser.com/questions/650291/how-to-get-video-duration-in-seconds
 async def get_duration(filename):
-    logging.info("Getting FPS...")
+    logging.info("Getting duration...")
     out = await run_command("ffprobe", "-v", "error", "-show_entries", "format=duration", "-of",
                             "default=noprint_wrappers=1:nokey=1", filename)
     return float(out)
@@ -133,7 +133,9 @@ async def assurefilesize(image: str, ctx: discord.ext.commands.Context):
         if size >= 8388119:
             logging.info("Image too big!")
             msg = await ctx.send(f"⚠ Resulting file too big! ({humanize.naturalsize(size)}) Downsizing result...")
-            image = await handleanimated(image, "", captionfunctions.halfsize)
+            imagenew = await handleanimated(image, "", captionfunctions.halfsize, ctx)
+            os.remove(image)
+            image = imagenew
             await msg.delete()
         if os.path.getsize(image) < 8388119:
             return image
@@ -205,9 +207,9 @@ def run_in_exec(func, *args, **kwargs):
     func(*args, **kwargs)
 
 
-async def handleanimated(image: str, caption, capfunction: callable, ctx: discord.ext.commands.Context, webengine):
+async def handleanimated(image: str, caption, capfunction: callable, ctx: discord.ext.commands.Context, webengine=False):
     imty = mediatype(image)
-    logging.info(f" Detected type {imty}.")
+    logging.info(f"Detected type {imty}.")
     if imty is None:
         raise Exception(f"File {image} is invalid!")
     elif imty == "IMAGE":
@@ -216,7 +218,7 @@ async def handleanimated(image: str, caption, capfunction: callable, ctx: discor
         async with renderlock:
             capped = capfunction(image, caption)
         return await compresspng(capped)
-    else:
+    elif imty == "VIDEO" or imty == "GIF":
         frames, name = await ffmpegsplit(image)
         audio = await splitaudio(image)
         fps = await get_frame_rate(image)
