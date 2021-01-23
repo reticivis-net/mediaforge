@@ -36,7 +36,7 @@ level_styles['COMMAND'] = {'color': 4}
 logging.addLevelName(25, "NOTICE")
 logging.addLevelName(35, "SUCCESS")
 logging.addLevelName(21, "COMMAND")
-# recommended level is NOTICE
+# recommended level is NOTICE, if you only want errors set it to WARNING, INFO puts out a lot of stuff
 coloredlogs.install(level='INFO', fmt='[%(asctime)s] [%(filename)s:%(funcName)s:%(lineno)d] '
                                       '%(levelname)s %(message)s',
                     datefmt='%m/%d/%Y %I:%M:%S %p', field_styles=field_styles, level_styles=level_styles)
@@ -111,27 +111,31 @@ if __name__ == "__main__":
                     logging.error(f"Tenor Error! `{tenor['error']}`")
                     return None
                 else:
-                    return await saveurl(tenor['results'][0]['media'][0]['mp4']['url'], "mp4"), m
+                    return await saveurl(tenor['results'][0]['media'][0]['mp4']['url'], "mp4")
             elif m.embeds[0].type in ["image", "video", "audio"]:
-                return await saveurl(m.embeds[0].url), m
+                return await saveurl(m.embeds[0].url)
         if len(m.attachments):
-            return await saveurl(m.attachments[0].url), m
+            return await saveurl(m.attachments[0].url)
         return None
 
 
-    async def imagesearch(ctx):
+    async def imagesearch(ctx, nargs=1):
+        outfiles = []
         if ctx.message.reference:
             m = ctx.message.reference.resolved
             hm = await handlemessagesave(m, ctx)
             if hm is None:
                 return False
             else:
-                return hm
-        else:
-            async for m in ctx.channel.history(limit=50):
-                hm = await handlemessagesave(m, ctx)
-                if hm is not None:
-                    return hm
+                outfiles.append(hm)
+                if len(outfiles) >= nargs:
+                    return outfiles[::-1]
+        async for m in ctx.channel.history(limit=50):
+            hm = await handlemessagesave(m, ctx)
+            if hm is not None:
+                outfiles.append(hm)
+                if len(outfiles) >= nargs:
+                    return outfiles[::-1]
         return False
 
 
@@ -174,26 +178,38 @@ if __name__ == "__main__":
     async def improcess(ctx: discord.ext.commands.Context, func: callable, allowedtypes: list, *args,
                         handleanimated=False, webengine=False):
         async with ctx.channel.typing():
-            file, filemsg = await imagesearch(ctx)
-            if file:
-                if (imtype := improcessing.mediatype(file)) not in allowedtypes:
-                    await filemsg.reply(
-                        f"❌ Media type is {imtype}, this command only accepts: {', '.join(allowedtypes)}")
-                    logging.warning(f"Media type {imtype} is not in {allowedtypes}")
-                    os.remove(file)
+            files = await imagesearch(ctx, len(allowedtypes))
+            if files:
+                for i, file in enumerate(files):
+                    if (imtype := improcessing.mediatype(file)) not in allowedtypes[i]:
+                        await ctx.reply(
+                            f"❌ Media #{i + 1} is {imtype}, it must be: {', '.join(allowedtypes[i])}")
+                        logging.warning(f"Media {i} type {imtype} is not in {allowedtypes[i]}")
+                        for f in files:
+                            os.remove(f)
+                        break
                 else:
                     logging.info("Processing...")
-                    msg = await filemsg.reply("⚙ Processing...", mention_author=False)
-                    if handleanimated:
-                        result = await improcessing.handleanimated(file, *args, func, ctx, webengine)
+                    msg = await ctx.reply("⚙ Processing...", mention_author=False)
+                    if len(files) == 1:
+                        filesforcommand = files[0]
                     else:
-                        result = await func(file, *args)
+                        filesforcommand = files.copy()
+                    if handleanimated:
+                        result = await improcessing.handleanimated(filesforcommand, func, ctx, *args,
+                                                                   webengine=webengine)
+                    else:
+                        result = await func(filesforcommand, *args)
                     result = await improcessing.assurefilesize(result, ctx)
                     logging.info("Uploading...")
                     await msg.edit(content="⚙ Uploading...")
                     await ctx.reply(file=discord.File(result))
                     await msg.delete()
-                    os.remove(file)
+                    for f in files:
+                        try:
+                            os.remove(f)
+                        except FileNotFoundError:
+                            pass
                     os.remove(result)
             else:
                 logging.warning("No media found.")
@@ -265,36 +281,36 @@ if __name__ == "__main__":
 
 
     @bot.command()
-    async def videotogif(ctx):
+    async def togif(ctx):
         """
         Converts a video to a GIF.
 
         Parameters:
             video - any video format FFMPEG supports.
         """
-        await improcess(ctx, improcessing.mp4togif, ["VIDEO"])
+        await improcess(ctx, improcessing.mp4togif, [["VIDEO"]])
 
 
     @bot.command()
-    async def giftovideo(ctx):
+    async def tovideo(ctx):
         """
         Converts a GIF to a video.
 
         Parameters:
             gif - a gif file
         """
-        await improcess(ctx, improcessing.giftomp4, ["GIF"])
+        await improcess(ctx, improcessing.giftomp4, [["GIF"]])
 
 
     @bot.command()
-    async def mediatopng(ctx):
+    async def topng(ctx):
         """
         Converts media to PNG
 
         Parameters:
             media - any valid media file.
         """
-        await improcess(ctx, improcessing.mediatopng, ["VIDEO", "GIF", "IMAGE"])
+        await improcess(ctx, improcessing.mediatopng, [["VIDEO", "GIF", "IMAGE"]])
 
 
     @bot.command(aliases=["pad"])
@@ -305,7 +321,31 @@ if __name__ == "__main__":
         Parameters:
             media - any valid media file.
         """
-        await improcess(ctx, improcessing.pad, ["VIDEO", "GIF", "IMAGE"])
+        await improcess(ctx, improcessing.pad, [["VIDEO", "GIF", "IMAGE"]])
+
+
+    @bot.command()
+    async def imageaudio(ctx):
+        """
+        Combines an image and audio into a video.
+
+        Parameters:
+            media - any valid media file.
+        """
+        await improcess(ctx, improcessing.imageaudio, [["IMAGE"], ["AUDIO"]])
+
+
+    @bot.command(aliases=["concat", "combinev"])
+    async def concatv(ctx):
+        """
+        Combines 2 video files.
+        The output video will take on all of the settings of the FIRST video, and the second
+        video will take on those settings.
+
+        Parameters:
+            media - any valid media file.
+        """
+        await improcess(ctx, improcessing.concatv, [["VIDEO", "GIF"], ["VIDEO", "GIF"]])
 
 
     @bot.command(name="speed")
@@ -318,10 +358,11 @@ if __name__ == "__main__":
             media - any valid media file.
             speed - speed to multiply the video by. must be between 0.5 and 10. defaults to 2.
         """
+        # i want this to allow 0.25 but fuckin atempo's minimum is 0.5
         if not 0.5 <= speed <= 10:
             await ctx.send("⚠ Speed must be between 0.5 and 10")
             return
-        await improcess(ctx, improcessing.speed, ["VIDEO", "GIF"], speed)
+        await improcess(ctx, improcessing.speed, [["VIDEO", "GIF"]], speed)
 
 
     @bot.command()
@@ -332,7 +373,7 @@ if __name__ == "__main__":
         Parameters:
             media - any valid media file.
         """
-        await improcess(ctx, improcessing.reverse, ["VIDEO", "GIF"])
+        await improcess(ctx, improcessing.reverse, [["VIDEO", "GIF"]])
 
 
     @bot.command()
@@ -355,7 +396,7 @@ if __name__ == "__main__":
         if not 0.1 <= qa <= 2:
             await ctx.send("⚠ qa must be between 0.1 and 2.")
             return
-        await improcess(ctx, improcessing.quality, ["VIDEO", "GIF"], crf, qa)
+        await improcess(ctx, improcessing.quality, [["VIDEO", "GIF"]], crf, qa)
 
 
     @bot.command(name="fps")
@@ -374,7 +415,7 @@ if __name__ == "__main__":
         if not 1 <= fps <= 60:
             await ctx.send("⚠ FPS must be between 1 and 60.")
             return
-        await improcess(ctx, improcessing.changefps, ["VIDEO", "GIF"], fps)
+        await improcess(ctx, improcessing.changefps, [["VIDEO", "GIF"]], fps)
 
 
     @bot.command(name="caption", aliases=["cap"])
@@ -386,7 +427,7 @@ if __name__ == "__main__":
             media - any valid media file
             caption - the caption text
         """
-        await improcess(ctx, captionfunctions.caption, ["VIDEO", "GIF", "IMAGE"], caption, handleanimated=True,
+        await improcess(ctx, captionfunctions.caption, [["VIDEO", "GIF", "IMAGE"]], caption, handleanimated=True,
                         webengine=True)
 
 
@@ -399,7 +440,7 @@ if __name__ == "__main__":
             media - any valid media file
             caption - the caption text
         """
-        await improcess(ctx, captionfunctions.bottomcaption, ["VIDEO", "GIF", "IMAGE"], caption, handleanimated=True,
+        await improcess(ctx, captionfunctions.bottomcaption, [["VIDEO", "GIF", "IMAGE"]], caption, handleanimated=True,
                         webengine=True)
 
 
@@ -412,7 +453,7 @@ if __name__ == "__main__":
             media - any valid media file
             caption - the caption text
         """
-        await improcess(ctx, captionfunctions.esmcaption, ["VIDEO", "GIF", "IMAGE"], caption, handleanimated=True,
+        await improcess(ctx, captionfunctions.esmcaption, [["VIDEO", "GIF", "IMAGE"]], caption, handleanimated=True,
                         webengine=True)
 
 
@@ -425,7 +466,7 @@ if __name__ == "__main__":
             media - any valid media file
             caption - the caption text
         """
-        await improcess(ctx, captionfunctions.twittercap, ["VIDEO", "GIF", "IMAGE"], caption, handleanimated=True,
+        await improcess(ctx, captionfunctions.twittercap, [["VIDEO", "GIF", "IMAGE"]], caption, handleanimated=True,
                         webengine=True)
 
 
@@ -450,7 +491,7 @@ if __name__ == "__main__":
         if not 1 <= quality <= 95:
             await ctx.send("⚠ Quality must be between 1 and 95.")
             return
-        await improcess(ctx, captionfunctions.jpeg, ["VIDEO", "GIF", "IMAGE"], [strength, stretch, quality],
+        await improcess(ctx, captionfunctions.jpeg, [["VIDEO", "GIF", "IMAGE"]], [strength, stretch, quality],
                         handleanimated=True)
 
 
@@ -466,7 +507,7 @@ if __name__ == "__main__":
         caption = caption.split("|")
         if len(caption) == 1:
             caption.append("")
-        await improcess(ctx, captionfunctions.motivate, ["VIDEO", "GIF", "IMAGE"], caption,
+        await improcess(ctx, captionfunctions.motivate, [["VIDEO", "GIF", "IMAGE"]], *caption,
                         handleanimated=True, webengine=True)
 
 
@@ -482,7 +523,7 @@ if __name__ == "__main__":
         caption = caption.split("|")
         if len(caption) == 1:
             caption.append("")
-        await improcess(ctx, captionfunctions.meme, ["VIDEO", "GIF", "IMAGE"], caption,
+        await improcess(ctx, captionfunctions.meme, [["VIDEO", "GIF", "IMAGE"]], *caption,
                         handleanimated=True, webengine=True)
 
 

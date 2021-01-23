@@ -18,7 +18,8 @@ def replaceall(text, rep):
 
 
 def sanitizehtml(caption):
-    if isinstance(caption, list):
+    if isinstance(caption, list) or isinstance(caption, tuple):
+        caption = list(caption)
         caption[:] = [c.replace("&", '&amp;').replace("<", '&lt;').replace(">", '&gt;').replace("\"", '&quot;')
                           .replace("'", '&#039;') for c in caption]
     else:
@@ -45,7 +46,7 @@ def caption(image, caption, tosavename=None):
         tosavename = temp_file("png")
     caption = sanitizehtml(caption)
     replacedict = {
-        "CaptionText": caption,
+        "CaptionText": caption[0],
         "rendering/demoimage.png": image
     }
     torender = replaceall(filetostring("mycaption.html"), replacedict)
@@ -58,7 +59,7 @@ def bottomcaption(image, caption, tosavename=None):
         tosavename = temp_file("png")
     caption = sanitizehtml(caption)
     replacedict = {
-        "CaptionText": caption,
+        "CaptionText": caption[0],
         "rendering/demoimage.png": image
     }
     torender = replaceall(filetostring("mycaptionbottom.html"), replacedict)
@@ -99,7 +100,7 @@ def twittercap(image, caption, tosavename=None):
         tosavename = temp_file("png")
     caption = sanitizehtml(caption)
     replacedict = {
-        "CaptionText1": caption,
+        "CaptionText1": caption[0],
         "rendering/demoimage.png": image
     }
     torender = replaceall(filetostring("twittercaption.html"), replacedict)
@@ -107,7 +108,7 @@ def twittercap(image, caption, tosavename=None):
     return tosavename
 
 
-def halfsize(image, caption, tosavename=None):  # caption arg kept here for compatibility with handleanimated()
+def halfsize(image, _, tosavename=None):  # caption arg kept here for compatibility with handleanimated()
 
     if tosavename is None:
         name = temp_file("png")
