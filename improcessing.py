@@ -25,6 +25,7 @@ else:
 
 MAXFRAMES = 1024  # to prevent gigantic mp4s from clogging stuff
 
+
 # renderpool = None
 
 
@@ -68,13 +69,12 @@ async def run_command(*args):
 
     # Progress
     if process.returncode == 0:
-        logging.log(21,
-                    f"PID {process.pid} Done.",
-                    )
+        logging.log(10,f"PID {process.pid} Done.")
     else:
         logging.error(
             f"PID {process.pid} Failed: {args} result: {stderr.decode().strip()}",
         )
+        raise Exception(f"Command {args} failed.")
     result = stdout.decode().strip() + stderr.decode().strip()
     # Result
 
@@ -103,6 +103,12 @@ async def get_duration(filename):
     return float(out)
 
 
+async def get_resolution(filename):
+    out = await run_command("ffprobe", "-v", "error", "-show_entries", "stream=width,height", "-of", "csv=p=0:s=x",
+                            filename)
+    return out.split("x")
+
+
 async def ffmpegsplit(image):
     logging.info("Splitting frames...")
     await run_command("ffmpeg", "-i", image, "-vsync", "1", "-vf", "scale='max(200,iw)':-1",
@@ -124,6 +130,18 @@ async def splitaudio(video):
         return False
 
 
+async def forceaudio(video):
+    ifaudio = await run_command("ffprobe", "-i", video, "-show_streams", "-select_streams", "a", "-loglevel", "error")
+    if ifaudio:
+        return video
+    else:
+        outname = temp_file("mp4")
+        await run_command("ffmpeg", "-f", "lavfi", "-i", "anullsrc", "-i", video, "-c:v", "copy", "-c:a", "aac", "-map",
+                          "0:a", "-map", "1:v", "-shortest", outname)
+        os.remove(video)
+        return outname
+
+
 async def compresspng(png):
     outname = temp_file("png")
     await run_command("pngquant", "--quality=0-80", "--o", outname, png)
@@ -139,7 +157,7 @@ async def assurefilesize(image: str, ctx: discord.ext.commands.Context):
         if size >= 8388119:
             logging.info("Image too big!")
             msg = await ctx.send(f"⚠ Resulting file too big! ({humanize.naturalsize(size)}) Downsizing result...")
-            imagenew = await handleanimated(image, "", captionfunctions.halfsize, ctx)
+            imagenew = await handleanimated(image, captionfunctions.halfsize, ctx)
             os.remove(image)
             image = imagenew
             await msg.delete()
@@ -213,7 +231,7 @@ def run_in_exec(func, *args, **kwargs):
     return func(*args, **kwargs)
 
 
-async def handleanimated(image: str, caption, capfunction: callable, ctx: discord.ext.commands.Context,
+async def handleanimated(image: str, capfunction: callable, ctx: discord.ext.commands.Context, *caption,
                          webengine=False):
     imty = mediatype(image)
     logging.info(f"Detected type {imty}.")
@@ -323,14 +341,9 @@ async def speed(file, sp):
     fps = await get_frame_rate(file)
     duration = await get_duration(file)
     ifaudio = await run_command("ffprobe", "-i", file, "-show_streams", "-select_streams", "a", "-loglevel", "error")
-    if ifaudio:
-        await run_command("ffmpeg", "-i", file, "-filter_complex",
-                          f"[0:v]setpts=PTS/{sp},fps={fps}[v];[0:a]atempo={sp}[a]",
-                          "-map", "[v]", "-map", "[a]", "-t", str(duration / float(sp)), outname)
-    else:
-        await run_command("ffmpeg", "-i", file, "-filter_complex",
-                          f"[0:v]setpts=PTS/{sp},fps={fps}[v]",
-                          "-map", "[v]", "-t", str(duration / float(sp)), outname)
+    await run_command("ffmpeg", "-i", await forceaudio(file), "-filter_complex",
+                      f"[0:v]setpts=PTS/{sp},fps={fps}[v];[0:a]atempo={sp}[a]",
+                      "-map", "[v]", "-map", "[a]", "-t", str(duration / float(sp)), outname)
     if mediatype(file) == "GIF":
         outname = await mp4togif(outname)
     return outname
@@ -338,11 +351,7 @@ async def speed(file, sp):
 
 async def reverse(file):
     outname = temp_file("mp4")
-    ifaudio = await run_command("ffprobe", "-i", file, "-show_streams", "-select_streams", "a", "-loglevel", "error")
-    if ifaudio:
-        await run_command("ffmpeg", "-i", file, "-vf", "reverse", "-af", "areverse", outname)
-    else:
-        await run_command("ffmpeg", "-i", file, "-vf", "reverse", outname)
+    await run_command("ffmpeg", "-i", await forceaudio(file), "-vf", "reverse", "-af", "areverse", outname)
     if mediatype(file) == "GIF":
         outname = await mp4togif(outname)
     return outname
@@ -351,10 +360,7 @@ async def reverse(file):
 async def quality(file, crf, qa):
     outname = temp_file("mp4")
     ifaudio = await run_command("ffprobe", "-i", file, "-show_streams", "-select_streams", "a", "-loglevel", "error")
-    if ifaudio:
-        await run_command("ffmpeg", "-i", file, "-crf", str(crf), "-c:a", "aac", "-q:a", str(qa), outname)
-    else:
-        await run_command("ffmpeg", "-i", file, "-crf", str(crf), outname)
+    await run_command("ffmpeg", "-i", await forceaudio(file), "-crf", str(crf), "-c:a", "aac", "-q:a", str(qa), outname)
     if mediatype(file) == "GIF":
         outname = await mp4togif(outname)
     return outname
@@ -378,4 +384,37 @@ async def pad(file):
                       "pad=width='max(iw,ih)':height='max(iw,ih)':x='(ih-iw)/2':y='(iw-ih)/2':color=white", outname)
     if mt == "GIF":
         outname = await mp4togif(outname)
+    return outname
+
+
+async def imageaudio(files):
+    audio = files[1]
+    image = files[0]
+    outname = temp_file("mp4")
+    await run_command("ffmpeg", "-loop", "1", "-i", image, "-i", audio, "-c:v", "libx264", "-tune",
+                      "stillimage", "-c:a", "aac", "-b:a", "192k", "-pix_fmt", "yuv420p", "-shortest", outname)
+    return outname
+
+
+async def concatv(files):
+    video0 = await forceaudio(files[0])
+    fixedvideo0 = temp_file("mp4")
+    await run_command("ffmpeg", "-i", video0, "-c:v", "libx264", "-c:a", "aac", fixedvideo0)
+    video1 = await forceaudio(files[1])
+    w, h = await get_resolution(video0)
+    fps = await get_frame_rate(video0)
+    fixedvideo1 = temp_file("mp4")
+
+    # https://superuser.com/a/1136305/1001487
+    await run_command("ffmpeg", "-i", video1, "-vf",
+                      f"scale={w}:{h}:force_original_aspect_ratio=decrease,pad={w}:{h}:-2:-2:color=black", "-c:v",
+                      "libx264", "-c:a", "aac", fixedvideo1)
+    fixedfixedvideo1 = await changefps(fixedvideo1, fps)
+    concatdemuxer = temp_file("txt")
+    with open(concatdemuxer, "w+") as f:
+        f.write(f"file '{fixedvideo0}'\nfile '{fixedfixedvideo1}'".replace("temp/", ""))
+    outname = temp_file("mp4")
+    await run_command("ffmpeg", "-f", "concat",  "-i", concatdemuxer, "-c:v", "libx264", "-c:a", "aac", outname)
+    for file in [video0, video1, fixedvideo1, concatdemuxer]:
+        os.remove(file)
     return outname

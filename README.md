@@ -21,12 +21,12 @@ discord bot inspired by [esmBot](https://github.com/esmBot/esmBot) mainly for me
 the bot uses many CLI programs for media processing.
 
 - FFmpeg - not included but [easily installable on windows and linux](https://ffmpeg.org/download.html)
-- gifski - windows executable and pngquant's (dependency) executable are included. linux
-  version [downloadable from the website](https://gif.ski/)
+- gifski - windows executable is included. linux version [downloadable from the website](https://gif.ski/)
+- pngquant - windows executable is included. installable on linux with `sudo apt-get install pngquant`
 - ChromeDriver - ChromeDriver 87.0.4280.88 for both windows and linux are included. linux isn't verified to work but it
   probably does. [here's the website anyways.](https://chromedriver.chromium.org/)
-    - also chromedriver requires there to be some form of chrome on your system that it can find. i only use it headless
-      so it should work on headless machines probably
+    - also chromedriver requires there to be some form of chrome on your system that it can find. i only use it
+      headless, so it should work on headless machines probably
 - I'll also probably implement ImageMagick in the
   future [downloadable here](https://imagemagick.org/script/download.php)
 
