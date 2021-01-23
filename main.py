@@ -19,10 +19,8 @@ import chromiumrender
 
 # TODO: better help command
 # TODO: stitch media command
-# TODO: concat media command
 # TODO: end video with motivate freeze frame command
 # TODO: attach audio to video command
-# TODO: make and run a test of number of pool workers v speed
 # https://coloredlogs.readthedocs.io/en/latest/api.html#id28
 field_styles = {
     'levelname': {'bold': True, 'color': 'blue'},
@@ -70,32 +68,30 @@ if __name__ == "__main__":
     async def saveurl(url, extension=None):
         if extension is None:
             extension = url.split(".")[-1].split("?")[0]
-        while True:
-            name = f"temp/{get_random_string(8)}.{extension}"
-            if not os.path.exists(name):
-                async with aiohttp.ClientSession() as session:
-                    async with session.head(url) as resp:
-                        if resp.status == 200:
-                            if "Content-Length" not in resp.headers:
-                                raise Exception("Cannot determine filesize!")
-                            size = int(resp.headers["Content-Length"])
-                            logging.info(f"Url is {humanize.naturalsize(size)}")
-                            if 50000000 < size:
-                                raise Exception(f"File is too big ({humanize.naturalsize(size)})!")
-                        else:
-                            logging.error(f"aiohttp status {resp.status}")
-                            logging.error(f"aiohttp status {await resp.read()}")
-                    async with session.get(url) as resp:
-                        if resp.status == 200:
-                            logging.info(f"Saving url {url} as {name}")
-                            f = await aiofiles.open(name, mode='wb')
-                            await f.write(await resp.read())
-                            await f.close()
-                        else:
-                            logging.error(f"aiohttp status {resp.status}")
-                            logging.error(f"aiohttp status {await resp.read()}")
+        name = improcessing.temp_file(extension)
+        async with aiohttp.ClientSession() as session:
+            async with session.head(url) as resp:
+                if resp.status == 200:
+                    if "Content-Length" not in resp.headers:
+                        raise Exception("Cannot determine filesize!")
+                    size = int(resp.headers["Content-Length"])
+                    logging.info(f"Url is {humanize.naturalsize(size)}")
+                    if 50000000 < size:
+                        raise Exception(f"File is too big ({humanize.naturalsize(size)})!")
+                else:
+                    logging.error(f"aiohttp status {resp.status}")
+                    logging.error(f"aiohttp status {await resp.read()}")
+            async with session.get(url) as resp:
+                if resp.status == 200:
+                    logging.info(f"Saving url {url} as {name}")
+                    f = await aiofiles.open(name, mode='wb')
+                    await f.write(await resp.read())
+                    await f.close()
+                else:
+                    logging.error(f"aiohttp status {resp.status}")
+                    logging.error(f"aiohttp status {await resp.read()}")
 
-                return name
+        return name
 
 
     async def handlemessagesave(m, ctx: discord.ext.commands.Context):
@@ -106,7 +102,6 @@ if __name__ == "__main__":
                     f"https://api.tenor.com/v1/gifs?ids={m.embeds[0].url.split('-').pop()}&key={tenorkey}")
                 tenor = json.loads(tenor)
                 if 'error' in tenor:
-                    print(tenor['error'])
                     await ctx.reply(f":bangbang: Tenor Error! `{tenor['error']}`")
                     logging.error(f"Tenor Error! `{tenor['error']}`")
                     return None
@@ -147,7 +142,7 @@ if __name__ == "__main__":
                     f"https://api.tenor.com/v1/gifs?ids={m.embeds[0].url.split('-').pop()}&key={tenorkey}")
                 tenor = json.loads(tenor)
                 if 'error' in tenor:
-                    print(tenor['error'])
+                    logging.error(tenor['error'])
                     await ctx.send(f":bangbang: Tenor Error! `{tenor['error']}`")
                     return False
                 else:
