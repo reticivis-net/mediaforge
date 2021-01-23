@@ -69,7 +69,7 @@ async def run_command(*args):
 
     # Progress
     if process.returncode == 0:
-        logging.log(10,f"PID {process.pid} Done.")
+        logging.log(10, f"PID {process.pid} Done.")
     else:
         logging.error(
             f"PID {process.pid} Failed: {args} result: {stderr.decode().strip()}",
@@ -136,8 +136,8 @@ async def forceaudio(video):
         return video
     else:
         outname = temp_file("mp4")
-        await run_command("ffmpeg", "-f", "lavfi", "-i", "anullsrc", "-i", video, "-c:v", "copy", "-c:a", "aac", "-map",
-                          "0:a", "-map", "1:v", "-shortest", outname)
+        await run_command("ffmpeg", "-f", "lavfi", "-i", "anullsrc", "-i", video, "-c:v", "libx264", "-c:a", "aac",
+                          "-map", "0:a", "-map", "1:v", "-shortest", outname)
         os.remove(video)
         return outname
 
@@ -212,9 +212,6 @@ def run_in_executor(f):  # wrapper to prevent intense non-async functions from b
     return inner
 
 
-renderlock = asyncio.Lock()
-
-
 @run_in_executor
 def unblockpool(workers, *args, initializer=None):
     if initializer is None:
@@ -240,10 +237,8 @@ async def handleanimated(image: str, capfunction: callable, ctx: discord.ext.com
     elif imty == "IMAGE":
         logging.info(f"Processing frame...")
         image = minimagesize(image, 200)
-        async with renderlock:
-            result = renderpool.apply_async(capfunction, (image, caption))
-            capped = await run_in_exec(result.get)
-            print(capped)
+        result = renderpool.apply_async(capfunction, (image, caption))
+        capped = await run_in_exec(result.get)
         return await compresspng(capped)
     elif imty == "VIDEO" or imty == "GIF":
         frames, name = await ffmpegsplit(image)
@@ -338,38 +333,41 @@ async def ffprobe(file):
 # TODO: some way to preserve gif transparency?
 async def speed(file, sp):
     outname = temp_file("mp4")
+    mt = mediatype(file)
     fps = await get_frame_rate(file)
     duration = await get_duration(file)
-    ifaudio = await run_command("ffprobe", "-i", file, "-show_streams", "-select_streams", "a", "-loglevel", "error")
     await run_command("ffmpeg", "-i", await forceaudio(file), "-filter_complex",
                       f"[0:v]setpts=PTS/{sp},fps={fps}[v];[0:a]atempo={sp}[a]",
                       "-map", "[v]", "-map", "[a]", "-t", str(duration / float(sp)), outname)
-    if mediatype(file) == "GIF":
+    if mt == "GIF":
         outname = await mp4togif(outname)
     return outname
 
 
 async def reverse(file):
+    mt = mediatype(file)
     outname = temp_file("mp4")
     await run_command("ffmpeg", "-i", await forceaudio(file), "-vf", "reverse", "-af", "areverse", outname)
-    if mediatype(file) == "GIF":
+    if mt == "GIF":
         outname = await mp4togif(outname)
     return outname
 
 
 async def quality(file, crf, qa):
+    mt = mediatype(file)
     outname = temp_file("mp4")
     ifaudio = await run_command("ffprobe", "-i", file, "-show_streams", "-select_streams", "a", "-loglevel", "error")
     await run_command("ffmpeg", "-i", await forceaudio(file), "-crf", str(crf), "-c:a", "aac", "-q:a", str(qa), outname)
-    if mediatype(file) == "GIF":
+    if mt == "GIF":
         outname = await mp4togif(outname)
     return outname
 
 
 async def changefps(file, fps):
+    mt = mediatype(file)
     outname = temp_file("mp4")
     await run_command("ffmpeg", "-i", file, "-filter:v", f"fps=fps={fps}", outname)
-    if mediatype(file) == "GIF":
+    if mt == "GIF":
         outname = await mp4togif(outname)
     return outname
 
@@ -414,7 +412,7 @@ async def concatv(files):
     with open(concatdemuxer, "w+") as f:
         f.write(f"file '{fixedvideo0}'\nfile '{fixedfixedvideo1}'".replace("temp/", ""))
     outname = temp_file("mp4")
-    await run_command("ffmpeg", "-f", "concat",  "-i", concatdemuxer, "-c:v", "libx264", "-c:a", "aac", outname)
+    await run_command("ffmpeg", "-f", "concat", "-i", concatdemuxer, "-c:v", "libx264", "-c:a", "aac", outname)
     for file in [video0, video1, fixedvideo1, concatdemuxer]:
         os.remove(file)
     return outname

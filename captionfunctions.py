@@ -33,7 +33,7 @@ def esmcaption(image, caption, tosavename=None):
         tosavename = temp_file("png")
     caption = sanitizehtml(caption)
     replacedict = {
-        "CaptionText": caption,
+        "CaptionText": caption[0],
         "rendering/demoimage.png": image
     }
     torender = replaceall(filetostring("esmcaption.html"), replacedict)
