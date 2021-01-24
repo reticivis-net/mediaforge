@@ -8,14 +8,10 @@ import random
 import string
 import sys
 from multiprocessing import Pool
-
 import discord.ext
 from PIL import Image, UnidentifiedImageError
 import captionfunctions
 import humanize
-
-# from multiprocessing import log_to_stderr
-# log_to_stderr(logging.DEBUG)
 import chromiumrender
 
 if sys.platform == "win32":  # this hopefully wont cause any problems :>
@@ -69,7 +65,8 @@ async def run_command(*args):
 
     # Progress
     if process.returncode == 0:
-        logging.log(10, f"PID {process.pid} Done.")
+        logging.debug(f"PID {process.pid} Done.")
+        logging.debug(f"Results: {stdout.decode().strip() + stderr.decode().strip()}")
     else:
         logging.error(
             f"PID {process.pid} Failed: {args} result: {stderr.decode().strip()}",
@@ -228,7 +225,7 @@ def run_in_exec(func, *args, **kwargs):
     return func(*args, **kwargs)
 
 
-async def handleanimated(image: str, capfunction: callable, ctx: discord.ext.commands.Context, *caption,
+async def handleanimated(image: str, capfunction: callable, ctx, *caption,
                          webengine=False):
     imty = mediatype(image)
     logging.info(f"Detected type {imty}.")
@@ -357,7 +354,7 @@ async def quality(file, crf, qa):
     mt = mediatype(file)
     outname = temp_file("mp4")
     ifaudio = await run_command("ffprobe", "-i", file, "-show_streams", "-select_streams", "a", "-loglevel", "error")
-    await run_command("ffmpeg", "-i", await forceaudio(file), "-crf", str(crf), "-c:a", "aac", "-q:a", str(qa), outname)
+    await run_command("ffmpeg", "-i", await forceaudio(file), "-crf", str(crf), "-c:a", "aac", "-ar", str(qa), outname)
     if mt == "GIF":
         outname = await mp4togif(outname)
     return outname
@@ -389,15 +386,16 @@ async def imageaudio(files):
     audio = files[1]
     image = files[0]
     outname = temp_file("mp4")
-    await run_command("ffmpeg", "-loop", "1", "-i", image, "-i", audio, "-c:v", "libx264", "-tune",
-                      "stillimage", "-c:a", "aac", "-b:a", "192k", "-pix_fmt", "yuv420p", "-shortest", outname)
+    duration = await get_duration(audio)  # it is a couple seconds too long without it :(
+    await run_command("ffmpeg", "-i", audio, "-loop", "1", "-i", image, "-c:v", "libx264",
+                      "-c:a", "aac", "-shortest", "-t", str(duration), outname)
     return outname
 
 
 async def concatv(files):
     video0 = await forceaudio(files[0])
     fixedvideo0 = temp_file("mp4")
-    await run_command("ffmpeg", "-i", video0, "-c:v", "libx264", "-c:a", "aac", fixedvideo0)
+    await run_command("ffmpeg", "-i", video0, "-c:v", "libx264", "-c:a", "aac", "-ar", "48000", fixedvideo0)
     video1 = await forceaudio(files[1])
     w, h = await get_resolution(video0)
     fps = await get_frame_rate(video0)
@@ -406,7 +404,7 @@ async def concatv(files):
     # https://superuser.com/a/1136305/1001487
     await run_command("ffmpeg", "-i", video1, "-vf",
                       f"scale={w}:{h}:force_original_aspect_ratio=decrease,pad={w}:{h}:-2:-2:color=black", "-c:v",
-                      "libx264", "-c:a", "aac", fixedvideo1)
+                      "libx264", "-c:a", "aac", "-ar", "48000", fixedvideo1)
     fixedfixedvideo1 = await changefps(fixedvideo1, fps)
     concatdemuxer = temp_file("txt")
     with open(concatdemuxer, "w+") as f:
@@ -416,3 +414,35 @@ async def concatv(files):
     for file in [video0, video1, fixedvideo1, concatdemuxer]:
         os.remove(file)
     return outname
+
+
+async def freezemotivate(files, *caption):
+    if isinstance(files, list):  # audio specified
+        video = files[0]
+        audio = files[1]
+    else:  # just default to song lol!
+        video = files
+        audio = "rendering/what.mp3"
+    framecount = await run_command('ffprobe', '-v', 'error', '-count_frames', '-select_streams', 'v:0', '-show_entries',
+                                   'stream=nb_read_frames', '-of', 'default=nokey=1:noprint_wrappers=1', video)
+    framecount = int(framecount)
+    lastframe = temp_file("png")
+    await run_command("ffmpeg", "-i", video, "-vf", f"select='eq(n,{framecount - 1})'", "-vframes", "1", lastframe)
+    clastframe = await handleanimated(lastframe, captionfunctions.motivate, None, *caption)
+    freezeframe = await imageaudio([clastframe, audio])
+    final = await concatv([video, freezeframe])
+    return final
+
+
+async def trim(file, length):
+    mt = mediatype(file)
+    exts = {
+        "AUDIO": "mp3",
+        "VIDEO": "mp4",
+        "GIF": "mp4"
+    }
+    out = temp_file(exts[mt])
+    await run_command("ffmpeg", "-i", file, "-t", str(length), out)
+    if mt == "GIF":
+        out = await mp4togif(out)
+    return out

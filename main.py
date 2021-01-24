@@ -1,7 +1,6 @@
 import glob
 import json
 import logging
-import multiprocessing
 import os
 import random
 import re
@@ -15,12 +14,10 @@ import aiohttp
 import aiofiles
 import humanize
 import sus
-import chromiumrender
 
 # TODO: better help command
 # TODO: stitch media command
-# TODO: end video with motivate freeze frame command
-# TODO: attach audio to video command
+# TODO: overlay media command
 # https://coloredlogs.readthedocs.io/en/latest/api.html#id28
 field_styles = {
     'levelname': {'bold': True, 'color': 'blue'},
@@ -42,7 +39,7 @@ coloredlogs.install(level='INFO', fmt='[%(asctime)s] [%(filename)s:%(funcName)s:
 if __name__ == "__main__":
     if not os.path.exists("temp"):  # cant fucking believe i never had this
         os.mkdir("temp")
-    bot = commands.Bot(command_prefix='$', description='MelMedia')
+    bot = commands.Bot(command_prefix='$', description='CaptionX')
 
 
     @bot.event
@@ -211,374 +208,442 @@ if __name__ == "__main__":
                 await ctx.send("❌ No file found.")
 
 
-    @bot.command()
-    async def attributions(ctx):
-        """Lists most libraries and programs this bot uses."""
-        with open("attributions.txt", "r") as f:
-            await ctx.send(f.read())
+    class Caption(commands.Cog, name="Caption Commands"):
+        def __init__(self, bot):
+            self.bot = bot
+
+        @commands.command()
+        async def motivate(self, ctx, *, caption):
+            """
+            Captions media in the style of demotivational posters.
+
+            Parameters:
+                media - any valid media file
+                caption - the caption texts. divide the top text from the bottom text with a | character.
+            """
+            caption = caption.split("|")
+            if len(caption) == 1:
+                caption.append("")
+            await improcess(ctx, captionfunctions.motivate, [["VIDEO", "GIF", "IMAGE"]], *caption,
+                            handleanimated=True, webengine=True)
+
+        @commands.command()
+        async def meme(self, ctx, *, caption):
+            """
+            Captions media in the style of top text + bottom text memes.
+
+            Parameters:
+                media - any valid media file
+                caption - the caption texts. divide the top text from the bottom text with a | character.
+            """
+            caption = caption.split("|")
+            if len(caption) == 1:
+                caption.append("")
+            await improcess(ctx, captionfunctions.meme, [["VIDEO", "GIF", "IMAGE"]], *caption,
+                            handleanimated=True, webengine=True)
+
+        @commands.command(name="caption", aliases=["cap"])
+        async def captioncommand(self, ctx, *, caption):
+            """
+            Captions media.
+
+            Parameters:
+                media - any valid media file
+                caption - the caption text
+            """
+            await improcess(ctx, captionfunctions.caption, [["VIDEO", "GIF", "IMAGE"]], caption, handleanimated=True,
+                            webengine=True)
+
+        @commands.command()
+        async def stuff(self, ctx, *, caption):
+            """
+            Captions media in the style of the "i'm stuff" meme
+
+            Parameters:
+                media - any valid media file
+                caption - the caption text
+            """
+            await improcess(ctx, captionfunctions.stuff, [["VIDEO", "GIF", "IMAGE"]], caption, handleanimated=True,
+                            webengine=True)
+
+        @commands.command()
+        async def stuffstretch(self, ctx, *, caption):
+            """
+            Alternate version of $stuff
+            it's not a bug... its a feature™!
+
+            Parameters:
+                media - any valid media file
+                caption - the caption text
+            """
+            await improcess(ctx, captionfunctions.stuffstretch, [["VIDEO", "GIF", "IMAGE"]], caption,
+                            handleanimated=True,
+                            webengine=True)
+
+        @commands.command(aliases=["bottomcap", "botcap"])
+        async def bottomcaption(self, ctx, *, caption):
+            """
+            Captions underneath media.
+
+            Parameters:
+                media - any valid media file
+                caption - the caption text
+            """
+            await improcess(ctx, captionfunctions.bottomcaption, [["VIDEO", "GIF", "IMAGE"]], caption,
+                            handleanimated=True,
+                            webengine=True)
+
+        @commands.command()
+        async def esmcaption(self, ctx, *, caption):
+            """
+            Captions media in the style of Essem's esmBot.
+
+            Parameters:
+                media - any valid media file
+                caption - the caption text
+            """
+            await improcess(ctx, captionfunctions.esmcaption, [["VIDEO", "GIF", "IMAGE"]], caption, handleanimated=True,
+                            webengine=True)
+
+        @commands.command()
+        async def twittercaption(self, ctx, *, caption):
+            """
+            Captions media in the style of a Twitter screenshot.
+
+            Parameters:
+                media - any valid media file
+                caption - the caption text
+            """
+            await improcess(ctx, captionfunctions.twittercap, [["VIDEO", "GIF", "IMAGE"]], caption, handleanimated=True,
+                            webengine=True)
+
+        @commands.command()
+        async def freezemotivate(self, ctx, *, caption):
+            """
+            Ends video with a freeze frame from $motivate.
+
+            Parameters:
+                caption - the caption text
+                video - a video or gif
+            """
+            caption = caption.split("|")
+            if len(caption) == 1:
+                caption.append("")
+            await improcess(ctx, improcessing.freezemotivate, [["VIDEO", "GIF"]], *caption)
+
+        @commands.command()
+        async def freezemotivateaudio(self, ctx, *, caption):
+            # TODO: merge this into freezemotivate
+            """
+            Ends video with a freeze frame from $motivate with custom audio.
+
+            Parameters:
+                caption - the caption text
+                video - a video or gif
+                audio - an audio file.
+            """
+            caption = caption.split("|")
+            if len(caption) == 1:
+                caption.append("")
+            await improcess(ctx, improcessing.freezemotivate, [["VIDEO", "GIF"], ["AUDIO"]], *caption)
 
 
-    @bot.command(aliases=['sus', 'imposter'])
-    async def jermatext(ctx, *, text="when the imposter is sus!😳"):
-        """
-        Cut and slice the popular Jerma sus meme to any message
-        For any letter not in the original meme, a random slice of the face is selected.
-        Based on https://github.com/aechaechaech/Jerma-Imposter-Message-Generator
-        """
-        file = sus.sus(text)
-        await ctx.reply(file=discord.File(file))
-        os.remove(file)
+    class Media(commands.Cog, name="Media Processing"):
+        def __init__(self, bot):
+            self.bot = bot
+
+        @commands.command(aliases=["pad"])
+        async def square(self, ctx):
+            """
+            Pads media into a square shape.
+
+            Parameters:
+                media - any valid media file.
+            """
+            await improcess(ctx, improcessing.pad, [["VIDEO", "GIF", "IMAGE"]])
+
+        @commands.command()
+        async def imageaudio(self, ctx):
+            """
+            Combines an image and audio into a video.
+
+            Parameters:
+                image - an image file
+                audio - an audio file
+            """
+            await improcess(ctx, improcessing.imageaudio, [["IMAGE"], ["AUDIO"]])
+
+        @commands.command(aliases=["concat", "combinev"])
+        async def concatv(self, ctx):
+            """
+            Combines 2 video files.
+            The output video will take on all of the settings of the FIRST video, and the second
+            video will take on those settings.
+
+            Parameters:
+                video1 - a video or gif
+                video2 - a video or gif
+            """
+            await improcess(ctx, improcessing.concatv, [["VIDEO", "GIF"], ["VIDEO", "GIF"]])
+
+        @commands.command(name="speed")
+        async def spcommand(self, ctx, speed: float = 2):
+            """
+            Changes the speed of media.
+            This command preserves the original FPS, which means speeding up will drop frames. See $fps.
+
+            Parameters:
+                media - any valid media file.
+                speed - speed to multiply the video by. must be between 0.5 and 10. defaults to 2.
+            """
+            # i want this to allow 0.25 but fuckin atempo's minimum is 0.5
+            if not 0.5 <= speed <= 10:
+                await ctx.send("⚠ Speed must be between 0.5 and 10")
+                return
+            await improcess(ctx, improcessing.speed, [["VIDEO", "GIF"]], speed)
+
+        @commands.command()
+        async def reverse(self, ctx):
+            """
+            Reverses media.
+
+            Parameters:
+                video - a video or gif
+            """
+            await improcess(ctx, improcessing.reverse, [["VIDEO", "GIF"]])
+
+        @commands.command()
+        async def compressv(self, ctx, crf: float = 51, qa: float = 8000):
+            """
+            Makes videos terrible quality.
+            The strange ranges on the numbers are because they are quality settings in FFmpeg's encoding.
+            CRF info is found at https://trac.ffmpeg.org/wiki/Encode/H.264#crf
+
+            Parameters:
+                video - a video or gif
+                crf - Controls video quality. Higher is worse quality. must be between 28 and 51. defaults to 51.
+                qa - Audio sample rate in Hz. lower is worse quality. must be between 8000 and 44100. defaults to 8000
+
+            """
+            if not 28 <= crf <= 51:
+                await ctx.send("⚠ CRF must be between 28 and 51.")
+                return
+            if not 8000 <= qa <= 44100:
+                await ctx.send("⚠ qa must be between 8000 and 44100.")
+                return
+            await improcess(ctx, improcessing.quality, [["VIDEO", "GIF"]], crf, qa)
+
+        @commands.command(name="fps")
+        async def fpschange(self, ctx, fps: float = 30):
+            """
+            Changes the FPS of media.
+            This command keeps the speed the same.
+            BEWARE: Changing the FPS of gifs can create strange results due to the strange way GIFs store FPS data.
+            GIFs are only stable at certain FPS values. These include 50, 30, 15, 10, and others.
+            An important reminder that by default tenor "gifs" are interpreted as mp4s, which do not suffer this problem.
+
+            Parameters:
+                video - a video or gif
+                fps - FPS to change the video to. must be between 1 and 60. defaults to 30.
+            """
+            if not 1 <= fps <= 60:
+                await ctx.send("⚠ FPS must be between 1 and 60.")
+                return
+            await improcess(ctx, improcessing.changefps, [["VIDEO", "GIF"]], fps)
+
+        @commands.command()
+        async def trim(self, ctx, length: int):
+            """
+            Trims media.
+
+            Parameters:
+                media - video, audio, or gif.
+                length - seconds to trim it to
+            """
+            await improcess(ctx, improcessing.trim, [["VIDEO", "GIF", "AUDIO"]], length)
 
 
-    @bot.command()
-    async def emojiurl(ctx, *, msg):
-        """
-        Extracts the raw file from up to 5 custom emojis.
-        Each emoji is sent as a separate message intentionally to allow replying with a media command.
+    class Conversion(commands.Cog, name="Media Conversion"):
+        def __init__(self, bot):
+            self.bot = bot
 
-        Parameters:
-            msg - any text that contains at least one custom emoji.
-        """
-        urls = []
-        emojiregex = "<(?P<animated>a?):(?P<name>[a-zA-Z0-9_]{2,32}):(?P<id>[0-9]{18,22})>"
-        for i, match in enumerate(re.finditer(emojiregex, msg)):
-            if i == 5:
-                break
-            emojiid = int(match.group(3))
-            anim = bool(match.group(1))
-            url = str(discord.PartialEmoji(id=emojiid, name="", animated=anim).url)
-            urls.append(url)
-        if urls:
-            for url in urls:
-                await ctx.send(url)
-        else:
-            await ctx.send("⚠ Your message doesn't contain any custom emojis!")
+        @commands.command()
+        async def jpeg(self, ctx, strength: int = 30, stretch: int = 20, quality: int = 10):
+            """
+            Makes media into a low quality jpeg
 
+            Parameters:
+                media - any valid media file
+                strength - amount of times to jpegify image. must be between 1 and 100. defaults to 30.
+                stretch - randomly stretch the image by this number on each jpegification.
+                can cause strange effects on videos. must be between 0 and 40. defaults to 20.
+                quality - quality of JPEG compression. must be between 1 and 95. defaults to 10.
+            """
+            if not 0 < strength <= 100:
+                await ctx.send("⚠ Strength must be between 0 and 100.")
+                return
+            if not 0 <= stretch <= 40:
+                await ctx.send("⚠ Stretch must be between 0 and 40.")
+                return
+            if not 1 <= quality <= 95:
+                await ctx.send("⚠ Quality must be between 1 and 95.")
+                return
+            await improcess(ctx, captionfunctions.jpeg, [["VIDEO", "GIF", "IMAGE"]], strength, stretch, quality,
+                            handleanimated=True)
 
-    @bot.command()
-    async def tenorgif(ctx):
-        """
-        Sends the GIF url for a tenor gif.
-        By default, tenor gifs are interpreted as MP4 files due to their superior quality.
-        This command gets the gif straight from tenor, making it faster than $videotogif,
-        however, some tenor gifs can be lower fps/quality than the converted video.
+        @commands.command()
+        async def togif(self, ctx):
+            """
+            Converts a video to a GIF.
 
-        Parameters:
-            gif - a valid tenor URL
-        """
-        logging.info("Getting tenor gif...")
-        file = await tenorsearch(ctx, True)
-        if file:
-            await ctx.send(file)
-            logging.info("Complete!")
-        else:
-            await ctx.send("❌ No tenor gif found.")
+            Parameters:
+                video - a video file
+            """
+            await improcess(ctx, improcessing.mp4togif, [["VIDEO"]])
 
+        @commands.command()
+        async def tenorgif(self, ctx):
+            """
+            Sends the GIF url for a tenor gif.
+            By default, tenor gifs are interpreted as MP4 files due to their superior quality.
+            This command gets the gif straight from tenor, making it faster than $videotogif,
+            however, some tenor gifs can be lower fps/quality than the converted video.
 
-    @bot.command()
-    async def togif(ctx):
-        """
-        Converts a video to a GIF.
-
-        Parameters:
-            video - any video format FFMPEG supports.
-        """
-        await improcess(ctx, improcessing.mp4togif, [["VIDEO"]])
-
-
-    @bot.command()
-    async def tovideo(ctx):
-        """
-        Converts a GIF to a video.
-
-        Parameters:
-            gif - a gif file
-        """
-        await improcess(ctx, improcessing.giftomp4, [["GIF"]])
-
-
-    @bot.command()
-    async def topng(ctx):
-        """
-        Converts media to PNG
-
-        Parameters:
-            media - any valid media file.
-        """
-        await improcess(ctx, improcessing.mediatopng, [["VIDEO", "GIF", "IMAGE"]])
-
-
-    @bot.command(aliases=["pad"])
-    async def square(ctx):
-        """
-        Pads media into a square shape.
-
-        Parameters:
-            media - any valid media file.
-        """
-        await improcess(ctx, improcessing.pad, [["VIDEO", "GIF", "IMAGE"]])
-
-
-    @bot.command()
-    async def imageaudio(ctx):
-        """
-        Combines an image and audio into a video.
-
-        Parameters:
-            media - any valid media file.
-        """
-        await improcess(ctx, improcessing.imageaudio, [["IMAGE"], ["AUDIO"]])
-
-
-    @bot.command(aliases=["concat", "combinev"])
-    async def concatv(ctx):
-        """
-        Combines 2 video files.
-        The output video will take on all of the settings of the FIRST video, and the second
-        video will take on those settings.
-
-        Parameters:
-            media - any valid media file.
-        """
-        await improcess(ctx, improcessing.concatv, [["VIDEO", "GIF"], ["VIDEO", "GIF"]])
-
-
-    @bot.command(name="speed")
-    async def spcommand(ctx, speed: float = 2):
-        """
-        Changes the speed of media.
-        This command preserves the original FPS, which means speeding up will drop frames. See $fps.
-
-        Parameters:
-            media - any valid media file.
-            speed - speed to multiply the video by. must be between 0.5 and 10. defaults to 2.
-        """
-        # i want this to allow 0.25 but fuckin atempo's minimum is 0.5
-        if not 0.5 <= speed <= 10:
-            await ctx.send("⚠ Speed must be between 0.5 and 10")
-            return
-        await improcess(ctx, improcessing.speed, [["VIDEO", "GIF"]], speed)
-
-
-    @bot.command()
-    async def reverse(ctx):
-        """
-        Reverses media.
-
-        Parameters:
-            media - any valid media file.
-        """
-        await improcess(ctx, improcessing.reverse, [["VIDEO", "GIF"]])
-
-
-    @bot.command()
-    async def compressv(ctx, crf: float = 51, qa: float = 0.2):
-        """
-        Makes videos terrible quality.
-        The strange ranges on the numbers are because they are quality settings in FFmpeg's encoding.
-        CRF info is found at https://trac.ffmpeg.org/wiki/Encode/H.264#crf
-        q:a info is found at https://trac.ffmpeg.org/wiki/Encode/AAC#NativeFFmpegAACEncoder
-
-        Parameters:
-            media - any valid media file.
-            crf - Controls video quality. Higher is worse quality. must be between 28 and 51. defaults to 51.
-            qa - Controls audio quality. Lower is worse quality. must be between 0.1 and 2. defaults to 0.2.
-
-        """
-        if not 28 <= crf <= 51:
-            await ctx.send("⚠ CRF must be between 28 and 51.")
-            return
-        if not 0.1 <= qa <= 2:
-            await ctx.send("⚠ qa must be between 0.1 and 2.")
-            return
-        await improcess(ctx, improcessing.quality, [["VIDEO", "GIF"]], crf, qa)
-
-
-    @bot.command(name="fps")
-    async def fpschange(ctx, fps: float = 30):
-        """
-        Changes the FPS of media.
-        This command keeps the speed the same.
-        BEWARE: Changing the FPS of gifs can create strange results due to the strange way GIFs store FPS data.
-        GIFs are only stable at certain FPS values. These include 50, 30, 15, 10, and others.
-        An important reminder that by default tenor "gifs" are interpreted as mp4s, which do not suffer this problem.
-
-        Parameters:
-            media - any valid media file.
-            fps - FPS to change the video to. must be between 1 and 60. defaults to 30.
-        """
-        if not 1 <= fps <= 60:
-            await ctx.send("⚠ FPS must be between 1 and 60.")
-            return
-        await improcess(ctx, improcessing.changefps, [["VIDEO", "GIF"]], fps)
-
-
-    @bot.command(name="caption", aliases=["cap"])
-    async def captioncommand(ctx, *, caption):
-        """
-        Captions media.
-
-        Parameters:
-            media - any valid media file
-            caption - the caption text
-        """
-        await improcess(ctx, captionfunctions.caption, [["VIDEO", "GIF", "IMAGE"]], caption, handleanimated=True,
-                        webengine=True)
-
-
-    @bot.command(aliases=["bottomcap", "botcap"])
-    async def bottomcaption(ctx, *, caption):
-        """
-        Captions underneath media.
-
-        Parameters:
-            media - any valid media file
-            caption - the caption text
-        """
-        await improcess(ctx, captionfunctions.bottomcaption, [["VIDEO", "GIF", "IMAGE"]], caption, handleanimated=True,
-                        webengine=True)
-
-
-    @bot.command()
-    async def esmcaption(ctx, *, caption):
-        """
-        Captions media in the style of Essem's esmBot.
-
-        Parameters:
-            media - any valid media file
-            caption - the caption text
-        """
-        await improcess(ctx, captionfunctions.esmcaption, [["VIDEO", "GIF", "IMAGE"]], caption, handleanimated=True,
-                        webengine=True)
-
-
-    @bot.command()
-    async def twittercaption(ctx, *, caption):
-        """
-        Captions media in the style of a Twitter screenshot.
-
-        Parameters:
-            media - any valid media file
-            caption - the caption text
-        """
-        await improcess(ctx, captionfunctions.twittercap, [["VIDEO", "GIF", "IMAGE"]], caption, handleanimated=True,
-                        webengine=True)
-
-
-    @bot.command()
-    async def jpeg(ctx, strength: int = 30, stretch: int = 20, quality: int = 10):
-        """
-        Makes media into a low quality jpeg
-
-        Parameters:
-            media - any valid media file
-            strength - amount of times to jpegify image. must be between 1 and 100. defaults to 30.
-            stretch - randomly stretch the image by this number on each jpegification.
-            can cause strange effects on videos. must be between 0 and 40. defaults to 20.
-            quality - quality of JPEG compression. must be between 1 and 95. defaults to 10.
-        """
-        if not 0 < strength <= 100:
-            await ctx.send("⚠ Strength must be between 0 and 100.")
-            return
-        if not 0 <= stretch <= 40:
-            await ctx.send("⚠ Stretch must be between 0 and 40.")
-            return
-        if not 1 <= quality <= 95:
-            await ctx.send("⚠ Quality must be between 1 and 95.")
-            return
-        await improcess(ctx, captionfunctions.jpeg, [["VIDEO", "GIF", "IMAGE"]], [strength, stretch, quality],
-                        handleanimated=True)
-
-
-    @bot.command()
-    async def motivate(ctx, *, caption):
-        """
-        Captions media in the style of demotivational posters.
-
-        Parameters:
-            media - any valid media file
-            caption - the caption texts. divide the top text from the bottom text with a | character.
-        """
-        caption = caption.split("|")
-        if len(caption) == 1:
-            caption.append("")
-        await improcess(ctx, captionfunctions.motivate, [["VIDEO", "GIF", "IMAGE"]], *caption,
-                        handleanimated=True, webengine=True)
-
-
-    @bot.command()
-    async def meme(ctx, *, caption):
-        """
-        Captions media in the style of top text + bottom text memes.
-
-        Parameters:
-            media - any valid media file
-            caption - the caption texts. divide the top text from the bottom text with a | character.
-        """
-        caption = caption.split("|")
-        if len(caption) == 1:
-            caption.append("")
-        await improcess(ctx, captionfunctions.meme, [["VIDEO", "GIF", "IMAGE"]], *caption,
-                        handleanimated=True, webengine=True)
-
-
-    @bot.command(aliases=["ffprobe"])
-    async def info(ctx):
-        """
-        Provides info on a media file.
-        Info provided is from ffprobe and libmagic.
-
-        Parameters:
-            media - any valid media file
-        """
-        async with ctx.channel.typing():
-            file, filemsg = await imagesearch(ctx)
+            Parameters:
+                gif - a valid tenor URL
+            """
+            logging.info("Getting tenor gif...")
+            file = await tenorsearch(ctx, True)
             if file:
-                result = await improcessing.ffprobe(file)
-                await ctx.reply(f"`{result[1]}` `{result[2]}`\n```{result[0]}```")
-                os.remove(file)
+                await ctx.send(file)
+                logging.info("Complete!")
             else:
-                await ctx.send("❌ No file found.")
+                await ctx.send("❌ No tenor gif found.")
+
+        @commands.command()
+        async def tovideo(self, ctx):
+            """
+            Converts a GIF to a video.
+
+            Parameters:
+                gif - a gif file
+            """
+            await improcess(ctx, improcessing.giftomp4, [["GIF"]])
+
+        @commands.command()
+        async def topng(self, ctx):
+            """
+            Converts media to PNG
+
+            Parameters:
+                media - any valid media file.
+            """
+            await improcess(ctx, improcessing.mediatopng, [["VIDEO", "GIF", "IMAGE"]])
 
 
-    @bot.command()
-    @commands.cooldown(1, 60 * 60, commands.BucketType.user)
-    async def feedback(ctx, *, msg):
-        """
-        Give feedback for the bot.
-        This command DMs the owner of the bot. You can only use this once per hour.
-        This command will be soon substituted with a github repo.
+    class Other(commands.Cog, name="Other Commands"):
+        def __init__(self, bot):
+            self.bot = bot
 
-        Parameters:
-            msg - the message to send. will not send any attachments.
-        """
-        app = await bot.application_info()
-        await app.owner.send(f"User <@{ctx.author.id}> (@{ctx.author.name}#{ctx.author.discriminator}) says:"
-                             f"\n```{msg}```")
-        await ctx.reply("Sent feedback!")
+        @commands.command(aliases=["ffprobe"])
+        async def info(self, ctx):
+            """
+            Provides info on a media file.
+            Info provided is from ffprobe and libmagic.
+
+            Parameters:
+                media - any valid media file
+            """
+            async with ctx.channel.typing():
+                file = await imagesearch(ctx)
+                if file:
+                    result = await improcessing.ffprobe(file[0])
+                    await ctx.reply(f"`{result[1]}` `{result[2]}`\n```{result[0]}```")
+                    os.remove(file[0])
+                else:
+                    await ctx.send("❌ No file found.")
+
+        @commands.command()
+        @commands.cooldown(1, 60 * 60, commands.BucketType.user)
+        async def feedback(self, ctx, *, msg):
+            """
+            Give feedback for the bot.
+            This command DMs the owner of the bot. You can only use this once per hour.
+            This command will be soon substituted with a github repo.
+
+            Parameters:
+                msg - the message to send. will not send any attachments.
+            """
+            app = await bot.application_info()
+            await app.owner.send(f"User <@{ctx.author.id}> (@{ctx.author.name}#{ctx.author.discriminator}) says:"
+                                 f"\n```{msg}```")
+            await ctx.reply("Sent feedback!")
+
+        @commands.command(aliases=['sus', 'imposter'])
+        async def jermatext(self, ctx, *, text="when the imposter is sus!😳"):
+            """
+            Cut and slice the popular Jerma sus meme to any message
+            For any letter not in the original meme, a random slice of the face is selected.
+            Based on https://github.com/aechaechaech/Jerma-Imposter-Message-Generator
+            """
+            file = sus.sus(text)
+            await ctx.reply(file=discord.File(file))
+            os.remove(file)
+
+        @commands.command()
+        async def attributions(self, ctx):
+            """Lists most libraries and programs this bot uses."""
+            with open("attributions.txt", "r") as f:
+                await ctx.send(f.read())
+
+        @commands.command()
+        async def emojiurl(self, ctx, *, msg):
+            """
+            Extracts the raw file from up to 5 custom emojis.
+            Each emoji is sent as a separate message intentionally to allow replying with a media command.
+
+            Parameters:
+                msg - any text that contains at least one custom emoji.
+            """
+            urls = []
+            emojiregex = "<(?P<animated>a?):(?P<name>[a-zA-Z0-9_]{2,32}):(?P<id>[0-9]{18,22})>"
+            for i, match in enumerate(re.finditer(emojiregex, msg)):
+                if i == 5:
+                    break
+                emojiid = int(match.group(3))
+                anim = bool(match.group(1))
+                url = str(discord.PartialEmoji(id=emojiid, name="", animated=anim).url)
+                urls.append(url)
+            if urls:
+                for url in urls:
+                    await ctx.reply(url)
+            else:
+                await ctx.reply("⚠ Your message doesn't contain any custom emojis!")
 
 
-    @bot.command(hidden=True)
-    @commands.is_owner()
-    async def say(ctx, *, msg):
-        await ctx.message.delete()
-        await ctx.channel.send(msg)
+    class Debug(commands.Cog, name="Owner Only"):
+        def __init__(self, bot):
+            self.bot = bot
 
+        @commands.command(hidden=True)
+        @commands.is_owner()
+        async def say(self, ctx, *, msg):
+            await ctx.message.delete()
+            await ctx.channel.send(msg)
 
-    @bot.command(hidden=True)
-    @commands.is_owner()
-    async def error(ctx):
-        raise Exception("Exception raised by $error command")
+        @commands.command(hidden=True)
+        @commands.is_owner()
+        async def error(self, ctx):
+            raise Exception("Exception raised by $error command")
 
-
-    @bot.command(hidden=True, aliases=["stop", "close"])
-    @commands.is_owner()
-    async def shutdown(ctx):
-        await ctx.send("✅ Shutting Down...")
-        logging.log(25, "Shutting Down....")
-        renderpool.close()
-        await bot.logout()
-        await bot.close()
+        @commands.command(hidden=True, aliases=["stop", "close"])
+        @commands.is_owner()
+        async def shutdown(self, ctx):
+            await ctx.send("✅ Shutting Down...")
+            logging.log(25, "Shutting Down....")
+            renderpool.close()
+            await bot.logout()
+            await bot.close()
 
 
     def logcommand(cmd):
@@ -641,5 +706,10 @@ if __name__ == "__main__":
         tenorkey = f.read()
     with open('token.txt') as f:  # not on github for obvious reasons
         token = f.read()
+    bot.add_cog(Caption(bot))
+    bot.add_cog(Media(bot))
+    bot.add_cog(Conversion(bot))
+    bot.add_cog(Other(bot))
+    bot.add_cog(Debug(bot))
     renderpool = improcessing.initializerenderpool()
     bot.run(token)
