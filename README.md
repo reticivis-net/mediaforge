@@ -10,6 +10,7 @@ discord bot inspired by [esmBot](https://github.com/esmBot/esmBot) mainly for me
 - uses FFmpeg for most media functions
 - uses selenium and ChromeDriver to render captions in html with Chrome
     - look i know it sounds stupid but HTML is easy and flexible
+    - it's still very fast, 20 are running at once thanks to python's `multiprocessing.Pool`
 
 ## to self-host
 
