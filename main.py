@@ -1,3 +1,4 @@
+import datetime
 import glob
 import json
 import logging
@@ -5,6 +6,7 @@ import os
 import random
 import re
 import string
+import traceback
 import coloredlogs
 import discord
 from discord.ext import commands
@@ -16,7 +18,7 @@ import humanize
 import sus
 
 # TODO: better help command
-# TODO: stitch media command
+# TODO: fix image stacking
 # TODO: overlay media command
 # https://coloredlogs.readthedocs.io/en/latest/api.html#id28
 field_styles = {
@@ -37,6 +39,9 @@ coloredlogs.install(level='INFO', fmt='[%(asctime)s] [%(filename)s:%(funcName)s:
                     datefmt='%m/%d/%Y %I:%M:%S %p', field_styles=field_styles, level_styles=level_styles)
 
 if __name__ == "__main__":
+    with open('tenorkey.txt') as f:  # not on github for obvious reasons
+        tenorkey = f.read()
+    renderpool = improcessing.initializerenderpool()
     if not os.path.exists("temp"):  # cant fucking believe i never had this
         os.mkdir("temp")
     bot = commands.Bot(command_prefix='$', description='CaptionX')
@@ -386,6 +391,28 @@ if __name__ == "__main__":
             """
             await improcess(ctx, improcessing.concatv, [["VIDEO", "GIF"], ["VIDEO", "GIF"]])
 
+        @commands.command()
+        async def hstack(self, ctx):
+            """
+            Stacks 2 videos horizontally
+
+            Parameters:
+                video1 - a video or gif
+                video2 - a video or gif
+            """
+            await improcess(ctx, improcessing.stack, [["VIDEO", "GIF", "IMAGE"], ["VIDEO", "GIF", "IMAGE"]], "hstack")
+
+        @commands.command()
+        async def vstack(self, ctx):
+            """
+            Stacks 2 videos horizontally
+
+            Parameters:
+                video1 - a video or gif
+                video2 - a video or gif
+            """
+            await improcess(ctx, improcessing.stack, [["VIDEO", "GIF", "IMAGE"], ["VIDEO", "GIF", "IMAGE"]], "vstack")
+
         @commands.command(name="speed")
         async def spcommand(self, ctx, speed: float = 2):
             """
@@ -636,6 +663,11 @@ if __name__ == "__main__":
         async def error(self, ctx):
             raise Exception("Exception raised by $error command")
 
+        @commands.command(hidden=True)
+        @commands.is_owner()
+        async def errorcmd(self, ctx):
+            await improcessing.run_command("ffmpeg", "-hide_banner", "dsfasdfsadfasdfasdf")
+
         @commands.command(hidden=True, aliases=["stop", "close"])
         @commands.is_owner()
         async def shutdown(self, ctx):
@@ -694,7 +726,16 @@ if __name__ == "__main__":
             await ctx.reply(err)
         else:
             logging.error(commanderror, exc_info=(type(commanderror), commanderror, commanderror.__traceback__))
-            await ctx.reply("‼ `" + str(commanderror).replace("@", "\\@") + "`")
+            tr = improcessing.temp_file("txt")
+            trheader = f"DATETIME:{datetime.datetime.now()}\nCOMMAND:{ctx.message.content}\nTRACEBACK:\n"
+            with open(tr, "w+") as t:
+                t.write(trheader + ''.join(
+                    traceback.format_exception(etype=type(commanderror), value=commanderror,
+                                               tb=commanderror.__traceback__)))
+            await ctx.reply("‼ `" + str(commanderror).replace("@", "\\@") +
+                            "`\nPlease report this error with the attached traceback to the github.",
+                            file=discord.File(tr))
+            os.remove(tr)
 
 
     logging.info(f"discord.py {discord.__version__}")
@@ -702,8 +743,6 @@ if __name__ == "__main__":
     # bot.remove_command('help')
     for f in glob.glob('temp/*'):
         os.remove(f)
-    with open('tenorkey.txt') as f:  # not on github for obvious reasons
-        tenorkey = f.read()
     with open('token.txt') as f:  # not on github for obvious reasons
         token = f.read()
     bot.add_cog(Caption(bot))
@@ -711,5 +750,5 @@ if __name__ == "__main__":
     bot.add_cog(Conversion(bot))
     bot.add_cog(Other(bot))
     bot.add_cog(Debug(bot))
-    renderpool = improcessing.initializerenderpool()
+
     bot.run(token)
