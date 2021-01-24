@@ -35,12 +35,16 @@
 
         .caption {
             -webkit-font-smoothing: antialiased;
-            background: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             font-family: caption, /*twemoji,*/ sans-serif;
             text-align: center;
             word-wrap: break-word;
-            font-size: 10vw;
-            padding: 3vw 1vw;
+            font-size: 9vw;
+            padding: 2vw 1vw;
+            width: 70%;
+            min-height: 100%;
         }
 
         .img {
@@ -58,15 +62,48 @@
         /*.caption span {
             vertical-align: middle;
         }*/
+        * {
+            box-sizing: border-box;
+        }
 
+        .column {
+            float: left;
+            /*padding: 10px;*/
+        }
 
+        .row:after {
+            content: "";
+            display: table;
+            clear: both;
+        }
+
+        .row {
+            background: white;
+            display: flex;
+            flex:1;
+        }
+
+        .stuff {
+            width: 30%;
+        }
+        .stuff img {
+            width: 100%;
+        }
     </style>
 </head>
 <body>
 
-<div class="caption"><span>CaptionText</span>
-</div>
+
 <img class="img" src="rendering/demoimage.png" alt="An error has occurred loading your image.">
+<div class="row">
+
+    <div class="caption column"><span class="t">CaptionText</span></div>'
+    <div class="column stuff">
+        <img class="stuff" src="rendering/Stuff.PNG" alt="stuff"/>
+    </div>
+
+</div>
+
 </body>
 <script>twemoji.parse(document.body);</script>
 <script>

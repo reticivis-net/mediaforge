@@ -67,6 +67,32 @@ def bottomcaption(image, caption, tosavename=None):
     return tosavename
 
 
+def stuff(image, caption, tosavename=None):
+    if tosavename is None:
+        tosavename = temp_file("png")
+    caption = sanitizehtml(caption)
+    replacedict = {
+        "CaptionText": caption[0],
+        "rendering/demoimage.png": image
+    }
+    torender = replaceall(filetostring("stuff.html"), replacedict)
+    chromiumrender.html2png(torender, tosavename)
+    return tosavename
+
+
+def stuffstretch(image, caption, tosavename=None):
+    if tosavename is None:
+        tosavename = temp_file("png")
+    caption = sanitizehtml(caption)
+    replacedict = {
+        "CaptionText": caption[0],
+        "rendering/demoimage.png": image
+    }
+    torender = replaceall(filetostring("stuffstretch.html"), replacedict)
+    chromiumrender.html2png(torender, tosavename)
+    return tosavename
+
+
 def motivate(image, caption, tosavename=None):
     if tosavename is None:
         tosavename = temp_file("png")
