@@ -3,8 +3,8 @@ import os
 import random
 import string
 import sys
-import multiprocessing
 from selenium import webdriver
+import config
 
 
 def send(driver, cmd, params=None):
@@ -61,9 +61,9 @@ def initdriver():
     opts.add_argument("--disable-extensions")
     # https://chromedriver.storage.googleapis.com/index.html?path=87.0.4280.88/
     if sys.platform == "win32":
-        driver = webdriver.Chrome("chromedriver87.exe", options=opts)
+        driver = webdriver.Chrome(config.chrome_driver_windows, options=opts)
     else:
-        driver = webdriver.Chrome("chromedriver87", options=opts)
+        driver = webdriver.Chrome(config.chrome_driver_linux, options=opts)
     return driver
 
 
