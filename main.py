@@ -16,6 +16,7 @@ import aiohttp
 import aiofiles
 import humanize
 import sus
+import config
 
 # TODO: finish help command
 # TODO: fix image stacking
@@ -40,12 +41,10 @@ coloredlogs.install(level='INFO', fmt='[%(asctime)s] [%(filename)s:%(funcName)s:
                     datefmt='%m/%d/%Y %I:%M:%S %p', field_styles=field_styles, level_styles=level_styles)
 
 if __name__ == "__main__":
-    with open('tenorkey.txt') as f:  # not on github for obvious reasons
-        tenorkey = f.read()
     renderpool = improcessing.initializerenderpool()
     if not os.path.exists("temp"):  # cant fucking believe i never had this
         os.mkdir("temp")
-    bot = commands.Bot(command_prefix='$', description='CaptionX', help_command=None)
+    bot = commands.Bot(command_prefix=config.command_prefix, help_command=None)
 
 
     @bot.event
@@ -102,7 +101,7 @@ if __name__ == "__main__":
             if m.embeds[0].type == "gifv":
                 # https://github.com/esmBot/esmBot/blob/master/utils/imagedetect.js#L34
                 tenor = await fetch(
-                    f"https://api.tenor.com/v1/gifs?ids={m.embeds[0].url.split('-').pop()}&key={tenorkey}")
+                    f"https://api.tenor.com/v1/gifs?ids={m.embeds[0].url.split('-').pop()}&key={config.tenor_key}")
                 tenor = json.loads(tenor)
                 if 'error' in tenor:
                     await ctx.reply(f":bangbang: Tenor Error! `{tenor['error']}`")
@@ -142,7 +141,7 @@ if __name__ == "__main__":
             if m.embeds[0].type == "gifv":
                 # https://github.com/esmBot/esmBot/blob/master/utils/imagedetect.js#L34
                 tenor = await fetch(
-                    f"https://api.tenor.com/v1/gifs?ids={m.embeds[0].url.split('-').pop()}&key={tenorkey}")
+                    f"https://api.tenor.com/v1/gifs?ids={m.embeds[0].url.split('-').pop()}&key={config.tenor_key}")
                 tenor = json.loads(tenor)
                 if 'error' in tenor:
                     logging.error(tenor['error'])
@@ -598,7 +597,8 @@ if __name__ == "__main__":
             """
             if arg is None:
                 embed = discord.Embed(title="Help", color=discord.Color(0x5ed149),
-                                      description="Run `$help category` to list commands from that category.")
+                                      description=f"Run `{config.command_prefix}help category` to list commands from "
+                                                  f"that category.")
                 for c in bot.cogs.values():
                     if c.qualified_name != "Owner Only":
                         embed.add_field(name=c.qualified_name, value=c.description)
@@ -607,18 +607,18 @@ if __name__ == "__main__":
                 cogs_lower = {k.lower(): v for k, v in bot.cogs.items()}
                 cog = cogs_lower[arg.lower()]
                 embed = discord.Embed(title=cog.qualified_name,
-                                      description=cog.description + "\nRun `$help command` for more information on a "
-                                                                    "command.",
+                                      description=cog.description + f"\nRun `{config.command_prefix}help command` for "
+                                                                    f"more information on a command.",
                                       color=discord.Color(0x34eb9e))
                 for cmd in cog.get_commands():
-                    embed.add_field(name=f"${cmd.name}", value=cmd.short_doc)
+                    embed.add_field(name=f"{config.command_prefix}{cmd.name}", value=cmd.short_doc)
                 await ctx.reply(embed=embed)
             elif arg.lower() in [c.name for c in bot.commands]:
                 for all_cmd in bot.commands:
                     if all_cmd.name == arg.lower():
                         cmd: discord.ext.commands.Command = all_cmd
                         break
-                embed = discord.Embed(title="$" + cmd.name, color=discord.Color(0x344ceb))
+                embed = discord.Embed(title=config.command_prefix + cmd.name, color=discord.Color(0x344ceb))
                 fields = {}
                 fhelp = []
                 for line in cmd.help.split("\n"):
@@ -630,11 +630,12 @@ if __name__ == "__main__":
                     else:
                         fhelp.append(line)
                 fhelp = "\n".join(fhelp)
-                embed.add_field(name="Command Information", value=fhelp, inline=False)
+                embed.add_field(name="Command Information", value=fhelp.replace("$", config.command_prefix),
+                                inline=False)
                 for k, v in fields.items():
                     if k == "Param":
                         k = "Paramaters"
-                    embed.add_field(name=k, value=v, inline=False)
+                    embed.add_field(name=k, value=v.replace("$", config.command_prefix), inline=False)
                 if cmd.aliases:
                     embed.add_field(name="Aliases", value=", ".join(cmd.aliases))
                 await ctx.reply(embed=embed)
@@ -770,7 +771,7 @@ if __name__ == "__main__":
             Shut down the bot
             """
             await ctx.send("✅ Shutting Down...")
-            logging.log(25, "Shutting Down....")
+            logging.log(25, "Shutting Down...")
             renderpool.close()
             await bot.logout()
             await bot.close()
@@ -841,12 +842,10 @@ if __name__ == "__main__":
     # bot.remove_command('help')
     for f in glob.glob('temp/*'):
         os.remove(f)
-    with open('token.txt') as f:  # not on github for obvious reasons
-        token = f.read()
     bot.add_cog(Caption(bot))
     bot.add_cog(Media(bot))
     bot.add_cog(Conversion(bot))
     bot.add_cog(Other(bot))
     bot.add_cog(Debug(bot))
 
-    bot.run(token)
+    bot.run(config.bot_token)

@@ -36,12 +36,10 @@ the bot uses many CLI programs for media processing.
 - The bot has a [requirements.txt](requirements.txt) file that can be installed
   with `python -m pip install -r requirements.txt`
 
-### tokens
+### config
 
-there need to be 2 txt files with tokens for the bot to function properly
-
-- `token.txt` must contain a [discord bot token](https://discord.com/developers/applications)
-- `tenorkey.txt` must contain a [tenor API key](https://tenor.com/developer/keyregistration)
+- create a copy of `config.example.py` and name it `config.py`.
+- insert/change the appropriate config settings such as your discord api token.
 
 ### python
 

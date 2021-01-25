@@ -9,18 +9,16 @@ import string
 import sys
 from multiprocessing import Pool
 import discord.ext
-import numpy as np
 from PIL import Image, UnidentifiedImageError
 import captionfunctions
 import humanize
 import chromiumrender
+import config
 
 if sys.platform == "win32":  # this hopefully wont cause any problems :>
     from winmagic import magic
 else:
     import magic
-
-MAXFRAMES = 1024  # to prevent gigantic mp4s from clogging stuff
 
 
 # renderpool = None
@@ -28,9 +26,8 @@ MAXFRAMES = 1024  # to prevent gigantic mp4s from clogging stuff
 
 def initializerenderpool():
     global renderpool
-    poolprocesses = 20
-    logging.info(f"Starting {poolprocesses} pool processes...")
-    renderpool = multiprocessing.Pool(poolprocesses, initializer=chromiumrender.initdriver)
+    logging.info(f"Starting {config.chrome_driver_instances} pool processes...")
+    renderpool = multiprocessing.Pool(config.chrome_driver_instances, initializer=chromiumrender.initdriver)
     return renderpool
 
 
@@ -246,9 +243,9 @@ async def handleanimated(image: str, capfunction: callable, ctx, *caption,
         fps = await get_frame_rate(image)
         # logging.info(
         #     f"Processing {len(frames)} frames with {min(len(frames), POOLWORKERS)} processes...")
-        if len(frames) > MAXFRAMES:
-            await ctx.reply(f"⚠ Input file has {len(frames)} frames, maximum allowed is {MAXFRAMES}.")
-            logging.warning(f"⚠ Input file has {len(frames)} frames, maximum allowed is {MAXFRAMES}.")
+        if len(frames) > config.max_frames:
+            await ctx.reply(f"⚠ Input file has {len(frames)} frames, maximum allowed is {config.max_frames}.")
+            logging.warning(f"⚠ Input file has {len(frames)} frames, maximum allowed is {config.max_frames}.")
             return
         logging.info(f"Processing {len(frames)} frames...")
         capargs = []
