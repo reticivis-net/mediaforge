@@ -18,7 +18,7 @@ import humanize
 import sus
 import config
 
-# TODO: finish help command
+
 # TODO: fix image stacking
 # TODO: overlay media command
 # TODO: comment code

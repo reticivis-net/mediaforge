@@ -38,7 +38,7 @@ the bot uses many CLI programs for media processing.
 
 ### config
 
-- create a copy of `config.example.py` and name it `config.py`.
+- create a copy of [`config.example.py`](config.example.py) and name it `config.py`.
 - insert/change the appropriate config settings such as your discord api token.
 
 ### python
