@@ -1,3 +1,4 @@
+# standard libs
 import datetime
 import glob
 import json
@@ -7,22 +8,23 @@ import random
 import re
 import string
 import traceback
+# pip libs
 import coloredlogs
 import discord
 from discord.ext import commands
-import captionfunctions
-import improcessing
 import aiohttp
 import aiofiles
 import humanize
+# project files
+import captionfunctions
+import improcessing
 import sus
 import config
 
-
 # TODO: fix image stacking
 # TODO: overlay media command
-# TODO: comment code
 # https://coloredlogs.readthedocs.io/en/latest/api.html#id28
+# configure logging
 field_styles = {
     'levelname': {'bold': True, 'color': 'blue'},
     'asctime': {'color': 2},
@@ -35,12 +37,11 @@ level_styles['COMMAND'] = {'color': 4}
 logging.addLevelName(25, "NOTICE")
 logging.addLevelName(35, "SUCCESS")
 logging.addLevelName(21, "COMMAND")
-# recommended level is NOTICE, if you only want errors set it to WARNING, INFO puts out a lot of stuff
-coloredlogs.install(level='INFO', fmt='[%(asctime)s] [%(filename)s:%(funcName)s:%(lineno)d] '
-                                      '%(levelname)s %(message)s',
+coloredlogs.install(level=config.log_level, fmt='[%(asctime)s] [%(filename)s:%(funcName)s:%(lineno)d] '
+                                                '%(levelname)s %(message)s',
                     datefmt='%m/%d/%Y %I:%M:%S %p', field_styles=field_styles, level_styles=level_styles)
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # prevents multiprocessing workers from running bot code
     renderpool = improcessing.initializerenderpool()
     if not os.path.exists("temp"):  # cant fucking believe i never had this
         os.mkdir("temp")
@@ -68,17 +69,23 @@ if __name__ == "__main__":
 
 
     async def saveurl(url, extension=None):
+        """
+        save a url to /temp
+        :param url: web url of a file
+        :param extension: force a file extension
+        :return: local path of saved file
+        """
         if extension is None:
             extension = url.split(".")[-1].split("?")[0]
         name = improcessing.temp_file(extension)
         async with aiohttp.ClientSession() as session:
             async with session.head(url) as resp:
                 if resp.status == 200:
-                    if "Content-Length" not in resp.headers:
+                    if "Content-Length" not in resp.headers:  # size of file to download
                         raise Exception("Cannot determine filesize!")
                     size = int(resp.headers["Content-Length"])
                     logging.info(f"Url is {humanize.naturalsize(size)}")
-                    if 50000000 < size:
+                    if 50000000 < size:  # file size to download must be under ~50MB
                         raise Exception(f"File is too big ({humanize.naturalsize(size)})!")
                 else:
                     logging.error(f"aiohttp status {resp.status}")
@@ -96,7 +103,13 @@ if __name__ == "__main__":
         return name
 
 
-    async def handlemessagesave(m, ctx: discord.ext.commands.Context):
+    async def handlemessagesave(m:discord.Message, ctx: discord.ext.commands.Context):
+        """
+        handles saving of media from discord messages
+        :param m: a discord message
+        :param ctx: command context (for sending error messages)
+        :return: local file path if saved, None if message has no savable media.
+        """
         if len(m.embeds):
             if m.embeds[0].type == "gifv":
                 # https://github.com/esmBot/esmBot/blob/master/utils/imagedetect.js#L34
@@ -117,6 +130,12 @@ if __name__ == "__main__":
 
 
     async def imagesearch(ctx, nargs=1):
+        """
+        searches the channel for nargs media
+        :param ctx: command context
+        :param nargs: amount of media to return
+        :return: False if none or not enough media found, list of file paths if found
+        """
         outfiles = []
         if ctx.message.reference:
             m = ctx.message.reference.resolved
@@ -137,6 +156,13 @@ if __name__ == "__main__":
 
 
     async def handletenor(m, ctx, gif=False):
+        """
+        like handlemessagesave() but only for tenor
+        :param m: discord message
+        :param ctx: command context
+        :param gif: return GIF url if true, mp4 url if false
+        :return: raw tenor media url
+        """
         if len(m.embeds):
             if m.embeds[0].type == "gifv":
                 # https://github.com/esmBot/esmBot/blob/master/utils/imagedetect.js#L34
@@ -157,6 +183,12 @@ if __name__ == "__main__":
 
     # currently only used for 1 command, might have future uses?
     async def tenorsearch(ctx, gif=False):
+        """
+        like imagesearch() but for tenor
+        :param ctx: discord context
+        :param gif: return GIF url if true, mp4 url if false
+        :return:
+        """
         if ctx.message.reference:
             m = ctx.message.reference.resolved
             hm = await handletenor(m, ctx, gif)
@@ -173,7 +205,16 @@ if __name__ == "__main__":
 
 
     async def improcess(ctx: discord.ext.commands.Context, func: callable, allowedtypes: list, *args,
-                        handleanimated=False, webengine=False):
+                        handleanimated=False):
+        """
+        The core function of the bot.
+        :param ctx: discord context. media is gathered using imagesearch() with this.
+        :param func: function to process input media with
+        :param allowedtypes: list of lists of strings. each inner list is an argument, the strings it contains are the types that arg must be.
+        :param args: any non-media arguments, passed into func()
+        :param handleanimated: if func() only works on still images, set to True to process each frame individually.
+        :return: nothing, all processing and uploading is done in this function
+        """
         async with ctx.channel.typing():
             files = await imagesearch(ctx, len(allowedtypes))
             if files:
@@ -193,8 +234,7 @@ if __name__ == "__main__":
                     else:
                         filesforcommand = files.copy()
                     if handleanimated:
-                        result = await improcessing.handleanimated(filesforcommand, func, ctx, *args,
-                                                                   webengine=webengine)
+                        result = await improcessing.handleanimated(filesforcommand, func, ctx, *args)
                     else:
                         result = await func(filesforcommand, *args)
                     result = await improcessing.assurefilesize(result, ctx)
@@ -233,7 +273,7 @@ if __name__ == "__main__":
             if len(caption) == 1:
                 caption.append("")
             await improcess(ctx, captionfunctions.motivate, [["VIDEO", "GIF", "IMAGE"]], *caption,
-                            handleanimated=True, webengine=True)
+                            handleanimated=True)
 
         @commands.command()
         async def meme(self, ctx, *, caption):
@@ -248,7 +288,7 @@ if __name__ == "__main__":
             if len(caption) == 1:
                 caption.append("")
             await improcess(ctx, captionfunctions.meme, [["VIDEO", "GIF", "IMAGE"]], *caption,
-                            handleanimated=True, webengine=True)
+                            handleanimated=True)
 
         @commands.command(name="caption", aliases=["cap"])
         async def captioncommand(self, ctx, *, caption):
@@ -259,8 +299,7 @@ if __name__ == "__main__":
             :Param=caption - The caption text.
             :Param=media - A video, gif, or image. (automatically found in channel)
             """
-            await improcess(ctx, captionfunctions.caption, [["VIDEO", "GIF", "IMAGE"]], caption, handleanimated=True,
-                            webengine=True)
+            await improcess(ctx, captionfunctions.caption, [["VIDEO", "GIF", "IMAGE"]], caption, handleanimated=True)
 
         @commands.command()
         async def stuff(self, ctx, *, caption):
@@ -271,8 +310,7 @@ if __name__ == "__main__":
             :Param=caption - The caption text.
             :Param=media - A video, gif, or image. (automatically found in channel)
             """
-            await improcess(ctx, captionfunctions.stuff, [["VIDEO", "GIF", "IMAGE"]], caption, handleanimated=True,
-                            webengine=True)
+            await improcess(ctx, captionfunctions.stuff, [["VIDEO", "GIF", "IMAGE"]], caption, handleanimated=True)
 
         @commands.command()
         async def stuffstretch(self, ctx, *, caption):
@@ -286,8 +324,7 @@ if __name__ == "__main__":
             :Param=media - A video, gif, or image. (automatically found in channel)
             """
             await improcess(ctx, captionfunctions.stuffstretch, [["VIDEO", "GIF", "IMAGE"]], caption,
-                            handleanimated=True,
-                            webengine=True)
+                            handleanimated=True)
 
         @commands.command(aliases=["bottomcap", "botcap"])
         async def bottomcaption(self, ctx, *, caption):
@@ -299,8 +336,7 @@ if __name__ == "__main__":
             :Param=media - A video, gif, or image. (automatically found in channel)
             """
             await improcess(ctx, captionfunctions.bottomcaption, [["VIDEO", "GIF", "IMAGE"]], caption,
-                            handleanimated=True,
-                            webengine=True)
+                            handleanimated=True)
 
         @commands.command()
         async def esmcaption(self, ctx, *, caption):
@@ -311,8 +347,7 @@ if __name__ == "__main__":
             :Param=caption - The caption text.
             :Param=media - A video, gif, or image. (automatically found in channel)
             """
-            await improcess(ctx, captionfunctions.esmcaption, [["VIDEO", "GIF", "IMAGE"]], caption, handleanimated=True,
-                            webengine=True)
+            await improcess(ctx, captionfunctions.esmcaption, [["VIDEO", "GIF", "IMAGE"]], caption, handleanimated=True)
 
         @commands.command()
         async def twittercaption(self, ctx, *, caption):
@@ -323,8 +358,7 @@ if __name__ == "__main__":
             :Param=caption - The caption text.
             :Param=media - A video, gif, or image. (automatically found in channel)
             """
-            await improcess(ctx, captionfunctions.twittercap, [["VIDEO", "GIF", "IMAGE"]], caption, handleanimated=True,
-                            webengine=True)
+            await improcess(ctx, captionfunctions.twittercap, [["VIDEO", "GIF", "IMAGE"]], caption, handleanimated=True)
 
         @commands.command()
         async def freezemotivate(self, ctx, *, caption):

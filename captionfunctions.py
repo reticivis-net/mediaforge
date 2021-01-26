@@ -9,6 +9,12 @@ from improcessing import filetostring, temp_file
 
 # stolen code https://stackoverflow.com/questions/6116978/how-to-replace-multiple-substrings-of-a-string
 def replaceall(text, rep):
+    """
+    for instance of a key in rep, replace it with the value
+    :param text: text to process
+    :param rep: {valuetoreplace: toreplacewith, ...}
+    :return: processed text
+    """
     # use these three lines to do the replacement
     rep = dict((re.escape(k), v) for k, v in rep.items())
     # Python 3 renamed dict.iteritems to dict.items so use rep.items() for latest versions
@@ -17,15 +23,20 @@ def replaceall(text, rep):
     return text
 
 
-def sanitizehtml(caption):
-    if isinstance(caption, list) or isinstance(caption, tuple):
-        caption = list(caption)
-        caption[:] = [c.replace("&", '&amp;').replace("<", '&lt;').replace(">", '&gt;').replace("\"", '&quot;')
-                          .replace("'", '&#039;') for c in caption]
+def sanitizehtml(text):
+    """
+    replace html characters with escaped characters to safely insert into html
+    :param text: text to sanitize
+    :return: sanitized text
+    """
+    if isinstance(text, list) or isinstance(text, tuple):
+        text = list(text)
+        text[:] = [c.replace("&", '&amp;').replace("<", '&lt;').replace(">", '&gt;').replace("\"", '&quot;')
+                          .replace("'", '&#039;') for c in text]
     else:
-        caption = caption.replace("&", '&amp;').replace("<", '&lt;').replace(">", '&gt;').replace("\"", '&quot;') \
+        text = text.replace("&", '&amp;').replace("<", '&lt;').replace(">", '&gt;').replace("\"", '&quot;') \
             .replace("'", '&#039;')
-    return caption
+    return text
 
 
 def esmcaption(image, caption, tosavename=None):
@@ -135,7 +146,13 @@ def twittercap(image, caption, tosavename=None):
 
 
 def halfsize(image, _, tosavename=None):  # caption arg kept here for compatibility with handleanimated()
-
+    """
+    cuts the width and height of an image in half
+    :param image: file
+    :param _: caption arg to keep compatibility with handleanimated(), too lazy to fix
+    :param tosavename: optionally specify the file to save it to
+    :return: processed media
+    """
     if tosavename is None:
         name = temp_file("png")
     else:
@@ -146,6 +163,13 @@ def halfsize(image, _, tosavename=None):  # caption arg kept here for compatibil
 
 
 def jpeg(image, params: list, tosavename=None):
+    """
+    makes image into badly compressed jpeg
+    :param image: image
+    :param params: [strength (# of iterations), stretch (random stretch), quality (jpeg quality)]
+    :param tosavename: optionally specify file to save it to
+    :return: processed media
+    """
     if tosavename is None:
         name = temp_file("png")
     else:
