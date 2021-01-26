@@ -8,6 +8,10 @@ import config
 
 
 def send(driver, cmd, params=None):
+    """
+    i dont know what this does but it communicates with chrome i think
+    its copy/pasted code lol!
+    """
     if params is None:
         params = {}
     resource = "/session/%s/chromium/send_command_and_get_result" % driver.session_id
@@ -30,6 +34,12 @@ def temp_file(extension="png"):
 
 
 def loadhtml(driver, html):
+    """
+    loads string html into driver
+    :param driver: selenium webdriver
+    :param html: string of html
+    :return: filename of saved html
+    """
     base = "file:///" + os.getcwd().replace("\\", "/")
     # html = html.replace("<base href='./'>", f"<base href='{base}/'>")
     html = f"<base href='{base}/'>" + html
@@ -45,6 +55,10 @@ def loadhtml(driver, html):
 
 
 def initdriver():
+    """
+    used by pool workers to initialize the web driver
+    :return: the driver, not sure if this is used from the return?
+    """
     global opts
     global driver
     opts = webdriver.ChromeOptions()
@@ -68,11 +82,19 @@ def initdriver():
 
 
 def closedriver():
+    """
+    close driver
+    """
     global driver
     driver.close()
 
 
 def html2png(html, png):
+    """
+    uses driver to turn html into a png
+    :param html: html string
+    :param png: filename to save
+    """
     driver.set_window_size(1, 1)
     tempfile = loadhtml(driver, html)
     for _ in range(3):

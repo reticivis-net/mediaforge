@@ -12,5 +12,7 @@ chrome_driver_linux = "chromedriver87"
 chrome_driver_instances = 20
 # maximum number of frames for an input file.
 max_frames = 1024
+# NOTICE is recommended, INFO prints more information about what bot is doing, WARNING only prints errors.
+log_level = "NOTICE"
 # prefix for commands
 command_prefix = "$"

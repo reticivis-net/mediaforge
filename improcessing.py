@@ -1,5 +1,4 @@
-import asyncio
-import functools
+# standard libs
 import glob
 import logging
 import multiprocessing
@@ -7,24 +6,29 @@ import os
 import random
 import string
 import sys
+import asyncio
+import functools
 from multiprocessing import Pool
+# pip libs
 import discord.ext
 from PIL import Image, UnidentifiedImageError
-import captionfunctions
-import humanize
-import chromiumrender
-import config
 
 if sys.platform == "win32":  # this hopefully wont cause any problems :>
     from winmagic import magic
 else:
     import magic
-
-
-# renderpool = None
+# project files
+import captionfunctions
+import humanize
+import chromiumrender
+import config
 
 
 def initializerenderpool():
+    """
+    Start the worker pool
+    :return: the worker pool
+    """
     global renderpool
     logging.info(f"Starting {config.chrome_driver_instances} pool processes...")
     renderpool = multiprocessing.Pool(config.chrome_driver_instances, initializer=chromiumrender.initdriver)
@@ -32,6 +36,11 @@ def initializerenderpool():
 
 
 def filetostring(f):
+    """
+    reads a file to a string
+    :param f: file path of file
+    :return: contents of file
+    """
     with open(f, 'r', encoding="UTF-8") as file:
         data = file.read()
     return data
@@ -42,6 +51,11 @@ def get_random_string(length):
 
 
 def temp_file(extension="png"):
+    """
+    generates the name of a non-existing file for usage in temp/
+    :param extension: the extension of the file
+    :return: the name of the file (no file is created by this function)
+    """
     while True:
         name = f"temp/{get_random_string(8)}.{extension}"
         if not os.path.exists(name):
@@ -50,6 +64,11 @@ def temp_file(extension="png"):
 
 # https://fredrikaverpil.github.io/2017/06/20/async-and-await-with-subprocesses/
 async def run_command(*args):
+    """
+    run a cli command
+    :param args: the args of the command, what would normally be seperated by a space
+    :return: the result of the command
+    """
     # Create subprocess
     process = await asyncio.create_subprocess_exec(
         *args, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
@@ -80,6 +99,11 @@ async def run_command(*args):
 
 # https://askubuntu.com/questions/110264/how-to-find-frames-per-second-of-any-video-file
 async def get_frame_rate(filename):
+    """
+    gets the FPS of a file
+    :param filename: filename
+    :return: FPS
+    """
     logging.info("Getting FPS...")
     out = await run_command("ffprobe", filename, "-v", "0", "-select_streams", "v", "-print_format", "flat",
                             "-show_entries", "stream=r_frame_rate")
@@ -93,6 +117,11 @@ async def get_frame_rate(filename):
 
 # https://superuser.com/questions/650291/how-to-get-video-duration-in-seconds
 async def get_duration(filename):
+    """
+    gets the duration of a file
+    :param filename: filename
+    :return: duration
+    """
     logging.info("Getting duration...")
     out = await run_command("ffprobe", "-v", "error", "-show_entries", "format=duration", "-of",
                             "default=noprint_wrappers=1:nokey=1", filename)
@@ -100,21 +129,36 @@ async def get_duration(filename):
 
 
 async def get_resolution(filename):
+    """
+    gets the resolution of a file
+    :param filename: filename
+    :return: [width, height]
+    """
     out = await run_command("ffprobe", "-v", "error", "-show_entries", "stream=width,height", "-of", "csv=p=0:s=x",
                             filename)
     return out.split("x")
 
 
-async def ffmpegsplit(image):
+async def ffmpegsplit(media):
+    """
+    splits the input file into frames
+    :param media: file
+    :return: [list of files, ffmpeg key to find files]
+    """
     logging.info("Splitting frames...")
-    await run_command("ffmpeg", "-hide_banner", "-i", image, "-vsync", "1", "-vf", "scale='max(200,iw)':-1",
-                      f"{image.split('.')[0]}%09d.png")
-    files = glob.glob(f"{image.split('.')[0]}*.png")
+    await run_command("ffmpeg", "-hide_banner", "-i", media, "-vsync", "1", "-vf", "scale='max(200,iw)':-1",
+                      f"{media.split('.')[0]}%09d.png")
+    files = glob.glob(f"{media.split('.')[0]}*.png")
 
-    return files, f"{image.split('.')[0]}%09d.png"
+    return files, f"{media.split('.')[0]}%09d.png"
 
 
 async def splitaudio(video):
+    """
+    splits audio from a file
+    :param video: file
+    :return: filename of audio (aac) if file has audio, False if it doesn't
+    """
     ifaudio = await run_command("ffprobe", "-i", video, "-show_streams", "-select_streams", "a", "-loglevel", "error")
     if ifaudio:
         logging.info("Splitting audio...")
@@ -127,6 +171,11 @@ async def splitaudio(video):
 
 
 async def forceaudio(video):
+    """
+    gives videos with no audio a silent audio stream
+    :param video: file
+    :return: video filename
+    """
     ifaudio = await run_command("ffprobe", "-i", video, "-show_streams", "-select_streams", "a", "-loglevel", "error")
     if ifaudio:
         return video
@@ -140,31 +189,48 @@ async def forceaudio(video):
 
 
 async def compresspng(png):
+    """
+    compress a png file with pngquant
+    :param png: file
+    :return: filename of compressed png
+    """
     outname = temp_file("png")
     await run_command("pngquant", "--quality=0-80", "--o", outname, png)
     os.remove(png)
     return outname
 
 
-async def assurefilesize(image: str, ctx: discord.ext.commands.Context):
+async def assurefilesize(media: str, ctx: discord.ext.commands.Context):
+    """
+    downsizes files up to 5 times if they are over discord's upload limit
+    :param media: media
+    :param ctx: discord context
+    :return: filename of fixed media if it works, False if it still is too big.
+    """
     for i in range(5):
-        size = os.path.getsize(image)
+        size = os.path.getsize(media)
         logging.info(f"Resulting file is {humanize.naturalsize(size)}")
         # https://www.reddit.com/r/discordapp/comments/aflp3p/the_truth_about_discord_file_upload_limits/
         if size >= 8388119:
             logging.info("Image too big!")
             msg = await ctx.send(f"⚠ Resulting file too big! ({humanize.naturalsize(size)}) Downsizing result...")
-            imagenew = await handleanimated(image, captionfunctions.halfsize, ctx)
-            os.remove(image)
-            image = imagenew
+            imagenew = await handleanimated(media, captionfunctions.halfsize, ctx)
+            os.remove(media)
+            media = imagenew
             await msg.delete()
-        if os.path.getsize(image) < 8388119:
-            return image
+        if os.path.getsize(media) < 8388119:
+            return media
     await ctx.send(f"⚠ Max downsizes reached. File is way too big.")
     return False
 
 
 def minimagesize(image, minsize):
+    """
+    resizes image to be at least minsize wide
+    :param image: image
+    :param minsize: minimum width in pixels
+    :return: image with width at least minsize
+    """
     im = Image.open(image)
     if im.size[0] < minsize:
         logging.info(f"Image is {im.size}, Upscaling image...")
@@ -180,7 +246,7 @@ def mediatype(image):
     """
     Gets basic type of media
     :param image: filename of media
-    :return: can be VIDEO, AUDIO, GIF, IMAGE or None.
+    :return: can be VIDEO, AUDIO, GIF, IMAGE or None (invalid or other).
     """
     mime = magic.from_file(image, mime=True)
     if mime.startswith("video"):
@@ -200,47 +266,37 @@ def mediatype(image):
     return None
 
 
-def run_in_executor(f):  # wrapper to prevent intense non-async functions from blocking event loop
-    @functools.wraps(f)
-    def inner(*args, **kwargs):
-        loop = asyncio.get_running_loop()
-        return loop.run_in_executor(None, lambda: f(*args, **kwargs))
-
-    return inner
-
-
-@run_in_executor
-def unblockpool(workers, *args, initializer=None):
-    if initializer is None:
-        pool = Pool(workers)
-    else:
-        pool = Pool(workers, initializer=initializer)
-    pool.starmap_async(*args)
-    pool.close()
-    pool.join()
-
-
-@run_in_executor
 def run_in_exec(func, *args, **kwargs):
-    return func(*args, **kwargs)
+    """
+    prevents intense non-async functions from blocking event loop
+    """
+    loop = asyncio.get_running_loop()
+    return loop.run_in_executor(None, lambda: func(*args, **kwargs))
 
 
-async def handleanimated(image: str, capfunction: callable, ctx, *caption,
-                         webengine=False):
-    imty = mediatype(image)
+async def handleanimated(media: str, capfunction: callable, ctx, *caption):
+    """
+    handles processing functions that only work in singular frames and applies to videos/gifs
+    :param media: image, video, or gif
+    :param capfunction: function to process media with
+    :param ctx: discord context
+    :param caption: other params (usually caption)
+    :return: processed media
+    """
+    imty = mediatype(media)
     logging.info(f"Detected type {imty}.")
     if imty is None:
-        raise Exception(f"File {image} is invalid!")
+        raise Exception(f"File {media} is invalid!")
     elif imty == "IMAGE":
         logging.info(f"Processing frame...")
-        image = minimagesize(image, 200)
-        result = renderpool.apply_async(capfunction, (image, caption))
+        media = minimagesize(media, 200)
+        result = renderpool.apply_async(capfunction, (media, caption))
         capped = await run_in_exec(result.get)
         return await compresspng(capped)
     elif imty == "VIDEO" or imty == "GIF":
-        frames, name = await ffmpegsplit(image)
-        audio = await splitaudio(image)
-        fps = await get_frame_rate(image)
+        frames, name = await ffmpegsplit(media)
+        audio = await splitaudio(media)
+        fps = await get_frame_rate(media)
         # logging.info(
         #     f"Processing {len(frames)} frames with {min(len(frames), POOLWORKERS)} processes...")
         if len(frames) > config.max_frames:
@@ -251,16 +307,6 @@ async def handleanimated(image: str, capfunction: callable, ctx, *caption,
         capargs = []
         for i, frame in enumerate(frames):
             capargs.append((frame, caption, frame.replace('.png', '_rendered.png')))
-        # to keep from blocking discord loop
-        # if webengine:  # not every caption command requires the webengine
-        #     await unblockpool(min(len(frames), 8), capfunction,
-        #                       capargs, initializer=chromiumrender.initdriver)
-        # else:
-        #     await unblockpool(min(len(frames), 16), capfunction, capargs)
-
-        # for frame in capargs:
-        #     async with renderlock:
-        #         await run_in_exec(capfunction, *frame)
         result = renderpool.starmap_async(capfunction, capargs)
         await run_in_exec(result.get)
         logging.info(f"Joining {len(frames)} frames...")
@@ -292,6 +338,11 @@ async def handleanimated(image: str, capfunction: callable, ctx, *caption,
 
 
 async def mp4togif(mp4):
+    """
+    converts mp4 to gif
+    :param mp4: mp4
+    :return: gif
+    """
     mime = magic.Magic(mime=True)
     filename = mime.from_file(mp4)
     if filename.find('video') == -1:
@@ -307,6 +358,11 @@ async def mp4togif(mp4):
 
 
 async def giftomp4(gif):
+    """
+    converts gif to mp4
+    :param gif: gif
+    :return: mp4
+    """
     outname = temp_file("mp4")
     await run_command("ffmpeg", "-hide_banner", "-i", gif, "-movflags", "faststart", "-pix_fmt", "yuv420p", "-vf",
                       "scale=trunc(iw/2)*2:trunc(ih/2)*2", outname)
@@ -315,6 +371,11 @@ async def giftomp4(gif):
 
 
 async def mediatopng(media):
+    """
+    converts media to png
+    :param media: media
+    :return: png
+    """
     outname = temp_file("png")
     await run_command("ffmpeg", "-hide_banner", "-i", media, "-frames:v", "1", outname)
 
@@ -329,6 +390,12 @@ async def ffprobe(file):
 # https://stackoverflow.com/questions/65728616/how-to-get-ffmpeg-to-consistently-apply-speed-effect-to-first-few-frames
 # TODO: some way to preserve gif transparency?
 async def speed(file, sp):
+    """
+    changes speed of media
+    :param file: media
+    :param sp: speed to multiply media by
+    :return: processed media
+    """
     outname = temp_file("mp4")
     mt = mediatype(file)
     fps = await get_frame_rate(file)
@@ -342,6 +409,11 @@ async def speed(file, sp):
 
 
 async def reverse(file):
+    """
+    reverses media (-1x speed)
+    :param file: media
+    :return: procesed media
+    """
     mt = mediatype(file)
     outname = temp_file("mp4")
     await run_command("ffmpeg", "-hide_banner", "-i", await forceaudio(file), "-vf", "reverse", "-af", "areverse",
@@ -352,9 +424,15 @@ async def reverse(file):
 
 
 async def quality(file, crf, qa):
+    """
+    changes quality of videos/gifs with ffmpeg compression
+    :param file: media
+    :param crf: FFmpeg CRF param
+    :param qa: audio bitrate
+    :return: processed media
+    """
     mt = mediatype(file)
     outname = temp_file("mp4")
-    ifaudio = await run_command("ffprobe", "-i", file, "-show_streams", "-select_streams", "a", "-loglevel", "error")
     await run_command("ffmpeg", "-hide_banner", "-i", await forceaudio(file), "-crf", str(crf), "-c:a", "aac", "-ar",
                       str(qa), outname)
     if mt == "GIF":
@@ -363,6 +441,12 @@ async def quality(file, crf, qa):
 
 
 async def changefps(file, fps):
+    """
+    changes FPS of media
+    :param file: media
+    :param fps: FPS
+    :return: processed media
+    """
     mt = mediatype(file)
     outname = temp_file("mp4")
     await run_command("ffmpeg", "-hide_banner", "-i", file, "-filter:v", f"fps=fps={fps}", outname)
@@ -372,6 +456,11 @@ async def changefps(file, fps):
 
 
 async def pad(file):
+    """
+    pads media into a square shape
+    :param file: media
+    :return: processed media
+    """
     mt = mediatype(file)
     if mt == "IMAGE":
         outname = temp_file("png")
@@ -385,6 +474,11 @@ async def pad(file):
 
 
 async def imageaudio(files):
+    """
+    combines an image an an audio file into a video
+    :param files: [image, audio]
+    :return: video
+    """
     audio = files[1]
     image = files[0]
     outname = temp_file("mp4")
@@ -395,6 +489,11 @@ async def imageaudio(files):
 
 
 async def concatv(files):
+    """
+    concatenates 2 videos
+    :param files: [video, video]
+    :return: combined video
+    """
     video0 = await forceaudio(files[0])
     fixedvideo0 = temp_file("mp4")
     await run_command("ffmpeg", "-hide_banner", "-i", video0, "-c:v", "libx264", "-c:a", "aac", "-ar", "48000",
@@ -421,6 +520,12 @@ async def concatv(files):
 
 
 async def stack(files, style):
+    """
+    stacks media
+    :param files: [media, media]
+    :param style: "hstack" or "vstack"
+    :return: processed media
+    """
     if mediatype(files[0]) == "IMAGE" and mediatype(files[1]) == "IMAGE":  # easier to just make this an edge case
         return await imagestack(files, style)
     video0 = await forceaudio(files[0])
@@ -449,10 +554,16 @@ async def stack(files, style):
 
 # https://stackoverflow.com/a/30228789/9044183
 async def imagestack(files, style):
-     raise NotImplementedError("images are a weird edge case i'll get to later")
+    raise NotImplementedError("images are a weird edge case i'll get to later")
 
 
 async def freezemotivate(files, *caption):
+    """
+    ends video with motivate caption
+    :param files: media
+    :param caption: caption to pass to motivate()
+    :return: processed media
+    """
     if isinstance(files, list):  # audio specified
         video = files[0]
         audio = files[1]
@@ -474,6 +585,12 @@ async def freezemotivate(files, *caption):
 
 
 async def trim(file, length):
+    """
+    trims media to length seconds
+    :param file: media
+    :param length: duration to trim
+    :return: processed media
+    """
     mt = mediatype(file)
     exts = {
         "AUDIO": "mp3",
