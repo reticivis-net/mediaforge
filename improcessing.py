@@ -213,7 +213,8 @@ async def assurefilesize(media: str, ctx: discord.ext.commands.Context):
         # https://www.reddit.com/r/discordapp/comments/aflp3p/the_truth_about_discord_file_upload_limits/
         if size >= 8388119:
             logging.info("Image too big!")
-            msg = await ctx.send(f"{config.emojis['warning']} Resulting file too big! ({humanize.naturalsize(size)}) Downsizing result...")
+            msg = await ctx.send(
+                f"{config.emojis['warning']} Resulting file too big! ({humanize.naturalsize(size)}) Downsizing result...")
             imagenew = await handleanimated(media, captionfunctions.halfsize, ctx)
             os.remove(media)
             media = imagenew
@@ -300,7 +301,8 @@ async def handleanimated(media: str, capfunction: callable, ctx, *caption):
         # logging.info(
         #     f"Processing {len(frames)} frames with {min(len(frames), POOLWORKERS)} processes...")
         if len(frames) > config.max_frames:
-            await ctx.reply(f"{config.emojis['warning']} Input file has {len(frames)} frames, maximum allowed is {config.max_frames}.")
+            await ctx.reply(
+                f"{config.emojis['warning']} Input file has {len(frames)} frames, maximum allowed is {config.max_frames}.")
             logging.warning(f"⚠ Input file has {len(frames)} frames, maximum allowed is {config.max_frames}.")
             return
         logging.info(f"Processing {len(frames)} frames...")
@@ -470,6 +472,18 @@ async def pad(file):
                       "pad=width='max(iw,ih)':height='max(iw,ih)':x='(ih-iw)/2':y='(iw-ih)/2':color=white", outname)
     if mt == "GIF":
         outname = await mp4togif(outname)
+    return outname
+
+
+async def gifloop(file, loop):
+    """
+    loops a gif
+    :param file: gif
+    :param loop: # of times to loop
+    :return: processed media
+    """
+    outname = temp_file("gif")
+    await run_command("ffmpeg", "-hide_banner", "-i", file, "-loop", str(loop), "-vcodec", "copy", outname)
     return outname
 
 

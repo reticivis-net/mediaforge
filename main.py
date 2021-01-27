@@ -444,6 +444,21 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             """
             await improcess(ctx, improcessing.pad, [["VIDEO", "GIF", "IMAGE"]])
 
+        @commands.command()
+        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
+        async def gifloop(self, ctx, loop: int = 0):
+            """
+            Changes the amount of times a gif loops
+
+            :Usage=$gifloop `[loop]`
+            :Param=loop - number of times to loop. -1 for no loop, 0 for infinite loop.
+            :Param=media - A gif. (automatically found in channel)
+            """
+            if not -1 <= loop:
+                await ctx.send(f"{config.emojis['warning']} Loop must be -1 or more.")
+                return
+            await improcess(ctx, improcessing.gifloop, [["GIF"]], loop)
+
         @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         @commands.command()
         async def imageaudio(self, ctx):
@@ -701,7 +716,8 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                     embed.add_field(name="Aliases", value=", ".join(cmd.aliases))
                 await ctx.reply(embed=embed)
             else:
-                await ctx.reply(f"{config.emojis['warning']} `{arg}` is not the name of a command or a command category!")
+                await ctx.reply(
+                    f"{config.emojis['warning']} `{arg}` is not the name of a command or a command category!")
 
         @commands.command(aliases=["ffprobe"])
         @commands.cooldown(1, config.cooldown, commands.BucketType.user)
