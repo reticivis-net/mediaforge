@@ -1,4 +1,4 @@
-ATTRIBUTIONS
+**ATTRIBUTIONS**
 discord.py - <https://pypi.org/project/discord.py/> - runs the discord bot
 Selenium - <https://www.selenium.dev/> - controls ChromeDriver from python.
 ChromeDriver - <https://chromedriver.chromium.org/> - controls Chrome
@@ -7,11 +7,10 @@ FFmpeg - <https://ffmpeg.org/> - handles most conversion and video processing
 Pillow - <https://python-pillow.org/> - resizes images
 python-magic - <https://github.com/ahupp/python-magic> - detects filetypes
 PyCharm - <https://www.jetbrains.com/pycharm/> - used for development
-<https://github.com/aechaechaech/Jerma-Imposter-Message-Generator> - $jermatext uses a modified version of this code.
+<https://github.com/aechaechaech/Jerma-Imposter-Message-Generator> - jermatext uses a modified version of this code.
 Twemoji - <https://twemoji.twitter.com/> - Emoji font used for caption commands
 gifski - <https://gif.ski/> - used to create high quality gifs
 pngquant - <https://pngquant.org/> - compresses PNG images
-
-Honorable Mentions
+**Honorable Mentions**
 wkhtmltoimage - <https://wkhtmltopdf.org/> - formerly used to render captions
 PyQt - <https://pypi.org/project/PyQt5/> - formerly used to render captions

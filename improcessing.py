@@ -554,6 +554,12 @@ async def stack(files, style):
 
 # https://stackoverflow.com/a/30228789/9044183
 async def imagestack(files, style):
+    """
+    stack() calls this function since ffmpeg can be weird about pngs
+    :param files: [image,image]
+    :param style: "hstack" or "vstack"
+    :return: processed media
+    """
     raise NotImplementedError("images are a weird edge case i'll get to later")
 
 
