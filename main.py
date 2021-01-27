@@ -21,7 +21,7 @@ import improcessing
 import sus
 import config
 
-# TODO: overlay media command
+# TODO: magik scale
 # TODO: somehow make it known you can reply to messages
 # https://coloredlogs.readthedocs.io/en/latest/api.html#id28
 # configure logging
@@ -101,6 +101,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                 else:
                     logging.error(f"aiohttp status {resp.status}")
                     logging.error(f"aiohttp status {await resp.read()}")
+                    raise Exception(f"aiohttp status {resp.status} {await resp.read()}")
 
         return name
 
@@ -118,7 +119,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                 if embed.type == "gifv":
                     # https://github.com/esmBot/esmBot/blob/master/utils/imagedetect.js#L34
                     tenor = await fetch(
-                        f"https://api.tenor.com/v1/gifs?ids={m.embeds[0].url.split('-').pop()}&key={config.tenor_key}")
+                        f"https://api.tenor.com/v1/gifs?ids={embed.url.split('-').pop()}&key={config.tenor_key}")
                     tenor = json.loads(tenor)
                     if 'error' in tenor:
                         # await ctx.reply(f"{config.emojis['2exclamation']} Tenor Error! `{tenor['error']}`")
@@ -254,16 +255,17 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                     else:
                         result = await func(filesforcommand, *args)
                     result = await improcessing.assurefilesize(result, ctx)
-                    logging.info("Uploading...")
-                    await msg.edit(content=f"{config.emojis['working']} Uploading...")
-                    await ctx.reply(file=discord.File(result))
-                    await msg.delete()
-                    for f in files:
-                        try:
-                            os.remove(f)
-                        except FileNotFoundError:
-                            pass
-                    os.remove(result)
+                    if result:
+                        logging.info("Uploading...")
+                        await msg.edit(content=f"{config.emojis['working']} Uploading...")
+                        await ctx.reply(file=discord.File(result))
+                        await msg.delete()
+                        for f in files:
+                            try:
+                                os.remove(f)
+                            except FileNotFoundError:
+                                pass
+                        os.remove(result)
             else:
                 logging.warning("No media found.")
                 await ctx.send(f"{config.emojis['x']} No file found.")
@@ -460,6 +462,19 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             """
             await improcess(ctx, improcessing.pad, [["VIDEO", "GIF", "IMAGE"]])
 
+        @commands.command(aliases=["magic", "magik"])
+        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
+        async def magick(self, ctx):
+            """
+            Apply imagemagick's liquid/content aware scale to an image.
+            This command is a bit slow.
+            https://legacy.imagemagick.org/script/command-line-options.php?#liquid-rescale
+
+            :Usage=$magick
+            :Param=media - A video, gif, or image. (automatically found in channel)
+            """
+            await improcess(ctx, captionfunctions.magick, [["VIDEO", "GIF", "IMAGE"]], handleanimated=True)
+
         @commands.command()
         @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         async def gifloop(self, ctx, loop: int = 0):
@@ -577,7 +592,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
 
         @commands.command(name="fps")
         @commands.cooldown(1, config.cooldown, commands.BucketType.user)
-        async def fpschange(self, ctx, fps: float = 30):
+        async def fpschange(self, ctx, fps: float):
             """
             Changes the FPS of media.
             This command keeps the speed the same.
@@ -585,8 +600,8 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             GIFs are only stable at certain FPS values. These include 50, 30, 15, 10, and others.
             An important reminder that by default tenor "gifs" are interpreted as mp4s, which do not suffer this problem.
 
-            :Usage=$fpschange `[fps]`
-            :Param=fps - Frames per second of the output. must be between 1 and 60. defaults to 30.
+            :Usage=$fps `[fps]`
+            :Param=fps - Frames per second of the output. must be between 1 and 60.
             :Param=video - A video or gif. (automatically found in channel)
             """
             if not 1 <= fps <= 60:
@@ -704,11 +719,15 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                 for cmd in cog.get_commands():
                     embed.add_field(name=f"{config.command_prefix}{cmd.name}", value=cmd.short_doc)
                 await ctx.reply(embed=embed)
-            elif arg.lower() in [c.name for c in bot.commands]:
+            # elif arg.lower() in [c.name for c in bot.commands]:
+            else:
                 for all_cmd in bot.commands:
-                    if all_cmd.name == arg.lower():
+                    if all_cmd.name == arg.lower() or arg.lower() in all_cmd.aliases:
                         cmd: discord.ext.commands.Command = all_cmd
                         break
+                else:
+                    await ctx.reply(
+                        f"{config.emojis['warning']} `{arg}` is not the name of a command or a command category!")
                 embed = discord.Embed(title=config.command_prefix + cmd.name, description=cmd.cog_name,
                                       color=discord.Color(0xEE609C))
                 fields = {}
@@ -731,9 +750,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                 if cmd.aliases:
                     embed.add_field(name="Aliases", value=", ".join(cmd.aliases))
                 await ctx.reply(embed=embed)
-            else:
-                await ctx.reply(
-                    f"{config.emojis['warning']} `{arg}` is not the name of a command or a command category!")
+
 
         @commands.command(aliases=["ffprobe"])
         @commands.cooldown(1, config.cooldown, commands.BucketType.user)
@@ -746,8 +763,9 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             :Param=media - Any media file.
             """
             async with ctx.channel.typing():
-                file = await imagesearch(ctx)
+                file = await imagesearch(ctx, 1)
                 if file:
+                    file = await saveurls(file)
                     result = await improcessing.ffprobe(file[0])
                     await ctx.reply(f"`{result[1]}` `{result[2]}`\n```{result[0]}```")
                     os.remove(file[0])

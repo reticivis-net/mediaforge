@@ -4,7 +4,7 @@ import re
 import subprocess
 from PIL import Image
 import chromiumrender
-from improcessing import filetostring, temp_file
+from improcessing import filetostring, temp_file, mediatype
 
 
 # stolen code https://stackoverflow.com/questions/6116978/how-to-replace-multiple-substrings-of-a-string
@@ -32,7 +32,7 @@ def sanitizehtml(text):
     if isinstance(text, list) or isinstance(text, tuple):
         text = list(text)
         text[:] = [c.replace("&", '&amp;').replace("<", '&lt;').replace(">", '&gt;').replace("\"", '&quot;')
-                          .replace("'", '&#039;') for c in text]
+                       .replace("'", '&#039;') for c in text]
     else:
         text = text.replace("&", '&amp;').replace("<", '&lt;').replace(">", '&gt;').replace("\"", '&quot;') \
             .replace("'", '&#039;')
@@ -190,3 +190,12 @@ def jpeg(image, params: list, tosavename=None):
     im = im.resize(size)
     im.save(name)
     return name
+
+
+def magick(file, _, tosavename=None):
+    assert mediatype(file) == "IMAGE"
+    if tosavename is None:
+        tosavename = temp_file("png")
+    subprocess.check_call(["magick", file, "-liquid-rescale", "50%x50%", tosavename])
+
+    return tosavename
