@@ -21,8 +21,8 @@ import improcessing
 import sus
 import config
 
-# TODO: fix image stacking
 # TODO: overlay media command
+# TODO: somehow make it known you can reply to messages
 # https://coloredlogs.readthedocs.io/en/latest/api.html#id28
 # configure logging
 field_styles = {
@@ -75,6 +75,8 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
         :param extension: force a file extension
         :return: local path of saved file
         """
+        if url.startswith("https://media.tenor.com") and url.endswith("/mp4"):  # tenor >:(
+            extension = "mp4"
         if extension is None:
             extension = url.split(".")[-1].split("?")[0]
         name = improcessing.temp_file(extension)
@@ -108,25 +110,28 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
         handles saving of media from discord messages
         :param m: a discord message
         :param ctx: command context (for sending error messages)
-        :return: local file path if saved, None if message has no savable media.
+        :return: list of file URLs detected in the message
         """
+        detectedfiles = []
         if len(m.embeds):
-            if m.embeds[0].type == "gifv":
-                # https://github.com/esmBot/esmBot/blob/master/utils/imagedetect.js#L34
-                tenor = await fetch(
-                    f"https://api.tenor.com/v1/gifs?ids={m.embeds[0].url.split('-').pop()}&key={config.tenor_key}")
-                tenor = json.loads(tenor)
-                if 'error' in tenor:
-                    await ctx.reply(f"{config.emojis['2exclamation']} Tenor Error! `{tenor['error']}`")
-                    logging.error(f"Tenor Error! `{tenor['error']}`")
-                    return None
-                else:
-                    return await saveurl(tenor['results'][0]['media'][0]['mp4']['url'], "mp4")
-            elif m.embeds[0].type in ["image", "video", "audio"]:
-                return await saveurl(m.embeds[0].url)
+            for embed in m.embeds:
+                if embed.type == "gifv":
+                    # https://github.com/esmBot/esmBot/blob/master/utils/imagedetect.js#L34
+                    tenor = await fetch(
+                        f"https://api.tenor.com/v1/gifs?ids={m.embeds[0].url.split('-').pop()}&key={config.tenor_key}")
+                    tenor = json.loads(tenor)
+                    if 'error' in tenor:
+                        # await ctx.reply(f"{config.emojis['2exclamation']} Tenor Error! `{tenor['error']}`")
+                        logging.error(f"Tenor Error! `{tenor['error']}`")
+                    else:
+                        detectedfiles.append(tenor['results'][0]['media'][0]['mp4']['url'])
+                elif embed.type in ["image", "video", "audio"]:
+                    detectedfiles.append(m.embeds[0].url)
         if len(m.attachments):
-            return await saveurl(m.attachments[0].url)
-        return None
+            for att in m.attachments:
+                if not att.filename.endswith("txt"):  # it was reading traceback attachments >:(
+                    detectedfiles.append(att.url)
+        return detectedfiles
 
 
     async def imagesearch(ctx, nargs=1):
@@ -140,19 +145,29 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
         if ctx.message.reference:
             m = ctx.message.reference.resolved
             hm = await handlemessagesave(m, ctx)
-            if hm is None:
-                return False
-            else:
-                outfiles.append(hm)
-                if len(outfiles) >= nargs:
-                    return outfiles[::-1]
+            outfiles += hm
+            if len(outfiles) >= nargs:
+                return outfiles[:nargs]
         async for m in ctx.channel.history(limit=50):
             hm = await handlemessagesave(m, ctx)
-            if hm is not None:
-                outfiles.append(hm)
-                if len(outfiles) >= nargs:
-                    return outfiles[::-1]
+            outfiles += hm
+            if len(outfiles) >= nargs:
+                return outfiles[:nargs]
         return False
+
+
+    async def saveurls(urls: list):
+        """
+        saves list of URLs and returns it
+        :param urls: list of urls
+        :return: list of filepaths
+        """
+        if not urls:
+            return False
+        files = []
+        for url in urls:
+            files.append(await saveurl(url))
+        return files
 
 
     async def handletenor(m, ctx, gif=False):
@@ -216,7 +231,8 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
         :return: nothing, all processing and uploading is done in this function
         """
         async with ctx.channel.typing():
-            files = await imagesearch(ctx, len(allowedtypes))
+            urls = await imagesearch(ctx, len(allowedtypes))
+            files = await saveurls(urls)
             if files:
                 for i, file in enumerate(files):
                     if (imtype := improcessing.mediatype(file)) not in allowedtypes[i]:
@@ -417,7 +433,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
 
             :Usage=$jpeg `[strength]` `[stretch]` `[quality]`
             :Param=strength - amount of times to jpegify image. must be between 1 and 100. defaults to 30.
-            :Param=stretch - randomly stretch the image by this number on each jpegification. an cause strange effects on videos. must be between 0 and 40. defaults to 20.
+            :Param=stretch - randomly stretch the image by this number on each jpegification. can cause strange effects on videos. must be between 0 and 40. defaults to 20.
             :Param=quality - quality of JPEG compression. must be between 1 and 95. defaults to 10.
             :Param=media - A video, gif, or image. (automatically found in channel)
             """
@@ -923,7 +939,8 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                     traceback.format_exception(etype=type(commanderror), value=commanderror,
                                                tb=commanderror.__traceback__)))
             await ctx.reply(f"{config.emojis['2exclamation']} `" + str(commanderror).replace("@", "\\@") +
-                            "`\nPlease report this error with the attached traceback to the github.",
+                            "`\nPlease report this error with the attached traceback to the github.\nhttps://github.com"
+                            "/HexCodeFFF/captionbot/issues",
                             file=discord.File(tr))
             os.remove(tr)
 

@@ -1,8 +1,0 @@
-{"tips": [
-  "Tip: Tenor GIFs are processed as MP4s by default due to their superior quality.",
-  "Tip: Use $tenorgif to get the raw gif file straight from tenor.",
-  "Tip: MP4s typically process faster.",
-  "Tip: Use $videotogif and $giftovideo to convert between videos and gifs.",
-  "Tip: Media with more than 250 frames will not be processed by caption commands. use $fps to change the framerate.",
-  "Tip: Type $help `command` for more info on a command."
-]}

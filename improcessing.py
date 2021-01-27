@@ -574,7 +574,29 @@ async def imagestack(files, style):
     :param style: "hstack" or "vstack"
     :return: processed media
     """
-    raise NotImplementedError("images are a weird edge case i'll get to later")
+    image0 = Image.open(files[0]).convert("RGBA")
+    image1 = Image.open(files[1]).convert("RGBA")
+    print(image0.size, image1.size)
+    if style == "hstack":
+        width = image0.size[0]
+        ratio1 = image1.size[1] / image1.size[0]
+        height1 = width * ratio1
+        image1 = image1.resize((int(width), int(height1)), resample=Image.BICUBIC)
+        outimg = Image.new("RGBA", (width, image0.size[1] + image1.size[1]))
+        outimg.alpha_composite(image0)
+        outimg.alpha_composite(image1, (0, image0.size[1]))
+    else:
+        height = image0.size[1]
+        ratio1 = image1.size[0] / image1.size[1]
+        width1 = height * ratio1
+        image1 = image1.resize((int(width1), int(height)), resample=Image.BICUBIC)
+        outimg = Image.new("RGBA", (image0.size[0] + image1.size[0], height))
+        outimg.alpha_composite(image0)
+        outimg.alpha_composite(image1, (image0.size[0], 0))
+    outname = temp_file("png")
+    outimg.save(outname)
+    outname = await compresspng(outname)
+    return outname
 
 
 async def freezemotivate(files, *caption):
