@@ -7,8 +7,6 @@ import random
 import string
 import sys
 import asyncio
-import functools
-from multiprocessing import Pool
 # pip libs
 import discord.ext
 from PIL import Image, UnidentifiedImageError
@@ -207,14 +205,16 @@ async def assurefilesize(media: str, ctx: discord.ext.commands.Context):
     :param ctx: discord context
     :return: filename of fixed media if it works, False if it still is too big.
     """
+    if media == "":
+        raise Exception(f"Processing function returned nothing!")
     for i in range(5):
         size = os.path.getsize(media)
         logging.info(f"Resulting file is {humanize.naturalsize(size)}")
         # https://www.reddit.com/r/discordapp/comments/aflp3p/the_truth_about_discord_file_upload_limits/
         if size >= 8388119:
             logging.info("Image too big!")
-            msg = await ctx.send(
-                f"{config.emojis['warning']} Resulting file too big! ({humanize.naturalsize(size)}) Downsizing result...")
+            msg = await ctx.send(f"{config.emojis['warning']} Resulting file too big! ({humanize.naturalsize(size)}) "
+                                 f"Downsizing result...")
             imagenew = await handleanimated(media, captionfunctions.halfsize, ctx)
             os.remove(media)
             media = imagenew
