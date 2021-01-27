@@ -21,8 +21,6 @@ import improcessing
 import sus
 import config
 
-# TODO: magik scale
-# TODO: somehow make it known you can reply to messages
 # https://coloredlogs.readthedocs.io/en/latest/api.html#id28
 # configure logging
 field_styles = {
@@ -271,7 +269,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                 await ctx.send(f"{config.emojis['x']} No file found.")
 
 
-    class Caption(commands.Cog, name="Caption Commands"):
+    class Caption(commands.Cog, name="Captioning"):
         """
         Commands to caption media.
         """
@@ -419,7 +417,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             await improcess(ctx, improcessing.freezemotivate, [["VIDEO", "GIF"], ["AUDIO"]], *caption)
 
 
-    class Media(commands.Cog, name="Media Processing"):
+    class Media(commands.Cog, name="Processing"):
         """
         Basic media editing/processing commands.
         """
@@ -622,7 +620,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             await improcess(ctx, improcessing.trim, [["VIDEO", "GIF", "AUDIO"]], length)
 
 
-    class Conversion(commands.Cog, name="Media Conversion"):
+    class Conversion(commands.Cog, name="Conversion"):
         """
         Commands to convert one type of media to another
         """
@@ -684,7 +682,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             await improcess(ctx, improcessing.mediatopng, [["VIDEO", "GIF", "IMAGE"]])
 
 
-    class Other(commands.Cog, name="Other Commands"):
+    class Other(commands.Cog, name="Other"):
         """
         Commands that don't fit in the other categories.
         """
@@ -708,6 +706,12 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                 for c in bot.cogs.values():
                     if c.qualified_name != "Owner Only":
                         embed.add_field(name=c.qualified_name, value=c.description)
+                embed.add_field(name="Tips", value="A list of tips for using the bot.")
+                await ctx.reply(embed=embed)
+            elif arg.lower() in ["tips", "tip"]:
+                embed = discord.Embed(title="Tips", color=discord.Color(0xD262BA))
+                for tip, tipv in config.tips.items():
+                    embed.add_field(name=tip, value=tipv, inline=False)
                 await ctx.reply(embed=embed)
             elif arg.lower() in [c.lower() for c in bot.cogs]:
                 cogs_lower = {k.lower(): v for k, v in bot.cogs.items()}
@@ -750,7 +754,6 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                 if cmd.aliases:
                     embed.add_field(name="Aliases", value=", ".join(cmd.aliases))
                 await ctx.reply(embed=embed)
-
 
         @commands.command(aliases=["ffprobe"])
         @commands.cooldown(1, config.cooldown, commands.BucketType.user)
