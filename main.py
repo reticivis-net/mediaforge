@@ -51,7 +51,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
     @bot.event
     async def on_ready():
         logging.log(35, f"Logged in as {bot.user.name}!")
-        game = discord.Activity(name=f"with your files",
+        game = discord.Activity(name=f"with your media | {config.command_prefix}help",
                                 type=discord.ActivityType.playing)
         await bot.change_presence(activity=game)
 
@@ -117,7 +117,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                     f"https://api.tenor.com/v1/gifs?ids={m.embeds[0].url.split('-').pop()}&key={config.tenor_key}")
                 tenor = json.loads(tenor)
                 if 'error' in tenor:
-                    await ctx.reply(f":bangbang: Tenor Error! `{tenor['error']}`")
+                    await ctx.reply(f"{config.emojis['2exclamation']} Tenor Error! `{tenor['error']}`")
                     logging.error(f"Tenor Error! `{tenor['error']}`")
                     return None
                 else:
@@ -171,7 +171,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                 tenor = json.loads(tenor)
                 if 'error' in tenor:
                     logging.error(tenor['error'])
-                    await ctx.send(f":bangbang: Tenor Error! `{tenor['error']}`")
+                    await ctx.send(f"{config.emojis['2exclamation']} Tenor Error! `{tenor['error']}`")
                     return False
                 else:
                     if gif:
@@ -221,14 +221,14 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                 for i, file in enumerate(files):
                     if (imtype := improcessing.mediatype(file)) not in allowedtypes[i]:
                         await ctx.reply(
-                            f"❌ Media #{i + 1} is {imtype}, it must be: {', '.join(allowedtypes[i])}")
+                            f"{config.emojis['z']} Media #{i + 1} is {imtype}, it must be: {', '.join(allowedtypes[i])}")
                         logging.warning(f"Media {i} type {imtype} is not in {allowedtypes[i]}")
                         for f in files:
                             os.remove(f)
                         break
                 else:
                     logging.info("Processing...")
-                    msg = await ctx.reply("⚙ Processing...", mention_author=False)
+                    msg = await ctx.reply(f"{config.emojis['working']} Processing...", mention_author=False)
                     if len(files) == 1:
                         filesforcommand = files[0]
                     else:
@@ -239,7 +239,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                         result = await func(filesforcommand, *args)
                     result = await improcessing.assurefilesize(result, ctx)
                     logging.info("Uploading...")
-                    await msg.edit(content="⚙ Uploading...")
+                    await msg.edit(content=f"{config.emojis['working']} Uploading...")
                     await ctx.reply(file=discord.File(result))
                     await msg.delete()
                     for f in files:
@@ -250,7 +250,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                     os.remove(result)
             else:
                 logging.warning("No media found.")
-                await ctx.send("❌ No file found.")
+                await ctx.send(f"{config.emojis['x']} No file found.")
 
 
     class Caption(commands.Cog, name="Caption Commands"):
@@ -422,13 +422,13 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             :Param=media - A video, gif, or image. (automatically found in channel)
             """
             if not 0 < strength <= 100:
-                await ctx.send("⚠ Strength must be between 0 and 100.")
+                await ctx.send(f"{config.emojis['warning']} Strength must be between 0 and 100.")
                 return
             if not 0 <= stretch <= 40:
-                await ctx.send("⚠ Stretch must be between 0 and 40.")
+                await ctx.send(f"{config.emojis['warning']} Stretch must be between 0 and 40.")
                 return
             if not 1 <= quality <= 95:
-                await ctx.send("⚠ Quality must be between 1 and 95.")
+                await ctx.send(f"{config.emojis['warning']} Quality must be between 1 and 95.")
                 return
             await improcess(ctx, captionfunctions.jpeg, [["VIDEO", "GIF", "IMAGE"]], strength, stretch, quality,
                             handleanimated=True)
@@ -507,7 +507,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             """
             # i want this to allow 0.25 but fuckin atempo's minimum is 0.5
             if not 0.5 <= speed <= 10:
-                await ctx.send("⚠ Speed must be between 0.5 and 10")
+                await ctx.send(f"{config.emojis['warning']} Speed must be between 0.5 and 10")
                 return
             await improcess(ctx, improcessing.speed, [["VIDEO", "GIF"]], speed)
 
@@ -537,10 +537,10 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
 
             """
             if not 28 <= crf <= 51:
-                await ctx.send("⚠ CRF must be between 28 and 51.")
+                await ctx.send(f"{config.emojis['warning']} CRF must be between 28 and 51.")
                 return
             if not 8000 <= qa <= 44100:
-                await ctx.send("⚠ qa must be between 8000 and 44100.")
+                await ctx.send(f"{config.emojis['warning']} qa must be between 8000 and 44100.")
                 return
             await improcess(ctx, improcessing.quality, [["VIDEO", "GIF"]], crf, qa)
 
@@ -559,7 +559,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             :Param=video - A video or gif. (automatically found in channel)
             """
             if not 1 <= fps <= 60:
-                await ctx.send("⚠ FPS must be between 1 and 60.")
+                await ctx.send(f"{config.emojis['warning']} FPS must be between 1 and 60.")
                 return
             await improcess(ctx, improcessing.changefps, [["VIDEO", "GIF"]], fps)
 
@@ -613,7 +613,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                 await ctx.send(file)
                 logging.info("Complete!")
             else:
-                await ctx.send("❌ No tenor gif found.")
+                await ctx.send(f"{config.emojis['x']} No tenor gif found.")
 
         @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         @commands.command()
@@ -701,7 +701,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                     embed.add_field(name="Aliases", value=", ".join(cmd.aliases))
                 await ctx.reply(embed=embed)
             else:
-                await ctx.reply(f"⚠ `{arg}` is not the name of a command or a command category!")
+                await ctx.reply(f"{config.emojis['warning']} `{arg}` is not the name of a command or a command category!")
 
         @commands.command(aliases=["ffprobe"])
         @commands.cooldown(1, config.cooldown, commands.BucketType.user)
@@ -720,7 +720,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                     await ctx.reply(f"`{result[1]}` `{result[2]}`\n```{result[0]}```")
                     os.remove(file[0])
                 else:
-                    await ctx.send("❌ No file found.")
+                    await ctx.send(f"{config.emojis['x']} No file found.")
 
         @commands.command()
         @commands.cooldown(1, config.cooldown, commands.BucketType.user)
@@ -796,7 +796,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                 for url in urls:
                     await ctx.reply(url)
             else:
-                await ctx.reply("⚠ Your message doesn't contain any custom emojis!")
+                await ctx.reply(f"{config.emojis['warning']} Your message doesn't contain any custom emojis!")
 
 
     class Debug(commands.Cog, name="Owner Only"):
@@ -883,19 +883,19 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
     async def on_command_error(ctx, commanderror):
         if isinstance(commanderror, discord.ext.commands.errors.CommandNotFound):
             msg = ctx.message.content.replace("@", "\\@")
-            err = f"⁉ Command `{msg.split(' ')[0]}` does not exist."
+            err = f"{config.emojis['exclamation_question']} Command `{msg.split(' ')[0]}` does not exist."
             logging.warning(err)
             await ctx.reply(err)
         elif isinstance(commanderror, discord.ext.commands.errors.NotOwner):
-            err = "❌ You are not authorized to use this command."
+            err = f"{config.emojis['x']} You are not authorized to use this command."
             logging.warning(err)
             await ctx.reply(err)
         elif isinstance(commanderror, discord.ext.commands.errors.CommandOnCooldown):
-            err = "⏱ " + str(commanderror).replace("@", "\\@")
+            err = f"{config.emojis['clock']} " + str(commanderror).replace("@", "\\@")
             logging.warning(err)
             await ctx.reply(err)
         elif isinstance(commanderror, discord.ext.commands.errors.MissingRequiredArgument):
-            err = "❓ " + str(commanderror).replace("@", "\\@")
+            err = f"{config.emojis['question']} " + str(commanderror).replace("@", "\\@")
             logging.warning(err)
             await ctx.reply(err)
         else:
@@ -906,7 +906,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                 t.write(trheader + ''.join(
                     traceback.format_exception(etype=type(commanderror), value=commanderror,
                                                tb=commanderror.__traceback__)))
-            await ctx.reply("‼ `" + str(commanderror).replace("@", "\\@") +
+            await ctx.reply(f"{config.emojis['2exclamation']} `" + str(commanderror).replace("@", "\\@") +
                             "`\nPlease report this error with the attached traceback to the github.",
                             file=discord.File(tr))
             os.remove(tr)
