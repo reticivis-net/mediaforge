@@ -12,6 +12,8 @@ chrome_driver_linux = "chromedriver87"
 chrome_driver_instances = 20
 # maximum number of frames for an input file.
 max_frames = 1024
+# amount of seconds cooldown per user commands have. set to 0 to disable cooldown
+cooldown = 1
 # NOTICE is recommended, INFO prints more information about what bot is doing, WARNING only prints errors.
 log_level = "NOTICE"
 # prefix for commands

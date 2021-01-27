@@ -103,7 +103,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
         return name
 
 
-    async def handlemessagesave(m:discord.Message, ctx: discord.ext.commands.Context):
+    async def handlemessagesave(m: discord.Message, ctx: discord.ext.commands.Context):
         """
         handles saving of media from discord messages
         :param m: a discord message
@@ -261,6 +261,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
         def __init__(self, bot):
             self.bot = bot
 
+        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         @commands.command()
         async def motivate(self, ctx, *, caption):
             """
@@ -275,6 +276,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             await improcess(ctx, captionfunctions.motivate, [["VIDEO", "GIF", "IMAGE"]], *caption,
                             handleanimated=True)
 
+        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         @commands.command()
         async def meme(self, ctx, *, caption):
             """
@@ -291,6 +293,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                             handleanimated=True)
 
         @commands.command(name="caption", aliases=["cap"])
+        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         async def captioncommand(self, ctx, *, caption):
             """
             Captions media.
@@ -301,6 +304,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             """
             await improcess(ctx, captionfunctions.caption, [["VIDEO", "GIF", "IMAGE"]], caption, handleanimated=True)
 
+        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         @commands.command()
         async def stuff(self, ctx, *, caption):
             """
@@ -312,6 +316,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             """
             await improcess(ctx, captionfunctions.stuff, [["VIDEO", "GIF", "IMAGE"]], caption, handleanimated=True)
 
+        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         @commands.command()
         async def stuffstretch(self, ctx, *, caption):
             """
@@ -327,6 +332,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                             handleanimated=True)
 
         @commands.command(aliases=["bottomcap", "botcap"])
+        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         async def bottomcaption(self, ctx, *, caption):
             """
             Captions underneath media.
@@ -338,6 +344,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             await improcess(ctx, captionfunctions.bottomcaption, [["VIDEO", "GIF", "IMAGE"]], caption,
                             handleanimated=True)
 
+        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         @commands.command()
         async def esmcaption(self, ctx, *, caption):
             """
@@ -349,6 +356,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             """
             await improcess(ctx, captionfunctions.esmcaption, [["VIDEO", "GIF", "IMAGE"]], caption, handleanimated=True)
 
+        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         @commands.command()
         async def twittercaption(self, ctx, *, caption):
             """
@@ -360,6 +368,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             """
             await improcess(ctx, captionfunctions.twittercap, [["VIDEO", "GIF", "IMAGE"]], caption, handleanimated=True)
 
+        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         @commands.command()
         async def freezemotivate(self, ctx, *, caption):
             """
@@ -374,6 +383,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                 caption.append("")
             await improcess(ctx, improcessing.freezemotivate, [["VIDEO", "GIF"]], *caption)
 
+        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         @commands.command()
         async def freezemotivateaudio(self, ctx, *, caption):
             # TODO: merge this into freezemotivate
@@ -399,6 +409,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
         def __init__(self, bot):
             self.bot = bot
 
+        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         @commands.command()
         async def jpeg(self, ctx, strength: int = 30, stretch: int = 20, quality: int = 10):
             """
@@ -423,6 +434,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                             handleanimated=True)
 
         @commands.command(aliases=["pad"])
+        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         async def square(self, ctx):
             """
             Pads media into a square shape.
@@ -432,6 +444,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             """
             await improcess(ctx, improcessing.pad, [["VIDEO", "GIF", "IMAGE"]])
 
+        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         @commands.command()
         async def imageaudio(self, ctx):
             """
@@ -444,6 +457,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             await improcess(ctx, improcessing.imageaudio, [["IMAGE"], ["AUDIO"]])
 
         @commands.command(aliases=["concat", "combinev"])
+        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         async def concatv(self, ctx):
             """
             Combines 2 video files.
@@ -456,6 +470,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             """
             await improcess(ctx, improcessing.concatv, [["VIDEO", "GIF"], ["VIDEO", "GIF"]])
 
+        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         @commands.command()
         async def hstack(self, ctx):
             """
@@ -467,6 +482,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             """
             await improcess(ctx, improcessing.stack, [["VIDEO", "GIF", "IMAGE"], ["VIDEO", "GIF", "IMAGE"]], "hstack")
 
+        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         @commands.command()
         async def vstack(self, ctx):
             """
@@ -479,6 +495,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             await improcess(ctx, improcessing.stack, [["VIDEO", "GIF", "IMAGE"], ["VIDEO", "GIF", "IMAGE"]], "vstack")
 
         @commands.command(name="speed")
+        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         async def spcommand(self, ctx, speed: float = 2):
             """
             Changes the speed of media.
@@ -494,6 +511,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                 return
             await improcess(ctx, improcessing.speed, [["VIDEO", "GIF"]], speed)
 
+        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         @commands.command()
         async def reverse(self, ctx):
             """
@@ -504,6 +522,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             """
             await improcess(ctx, improcessing.reverse, [["VIDEO", "GIF"]])
 
+        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         @commands.command()
         async def compressv(self, ctx, crf: float = 51, qa: float = 8000):
             """
@@ -526,6 +545,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             await improcess(ctx, improcessing.quality, [["VIDEO", "GIF"]], crf, qa)
 
         @commands.command(name="fps")
+        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         async def fpschange(self, ctx, fps: float = 30):
             """
             Changes the FPS of media.
@@ -543,6 +563,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                 return
             await improcess(ctx, improcessing.changefps, [["VIDEO", "GIF"]], fps)
 
+        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         @commands.command()
         async def trim(self, ctx, length: int):
             """
@@ -563,6 +584,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
         def __init__(self, bot):
             self.bot = bot
 
+        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         @commands.command()
         async def togif(self, ctx):
             """
@@ -573,6 +595,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             """
             await improcess(ctx, improcessing.mp4togif, [["VIDEO"]])
 
+        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         @commands.command()
         async def tenorgif(self, ctx):
             """
@@ -592,6 +615,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             else:
                 await ctx.send("❌ No tenor gif found.")
 
+        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         @commands.command()
         async def tovideo(self, ctx):
             """
@@ -602,6 +626,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             """
             await improcess(ctx, improcessing.giftomp4, [["GIF"]])
 
+        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         @commands.command()
         async def topng(self, ctx):
             """
@@ -621,6 +646,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
         def __init__(self, bot):
             self.bot = bot
 
+        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         @commands.command()
         async def help(self, ctx, *, arg=None):
             """
@@ -630,7 +656,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             :Param=inquiry - the name of a command or command category. If none is provided, all categories are shown.
             """
             if arg is None:
-                embed = discord.Embed(title="Help", color=discord.Color(0x5ed149),
+                embed = discord.Embed(title="Help", color=discord.Color(0xB565D9),
                                       description=f"Run `{config.command_prefix}help category` to list commands from "
                                                   f"that category.")
                 for c in bot.cogs.values():
@@ -643,7 +669,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                 embed = discord.Embed(title=cog.qualified_name,
                                       description=cog.description + f"\nRun `{config.command_prefix}help command` for "
                                                                     f"more information on a command.",
-                                      color=discord.Color(0x34eb9e))
+                                      color=discord.Color(0xD262BA))
                 for cmd in cog.get_commands():
                     embed.add_field(name=f"{config.command_prefix}{cmd.name}", value=cmd.short_doc)
                 await ctx.reply(embed=embed)
@@ -652,7 +678,8 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                     if all_cmd.name == arg.lower():
                         cmd: discord.ext.commands.Command = all_cmd
                         break
-                embed = discord.Embed(title=config.command_prefix + cmd.name, color=discord.Color(0x344ceb))
+                embed = discord.Embed(title=config.command_prefix + cmd.name, description=cmd.cog_name,
+                                      color=discord.Color(0xEE609C))
                 fields = {}
                 fhelp = []
                 for line in cmd.help.split("\n"):
@@ -677,6 +704,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                 await ctx.reply(f"⚠ `{arg}` is not the name of a command or a command category!")
 
         @commands.command(aliases=["ffprobe"])
+        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         async def info(self, ctx):
             """
             Provides info on a media file.
@@ -695,20 +723,31 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                     await ctx.send("❌ No file found.")
 
         @commands.command()
-        @commands.cooldown(1, 60 * 60, commands.BucketType.user)
-        async def feedback(self, ctx, *, msg):
+        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
+        async def feedback(self, ctx):
             """
             Give feedback for the bot.
-            This command DMs the owner of the bot. You can only use this once per hour.
-            This command will be soon substituted with a github repo.
+            This sends various links from the github repo for reporting issues or asking questions.
 
-            :Usage=$feedback `feedbacktext`
-            :Param=feedback - Any text.
+            :Usage=$feedback
             """
-            app = await bot.application_info()
-            await app.owner.send(f"User <@{ctx.author.id}> (@{ctx.author.name}#{ctx.author.discriminator}) says:"
-                                 f"\n```{msg}```")
-            await ctx.reply("Sent feedback!")
+            embed = discord.Embed(title="Feedback", description="Feedback is best given via the GitHub repo, various "
+                                                                "links are provided below.",
+                                  color=discord.Color(0xD262BA))
+            embed.add_field(name="Report a bug",
+                            value="To report a bug, make an issue at\nhttps://github.com/HexCodeFFF/captionbot/issues",
+                            inline=False)
+            embed.add_field(name="Ask a question", value="Have a question? Use the Q&A Discussion "
+                                                         "page.\nhttps://github.com/HexCodeFFF/captionbot/discussions/c"
+                                                         "ategories/q-a", inline=False)
+            embed.add_field(name="Give an idea", value="Have an idea or suggestion? Use the Ideas Discussion page.\nhtt"
+                                                       "ps://github.com/HexCodeFFF/captionbot/discussions/categories/id"
+                                                       "eas", inline=False)
+            embed.add_field(name="Something else?", value="Anything is welcome in the discussion page!\nhttps://github."
+                                                          "com/HexCodeFFF/captionbot/discussions", inline=False)
+            embed.add_field(name="Why GitHub?", value="Using GitHub for feedback makes it much easier to organize any i"
+                                                      "ssues and to implement them into the bot's code.")
+            await ctx.reply(embed=embed)
 
         @commands.command(aliases=['sus', 'imposter'])
         async def jermatext(self, ctx, *, text="when the imposter is sus!😳"):
@@ -724,6 +763,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             await ctx.reply(file=discord.File(file))
             os.remove(file)
 
+        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         @commands.command()
         async def attributions(self, ctx):
             """
@@ -733,6 +773,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             with open("attributions.txt", "r") as f:
                 await ctx.send(f.read())
 
+        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         @commands.command()
         async def emojiurl(self, ctx, *, msg):
             """
