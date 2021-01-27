@@ -21,6 +21,7 @@ import improcessing
 import sus
 import config
 
+# TODO: videos that are over max frames are trimmed
 # https://coloredlogs.readthedocs.io/en/latest/api.html#id28
 # configure logging
 field_styles = {
@@ -236,7 +237,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                 for i, file in enumerate(files):
                     if (imtype := improcessing.mediatype(file)) not in allowedtypes[i]:
                         await ctx.reply(
-                            f"{config.emojis['z']} Media #{i + 1} is {imtype}, it must be: {', '.join(allowedtypes[i])}")
+                            f"{config.emojis['warning']} Media #{i + 1} is {imtype}, it must be: {', '.join(allowedtypes[i])}")
                         logging.warning(f"Media {i} type {imtype} is not in {allowedtypes[i]}")
                         for f in files:
                             os.remove(f)
@@ -955,7 +956,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             logging.error(commanderror, exc_info=(type(commanderror), commanderror, commanderror.__traceback__))
             tr = improcessing.temp_file("txt")
             trheader = f"DATETIME:{datetime.datetime.now()}\nCOMMAND:{ctx.message.content}\nTRACEBACK:\n"
-            with open(tr, "w+") as t:
+            with open(tr, "w+", encoding="UTF-8") as t:
                 t.write(trheader + ''.join(
                     traceback.format_exception(etype=type(commanderror), value=commanderror,
                                                tb=commanderror.__traceback__)))

@@ -205,7 +205,7 @@ async def assurefilesize(media: str, ctx: discord.ext.commands.Context):
     :param ctx: discord context
     :return: filename of fixed media if it works, False if it still is too big.
     """
-    if media == "":
+    if not media:
         raise Exception(f"Processing function returned nothing!")
     for i in range(5):
         size = os.path.getsize(media)
@@ -213,7 +213,7 @@ async def assurefilesize(media: str, ctx: discord.ext.commands.Context):
         # https://www.reddit.com/r/discordapp/comments/aflp3p/the_truth_about_discord_file_upload_limits/
         if size >= 8388119:
             logging.info("Image too big!")
-            msg = await ctx.send(f"{config.emojis['warning']} Resulting file too big! ({humanize.naturalsize(size)}) "
+            msg = await ctx.reply(f"{config.emojis['warning']} Resulting file too big! ({humanize.naturalsize(size)}) "
                                  f"Downsizing result...")
             imagenew = await handleanimated(media, captionfunctions.halfsize, ctx)
             os.remove(media)
@@ -295,16 +295,21 @@ async def handleanimated(media: str, capfunction: callable, ctx, *caption):
         capped = await run_in_exec(result.get)
         return await compresspng(capped)
     elif imty == "VIDEO" or imty == "GIF":
+        framecount = await run_command('ffprobe', '-v', 'error', '-count_frames', '-select_streams', 'v:0',
+                                       '-show_entries',
+                                       'stream=nb_read_frames', '-of', 'default=nokey=1:noprint_wrappers=1', media)
+        framecount = int(framecount)
+        if framecount > config.max_frames:
+            await ctx.reply(
+                f"{config.emojis['warning']} Input file has {framecount} frames, maximum allowed is {config.max_frames}.")
+            logging.warning(f"⚠ Input file has {framecount} frames, maximum allowed is {config.max_frames}.")
+            return False
         frames, name = await ffmpegsplit(media)
         audio = await splitaudio(media)
         fps = await get_frame_rate(media)
         # logging.info(
         #     f"Processing {len(frames)} frames with {min(len(frames), POOLWORKERS)} processes...")
-        if len(frames) > config.max_frames:
-            await ctx.reply(
-                f"{config.emojis['warning']} Input file has {len(frames)} frames, maximum allowed is {config.max_frames}.")
-            logging.warning(f"⚠ Input file has {len(frames)} frames, maximum allowed is {config.max_frames}.")
-            return
+
         logging.info(f"Processing {len(frames)} frames...")
         capargs = []
         for i, frame in enumerate(frames):
@@ -576,7 +581,6 @@ async def imagestack(files, style):
     """
     image0 = Image.open(files[0]).convert("RGBA")
     image1 = Image.open(files[1]).convert("RGBA")
-    print(image0.size, image1.size)
     if style == "hstack":
         width = image0.size[0]
         ratio1 = image1.size[1] / image1.size[0]
