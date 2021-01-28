@@ -214,7 +214,7 @@ async def assurefilesize(media: str, ctx: discord.ext.commands.Context):
         if size >= 8388119:
             logging.info("Image too big!")
             msg = await ctx.reply(f"{config.emojis['warning']} Resulting file too big! ({humanize.naturalsize(size)}) "
-                                 f"Downsizing result...")
+                                  f"Downsizing result...")
             imagenew = await handleanimated(media, captionfunctions.halfsize, ctx)
             os.remove(media)
             media = imagenew
@@ -275,6 +275,29 @@ def run_in_exec(func, *args, **kwargs):
     return loop.run_in_executor(None, lambda: func(*args, **kwargs))
 
 
+async def ensureduration(media, ctx):
+    """
+    ensures that media is under or equal to the config minimum frame count
+    :param media: media to trim
+    :param ctx: discord context
+    :return: processed media or original media, within config.max_frames
+    """
+    # the function that splits frames actually has a vsync thing so this is more accurate to what's generated
+    fps = await get_frame_rate(media)
+    dur = await get_duration(media)
+    frames = int(fps * dur)
+    if frames < config.max_frames:
+        return media
+    else:
+        newdur = config.max_frames / fps
+        tmsg = f"{config.emojis['warning']} input file is too long (~{frames} frames)! Trimming to {round(newdur, 1)}" \
+               f"s (~{config.max_frames} frames)... "
+        msg = await ctx.reply(tmsg)
+        media = await trim(media, newdur)
+        await msg.edit(content=tmsg + " Done!", delete_after=5)
+        return media
+
+
 async def handleanimated(media: str, capfunction: callable, ctx, *caption):
     """
     handles processing functions that only work in singular frames and applies to videos/gifs
@@ -295,15 +318,7 @@ async def handleanimated(media: str, capfunction: callable, ctx, *caption):
         capped = await run_in_exec(result.get)
         return await compresspng(capped)
     elif imty == "VIDEO" or imty == "GIF":
-        framecount = await run_command('ffprobe', '-v', 'error', '-count_frames', '-select_streams', 'v:0',
-                                       '-show_entries',
-                                       'stream=nb_read_frames', '-of', 'default=nokey=1:noprint_wrappers=1', media)
-        framecount = int(framecount)
-        if framecount > config.max_frames:
-            await ctx.reply(
-                f"{config.emojis['warning']} Input file has {framecount} frames, maximum allowed is {config.max_frames}.")
-            logging.warning(f"⚠ Input file has {framecount} frames, maximum allowed is {config.max_frames}.")
-            return False
+        media = await ensureduration(media, ctx)
         frames, name = await ffmpegsplit(media)
         audio = await splitaudio(media)
         fps = await get_frame_rate(media)
@@ -340,7 +355,6 @@ async def handleanimated(media: str, capfunction: callable, ctx, *caption):
         logging.info("Cleaning files...")
         for f in glob.glob(name.replace('%09d', '*')):
             os.remove(f)
-
         return outname
 
 
@@ -634,7 +648,7 @@ async def trim(file, length):
     """
     trims media to length seconds
     :param file: media
-    :param length: duration to trim
+    :param length: duration to set video to in seconds
     :return: processed media
     """
     mt = mediatype(file)

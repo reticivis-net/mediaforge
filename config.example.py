@@ -15,7 +15,7 @@ log_level = "NOTICE"
 # maximum number of frames for an input file.
 max_frames = 1024
 # amount of seconds cooldown per user commands have. set to 0 to disable cooldown
-cooldown = 1
+cooldown = 3
 # the text to use for different messages, can be custom emojis or just unicode
 emojis = {
     "x": "<:xmark:803792052932444180>",
@@ -26,7 +26,7 @@ emojis = {
     "working": "<a:working:803801825605320754>",
     "clock": "<:clockmark:803803703169515541>"
 }
-# up to 25 tips that can show when using $help tips
+# up to 25 tips that can show when using $help tips. type \n for a newline
 tips = {
     "Media Searching": "MediaForge automatically searches for any media in a channel. Reply to a message with the command to search that message first.",
     "GIFs and MP4s": "MediaForge works faster with MP4 files, due to GIF conversion not being fast.",
