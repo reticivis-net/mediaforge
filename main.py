@@ -8,6 +8,7 @@ import random
 import re
 import string
 import traceback
+import urllib.parse
 # pip libs
 import coloredlogs
 import discord
@@ -20,6 +21,7 @@ import captionfunctions
 import improcessing
 import sus
 import config
+
 
 # TODO: videos that are over max frames are trimmed
 # https://coloredlogs.readthedocs.io/en/latest/api.html#id28
@@ -961,8 +963,9 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                     traceback.format_exception(etype=type(commanderror), value=commanderror,
                                                tb=commanderror.__traceback__)))
             await ctx.reply(f"{config.emojis['2exclamation']} `" + str(commanderror).replace("@", "\\@") +
-                            "`\nPlease report this error with the attached traceback to the github.\nhttps://github.com"
-                            "/HexCodeFFF/captionbot/issues",
+                            "`\nPlease report this error with the attached traceback to the github.\n<https://github.co"
+                            "m/HexCodeFFF/captionbot/issues/new?assignees=&labels=bug&template=bug_report.md&"
+                            f"title={urllib.parse.quote(str(commanderror), safe='')}>",
                             file=discord.File(tr))
             os.remove(tr)
 
