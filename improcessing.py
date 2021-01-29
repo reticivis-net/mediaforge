@@ -578,7 +578,7 @@ async def stack(files, style):
     fixedfixedvideo1 = await changefps(fixedvideo1, fps)
     outname = temp_file("mp4")
     await run_command("ffmpeg", "-hide_banner", "-i", fixedvideo0, "-i", fixedfixedvideo1, "-filter_complex",
-                      f"{'h' if style == 'hstack' else 'v'}stack=inputs=2;amix=inputs=2", "-c:v", "libx264", "-c:a",
+                      f"{'h' if style == 'hstack' else 'v'}stack=inputs=2;amix=inputs=2:dropout_transition=0", "-c:v", "libx264", "-c:a",
                       "aac", outname)
     for file in [video0, video1, fixedvideo1, fixedvideo0, fixedfixedvideo1]:
         os.remove(file)
