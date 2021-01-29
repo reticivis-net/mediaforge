@@ -22,8 +22,7 @@ import improcessing
 import sus
 import config
 
-
-# TODO: videos that are over max frames are trimmed
+#  TODO: implement resolution cap
 # https://coloredlogs.readthedocs.io/en/latest/api.html#id28
 # configure logging
 field_styles = {
@@ -44,7 +43,7 @@ coloredlogs.install(level=config.log_level, fmt='[%(asctime)s] [%(filename)s:%(f
 
 if __name__ == "__main__":  # prevents multiprocessing workers from running bot code
     renderpool = improcessing.initializerenderpool()
-    if not os.path.exists("temp"):  # cant fucking believe i never had this
+    if not os.path.exists("temp"):
         os.mkdir("temp")
     bot = commands.Bot(command_prefix=config.command_prefix, help_command=None)
 
@@ -107,11 +106,10 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
         return name
 
 
-    async def handlemessagesave(m: discord.Message, ctx: discord.ext.commands.Context):
+    async def handlemessagesave(m: discord.Message):
         """
         handles saving of media from discord messages
         :param m: a discord message
-        :param ctx: command context (for sending error messages)
         :return: list of file URLs detected in the message
         """
         detectedfiles = []
@@ -146,12 +144,12 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
         outfiles = []
         if ctx.message.reference:
             m = ctx.message.reference.resolved
-            hm = await handlemessagesave(m, ctx)
+            hm = await handlemessagesave(m)
             outfiles += hm
             if len(outfiles) >= nargs:
                 return outfiles[:nargs]
         async for m in ctx.channel.history(limit=50):
-            hm = await handlemessagesave(m, ctx)
+            hm = await handlemessagesave(m)
             outfiles += hm
             if len(outfiles) >= nargs:
                 return outfiles[:nargs]
@@ -335,20 +333,21 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             """
             await improcess(ctx, captionfunctions.stuff, [["VIDEO", "GIF", "IMAGE"]], caption, handleanimated=True)
 
-        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
-        @commands.command()
-        async def stuffstretch(self, ctx, *, caption):
-            """
-            Alternate version of $stuff
-            it's not a bug... its a feature™! (this command exists due to a funny bug i made when trying to make $stuff)
-
-
-            :Usage=$stuffstretch `text`
-            :Param=caption - The caption text.
-            :Param=media - A video, gif, or image. (automatically found in channel)
-            """
-            await improcess(ctx, captionfunctions.stuffstretch, [["VIDEO", "GIF", "IMAGE"]], caption,
-                            handleanimated=True)
+        # @commands.cooldown(1, config.cooldown, commands.BucketType.user)
+        # @commands.command()
+        # async def stuffstretch(self, ctx, *, caption):
+        #     """
+        #     Alternate version of $stuff
+        #     it's not a bug... its a feature™! (this command exists due to a bug i made when trying to make $stuff)
+        #
+        #
+        #     :Usage=$stuffstretch `text`
+        #     :Param=caption - The caption text.
+        #     :Param=media - A video, gif, or image. (automatically found in channel)
+        #     """
+        #     await improcess(ctx, captionfunctions.stuffstretch, [["VIDEO", "GIF", "IMAGE"]], caption,
+        #                     handleanimated=True)
+        # TODO: fix
 
         @commands.command(aliases=["bottomcap", "botcap"])
         @commands.cooldown(1, config.cooldown, commands.BucketType.user)
@@ -465,18 +464,23 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
 
         @commands.command(aliases=["magic", "magik"])
         @commands.cooldown(1, config.cooldown, commands.BucketType.user)
-        async def magick(self, ctx):
+        async def magick(self, ctx, strength: int = 50):
             """
             Apply imagemagick's liquid/content aware scale to an image.
             This command is a bit slow.
-            https://legacy.imagemagick.org/script/command-line-options.php?#liquid-rescale
+            https://legacy.imagemagick.org/Usage/resize/#liquid-rescale
 
-            :Usage=$magick
+            :Usage=$magick `[strength]`
+            :Param=strength - how strongly to compress the image. smaller is stronger. output image will be strength% of the original size. must be between 1 and 99. defaults to 50.
             :Param=media - A video, gif, or image. (automatically found in channel)
-            """
-            await improcess(ctx, captionfunctions.magick, [["VIDEO", "GIF", "IMAGE"]], handleanimated=True)
 
-        @commands.command()
+            """
+            if not 1 <= strength <= 99:
+                await ctx.send(f"{config.emojis['warning']} Strength must be between 1 and 99.")
+                return
+            await improcess(ctx, captionfunctions.magick, [["VIDEO", "GIF", "IMAGE"]], strength, handleanimated=True)
+
+        @commands.command(aliases=["loop"])
         @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         async def gifloop(self, ctx, loop: int = 0):
             """
@@ -527,7 +531,8 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             :Param=video1 - A video or gif. (automatically found in channel)
             :Param=video2 - A video or gif. (automatically found in channel)
             """
-            await improcess(ctx, improcessing.stack, [["VIDEO", "GIF", "IMAGE"], ["VIDEO", "GIF", "IMAGE"]], "hstack")
+            await improcess(ctx, improcessing.stack, [["VIDEO", "GIF", "IMAGE"], ["VIDEO", "GIF", "IMAGE"]],
+                            "hstack")
 
         @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         @commands.command()
@@ -539,7 +544,8 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             :Param=video1 - A video or gif. (automatically found in channel)
             :Param=video2 - A video or gif. (automatically found in channel)
             """
-            await improcess(ctx, improcessing.stack, [["VIDEO", "GIF", "IMAGE"], ["VIDEO", "GIF", "IMAGE"]], "vstack")
+            await improcess(ctx, improcessing.stack, [["VIDEO", "GIF", "IMAGE"], ["VIDEO", "GIF", "IMAGE"]],
+                            "vstack")
 
         @commands.command(name="speed")
         @commands.cooldown(1, config.cooldown, commands.BucketType.user)
@@ -612,7 +618,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
 
         @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         @commands.command()
-        async def trim(self, ctx, length: int):
+        async def trim(self, ctx, length: float):
             """
             Trims media.
 
@@ -735,6 +741,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                 else:
                     await ctx.reply(
                         f"{config.emojis['warning']} `{arg}` is not the name of a command or a command category!")
+                    return
                 embed = discord.Embed(title=config.command_prefix + cmd.name, description=cmd.cog_name,
                                       color=discord.Color(0xEE609C))
                 fields = {}
@@ -766,7 +773,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             Info provided is from ffprobe and libmagic.
 
             :Usage=$info
-            :Param=media - Any media file.
+            :Param=media - Any media file. (automatically found in channel)
             """
             async with ctx.channel.typing():
                 file = await imagesearch(ctx, 1)
@@ -787,8 +794,9 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
 
             :Usage=$feedback
             """
-            embed = discord.Embed(title="Feedback", description="Feedback is best given via the GitHub repo, various "
-                                                                "links are provided below.",
+            embed = discord.Embed(title="Feedback",
+                                  description="Feedback is best given via the GitHub repo, various "
+                                              "links are provided below.",
                                   color=discord.Color(0xD262BA))
             embed.add_field(name="Report a bug",
                             value="To report a bug, make an issue at\nhttps://github.com/HexCodeFFF/captionbot/issues",
@@ -796,13 +804,16 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             embed.add_field(name="Ask a question", value="Have a question? Use the Q&A Discussion "
                                                          "page.\nhttps://github.com/HexCodeFFF/captionbot/discussions/c"
                                                          "ategories/q-a", inline=False)
-            embed.add_field(name="Give an idea", value="Have an idea or suggestion? Use the Ideas Discussion page.\nhtt"
-                                                       "ps://github.com/HexCodeFFF/captionbot/discussions/categories/id"
-                                                       "eas", inline=False)
-            embed.add_field(name="Something else?", value="Anything is welcome in the discussion page!\nhttps://github."
-                                                          "com/HexCodeFFF/captionbot/discussions", inline=False)
-            embed.add_field(name="Why GitHub?", value="Using GitHub for feedback makes it much easier to organize any i"
-                                                      "ssues and to implement them into the bot's code.")
+            embed.add_field(name="Give an idea",
+                            value="Have an idea or suggestion? Use the Ideas Discussion page.\nhtt"
+                                  "ps://github.com/HexCodeFFF/captionbot/discussions/categories/id"
+                                  "eas", inline=False)
+            embed.add_field(name="Something else?",
+                            value="Anything is welcome in the discussion page!\nhttps://github."
+                                  "com/HexCodeFFF/captionbot/discussions", inline=False)
+            embed.add_field(name="Why GitHub?",
+                            value="Using GitHub for feedback makes it much easier to organize any i"
+                                  "ssues and to implement them into the bot's code.")
             await ctx.reply(embed=embed)
 
         @commands.command(aliases=['sus', 'imposter'])
@@ -878,7 +889,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
 
         @commands.command(hidden=True)
         @commands.is_owner()
-        async def errorcmd(self, ctx):
+        async def errorcmd(self, _):
             """
             Raise an error from the commandline
             """
@@ -954,6 +965,11 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             err = f"{config.emojis['question']} " + str(commanderror).replace("@", "\\@")
             logging.warning(err)
             await ctx.reply(err)
+        elif isinstance(commanderror, discord.ext.commands.errors.BadArgument):
+            err = f"{config.emojis['warning']} Bad Argument! Did you put text where a number should be? `" + \
+                  str(commanderror).replace("@", "\\@") + "`"
+            logging.warning(err)
+            await ctx.reply(err)
         else:
             logging.error(commanderror, exc_info=(type(commanderror), commanderror, commanderror.__traceback__))
             tr = improcessing.temp_file("txt")
@@ -962,11 +978,15 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                 t.write(trheader + ''.join(
                     traceback.format_exception(etype=type(commanderror), value=commanderror,
                                                tb=commanderror.__traceback__)))
-            await ctx.reply(f"{config.emojis['2exclamation']} `" + str(commanderror).replace("@", "\\@") +
-                            "`\nPlease report this error with the attached traceback to the github.\n<https://github.co"
-                            "m/HexCodeFFF/captionbot/issues/new?assignees=&labels=bug&template=bug_report.md&"
-                            f"title={urllib.parse.quote(str(commanderror), safe='')}>",
-                            file=discord.File(tr))
+            embed = discord.Embed(color=0xed1c24,
+                                  description="Please report this error with the attached traceback file to the github.")
+            embed.add_field(name=f"{config.emojis['2exclamation']} Report Issue to GitHub",
+                            value=f"[Create New Issue](https://github.com/HexCodeFFF/captionbot"
+                                  f"/issues/new?assignees=&labels=bug&template=bug_report.md&title"
+                                  f"={urllib.parse.quote(str(commanderror), safe='')})\n[View Issu"
+                                  f"es](https://github.com/HexCodeFFF/captionbot/issues)")
+            await ctx.reply(f"{config.emojis['2exclamation']} `" + str(commanderror).replace("@", "\\@") + "`",
+                            file=discord.File(tr), embed=embed)
             os.remove(tr)
 
 

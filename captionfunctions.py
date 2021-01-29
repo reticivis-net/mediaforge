@@ -192,10 +192,10 @@ def jpeg(image, params: list, tosavename=None):
     return name
 
 
-def magick(file, _, tosavename=None):
+def magick(file, strength, tosavename=None):
     assert mediatype(file) == "IMAGE"
     if tosavename is None:
         tosavename = temp_file("png")
-    subprocess.check_call(["magick", file, "-liquid-rescale", "50%x50%", tosavename])
+    subprocess.check_call(["magick", file, "-liquid-rescale", f"{strength[0]}%x{strength[0]}%", tosavename])
 
     return tosavename
