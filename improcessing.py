@@ -559,7 +559,7 @@ async def concatv(files):
     video0 = await forceaudio(files[0])
     fixedvideo0 = temp_file("mp4")
     await run_command("ffmpeg", "-hide_banner", "-i", video0, "-c:v", "libx264", "-c:a", "aac", "-ar", "48000",
-                      fixedvideo0)
+                      "-max_muxing_queue_size", "4096", fixedvideo0)
     video1 = await forceaudio(files[1])
     w, h = await get_resolution(video0)
     fps = await get_frame_rate(video0)
@@ -593,7 +593,7 @@ async def stack(files, style):
     video0 = await forceaudio(files[0])
     fixedvideo0 = temp_file("mp4")
     await run_command("ffmpeg", "-hide_banner", "-i", video0, "-c:v", "libx264", "-c:a", "aac", "-ar", "48000",
-                      fixedvideo0)
+                      "-max_muxing_queue_size", "4096", fixedvideo0)
     video1 = await forceaudio(files[1])
     w, h = await get_resolution(video0)
     fps = await get_frame_rate(video0)

@@ -48,7 +48,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
     renderpool = improcessing.initializerenderpool()
     if not os.path.exists("temp"):
         os.mkdir("temp")
-    bot = commands.Bot(command_prefix=config.command_prefix, help_command=None)
+    bot = commands.Bot(command_prefix=config.command_prefix, help_command=None, case_insensitive=True)
 
 
     @bot.event
@@ -202,8 +202,8 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
         return None
 
 
-    # currently only used for 1 command, might have future uses?
     async def tenorsearch(ctx, gif=False):
+        # currently only used for 1 command, might have future uses?
         """
         like imagesearch() but for tenor
         :param ctx: discord context
@@ -231,15 +231,18 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
         The core function of the bot.
         :param ctx: discord context. media is gathered using imagesearch() with this.
         :param func: function to process input media with
-        :param allowedtypes: list of lists of strings. each inner list is an argument, the strings it contains are the types that arg must be.
+        :param allowedtypes: list of lists of strings. each inner list is an argument, the strings it contains are the types that arg must be. or just False/[] if no media needed
         :param args: any non-media arguments, passed into func()
         :param handleanimated: if func() only works on still images, set to True to process each frame individually.
         :return: nothing, all processing and uploading is done in this function
         """
         async with ctx.channel.typing():
-            urls = await imagesearch(ctx, len(allowedtypes))
-            files = await saveurls(urls)
-            if files:
+            if allowedtypes:
+                urls = await imagesearch(ctx, len(allowedtypes))
+                files = await saveurls(urls)
+            else:
+                files = []
+            if files or not allowedtypes:
                 for i, file in enumerate(files):
                     if (imtype := improcessing.mediatype(file)) not in allowedtypes[i]:
                         await ctx.reply(
@@ -251,14 +254,17 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                 else:
                     logging.info("Processing...")
                     msg = await ctx.reply(f"{config.emojis['working']} Processing...", mention_author=False)
-                    if len(files) == 1:
-                        filesforcommand = files[0]
+                    if allowedtypes:
+                        if len(files) == 1:
+                            filesforcommand = files[0]
+                        else:
+                            filesforcommand = files.copy()
+                        if handleanimated:
+                            result = await improcessing.handleanimated(filesforcommand, func, ctx, *args)
+                        else:
+                            result = await func(filesforcommand, *args)
                     else:
-                        filesforcommand = files.copy()
-                    if handleanimated:
-                        result = await improcessing.handleanimated(filesforcommand, func, ctx, *args)
-                    else:
-                        result = await func(filesforcommand, *args)
+                        result = await renderpool.submit(func, *args)
                     result = await improcessing.assurefilesize(result, ctx)
                     if result:
                         logging.info("Uploading...")
@@ -338,6 +344,18 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             :Param=media - A video, gif, or image. (automatically found in channel)
             """
             await improcess(ctx, captionfunctions.stuff, [["VIDEO", "GIF", "IMAGE"]], caption, handleanimated=True)
+
+        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
+        @commands.command(aliases=["eminemcaption"])
+        async def eminemcap(self, ctx, *, caption):
+            """
+            Eminem says something below your image.
+
+            :Usage=$stuff `text`
+            :Param=caption - The caption text.
+            :Param=media - A video, gif, or image. (automatically found in channel)
+            """
+            await improcess(ctx, captionfunctions.eminemcap, [["VIDEO", "GIF", "IMAGE"]], caption, handleanimated=True)
 
         @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         @commands.command()
@@ -710,6 +728,39 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             await improcess(ctx, improcessing.mediatopng, [["VIDEO", "GIF", "IMAGE"]])
 
 
+    class Image(commands.Cog, name="Creation"):
+        """
+        Generate images from a template.
+        """
+
+        def __init__(self, bot):
+            self.bot = bot
+
+        @commands.command(aliases=['sus', 'imposter'])
+        async def jermatext(self, ctx, *, text="when the imposter is sus!😳"):
+            """
+            Cut and slice the popular Jerma sus meme to any message
+            For any letter not in the original meme, a random slice of the face is selected.
+            Based on https://github.com/aechaechaech/Jerma-Imposter-Message-Generator
+
+            :Usage=$sus `text`
+            :Param=text - The text to cut and splice.
+            """
+            file = sus.sus(text)
+            await ctx.reply(file=discord.File(file))
+            os.remove(file)
+
+        @commands.command()
+        async def eminem(self, ctx, *, text):
+            """
+            Eminem says something.
+
+            :Usage=$eminem `text`
+            :Param=text - The text to put next to eminem.
+            """
+            await improcess(ctx, captionfunctions.eminem, [], text)
+
+
     class Other(commands.Cog, name="Other"):
         """
         Commands that don't fit in the other categories.
@@ -850,20 +901,6 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                             value="Using GitHub for feedback makes it much easier to organize any i"
                                   "ssues and to implement them into the bot's code.")
             await ctx.reply(embed=embed)
-
-        @commands.command(aliases=['sus', 'imposter'])
-        async def jermatext(self, ctx, *, text="when the imposter is sus!😳"):
-            """
-            Cut and slice the popular Jerma sus meme to any message
-            For any letter not in the original meme, a random slice of the face is selected.
-            Based on https://github.com/aechaechaech/Jerma-Imposter-Message-Generator
-
-            :Usage=$sus `text`
-            :Param=text - The text to cut and splice.
-            """
-            file = sus.sus(text)
-            await ctx.reply(file=discord.File(file))
-            os.remove(file)
 
         @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         @commands.command()
@@ -1033,6 +1070,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
     bot.add_cog(Caption(bot))
     bot.add_cog(Media(bot))
     bot.add_cog(Conversion(bot))
+    bot.add_cog(Image(bot))
     bot.add_cog(Other(bot))
     bot.add_cog(Debug(bot))
 
