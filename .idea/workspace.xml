@@ -26,9 +26,13 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="ef38d419-8cc3-42ef-bbef-6fd62fc27c52" name="Default Changelist" comment="bug fixes">
+      <change afterPath="$PROJECT_DIR$/eminem.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/eminemcap.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/rendering/eminem.png" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/captionfunctions.py" beforeDir="false" afterPath="$PROJECT_DIR$/captionfunctions.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/improcessing.py" beforeDir="false" afterPath="$PROJECT_DIR$/improcessing.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/meme.html" beforeDir="false" afterPath="$PROJECT_DIR$/meme.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -315,14 +319,8 @@
       <workItem from="1611949787453" duration="10641000" />
       <workItem from="1611972346942" duration="674000" />
       <workItem from="1612057934114" duration="2568000" />
-      <workItem from="1612076047280" duration="2149000" />
-    </task>
-    <task id="LOCAL-00015" summary="colored logs lol">
-      <created>1610475225479</created>
-      <option name="number" value="00015" />
-      <option name="presentableId" value="LOCAL-00015" />
-      <option name="project" value="LOCAL" />
-      <updated>1610475225479</updated>
+      <workItem from="1612076047280" duration="2626000" />
+      <workItem from="1612133629265" duration="2760000" />
     </task>
     <task id="LOCAL-00016" summary="minimum image witdh of 200 lol">
       <created>1610511938664</created>
@@ -660,7 +658,14 @@
       <option name="project" value="LOCAL" />
       <updated>1612079786928</updated>
     </task>
-    <option name="localTasksCounter" value="64" />
+    <task id="LOCAL-00064" summary="gn lol">
+      <created>1612081255038</created>
+      <option name="number" value="00064" />
+      <option name="presentableId" value="LOCAL-00064" />
+      <option name="project" value="LOCAL" />
+      <updated>1612081255038</updated>
+    </task>
+    <option name="localTasksCounter" value="65" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -710,7 +715,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="added $jermatext based on https://github.com/aechaechaech/Jerma-Imposter-Message-Generator" />
     <MESSAGE value="im not using multiprocessing anymore baby" />
     <MESSAGE value="i think i forgot to commit" />
     <MESSAGE value="fixed bugs" />
@@ -735,14 +739,15 @@
     <MESSAGE value="bug fixes" />
     <MESSAGE value="implemented https://stackoverflow.com/a/65966787/9044183" />
     <MESSAGE value="twitcapdark and stuffstretch is fixed" />
-    <option name="LAST_COMMIT_MESSAGE" value="twitcapdark and stuffstretch is fixed" />
+    <MESSAGE value="gn lol" />
+    <option name="LAST_COMMIT_MESSAGE" value="gn lol" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/CaptionX$improcessing.coverage" NAME="improcessing Coverage Results" MODIFIED="1606284753774" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/CaptionX$qtrenderer.coverage" NAME="qtrenderer Coverage Results" MODIFIED="1611025320241" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/caption_bot$main.coverage" NAME="main Coverage Results" MODIFIED="1606184268706" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/CaptionX$sus.coverage" NAME="sus Coverage Results" MODIFIED="1611175143620" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/captionbot$main.coverage" NAME="main Coverage Results" MODIFIED="1612079983433" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/captionbot$main.coverage" NAME="main Coverage Results" MODIFIED="1612135880743" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/CaptionX$chromiumrender.coverage" NAME="chromiumrender Coverage Results" MODIFIED="1611107683335" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/CaptionX$main.coverage" NAME="main Coverage Results" MODIFIED="1611273027854" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
