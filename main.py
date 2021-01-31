@@ -1,4 +1,5 @@
 # standard libs
+import asyncio
 import datetime
 import glob
 import json
@@ -22,7 +23,7 @@ import improcessing
 import sus
 import config
 
-#  TODO: implement resolution cap
+# TODO: implement resolution cap
 # https://coloredlogs.readthedocs.io/en/latest/api.html#id28
 # configure logging
 field_styles = {
@@ -54,6 +55,9 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
         game = discord.Activity(name=f"with your media | {config.command_prefix}help",
                                 type=discord.ActivityType.playing)
         await bot.change_presence(activity=game)
+        # while True:
+        #     logging.info(renderpool.stats())
+        #     await asyncio.sleep(1)
 
 
     def get_random_string(length):
@@ -126,7 +130,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                     else:
                         detectedfiles.append(tenor['results'][0]['media'][0]['mp4']['url'])
                 elif embed.type in ["image", "video", "audio"]:
-                    detectedfiles.append(m.embeds[0].url)
+                    detectedfiles.append(embed.url)
         if len(m.attachments):
             for att in m.attachments:
                 if not att.filename.endswith("txt"):  # it was reading traceback attachments >:(
@@ -698,6 +702,22 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
 
         def __init__(self, bot):
             self.bot = bot
+
+        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
+        @commands.command()
+        async def stats(self, ctx):
+            """
+            Displays some stats about what the bot is currently doing.
+
+            :Usage=$stats
+            """
+            stats = renderpool.stats()
+            embed = discord.Embed(color=discord.Color(0xD262BA), title="Statistics")
+            embed.add_field(name="Queued Tasks", value=f"{stats[0]}")
+            embed.add_field(name="Currently Executing Tasks", value=f"{stats[1]}")
+            embed.add_field(name="Available Workers", value=f"{config.chrome_driver_instances - stats[1]}")
+            embed.add_field(name="Total Workers", value=f"{config.chrome_driver_instances}")
+            await ctx.reply(embed=embed)
 
         @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         @commands.command()
