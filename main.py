@@ -24,6 +24,8 @@ import sus
 import config
 
 # TODO: implement resolution cap
+# TODO: reddit moment caption
+# TODO: resize/wide/kyle command
 # https://coloredlogs.readthedocs.io/en/latest/api.html#id28
 # configure logging
 field_styles = {
@@ -341,8 +343,9 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
         @commands.command()
         async def stuffstretch(self, ctx, *, caption):
             """
-            Alternate version of $stuff
-            it's not a bug... its a feature™! (this command exists due to a bug i made when trying to make $stuff)
+            Alternate version of $stuff where RDJ stretches
+            in this version, RDJ stretches vertically to the size of whatever text he says
+            it's not a bug... its a feature™! (this command exists due to a former bug in $stuff)
 
 
             :Usage=$stuffstretch `text`
