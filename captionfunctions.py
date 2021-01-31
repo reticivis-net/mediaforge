@@ -145,6 +145,19 @@ def twittercap(image, caption, tosavename=None):
     return tosavename
 
 
+def twittercapdark(image, caption, tosavename=None):
+    if tosavename is None:
+        tosavename = temp_file("png")
+    caption = sanitizehtml(caption)
+    replacedict = {
+        "CaptionText1": caption[0],
+        "rendering/demoimage.png": image
+    }
+    torender = replaceall(filetostring("twittercaptiondark.html"), replacedict)
+    chromiumrender.html2png(torender, tosavename)
+    return tosavename
+
+
 def halfsize(image, _, tosavename=None):  # caption arg kept here for compatibility with handleanimated()
     """
     cuts the width and height of an image in half

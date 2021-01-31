@@ -326,7 +326,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             await improcess(ctx, captionfunctions.caption, [["VIDEO", "GIF", "IMAGE"]], caption, handleanimated=True)
 
         @commands.cooldown(1, config.cooldown, commands.BucketType.user)
-        @commands.command()
+        @commands.command(aliases=["imstuff"])
         async def stuff(self, ctx, *, caption):
             """
             Captions media in the style of the "i'm stuff" meme
@@ -337,21 +337,20 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             """
             await improcess(ctx, captionfunctions.stuff, [["VIDEO", "GIF", "IMAGE"]], caption, handleanimated=True)
 
-        # @commands.cooldown(1, config.cooldown, commands.BucketType.user)
-        # @commands.command()
-        # async def stuffstretch(self, ctx, *, caption):
-        #     """
-        #     Alternate version of $stuff
-        #     it's not a bug... its a feature™! (this command exists due to a bug i made when trying to make $stuff)
-        #
-        #
-        #     :Usage=$stuffstretch `text`
-        #     :Param=caption - The caption text.
-        #     :Param=media - A video, gif, or image. (automatically found in channel)
-        #     """
-        #     await improcess(ctx, captionfunctions.stuffstretch, [["VIDEO", "GIF", "IMAGE"]], caption,
-        #                     handleanimated=True)
-        # TODO: fix
+        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
+        @commands.command()
+        async def stuffstretch(self, ctx, *, caption):
+            """
+            Alternate version of $stuff
+            it's not a bug... its a feature™! (this command exists due to a bug i made when trying to make $stuff)
+
+
+            :Usage=$stuffstretch `text`
+            :Param=caption - The caption text.
+            :Param=media - A video, gif, or image. (automatically found in channel)
+            """
+            await improcess(ctx, captionfunctions.stuffstretch, [["VIDEO", "GIF", "IMAGE"]], caption,
+                            handleanimated=True)
 
         @commands.command(aliases=["bottomcap", "botcap"])
         @commands.cooldown(1, config.cooldown, commands.BucketType.user)
@@ -379,7 +378,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             await improcess(ctx, captionfunctions.esmcaption, [["VIDEO", "GIF", "IMAGE"]], caption, handleanimated=True)
 
         @commands.cooldown(1, config.cooldown, commands.BucketType.user)
-        @commands.command()
+        @commands.command(aliases=["twitter", "twitcap", "twittercap"])
         async def twittercaption(self, ctx, *, caption):
             """
             Captions media in the style of a Twitter screenshot.
@@ -389,6 +388,19 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             :Param=media - A video, gif, or image. (automatically found in channel)
             """
             await improcess(ctx, captionfunctions.twittercap, [["VIDEO", "GIF", "IMAGE"]], caption, handleanimated=True)
+
+        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
+        @commands.command(aliases=["twitterdark", "twitcapdark", "twittercapdark"])
+        async def twittercaptiondark(self, ctx, *, caption):
+            """
+            Captions media in the style of a dark mode Twitter screenshot.
+
+            :Usage=$twittercaption `text`
+            :Param=caption - The caption text.
+            :Param=media - A video, gif, or image. (automatically found in channel)
+            """
+            await improcess(ctx, captionfunctions.twittercapdark, [["VIDEO", "GIF", "IMAGE"]], caption,
+                            handleanimated=True)
 
         @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         @commands.command()
@@ -642,7 +654,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             self.bot = bot
 
         @commands.cooldown(1, config.cooldown, commands.BucketType.user)
-        @commands.command()
+        @commands.command(aliases=["gif", "videotogif"])
         async def togif(self, ctx):
             """
             Converts a video to a GIF.
@@ -673,7 +685,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                 await ctx.send(f"{config.emojis['x']} No tenor gif found.")
 
         @commands.cooldown(1, config.cooldown, commands.BucketType.user)
-        @commands.command()
+        @commands.command(aliases=["video", "giftovideo"])
         async def tovideo(self, ctx):
             """
             Converts a GIF to a video.
@@ -684,7 +696,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             await improcess(ctx, improcessing.giftomp4, [["GIF"]])
 
         @commands.cooldown(1, config.cooldown, commands.BucketType.user)
-        @commands.command()
+        @commands.command(aliases=["png", "mediatopng"])
         async def topng(self, ctx):
             """
             Converts media to PNG
@@ -934,7 +946,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             """
             await ctx.send("✅ Shutting Down...")
             logging.log(25, "Shutting Down...")
-            renderpool.close()
+            renderpool.shutdown()
             await bot.logout()
             await bot.close()
 

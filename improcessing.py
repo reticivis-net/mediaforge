@@ -39,6 +39,9 @@ class Pool:
         finally:
             self._submitted -= 1
 
+    def shutdown(self):
+        self._executor.shutdown()
+
     def stats(self):
         queued = max(0, self._submitted - self._nworkers)
         executing = min(self._submitted, self._nworkers)
