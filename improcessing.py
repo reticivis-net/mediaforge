@@ -1,4 +1,5 @@
 # standard libs
+import concurrent.futures
 import glob
 import logging
 import multiprocessing
@@ -22,6 +23,28 @@ import chromiumrender
 import config
 
 
+# https://stackoverflow.com/a/65966787/9044183
+class Pool:
+    def __init__(self, nworkers, initf):
+        self._executor = concurrent.futures.ProcessPoolExecutor(nworkers, initializer=initf)
+        self._nworkers = nworkers
+        self._submitted = 0
+
+    async def submit(self, fn, *args, **kwargs):
+        self._submitted += 1
+        loop = asyncio.get_event_loop()
+        fut = loop.run_in_executor(self._executor, fn, *args, **kwargs)
+        try:
+            return await fut
+        finally:
+            self._submitted -= 1
+
+    def stats(self):
+        queued = max(0, self._submitted - self._nworkers)
+        executing = min(self._submitted, self._nworkers)
+        return queued, executing
+
+
 def initializerenderpool():
     """
     Start the worker pool
@@ -29,7 +52,8 @@ def initializerenderpool():
     """
     global renderpool
     logging.info(f"Starting {config.chrome_driver_instances} pool processes...")
-    renderpool = multiprocessing.Pool(config.chrome_driver_instances, initializer=chromiumrender.initdriver)
+    # renderpool = multiprocessing.Pool(config.chrome_driver_instances, initializer=chromiumrender.initdriver)
+    renderpool = Pool(config.chrome_driver_instances, chromiumrender.initdriver)
     return renderpool
 
 
@@ -314,9 +338,9 @@ async def handleanimated(media: str, capfunction: callable, ctx, *caption):
     elif imty == "IMAGE":
         logging.info(f"Processing frame...")
         media = minimagesize(media, 200)
-        result = renderpool.apply_async(capfunction, (media, caption))
-        capped = await run_in_exec(result.get)
-        return await compresspng(capped)
+        result = await renderpool.submit(capfunction, media, caption)
+        # capped = await run_in_exec(result.get)
+        return await compresspng(result)
     elif imty == "VIDEO" or imty == "GIF":
         media = await ensureduration(media, ctx)
         frames, name = await ffmpegsplit(media)
@@ -326,11 +350,13 @@ async def handleanimated(media: str, capfunction: callable, ctx, *caption):
         #     f"Processing {len(frames)} frames with {min(len(frames), POOLWORKERS)} processes...")
 
         logging.info(f"Processing {len(frames)} frames...")
-        capargs = []
+        framefuncs = []
         for i, frame in enumerate(frames):
-            capargs.append((frame, caption, frame.replace('.png', '_rendered.png')))
-        result = renderpool.starmap_async(capfunction, capargs)
-        await run_in_exec(result.get)
+            framefuncs.append(renderpool.submit(capfunction, frame, caption, frame.replace('.png', '_rendered.png')))
+        await asyncio.wait(framefuncs)
+        # result = renderpool.starmap_async(capfunction, capargs)
+        # await run_in_exec(result.get)
+        # result = await renderpool.
         logging.info(f"Joining {len(frames)} frames...")
         if imty == "GIF":
             outname = temp_file("gif")
@@ -578,7 +604,8 @@ async def stack(files, style):
     fixedfixedvideo1 = await changefps(fixedvideo1, fps)
     outname = temp_file("mp4")
     await run_command("ffmpeg", "-hide_banner", "-i", fixedvideo0, "-i", fixedfixedvideo1, "-filter_complex",
-                      f"{'h' if style == 'hstack' else 'v'}stack=inputs=2;amix=inputs=2:dropout_transition=0", "-c:v", "libx264", "-c:a",
+                      f"{'h' if style == 'hstack' else 'v'}stack=inputs=2;amix=inputs=2:dropout_transition=0", "-c:v",
+                      "libx264", "-c:a",
                       "aac", outname)
     for file in [video0, video1, fixedvideo1, fixedvideo0, fixedfixedvideo1]:
         os.remove(file)
@@ -595,7 +622,7 @@ async def imagestack(files, style):
     """
     image0 = Image.open(files[0]).convert("RGBA")
     image1 = Image.open(files[1]).convert("RGBA")
-    if style == "hstack":
+    if style == "vstack":
         width = image0.size[0]
         ratio1 = image1.size[1] / image1.size[0]
         height1 = width * ratio1
