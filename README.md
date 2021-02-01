@@ -2,10 +2,13 @@
 [![MediaForge Discord](https://discordapp.com/api/guilds/803788965215338546/embed.png)](https://discord.gg/xwWjgyVqBz)
 ![Total Lines](https://img.shields.io/tokei/lines/github/HexCodeFFF/captionbot)
 ![Downloads](https://img.shields.io/github/downloads/HexCodeFFF/captionbot/total)
-### a discord bot inspired by [esmBot](https://github.com/esmBot/esmBot) mainly for media processing.
+![discord.py](https://img.shields.io/github/pipenv/locked/dependency-version/hexcodefff/captionbot/discord.py)
+![python](https://img.shields.io/github/pipenv/locked/python-version/hexcodefff/captionbot)
+### A Discord bot for editing and creating videos, images, GIFs, and more!
 
 ## general info about the bot
 
+- inspired by [esmBot](https://github.com/esmBot/esmBot)
 - written in python and uses discord.py
 - uses FFmpeg for most media functions
 - uses selenium and ChromeDriver to render captions in html with Chrome
