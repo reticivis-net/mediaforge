@@ -382,11 +382,14 @@ async def mp4togif(mp4):
     fps = await get_frame_rate(mp4)
     outname = temp_file("gif")
     n = glob.glob(name.replace('%09d', '*'))
-    await run_command("gifski", "--quiet", "--fast", "-o", outname, "--fps", str(fps), *n)
-    logging.info("Cleaning files...")
-    for f in glob.glob(name.replace('%09d', '*')):
-        os.remove(f)
-    return outname
+    if len(n) <= 1:
+        raise Exception(f"Output file only has {len(n)} frames, GIFs must have at least 2.")
+    else:
+        await run_command("gifski", "--quiet", "--fast", "-o", outname, "--fps", str(fps), *n)
+        logging.info("Cleaning files...")
+        for f in glob.glob(name.replace('%09d', '*')):
+            os.remove(f)
+        return outname
 
 
 async def giftomp4(gif):

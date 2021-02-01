@@ -21,7 +21,7 @@ min_size = 50
 # maximum height/width that media will be downsized to if above
 max_size = 2000
 # maximum size, in bytes, to download. see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Length
-max_file_size = 50000000
+max_file_size = 25000000
 # the text to use for different messages, can be custom emojis or just unicode
 emojis = {
     "x": "<:xmark:803792052932444180>",
