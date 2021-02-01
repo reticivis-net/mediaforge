@@ -34,7 +34,7 @@ tips = {
     "Self-Hosting": "MediaForge is completely open source and anyone can host a clone themself!\nhttps://github.com/HexCodeFFF/captionbot"
 }
 # minimum height/width that media will be sized up to if below
-min_size = 200
+min_size = 50
 # maximum height/width that media will be downsized to if above
 max_size = 2000
 # prefix for commands

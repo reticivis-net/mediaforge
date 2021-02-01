@@ -24,7 +24,7 @@ import sus
 import config
 
 # TODO: reddit moment caption
-# TODO: resize/wide/kyle command
+# TODO: donal trump tweet
 # https://coloredlogs.readthedocs.io/en/latest/api.html#id28
 # configure logging
 field_styles = {
@@ -348,19 +348,19 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             await improcess(ctx, captionfunctions.stuff, [["VIDEO", "GIF", "IMAGE"]], caption, handleanimated=True)
 
         @commands.cooldown(1, config.cooldown, commands.BucketType.user)
-        @commands.command(aliases=["eminemcaption"])
-        async def eminemcap(self, ctx, *, caption):
+        @commands.command(aliases=["eminemcaption", "eminemcap"])
+        async def eminem(self, ctx, *, caption):
             """
-            Eminem says something below your image.
+            Eminem says something below your media.
 
-            :Usage=$stuff `text`
+            :Usage=$eminem `text`
             :Param=caption - The caption text.
             :Param=media - A video, gif, or image. (automatically found in channel)
             """
             await improcess(ctx, captionfunctions.eminemcap, [["VIDEO", "GIF", "IMAGE"]], caption, handleanimated=True)
 
         @commands.cooldown(1, config.cooldown, commands.BucketType.user)
-        @commands.command()
+        @commands.command(aliases=["stretchstuff"])
         async def stuffstretch(self, ctx, *, caption):
             """
             Alternate version of $stuff where RDJ stretches
@@ -501,7 +501,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             """
             await improcess(ctx, improcessing.pad, [["VIDEO", "GIF", "IMAGE"]])
 
-        @commands.command()
+        @commands.command(aliases=["size"])
         @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         async def resize(self, ctx, width: int, height: int):
             """
@@ -523,7 +523,18 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             await improcess(ctx, captionfunctions.resize, [["VIDEO", "GIF", "IMAGE"]], width, height,
                             handleanimated=True, resize=False)
 
-        @commands.command(aliases=["magic", "magik"])
+        @commands.command(aliases=["short", "kyle"])
+        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
+        async def wide(self, ctx):
+            """
+            makes media twice as wide
+
+            :Usage=$wide
+            """
+            await improcess(ctx, captionfunctions.resize, [["VIDEO", "GIF", "IMAGE"]], "iw*2", "ih",
+                            handleanimated=True)
+
+        @commands.command(aliases=["magic", "magik", "contentawarescale", "liquidrescale"])
         @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         async def magick(self, ctx, strength: int = 50):
             """
@@ -774,8 +785,8 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             await ctx.reply(file=discord.File(file))
             os.remove(file)
 
-        @commands.command()
-        async def eminem(self, ctx, *, text):
+        @commands.command(aliases=["emsay"])
+        async def eminemsay(self, ctx, *, text):
             """
             Eminem says something.
 
@@ -794,7 +805,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             self.bot = bot
 
         @commands.cooldown(1, config.cooldown, commands.BucketType.user)
-        @commands.command()
+        @commands.command(aliases=["statistics", "botinfo"])
         async def stats(self, ctx):
             """
             Displays some stats about what the bot is currently doing.
@@ -802,7 +813,9 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             :Usage=$stats
             """
             stats = renderpool.stats()
-            embed = discord.Embed(color=discord.Color(0xD262BA), title="Statistics")
+            embed = discord.Embed(color=discord.Color(0xD262BA), title="Statistics",
+                                  description="A 'task' is typically processing a single image/frame of a video. Not "
+                                              "all commands will use tasks.")
             embed.add_field(name="Queued Tasks", value=f"{stats[0]}")
             embed.add_field(name="Currently Executing Tasks", value=f"{stats[1]}")
             embed.add_field(name="Available Workers", value=f"{config.chrome_driver_instances - stats[1]}")
@@ -872,7 +885,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                         k = "Paramaters"
                     embed.add_field(name=k, value=v.replace("$", config.command_prefix), inline=False)
                 if cmd.aliases:
-                    embed.add_field(name="Aliases", value=", ".join(cmd.aliases))
+                    embed.add_field(name="Aliases", value=", ".join([config.command_prefix + a for a in cmd.aliases]))
                 await ctx.reply(embed=embed)
 
         @commands.command(aliases=["ffprobe"])
