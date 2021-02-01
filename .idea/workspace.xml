@@ -28,7 +28,6 @@
     <list default="true" id="ef38d419-8cc3-42ef-bbef-6fd62fc27c52" name="Default Changelist" comment="bug fixes">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/config.example.py" beforeDir="false" afterPath="$PROJECT_DIR$/config.example.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -320,14 +319,8 @@
       <workItem from="1612152074592" duration="1470000" />
       <workItem from="1612188086750" duration="800000" />
       <workItem from="1612190521098" duration="252000" />
-      <workItem from="1612190859984" duration="2204000" />
-    </task>
-    <task id="LOCAL-00021" summary="size reduction thing was broken lol!">
-      <created>1610558422448</created>
-      <option name="number" value="00021" />
-      <option name="presentableId" value="LOCAL-00021" />
-      <option name="project" value="LOCAL" />
-      <updated>1610558422448</updated>
+      <workItem from="1612190859984" duration="3259000" />
+      <workItem from="1612195887821" duration="8000" />
     </task>
     <task id="LOCAL-00022" summary="oops">
       <created>1610567113982</created>
@@ -665,7 +658,14 @@
       <option name="project" value="LOCAL" />
       <updated>1612153450646</updated>
     </task>
-    <option name="localTasksCounter" value="70" />
+    <task id="LOCAL-00070" summary="fix weird stalling issue where HEAD requests to tenor videos take forever, so i just dont do them lol">
+      <created>1612194394265</created>
+      <option name="number" value="00070" />
+      <option name="presentableId" value="LOCAL-00070" />
+      <option name="project" value="LOCAL" />
+      <updated>1612194394266</updated>
+    </task>
+    <option name="localTasksCounter" value="71" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -715,7 +715,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="who remembers?" />
     <MESSAGE value="joe biden" />
     <MESSAGE value="redditor wholesome 43 at least..." />
     <MESSAGE value="most of stack command" />
@@ -740,7 +739,8 @@
     <MESSAGE value="minor improvements" />
     <MESSAGE value="implement linux-specific fixes" />
     <MESSAGE value="fixed weird linux connection bugs?" />
-    <option name="LAST_COMMIT_MESSAGE" value="fixed weird linux connection bugs?" />
+    <MESSAGE value="fix weird stalling issue where HEAD requests to tenor videos take forever, so i just dont do them lol" />
+    <option name="LAST_COMMIT_MESSAGE" value="fix weird stalling issue where HEAD requests to tenor videos take forever, so i just dont do them lol" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/CaptionX$improcessing.coverage" NAME="improcessing Coverage Results" MODIFIED="1606284753774" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />

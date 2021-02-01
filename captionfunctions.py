@@ -213,7 +213,7 @@ def halfsize(image, _, tosavename=None):
     :param tosavename: optionally specify the file to save it to
     :return: processed media
     """
-    name = resize(image, "iw/2", "ih/2", tosavename)
+    name = resize(image, ("iw/2", "ih/2"), tosavename)
     return name
 
 
