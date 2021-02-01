@@ -16,6 +16,12 @@ log_level = "NOTICE"
 max_frames = 1024
 # amount of seconds cooldown per user commands have. set to 0 to disable cooldown
 cooldown = 3
+# minimum height/width that media will be sized up to if below
+min_size = 50
+# maximum height/width that media will be downsized to if above
+max_size = 2000
+# maximum size, in bytes, to download. see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Length
+max_file_size = 50000000
 # the text to use for different messages, can be custom emojis or just unicode
 emojis = {
     "x": "<:xmark:803792052932444180>",
@@ -33,9 +39,6 @@ tips = {
     "Tenor GIFs": "All tenor GIFs are interpreted as MP4s by default due to their superior quality. Use `tenorgif` to send the raw GIF url or `togif` to convert any video to a gif.",
     "Self-Hosting": "MediaForge is completely open source and anyone can host a clone themself!\nhttps://github.com/HexCodeFFF/captionbot"
 }
-# minimum height/width that media will be sized up to if below
-min_size = 50
-# maximum height/width that media will be downsized to if above
-max_size = 2000
+
 # prefix for commands
 command_prefix = "$"
