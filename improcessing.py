@@ -161,7 +161,8 @@ async def get_resolution(filename):
     """
     out = await run_command("ffprobe", "-v", "error", "-show_entries", "stream=width,height", "-of", "csv=p=0:s=x",
                             filename)
-    return out.split("x")
+    out = out.split("x")
+    return [float(out[0]), float(out[1])]
 
 
 async def ffmpegsplit(media):
@@ -171,8 +172,7 @@ async def ffmpegsplit(media):
     :return: [list of files, ffmpeg key to find files]
     """
     logging.info("Splitting frames...")
-    await run_command("ffmpeg", "-hide_banner", "-i", media, "-vsync", "1", "-vf", "scale='max(200,iw)':-1",
-                      f"{media.split('.')[0]}%09d.png")
+    await run_command("ffmpeg", "-hide_banner", "-i", media, "-vsync", "1", f"{media.split('.')[0]}%09d.png")
     files = glob.glob(f"{media.split('.')[0]}*.png")
 
     return files, f"{media.split('.')[0]}%09d.png"
@@ -252,24 +252,6 @@ async def assurefilesize(media: str, ctx: discord.ext.commands.Context):
     return False
 
 
-def minimagesize(image, minsize):
-    """
-    resizes image to be at least minsize wide
-    :param image: image
-    :param minsize: minimum width in pixels
-    :return: image with width at least minsize
-    """
-    im = Image.open(image)
-    if im.size[0] < minsize:
-        logging.info(f"Image is {im.size}, Upscaling image...")
-        im = im.resize((minsize, round(im.size[1] * (minsize / im.size[0]))), Image.BICUBIC)
-        name = temp_file("png")
-        im.save(name)
-        return name
-    else:
-        return image
-
-
 def mediatype(image):
     """
     Gets basic type of media
@@ -340,7 +322,7 @@ async def handleanimated(media: str, capfunction: callable, ctx, *caption):
         raise Exception(f"File {media} is invalid!")
     elif imty == "IMAGE":
         logging.info(f"Processing frame...")
-        media = minimagesize(media, 200)
+        # media = minimagesize(media, 200)
         result = await renderpool.submit(capfunction, media, caption)
         # capped = await run_in_exec(result.get)
         return await compresspng(result)
@@ -414,7 +396,8 @@ async def giftomp4(gif):
     :return: mp4
     """
     outname = temp_file("mp4")
-    await run_command("ffmpeg", "-hide_banner", "-i", gif, "-movflags", "faststart", "-pix_fmt", "yuv420p", "-vf",
+    await run_command("ffmpeg", "-hide_banner", "-i", gif, "-movflags", "faststart", "-pix_fmt", "yuv420p",
+                      "-sws_flags", "spline+accurate_rnd+full_chroma_int+full_chroma_inp", "-vf",
                       "scale=trunc(iw/2)*2:trunc(ih/2)*2", outname)
 
     return outname
@@ -566,7 +549,8 @@ async def concatv(files):
     fixedvideo1 = temp_file("mp4")
 
     # https://superuser.com/a/1136305/1001487
-    await run_command("ffmpeg", "-hide_banner", "-i", video1, "-vf",
+    await run_command("ffmpeg", "-hide_banner", "-i", video1, "-sws_flags",
+                      "spline+accurate_rnd+full_chroma_int+full_chroma_inp", "-vf",
                       f"scale={w}:{h}:force_original_aspect_ratio=decrease,pad={w}:{h}:-2:-2:color=black", "-c:v",
                       "libx264", "-c:a", "aac", "-ar", "48000", fixedvideo1)
     fixedfixedvideo1 = await changefps(fixedvideo1, fps)
@@ -602,7 +586,8 @@ async def stack(files, style):
         scale = f"scale=-2:{h}"
     else:
         scale = f"scale={w}:-2"
-    await run_command("ffmpeg", "-hide_banner", "-i", video1, "-vf", scale, "-c:v",
+    await run_command("ffmpeg", "-hide_banner", "-i", video1, "-sws_flags",
+                      "spline+accurate_rnd+full_chroma_int+full_chroma_inp", "-vf", scale, "-c:v",
                       "libx264", "-c:a", "aac", "-ar", "48000", fixedvideo1)
     fixedfixedvideo1 = await changefps(fixedvideo1, fps)
     outname = temp_file("mp4")
@@ -692,3 +677,43 @@ async def trim(file, length):
     if mt == "GIF":
         out = await mp4togif(out)
     return out
+
+
+async def ensuresize(ctx, file, minsize, maxsize):
+    """
+    Ensures valid media is between minsize and maxsize in resolution
+    :param ctx: discord context
+    :param file: media
+    :param minsize: minimum width/height in pixels
+    :param maxsize: maximum height in pixels
+    :return: original or resized media
+    """
+    resized = False
+    if mediatype(file) not in ["IMAGE", "VIDEO", "GIF"]:
+        return file
+    w, h = await get_resolution(file)
+    owidth = w
+    oheight = h
+    if w < minsize:
+        # the min(-1,maxsize) thing is to prevent a case where someone puts in like a 1x1000 image and it gets resized
+        # to 200x200000 which is very large so even though it wont preserve aspect ratio it's an edge case anyways
+        file = await handleanimated(file, captionfunctions.resize, ctx, minsize, f"min(-1, {maxsize * 2})")
+        w, h = await get_resolution(file)
+        resized = True
+    if h < minsize:
+        file = await handleanimated(file, captionfunctions.resize, ctx, f"min(-1, {maxsize * 2})", minsize)
+        w, h = await get_resolution(file)
+        resized = True
+    if w > maxsize:
+        file = await handleanimated(file, captionfunctions.resize, ctx, maxsize, "-1")
+        w, h = await get_resolution(file)
+        resized = True
+    if h > maxsize:
+        file = await handleanimated(file, captionfunctions.resize, ctx, "-1", maxsize)
+        w, h = await get_resolution(file)
+        resized = True
+    if resized:
+        logging.info(f"Resized from {owidth}x{oheight} to {w}x{h}")
+        await ctx.reply(f"Resized input media from {int(owidth)}x{int(oheight)} to {int(w)}x{int(h)}.", delete_after=5,
+                        mention_author=False)
+    return file

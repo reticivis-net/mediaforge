@@ -183,7 +183,29 @@ def eminem(caption, tosavename=None):
     return tosavename
 
 
-def halfsize(image, _, tosavename=None):  # caption arg kept here for compatibility with handleanimated()
+def resize(image, size, tosavename=None):
+    """
+    resizes image
+
+    :param image: file
+    :param width: new width, thrown directly into ffmpeg so it can be things like -1 or iw/2
+    :param height: new height, same as width
+    :param tosavename: optionally specify the file to save it to
+    :return: processed media
+    """
+    width, height = size
+    if tosavename is None:
+        name = temp_file("png")
+    else:
+        name = tosavename
+    subprocess.check_call(["ffmpeg", "-i", image, "-pix_fmt", "yuva420p",
+                           "-sws_flags", "spline+accurate_rnd+full_chroma_int+full_chroma_inp",
+                           "-vf", f"scale='{width}:{height}'", "-pix_fmt", "yuva420p", name],
+                          stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL)
+    return name
+
+
+def halfsize(image, _, tosavename=None):
     """
     cuts the width and height of an image in half
     :param image: file
@@ -191,12 +213,7 @@ def halfsize(image, _, tosavename=None):  # caption arg kept here for compatibil
     :param tosavename: optionally specify the file to save it to
     :return: processed media
     """
-    if tosavename is None:
-        name = temp_file("png")
-    else:
-        name = tosavename
-    subprocess.check_call(["ffmpeg", "-i", image, "-vf", "scale=iw/2:ih/2", name],
-                          stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL)
+    name = resize(image, "iw/2", "ih/2", tosavename)
     return name
 
 

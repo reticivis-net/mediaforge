@@ -23,7 +23,6 @@ import improcessing
 import sus
 import config
 
-# TODO: implement resolution cap
 # TODO: reddit moment caption
 # TODO: resize/wide/kyle command
 # https://coloredlogs.readthedocs.io/en/latest/api.html#id28
@@ -226,7 +225,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
 
 
     async def improcess(ctx: discord.ext.commands.Context, func: callable, allowedtypes: list, *args,
-                        handleanimated=False):
+                        handleanimated=False, resize=True):
         """
         The core function of the bot.
         :param ctx: discord context. media is gathered using imagesearch() with this.
@@ -251,6 +250,9 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                         for f in files:
                             os.remove(f)
                         break
+                    else:
+                        if resize:
+                            files[i] = await improcessing.ensuresize(ctx, file, config.min_size, config.max_size)
                 else:
                     logging.info("Processing...")
                     msg = await ctx.reply(f"{config.emojis['working']} Processing...", mention_author=False)
@@ -456,7 +458,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             await improcess(ctx, improcessing.freezemotivate, [["VIDEO", "GIF"], ["AUDIO"]], *caption)
 
 
-    class Media(commands.Cog, name="Processing"):
+    class Media(commands.Cog, name="Editing"):
         """
         Basic media editing/processing commands.
         """
@@ -498,6 +500,28 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             :Param=media - A video, gif, or image. (automatically found in channel)
             """
             await improcess(ctx, improcessing.pad, [["VIDEO", "GIF", "IMAGE"]])
+
+        @commands.command()
+        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
+        async def resize(self, ctx, width: int, height: int):
+            """
+            Resizes an image.
+
+            :Usage=$resize width height
+            :Param=width - width of output image. set to -1 to determine automatically based on height and aspect ratio.
+            :Param=height - height of output image. also can be set to -1.
+            :Param=media - A video, gif, or image. (automatically found in channel)
+            """
+            if not (1 <= width <= config.max_size or width == -1):
+                await ctx.send(f"{config.emojis['warning']} Width must be between 1 and "
+                               f"{config.max_size} or be -1.")
+                return
+            if not (1 <= height <= config.max_size or height == -1):
+                await ctx.send(f"{config.emojis['warning']} Height must be between 1 and "
+                               f"{config.max_size} or be -1.")
+                return
+            await improcess(ctx, captionfunctions.resize, [["VIDEO", "GIF", "IMAGE"]], width, height,
+                            handleanimated=True, resize=False)
 
         @commands.command(aliases=["magic", "magik"])
         @commands.cooldown(1, config.cooldown, commands.BucketType.user)
