@@ -1,5 +1,7 @@
 # ![MediaForge](banner.png)
-
+[![MediaForge Discord](https://discordapp.com/api/guilds/803788965215338546/embed.png)](https://discord.gg/xwWjgyVqBz)
+![Total Lines](https://img.shields.io/tokei/lines/github/HexCodeFFF/captionbot)
+![Downloads](https://img.shields.io/github/downloads/HexCodeFFF/captionbot/total)
 ### a discord bot inspired by [esmBot](https://github.com/esmBot/esmBot) mainly for media processing.
 
 ## general info about the bot
@@ -31,13 +33,14 @@ the bot uses many CLI programs for media processing.
 
 ### pip libraries
 
-- The bot has a [requirements.txt](requirements.txt) file that can be installed
-  with `python -m pip install -r requirements.txt`
+- This project uses [`pipenv`](https://github.com/pypa/pipenv), run `pipenv install` to install required dependencies.
+- check [pipenv's repo](https://github.com/pypa/pipenv) for more info on pipenv usage.
 
 ### config
 
 - create a copy of [`config.example.py`](config.example.py) and name it `config.py`.
 - insert/change the appropriate config settings such as your discord api token. be sure not to add or remove quotes.
+- for now, a [`requirements.txt`](requirements.txt) file is also maintained.
 
 ### python
 
