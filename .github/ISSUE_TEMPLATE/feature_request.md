@@ -7,6 +7,7 @@ assignees: ''
 
 ---
 
+<!--A feature request under issues must be a precise and implementable feature. For very vague/broad requests, post to the ideas page in discussion.-->
 **Is your feature request related to a problem? Please describe.**
 A clear and concise description of what the problem is. Ex. I'm always frustrated when [...]
 
