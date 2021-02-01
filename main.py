@@ -87,19 +87,15 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
         name = improcessing.temp_file(extension)
         # https://github.com/aio-libs/aiohttp/issues/3904#issuecomment-632661245
         async with aiohttp.ClientSession(headers={'Connection': 'keep-alive'}) as session:
-            async with session.head(url) as resp:
+            # i used to make a head request to check size first, but for some reason head requests can be super slow
+            async with session.get(url) as resp:
                 if resp.status == 200:
                     if "Content-Length" not in resp.headers:  # size of file to download
                         raise Exception("Cannot determine filesize!")
                     size = int(resp.headers["Content-Length"])
                     logging.info(f"Url is {humanize.naturalsize(size)}")
-                    if 50000000 < size:  # file size to download must be under ~50MB
+                    if config.max_file_size < size:  # file size to download must be under ~50MB
                         raise Exception(f"File is too big ({humanize.naturalsize(size)})!")
-                else:
-                    logging.error(f"aiohttp status {resp.status}")
-                    logging.error(f"aiohttp status {await resp.read()}")
-            async with session.get(url) as resp:
-                if resp.status == 200:
                     logging.info(f"Saving url {url} as {name}")
                     f = await aiofiles.open(name, mode='wb')
                     await f.write(await resp.read())
@@ -154,7 +150,12 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             outfiles += hm
             if len(outfiles) >= nargs:
                 return outfiles[:nargs]
-        async for m in ctx.channel.history(limit=50):
+        m = ctx.message
+        hm = await handlemessagesave(m)
+        outfiles += hm
+        if len(outfiles) >= nargs:
+            return outfiles[:nargs]
+        async for m in ctx.channel.history(limit=50, before=ctx.message):
             hm = await handlemessagesave(m)
             outfiles += hm
             if len(outfiles) >= nargs:
@@ -236,7 +237,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
         :param handleanimated: if func() only works on still images, set to True to process each frame individually.
         :return: nothing, all processing and uploading is done in this function
         """
-        async with ctx.channel.typing():
+        async with ctx.channel.typing():  # TODO: possible stalling bug around here
             if allowedtypes:
                 urls = await imagesearch(ctx, len(allowedtypes))
                 files = await saveurls(urls)
