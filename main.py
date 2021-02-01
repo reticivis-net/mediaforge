@@ -66,7 +66,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
 
 
     async def fetch(url):
-        async with aiohttp.ClientSession() as session:
+        async with aiohttp.ClientSession(headers={'Connection': 'keep-alive'}) as session:
             async with session.get(url) as response:
                 if response.status != 200:
                     response.raise_for_status()
@@ -85,7 +85,8 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
         if extension is None:
             extension = url.split(".")[-1].split("?")[0]
         name = improcessing.temp_file(extension)
-        async with aiohttp.ClientSession() as session:
+        # https://github.com/aio-libs/aiohttp/issues/3904#issuecomment-632661245
+        async with aiohttp.ClientSession(headers={'Connection': 'keep-alive'}) as session:
             async with session.head(url) as resp:
                 if resp.status == 200:
                     if "Content-Length" not in resp.headers:  # size of file to download

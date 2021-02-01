@@ -26,13 +26,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="ef38d419-8cc3-42ef-bbef-6fd62fc27c52" name="Default Changelist" comment="bug fixes">
-      <change afterPath="$PROJECT_DIR$/devlogo.png" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/chromiumrender.py" beforeDir="false" afterPath="$PROJECT_DIR$/chromiumrender.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config.example.py" beforeDir="false" afterPath="$PROJECT_DIR$/config.example.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/improcessing.py" beforeDir="false" afterPath="$PROJECT_DIR$/improcessing.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/logo.psd" beforeDir="false" afterPath="$PROJECT_DIR$/logo.psd" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -321,14 +315,8 @@
       <workItem from="1611972346942" duration="674000" />
       <workItem from="1612057934114" duration="2568000" />
       <workItem from="1612076047280" duration="2626000" />
-      <workItem from="1612133629265" duration="13787000" />
-    </task>
-    <task id="LOCAL-00019" summary="FIXED THE STGUPID FUCKING SPAM BUG FINALLY OMFG&#10;https://github.com/jarrekk/imgkit/issues/52">
-      <created>1610556053376</created>
-      <option name="number" value="00019" />
-      <option name="presentableId" value="LOCAL-00019" />
-      <option name="project" value="LOCAL" />
-      <updated>1610556053376</updated>
+      <workItem from="1612133629265" duration="14247000" />
+      <workItem from="1612152074592" duration="1140000" />
     </task>
     <task id="LOCAL-00020" summary="fix bug where gifski has some maximum size thing idk">
       <created>1610557893531</created>
@@ -666,7 +654,14 @@
       <option name="project" value="LOCAL" />
       <updated>1612144675602</updated>
     </task>
-    <option name="localTasksCounter" value="68" />
+    <task id="LOCAL-00068" summary="implement linux-specific fixes">
+      <created>1612147837814</created>
+      <option name="number" value="00068" />
+      <option name="presentableId" value="LOCAL-00068" />
+      <option name="project" value="LOCAL" />
+      <updated>1612147837814</updated>
+    </task>
+    <option name="localTasksCounter" value="69" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -716,7 +711,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="fixed bugs" />
     <MESSAGE value="MY GOAL IS ACHIEVED! POOL WORKERS ARE INITIALIZED AT STARTUP AND ARE AVAILABLE FOR WORK UNTIL SHUTDOWN. BIG SPEED" />
     <MESSAGE value="who remembers?" />
     <MESSAGE value="joe biden" />
@@ -741,14 +735,15 @@
     <MESSAGE value="eminem commands lmao" />
     <MESSAGE value="image size correction and fixed bug with FFmpeg resizing losing color detail" />
     <MESSAGE value="minor improvements" />
-    <option name="LAST_COMMIT_MESSAGE" value="minor improvements" />
+    <MESSAGE value="implement linux-specific fixes" />
+    <option name="LAST_COMMIT_MESSAGE" value="implement linux-specific fixes" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/CaptionX$improcessing.coverage" NAME="improcessing Coverage Results" MODIFIED="1606284753774" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/CaptionX$qtrenderer.coverage" NAME="qtrenderer Coverage Results" MODIFIED="1611025320241" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/caption_bot$main.coverage" NAME="main Coverage Results" MODIFIED="1606184268706" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/CaptionX$sus.coverage" NAME="sus Coverage Results" MODIFIED="1611175143620" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/captionbot$main.coverage" NAME="main Coverage Results" MODIFIED="1612144267626" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/captionbot$main.coverage" NAME="main Coverage Results" MODIFIED="1612152105734" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/CaptionX$chromiumrender.coverage" NAME="chromiumrender Coverage Results" MODIFIED="1611107683335" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/CaptionX$main.coverage" NAME="main Coverage Results" MODIFIED="1611273027854" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
