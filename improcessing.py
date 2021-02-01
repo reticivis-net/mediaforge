@@ -220,7 +220,7 @@ async def compresspng(png):
     :return: filename of compressed png
     """
     outname = temp_file("png")
-    await run_command("pngquant", "--quality=0-80", "--o", outname, png)
+    await run_command("pngquant", "--quality=0-80", "--output", outname, png)
     os.remove(png)
     return outname
 
@@ -345,9 +345,8 @@ async def handleanimated(media: str, capfunction: callable, ctx, *caption):
         logging.info(f"Joining {len(frames)} frames...")
         if imty == "GIF":
             outname = temp_file("gif")
-            await run_command(
-                "gifski", "--quiet", "--fast", "-o", outname, "--fps", str(fps), "--width", "1000",
-                name.replace('.png', '_rendered.png').replace('%09d', '*'))
+            n = glob.glob(name.replace('.png', '_rendered.png').replace('%09d', '*'))
+            await run_command("gifski", "--quiet", "--fast", "-o", outname, "--fps", str(fps), "--width", "1000", *n)
         else:  # imty == "VIDEO":
             outname = temp_file("mp4")
             if audio:
@@ -382,7 +381,8 @@ async def mp4togif(mp4):
     frames, name = await ffmpegsplit(mp4)
     fps = await get_frame_rate(mp4)
     outname = temp_file("gif")
-    await run_command("gifski", "--quiet", "--fast", "-o", outname, "--fps", str(fps), name.replace('%09d', '*'))
+    n = glob.glob(name.replace('%09d', '*'))
+    await run_command("gifski", "--quiet", "--fast", "-o", outname, "--fps", str(fps), *n)
     logging.info("Cleaning files...")
     for f in glob.glob(name.replace('%09d', '*')):
         os.remove(f)
