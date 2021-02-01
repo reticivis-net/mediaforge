@@ -73,6 +73,8 @@ def initdriver():
     opts.add_argument("--allow-file-access-from-file")
     opts.add_argument("--allow-file-access")
     opts.add_argument("--disable-extensions")
+    opts.add_argument("--disable-dev-shm-usage")
+    opts.add_argument("--no-sandbox")
     # https://chromedriver.storage.googleapis.com/index.html?path=87.0.4280.88/
     if sys.platform == "win32":
         driver = webdriver.Chrome(config.chrome_driver_windows, options=opts)

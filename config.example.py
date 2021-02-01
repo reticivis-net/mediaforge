@@ -6,7 +6,7 @@ tenor_key = "EXAMPLE_KEY"
 # windows executable for chromedriver https://chromedriver.chromium.org/
 chrome_driver_windows = "chromedriver87.exe"
 # linux binary for chromedriver https://chromedriver.chromium.org/
-chrome_driver_linux = "chromedriver87"
+chrome_driver_linux = "./chromedriver87"
 # the number of instances of chromedriver to run for caption processing.
 # more means faster processing of videos and better under heavy load but also uses more PC resources!
 chrome_driver_instances = 20
