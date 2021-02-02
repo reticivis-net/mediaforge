@@ -820,6 +820,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                     if r[0]:
                         await msg.edit(content=f"{config.emojis['working']} Uploading...")
                         await ctx.reply(file=discord.File(r[1]))
+                        os.remove(r[1])
                     else:
                         await ctx.reply(f"{config.emojis['2exclamation']} {r[1]}")
                 else:
