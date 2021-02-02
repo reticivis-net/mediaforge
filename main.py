@@ -23,8 +23,14 @@ import improcessing
 import sus
 import config
 
+"""
+This file contains the discord.py functions, which call other files to do the actual processing.
+"""
+
 # TODO: reddit moment caption
 # TODO: donal trump tweet
+# TODO: rotate
+# TODO: volume
 # https://coloredlogs.readthedocs.io/en/latest/api.html#id28
 # configure logging
 field_styles = {
@@ -948,7 +954,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             Lists most libraries and programs this bot uses.
             :Usage=$attributions
             """
-            with open("attributions.txt", "r") as f:
+            with open("media/attributions.txt", "r") as f:
                 await ctx.send(f.read())
 
         @commands.cooldown(1, config.cooldown, commands.BucketType.user)

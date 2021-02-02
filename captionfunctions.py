@@ -6,6 +6,11 @@ from PIL import Image
 import chromiumrender
 from improcessing import filetostring, temp_file, mediatype
 
+"""
+This file contains all media processing functions that only work on one image/frame of video and must be run through 
+improcessing.handleanimated()
+"""
+
 
 # stolen code https://stackoverflow.com/questions/6116978/how-to-replace-multiple-substrings-of-a-string
 def replaceall(text, rep):
@@ -39,148 +44,68 @@ def sanitizehtml(text):
     return text
 
 
-def esmcaption(image, caption, tosavename=None):
+def htmlcap(file, image, caption, tosavename=None):
     if tosavename is None:
         tosavename = temp_file("png")
-    caption = sanitizehtml(caption)
-    replacedict = {
-        "CaptionText": caption[0],
-        "rendering/demoimage.png": image
-    }
-    torender = replaceall(filetostring("esmcaption.html"), replacedict)
+    replacedict = {}
+    if image:
+        replacedict["rendering/demoimage.png"] = image
+    if caption:
+        caption = sanitizehtml(caption)
+        if len(caption) == 1:
+            replacedict["CaptionText"] = caption[0]
+        else:
+            for i, c in enumerate(caption):
+                replacedict[f"CaptionText{i + 1}"] = c
+    torender = replaceall(filetostring(file), replacedict)
     chromiumrender.html2png(torender, tosavename)
     return tosavename
+
+
+# at some point i might remove these entirely and just have calls to htmlcap but i dont feel like changing all of
+# this rn
+def esmcaption(image, caption, tosavename=None):
+    return htmlcap("captionhtml/esmcaption.html", image, caption, tosavename)
 
 
 def caption(image, caption, tosavename=None):
-    if tosavename is None:
-        tosavename = temp_file("png")
-    caption = sanitizehtml(caption)
-    replacedict = {
-        "CaptionText": caption[0],
-        "rendering/demoimage.png": image
-    }
-    torender = replaceall(filetostring("mycaption.html"), replacedict)
-    chromiumrender.html2png(torender, tosavename)
-    return tosavename
+    return htmlcap("captionhtml/mycaption.html", image, caption, tosavename)
 
 
 def bottomcaption(image, caption, tosavename=None):
-    if tosavename is None:
-        tosavename = temp_file("png")
-    caption = sanitizehtml(caption)
-    replacedict = {
-        "CaptionText": caption[0],
-        "rendering/demoimage.png": image
-    }
-    torender = replaceall(filetostring("mycaptionbottom.html"), replacedict)
-    chromiumrender.html2png(torender, tosavename)
-    return tosavename
+    return htmlcap("captionhtml/mycaptionbottom.html", image, caption, tosavename)
 
 
 def stuff(image, caption, tosavename=None):
-    if tosavename is None:
-        tosavename = temp_file("png")
-    caption = sanitizehtml(caption)
-    replacedict = {
-        "CaptionText": caption[0],
-        "rendering/demoimage.png": image
-    }
-    torender = replaceall(filetostring("stuff.html"), replacedict)
-    chromiumrender.html2png(torender, tosavename)
-    return tosavename
+    return htmlcap("captionhtml/stuff.html", image, caption, tosavename)
 
 
 def stuffstretch(image, caption, tosavename=None):
-    if tosavename is None:
-        tosavename = temp_file("png")
-    caption = sanitizehtml(caption)
-    replacedict = {
-        "CaptionText": caption[0],
-        "rendering/demoimage.png": image
-    }
-    torender = replaceall(filetostring("stuffstretch.html"), replacedict)
-    chromiumrender.html2png(torender, tosavename)
-    return tosavename
+    return htmlcap("captionhtml/stuffstretch.html", image, caption, tosavename)
 
 
 def motivate(image, caption, tosavename=None):
-    if tosavename is None:
-        tosavename = temp_file("png")
-    caption = sanitizehtml(caption)
-    replacedict = {
-        "CaptionText1": caption[0],
-        "CaptionText2": caption[1],
-        "rendering/demoimage.png": image
-    }
-    torender = replaceall(filetostring("motivate.html"), replacedict)
-    chromiumrender.html2png(torender, tosavename)
-    return tosavename
+    return htmlcap("captionhtml/motivate.html", image, caption, tosavename)
 
 
 def meme(image, caption, tosavename=None):
-    if tosavename is None:
-        tosavename = temp_file("png")
-    caption = sanitizehtml(caption)
-    replacedict = {
-        "CaptionText1": caption[0],
-        "CaptionText2": caption[1],
-        "rendering/demoimage.png": image
-    }
-    torender = replaceall(filetostring("meme.html"), replacedict)
-    chromiumrender.html2png(torender, tosavename)
-    return tosavename
+    return htmlcap("captionhtml/meme.html", image, caption, tosavename)
 
 
 def twittercap(image, caption, tosavename=None):
-    if tosavename is None:
-        tosavename = temp_file("png")
-    caption = sanitizehtml(caption)
-    replacedict = {
-        "CaptionText1": caption[0],
-        "rendering/demoimage.png": image
-    }
-    torender = replaceall(filetostring("twittercaption.html"), replacedict)
-    chromiumrender.html2png(torender, tosavename)
-    return tosavename
+    return htmlcap("captionhtml/twittercaption.html", image, caption, tosavename)
 
 
 def twittercapdark(image, caption, tosavename=None):
-    if tosavename is None:
-        tosavename = temp_file("png")
-    caption = sanitizehtml(caption)
-    replacedict = {
-        "CaptionText1": caption[0],
-        "rendering/demoimage.png": image
-    }
-    torender = replaceall(filetostring("twittercaptiondark.html"), replacedict)
-    chromiumrender.html2png(torender, tosavename)
-    return tosavename
+    return htmlcap("captionhtml/twittercaptiondark.html", image, caption, tosavename)
 
 
 def eminemcap(image, caption, tosavename=None):
-    if tosavename is None:
-        tosavename = temp_file("png")
-    caption = sanitizehtml(caption)
-    replacedict = {
-        "CaptionText": caption[0],
-        "rendering/demoimage.png": image
-    }
-    torender = replaceall(filetostring("eminemcap.html"), replacedict)
-    chromiumrender.html2png(torender, tosavename)
-    return tosavename
+    return htmlcap("captionhtml/eminemcap.html", image, caption, tosavename)
 
 
 def eminem(caption, tosavename=None):
-    if tosavename is None:
-        tosavename = temp_file("png")
-    caption = sanitizehtml(caption)
-    replacedict = {
-        "CaptionText": caption,
-    }
-    torender = replaceall(filetostring("eminem.html"), replacedict)
-    chromiumrender.html2png(torender, tosavename)
-    return tosavename
+    return htmlcap("captionhtml/eminem.html", None, caption, tosavename)
 
 
 def resize(image, size, tosavename=None):

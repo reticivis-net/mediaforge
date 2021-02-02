@@ -22,6 +22,9 @@ import humanize
 import chromiumrender
 import config
 
+"""
+This file contains functions for processing and editing media
+"""
 
 # https://stackoverflow.com/a/65966787/9044183
 class Pool:
