@@ -16,6 +16,7 @@ import discord
 from discord.ext import commands
 import aiofiles
 import humanize
+import youtube_dl
 # project files
 import captionfunctions
 import improcessing
@@ -65,10 +66,6 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
         #     await asyncio.sleep(1)
 
 
-    def get_random_string(length):
-        return ''.join(random.choice(string.ascii_letters) for _ in range(length))
-
-
     async def fetch(url):
         async with aiohttp.ClientSession(headers={'Connection': 'keep-alive'}) as session:
             async with session.get(url) as response:
@@ -112,45 +109,30 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
         return name
 
 
-    async def ytdownload(vid, form):
-        async with aiohttp.ClientSession(headers={'Connection': 'keep-alive'}) as session:
-            async with session.get(f"https://www.youtube.com/get_video_info",
-                                   params={"video_id": vid, "asv": "2"}) as response:  # , "asv": "3"
-                if response.status != 200:
-                    response.raise_for_status()
-                vinfo = json.loads(urllib.parse.parse_qs(await response.text())['player_response'][0])
-                if vinfo['playabilityStatus']['status'] == "OK":
-                    validformats = []
-                    for f in vinfo['streamingData']['formats']:
-                        if 'contentLength' in f:
-                            # logging.info(f)
-                            if form == "video":
-                                if float(f['contentLength']) <= 8388119 and 'qualityLabel' in f:
-                                    validformats.append(f)
-                            else:
-                                if float(f['contentLength']) <= 8388119 and 'qualityLabel' not in f:
-                                    validformats.append(f)
-                                # logging.info(humanize.naturalsize(f['contentLength']) + f['qualityLabel'])
-                    # adaptiveFormats contains seperate video/audio streams... dont feel like doing that
-                    for f in vinfo['streamingData']['adaptiveFormats']:
-                        if 'contentLength' in f:
-                            if form == "audio" and float(f['contentLength']) <= 8388119 and 'qualityLabel' not in f:
-                                validformats.append(f)
-                    if validformats:
-                        validformats = sorted(validformats, key=lambda x: x['bitrate'], reverse=True)
-                        td = validformats[0]
-                        # logging.info(td['qualityLabel'])
-                        ext = td['mimeType'].split(";")[0].split("/")
-                        if ext[0] == "audio":
-                            ext = "mp3"
-                        else:
-                            ext = ext[1]
-                        file = await saveurl(td['url'], ext)
-                        return [True, file]
-                    else:
-                        return [False, "No available download within Discord file limit."]
-                else:
-                    return [False, "YouTube Error"]
+    def ytdownload(vid, form):
+        while True:
+            name = f"temp/{improcessing.get_random_string(12)}"
+            if len(glob.glob(name + ".*")) == 0:
+                break
+        opts = {
+            "max_filesize": 8388119,
+            "quiet": True,
+            "outtmpl": f"{name}.%(ext)s",
+            "default_search": "auto",
+            "logger": logging,
+            "merge_output_format": "mp4",
+            "format": 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/bestvideo+bestaudio'
+        }
+        if form == "audio":
+            opts['format'] = "bestaudio/best[ext=mp3]"
+            opts['postprocessors'] = [{
+                'key': 'FFmpegExtractAudio',
+                'preferredcodec': 'mp3',
+            }]
+        with youtube_dl.YoutubeDL(opts) as ydl:
+            ydl.download([vid])
+        filename = glob.glob(name + ".*")[0]
+        return filename
 
 
     async def handlemessagesave(m: discord.Message):
@@ -795,13 +777,14 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             await improcess(ctx, improcessing.imageaudio, [["IMAGE"], ["AUDIO"]])
 
         @commands.cooldown(1, config.cooldown, commands.BucketType.user)
-        @commands.command(aliases=["youtube", "youtubedownload", "youtubedl"])
-        async def ytdl(self, ctx, url, form="video"):
+        @commands.command(aliases=["youtube", "youtubedownload", "youtubedl", "ytdownload", "download", "dl", "ytdl"])
+        async def videodl(self, ctx, url, form="video"):
             """
-            Downloads a youtube video.
+            Downloads a web hosted video from sites like youtube.
+            Any site here works: https://ytdl-org.github.io/youtube-dl/supportedsites.html
 
             :Usage=$ytdl `videourl` `format`
-            :Param=videourl - the URL of a youtube video
+            :Param=videourl - the URL of a video or the title of a youtube video.
             :Param=format - download audio or video, defaults to video.
             """
             types = ["video", "audio"]
@@ -812,20 +795,15 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             # await improcessing.ytdl(url, form)
             async with ctx.channel.typing():
                 # logging.info(url)
-                msg = await ctx.reply(f"{config.emojis['working']} Downloading from YouTube...", mention_author=False)
-                m = re.search('(?:youtube(?:-nocookie)?\.com/(?:[^/]+/.+/|(?:v|e(?:mbed)?)/|.*[?&]v=)|youtu\.be/)([^"&'
-                              '?/\s]{11})', url)
-                if m and m.group(1) is not None:
-                    r = await ytdownload(m.group(1), form)
-                    if r[0]:
-                        await msg.edit(content=f"{config.emojis['working']} Uploading...")
-                        await ctx.reply(file=discord.File(r[1]))
-                        os.remove(r[1])
-                    else:
-                        await ctx.reply(f"{config.emojis['2exclamation']} {r[1]}")
-                else:
-                    await ctx.reply(f"{config.emojis['warning']} Invalid youtube url!")
-                await msg.delete()
+                msg = await ctx.reply(f"{config.emojis['working']} Downloading from site...", mention_author=False)
+                try:
+                    r = await improcessing.run_in_exec(ytdownload, url, form)
+                    await msg.edit(content=f"{config.emojis['working']} Uploading to Discord...")
+                    await ctx.reply(file=discord.File(r))
+                    os.remove(r)
+                    await msg.delete()
+                except youtube_dl.DownloadError as e:
+                    await ctx.reply(f"{config.emojis['2exclamation']} {e}")
 
         @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         @commands.command(aliases=["gif", "videotogif"])

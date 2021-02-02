@@ -11,7 +11,6 @@ import string
 import sys
 import asyncio
 # pip libs
-import aiohttp
 import discord.ext
 from PIL import Image, UnidentifiedImageError
 
@@ -265,6 +264,8 @@ def mediatype(image):
     :param image: filename of media
     :return: can be VIDEO, AUDIO, GIF, IMAGE or None (invalid or other).
     """
+    if image.endswith(".m4a"):
+        return "AUDIO"  # idfk
     mime = magic.from_file(image, mime=True)
     if mime.startswith("video"):
         return "VIDEO"
@@ -760,6 +761,3 @@ async def volume(file, vol):
     # for some reason aac has audio caps but libmp3lame works fine lol
     await run_command("ffmpeg", "-i", file, "-af", f"volume={vol}dB", "-c:a", "libmp3lame", out)
     return out
-
-
-
