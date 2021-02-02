@@ -176,6 +176,9 @@ def magick(file, strength, tosavename=None):
     assert mediatype(file) == "IMAGE"
     if tosavename is None:
         tosavename = temp_file("png")
-    subprocess.check_call(["magick", file, "-liquid-rescale", f"{strength[0]}%x{strength[0]}%", tosavename])
+    subprocess.check_call(["magick", file, "-liquid-rescale", f"{strength[0]}%x{strength[0]}%", tosavename],
+                          stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL)
 
     return tosavename
+
+

@@ -1,7 +1,9 @@
 # standard libs
 import concurrent.futures
 import glob
+import json
 import logging
+import urllib.parse
 import multiprocessing
 import os
 import random
@@ -9,6 +11,7 @@ import string
 import sys
 import asyncio
 # pip libs
+import aiohttp
 import discord.ext
 from PIL import Image, UnidentifiedImageError
 
@@ -25,6 +28,7 @@ import config
 """
 This file contains functions for processing and editing media
 """
+
 
 # https://stackoverflow.com/a/65966787/9044183
 class Pool:
@@ -723,3 +727,39 @@ async def ensuresize(ctx, file, minsize, maxsize):
         await ctx.reply(f"Resized input media from {int(owidth)}x{int(oheight)} to {int(w)}x{int(h)}.", delete_after=5,
                         mention_author=False)
     return file
+
+
+async def rotate(file, rottype):
+    types = {  # command input to ffmpeg vf
+        "90": "transpose=1,format=yuv420p",
+        "90ccw": "transpose=2,format=yuv420p",
+        "180": "vflip,hflip,format=yuv420p",
+        "vflip": "vflip,format=yuv420p",
+        "hflip": "hflip,format=yuv420p"
+    }
+    mt = mediatype(file)
+    exts = {
+        "AUDIO": "mp3",
+        "VIDEO": "mp4",
+        "GIF": "mp4"
+    }
+    out = temp_file(exts[mt])
+    await run_command("ffmpeg", "-i", file, "-vf", types[rottype], out)
+    if mt == "GIF":
+        out = await mp4togif(out)
+    return out
+
+
+async def volume(file, vol):
+    mt = mediatype(file)
+    exts = {
+        "AUDIO": "mp3",
+        "VIDEO": "mp4"
+    }
+    out = temp_file(exts[mt])
+    # for some reason aac has audio caps but libmp3lame works fine lol
+    await run_command("ffmpeg", "-i", file, "-af", f"volume={vol}dB", "-c:a", "libmp3lame", out)
+    return out
+
+
+
