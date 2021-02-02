@@ -1,4 +1,4 @@
-# ![MediaForge](banner.png)
+# ![MediaForge](media/banner.png)
 
 [![MediaForge Discord](https://discordapp.com/api/guilds/803788965215338546/embed.png)](https://discord.gg/xwWjgyVqBz)
 ![Total Lines](https://img.shields.io/tokei/lines/github/HexCodeFFF/captionbot)

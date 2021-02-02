@@ -18,7 +18,7 @@ def temp_file(extension="png"):
 
 # this codebase is FUCKED
 
-master_im = Image.open("imposter.jpg")
+master_im = Image.open("rendering/imposter.jpg")
 
 # the y coordinate for where the text and the face split
 y_coord_split = 22
