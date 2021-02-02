@@ -14,7 +14,7 @@
 - uses discord.py (python discord lib)
 - uses FFmpeg for most media functions
 - uses selenium and ChromeDriver to render captions in html with Chrome
-    - although not the fastest approach,
+    - although not the fastest approach, it is very readable, flexible, and easy to work with/expand.
 
 ## to self-host
 
