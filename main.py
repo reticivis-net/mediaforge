@@ -1,5 +1,4 @@
 # standard libs
-import asyncio
 import datetime
 import glob
 import json
@@ -11,10 +10,10 @@ import string
 import traceback
 import urllib.parse
 # pip libs
+import aiohttp
 import coloredlogs
 import discord
 from discord.ext import commands
-import aiohttp
 import aiofiles
 import humanize
 # project files
@@ -29,11 +28,9 @@ This file contains the discord.py functions, which call other files to do the ac
 
 # TODO: reddit moment caption
 # TODO: donal trump tweet
-# TODO: rotate
-# TODO: volume
-# TODO: youtube to mp3/mp4
-# https://coloredlogs.readthedocs.io/en/latest/api.html#id28
-# configure logging
+# TODO: github version command
+
+# configure logging https://coloredlogs.readthedocs.io/en/latest/api.html#id28
 field_styles = {
     'levelname': {'bold': True, 'color': 'blue'},
     'asctime': {'color': 2},
@@ -113,6 +110,47 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                     raise Exception(f"aiohttp status {resp.status} {await resp.read()}")
 
         return name
+
+
+    async def ytdownload(vid, form):
+        async with aiohttp.ClientSession(headers={'Connection': 'keep-alive'}) as session:
+            async with session.get(f"https://www.youtube.com/get_video_info",
+                                   params={"video_id": vid, "asv": "2"}) as response:  # , "asv": "3"
+                if response.status != 200:
+                    response.raise_for_status()
+                vinfo = json.loads(urllib.parse.parse_qs(await response.text())['player_response'][0])
+                if vinfo['playabilityStatus']['status'] == "OK":
+                    validformats = []
+                    for f in vinfo['streamingData']['formats']:
+                        if 'contentLength' in f:
+                            # logging.info(f)
+                            if form == "video":
+                                if float(f['contentLength']) <= 8388119 and 'qualityLabel' in f:
+                                    validformats.append(f)
+                            else:
+                                if float(f['contentLength']) <= 8388119 and 'qualityLabel' not in f:
+                                    validformats.append(f)
+                                # logging.info(humanize.naturalsize(f['contentLength']) + f['qualityLabel'])
+                    # adaptiveFormats contains seperate video/audio streams... dont feel like doing that
+                    for f in vinfo['streamingData']['adaptiveFormats']:
+                        if 'contentLength' in f:
+                            if form == "audio" and float(f['contentLength']) <= 8388119 and 'qualityLabel' not in f:
+                                validformats.append(f)
+                    if validformats:
+                        validformats = sorted(validformats, key=lambda x: x['bitrate'], reverse=True)
+                        td = validformats[0]
+                        # logging.info(td['qualityLabel'])
+                        ext = td['mimeType'].split(";")[0].split("/")
+                        if ext[0] == "audio":
+                            ext = "mp3"
+                        else:
+                            ext = ext[1]
+                        file = await saveurl(td['url'], ext)
+                        return [True, file]
+                    else:
+                        return [False, "No available download within Discord file limit."]
+                else:
+                    return [False, "YouTube Error"]
 
 
     async def handlemessagesave(m: discord.Message):
@@ -275,7 +313,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                         else:
                             result = await func(filesforcommand, *args)
                     else:
-                        result = await renderpool.submit(func, *args)
+                        result = await func(*args)
                     result = await improcessing.assurefilesize(result, ctx)
                     if result:
                         logging.info("Uploading...")
@@ -576,17 +614,43 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                 return
             await improcess(ctx, improcessing.gifloop, [["GIF"]], loop)
 
+        @commands.command(aliases=["flip", "rot"])
         @commands.cooldown(1, config.cooldown, commands.BucketType.user)
-        @commands.command()
-        async def imageaudio(self, ctx):
+        async def rotate(self, ctx, rot):
             """
-            Combines an image and audio into a video.
+            Rotates and/or flips media
 
-            :Usage=$imageaudio
-            :Param=image - An image. (automatically found in channel)
-            :Param=audio - An audio file. (automatically found in channel)
+            :Usage=$rotate `[type]`
+            :Param=type - 90: 90° clockwise, 90ccw: 90° counter clockwise, 180: 180°, vflip: vertical flip, hflip: horizontal flip
+            :Param=media - A video, gif, or image. (automatically found in channel)
             """
-            await improcess(ctx, improcessing.imageaudio, [["IMAGE"], ["AUDIO"]])
+            types = ["90", "90ccw", "180", "vflip", "hflip"]
+            rot = rot.lower()
+            if rot not in types:
+                await ctx.send(f"{config.emojis['warning']} Rotation type must be: {', '.join(rot)}")
+                return
+            await improcess(ctx, improcessing.rotate, [["GIF", "IMAGE", "VIDEO"]], rot)
+
+        @commands.command()
+        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
+        async def volume(self, ctx, volume: float):
+            """
+            Changes the volume of media in decibels.
+            Decibels are logarithmic, so:
+            +10dB is double the perceived audio level
+            +20dB is quadruple the perceived audio level
+            +30dB is 8x the audio level... etc etc
+            NOTE: THIS COMMAND IS UNCAPPED, VERY VERY LOUD AUDIO CAN BE CREATED
+
+            :Usage=$volume `volume`
+            :Param=volume - volume in decibels to increase/decrease (if negative) the input media by.
+            :Param=media - A video or audio file. (automatically found in channel)
+            """
+            if not -60 <= volume <= 60:
+                # not noted in docs because 60db is literally 64x louder who needs more then that
+                await ctx.send(f"{config.emojis['warning']} Volume must be between -60dB and 60dB.")
+                return
+            await improcess(ctx, improcessing.volume, [["VIDEO", "AUDIO"]], volume)
 
         @commands.command(aliases=["concat", "combinev"])
         @commands.cooldown(1, config.cooldown, commands.BucketType.user)
@@ -717,6 +781,50 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
 
         def __init__(self, bot):
             self.bot = bot
+
+        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
+        @commands.command()
+        async def imageaudio(self, ctx):
+            """
+            Combines an image and audio into a video.
+
+            :Usage=$imageaudio
+            :Param=image - An image. (automatically found in channel)
+            :Param=audio - An audio file. (automatically found in channel)
+            """
+            await improcess(ctx, improcessing.imageaudio, [["IMAGE"], ["AUDIO"]])
+
+        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
+        @commands.command(aliases=["youtube", "youtubedownload", "youtubedl"])
+        async def ytdl(self, ctx, url, form="video"):
+            """
+            Downloads a youtube video.
+
+            :Usage=$ytdl `videourl` `format`
+            :Param=videourl - the URL of a youtube video
+            :Param=format - download audio or video, defaults to video.
+            """
+            types = ["video", "audio"]
+            form = form.lower()
+            if form not in types:
+                await ctx.send(f"{config.emojis['warning']} Download format must be `video` or `audio`.")
+                return
+            # await improcessing.ytdl(url, form)
+            async with ctx.channel.typing():
+                # logging.info(url)
+                msg = await ctx.reply(f"{config.emojis['working']} Downloading from YouTube...", mention_author=False)
+                m = re.search('(?:youtube(?:-nocookie)?\.com/(?:[^/]+/.+/|(?:v|e(?:mbed)?)/|.*[?&]v=)|youtu\.be/)([^"&'
+                              '?/\s]{11})', url)
+                if m and m.group(1) is not None:
+                    r = await ytdownload(m.group(1), form)
+                    if r[0]:
+                        await msg.edit(content=f"{config.emojis['working']} Uploading...")
+                        await ctx.reply(file=discord.File(r[1]))
+                    else:
+                        await ctx.reply(f"{config.emojis['2exclamation']} {r[1]}")
+                else:
+                    await ctx.reply(f"{config.emojis['warning']} Invalid youtube url!")
+                await msg.delete()
 
         @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         @commands.command(aliases=["gif", "videotogif"])
@@ -861,7 +969,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                                       description=cog.description + f"\nRun `{config.command_prefix}help command` for "
                                                                     f"more information on a command.",
                                       color=discord.Color(0xD262BA))
-                for cmd in cog.get_commands():
+                for cmd in sorted(cog.get_commands(), key=lambda x: x.name):
                     embed.add_field(name=f"{config.command_prefix}{cmd.name}", value=cmd.short_doc)
                 await ctx.reply(embed=embed)
             # elif arg.lower() in [c.name for c in bot.commands]:
