@@ -1188,9 +1188,9 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             embed.add_field(name=f"{config.emojis['2exclamation']} Report Issue to GitHub",
                             value=f"[Create New Issue](https://github.com/HexCodeFFF/captionbot"
                                   f"/issues/new?assignees=&labels=bug&template=bug_report.md&title"
-                                  f"={urllib.parse.quote(str(commanderror), safe='')})\n[View Issu"
+                                  f"={urllib.parse.quote(str(commanderror)[:128], safe='')})\n[View Issu"
                                   f"es](https://github.com/HexCodeFFF/captionbot/issues)")
-            await ctx.reply(f"{config.emojis['2exclamation']} `" + str(commanderror).replace("@", "\\@") + "`",
+            await ctx.reply(f"{config.emojis['2exclamation']} `" + str(commanderror)[:128].replace("@", "\\@") + "`",
                             file=discord.File(tr), embed=embed)
             os.remove(tr)
 
