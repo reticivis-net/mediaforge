@@ -366,6 +366,7 @@ async def handleanimated(media: str, capfunction: callable, ctx, *caption):
         # result = await renderpool.
         logging.info(f"Joining {len(frames)} frames...")
         frames = await forcesize(glob.glob(name.replace('.png', '_rendered.png').replace('%09d', '*')))
+        # frames = glob.glob(name.replace('.png', '_rendered.png').replace('%09d', '*'))
         if imty == "GIF":
             outname = temp_file("gif")
             await run_command("gifski", "--quiet", "--fast", "-o", outname, "--fps", str(fps), "--width", "1000",
@@ -387,9 +388,15 @@ async def handleanimated(media: str, capfunction: callable, ctx, *caption):
         # cleanup
         logging.info("Cleaning files...")
         for f in glob.glob(name.replace('%09d', '*')):
-            os.remove(f)
+            try:
+                os.remove(f)
+            except FileNotFoundError:
+                pass
         for f in frames:
-            os.remove(f)
+            try:
+                os.remove(f)
+            except FileNotFoundError:
+                pass
         return outname
 
 
