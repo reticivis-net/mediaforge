@@ -26,10 +26,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="ef38d419-8cc3-42ef-bbef-6fd62fc27c52" name="Default Changelist" comment="fixed downloader enough">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/improcessing.py" beforeDir="false" afterPath="$PROJECT_DIR$/improcessing.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -328,14 +326,7 @@
       <workItem from="1612240365454" duration="5364000" />
       <workItem from="1612274841157" duration="17015000" />
       <workItem from="1612453548981" duration="638000" />
-      <workItem from="1612469736359" duration="1574000" />
-    </task>
-    <task id="LOCAL-00032" summary="FULLY SWITCHED TO PYQT OMG THIS IS PERFECT AAAAAAAAA">
-      <created>1611027236101</created>
-      <option name="number" value="00032" />
-      <option name="presentableId" value="LOCAL-00032" />
-      <option name="project" value="LOCAL" />
-      <updated>1611027236101</updated>
+      <workItem from="1612469736359" duration="1915000" />
     </task>
     <task id="LOCAL-00033" summary="i giv eup for nmow.">
       <created>1611037538527</created>
@@ -673,7 +664,14 @@
       <option name="project" value="LOCAL" />
       <updated>1612291730645</updated>
     </task>
-    <option name="localTasksCounter" value="81" />
+    <task id="LOCAL-00081" summary="addresses #10 ... not fixed since the root cause isn't reproducable in the dev environment but calls to handleanimated() force all frames to the same size">
+      <created>1612471450399</created>
+      <option name="number" value="00081" />
+      <option name="presentableId" value="LOCAL-00081" />
+      <option name="project" value="LOCAL" />
+      <updated>1612471450399</updated>
+    </task>
+    <option name="localTasksCounter" value="82" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -728,7 +726,6 @@
     <option name="CHECK_CODE_CLEANUP_BEFORE_PROJECT_COMMIT" value="true" />
     <option name="CHECK_NEW_TODO" value="false" />
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="better emojis" />
     <MESSAGE value="added $gifloop" />
     <MESSAGE value="image stack and fixed media search" />
     <MESSAGE value="some bug fixes and $help aliases" />
@@ -753,7 +750,8 @@
     <MESSAGE value="$ytdl, $rotate, $volume" />
     <MESSAGE value="i dont need svgs h" />
     <MESSAGE value="fixed downloader enough" />
-    <option name="LAST_COMMIT_MESSAGE" value="fixed downloader enough" />
+    <MESSAGE value="addresses #10 ... not fixed since the root cause isn't reproducable in the dev environment but calls to handleanimated() force all frames to the same size" />
+    <option name="LAST_COMMIT_MESSAGE" value="addresses #10 ... not fixed since the root cause isn't reproducable in the dev environment but calls to handleanimated() force all frames to the same size" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/CaptionX$improcessing.coverage" NAME="improcessing Coverage Results" MODIFIED="1606284753774" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />

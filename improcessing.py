@@ -117,7 +117,7 @@ async def run_command(*args):
         logging.debug(f"Results: {stdout.decode().strip() + stderr.decode().strip()}")
     else:
         logging.error(
-            f"PID {process.pid} Failed: {args[:100]} result: {stderr.decode().strip()}",
+            f"PID {process.pid} Failed: {args} result: {stderr.decode().strip()}",
         )
         # adds command output to traceback
         raise Exception(f"Command {args} failed.") from Exception(stderr.decode().strip())
