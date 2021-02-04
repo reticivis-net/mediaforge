@@ -117,7 +117,7 @@ async def run_command(*args):
         logging.debug(f"Results: {stdout.decode().strip() + stderr.decode().strip()}")
     else:
         logging.error(
-            f"PID {process.pid} Failed: {args} result: {stderr.decode().strip()}",
+            f"PID {process.pid} Failed: {args[:100]} result: {stderr.decode().strip()}",
         )
         # adds command output to traceback
         raise Exception(f"Command {args} failed.") from Exception(stderr.decode().strip())
@@ -315,6 +315,20 @@ async def ensureduration(media, ctx):
         return media
 
 
+async def forcesize(files):
+    logging.info("Forcing all frames to same size...")
+    res = await get_resolution(files[0])
+    out = []
+    jobs = []
+    for f in files:
+        n = temp_file("png")
+        out.append(n)
+        # captionfunctions.resize(f, res, n)
+        jobs.append(renderpool.submit(captionfunctions.resize, f, res, n))
+    await asyncio.wait(jobs)
+    return out
+
+
 async def handleanimated(media: str, capfunction: callable, ctx, *caption):
     """
     handles processing functions that only work in singular frames and applies to videos/gifs
@@ -351,15 +365,16 @@ async def handleanimated(media: str, capfunction: callable, ctx, *caption):
         # await run_in_exec(result.get)
         # result = await renderpool.
         logging.info(f"Joining {len(frames)} frames...")
+        frames = await forcesize(glob.glob(name.replace('.png', '_rendered.png').replace('%09d', '*')))
         if imty == "GIF":
             outname = temp_file("gif")
-            n = glob.glob(name.replace('.png', '_rendered.png').replace('%09d', '*'))
-            await run_command("gifski", "--quiet", "--fast", "-o", outname, "--fps", str(fps), "--width", "1000", *n)
+            await run_command("gifski", "--quiet", "--fast", "-o", outname, "--fps", str(fps), "--width", "1000",
+                              *frames)
         else:  # imty == "VIDEO":
             outname = temp_file("mp4")
             if audio:
                 await run_command("ffmpeg", "-hide_banner", "-r", str(fps), "-start_number", "1", "-i",
-                                  name.replace('.png', '_rendered.png'),
+                                  *frames,
                                   "-i", audio, "-c:a", "aac", "-shortest",
                                   "-c:v", "libx264", "-crf", "25", "-pix_fmt", "yuv420p",
                                   "-vf", "crop=trunc(iw/2)*2:trunc(ih/2)*2", outname)
@@ -372,6 +387,8 @@ async def handleanimated(media: str, capfunction: callable, ctx, *caption):
         # cleanup
         logging.info("Cleaning files...")
         for f in glob.glob(name.replace('%09d', '*')):
+            os.remove(f)
+        for f in frames:
             os.remove(f)
         return outname
 

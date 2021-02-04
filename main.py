@@ -264,7 +264,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
         :param handleanimated: if func() only works on still images, set to True to process each frame individually.
         :return: nothing, all processing and uploading is done in this function
         """
-        async with ctx.channel.typing():  # TODO: possible stalling bug around here
+        async with ctx.channel.typing():
             if allowedtypes:
                 urls = await imagesearch(ctx, len(allowedtypes))
                 files = await saveurls(urls)
@@ -322,7 +322,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             self.bot = bot
 
         @commands.cooldown(1, config.cooldown, commands.BucketType.user)
-        @commands.command()
+        @commands.command(aliases=["demotivate", "motivational", "demotivational"])
         async def motivate(self, ctx, *, caption):
             """
             Captions media in the style of demotivational posters.
