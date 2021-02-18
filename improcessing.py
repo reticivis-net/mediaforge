@@ -433,8 +433,8 @@ async def mp4togif(mp4):
 
 async def reencode(mp4):  # reencodes mp4 as libx264 since the png format used cant be played by like literally anything
     outname = temp_file("mp4")
-    # mp3 used because aac causes problems with $volume
-    await run_command("ffmpeg", "-hide_banner", "-i", mp4, "-c:v", "libx264", "-c:a", "aac", outname)
+    await run_command("ffmpeg", "-hide_banner", "-i", mp4, "-c:v", "libx264", "-c:a", "copy", "-pix_fmt", "yuv420p",
+                      outname)
     os.remove(mp4)
     return outname
 
@@ -593,7 +593,7 @@ async def concatv(files):
     """
     video0 = await forceaudio(files[0])
     fixedvideo0 = temp_file("mp4")
-    await run_command("ffmpeg", "-hide_banner", "-i", video0, "-c:v", "libx264", "-c:a", "aac", "-ar", "48000",
+    await run_command("ffmpeg", "-hide_banner", "-i", video0, "-c:v", "png", "-c:a", "aac", "-ar", "48000",
                       "-max_muxing_queue_size", "4096", fixedvideo0)
     video1 = await forceaudio(files[1])
     w, h = await get_resolution(video0)
@@ -604,13 +604,13 @@ async def concatv(files):
     await run_command("ffmpeg", "-hide_banner", "-i", video1, "-sws_flags",
                       "spline+accurate_rnd+full_chroma_int+full_chroma_inp", "-vf",
                       f"scale={w}:{h}:force_original_aspect_ratio=decrease,pad={w}:{h}:-2:-2:color=black", "-c:v",
-                      "libx264", "-c:a", "aac", "-ar", "48000", fixedvideo1)
+                      "png", "-c:a", "aac", "-ar", "48000", fixedvideo1)
     fixedfixedvideo1 = await changefps(fixedvideo1, fps)
     concatdemuxer = temp_file("txt")
     with open(concatdemuxer, "w+") as f:
         f.write(f"file '{fixedvideo0}'\nfile '{fixedfixedvideo1}'".replace("temp/", ""))
     outname = temp_file("mp4")
-    await run_command("ffmpeg", "-hide_banner", "-f", "concat", "-i", concatdemuxer, "-c:v", "libx264", "-c:a", "aac",
+    await run_command("ffmpeg", "-hide_banner", "-f", "concat", "-i", concatdemuxer, "-c:v", "png", "-c:a", "aac",
                       outname)
     for file in [video0, video1, fixedvideo1, fixedvideo0, fixedfixedvideo1, concatdemuxer]:
         os.remove(file)
