@@ -99,7 +99,7 @@ def html2png(html, png):
     """
     driver.set_window_size(1, 1)
     tempfile = loadhtml(driver, html)
-    for _ in range(2):
+    for _ in range(4):
         size = driver.execute_script(f"return [document.documentElement.scrollWidth, outerHeight(document.body)];")
         driver.set_window_size(size[0], size[1])
     driver.execute_script("if (typeof beforerender === \"function\") {beforerender()}")
