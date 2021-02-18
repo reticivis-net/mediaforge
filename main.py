@@ -553,8 +553,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                 await ctx.send(f"{config.emojis['warning']} Height must be between 1 and "
                                f"{config.max_size} or be -1.")
                 return
-            await improcess(ctx, captionfunctions.resize, [["VIDEO", "GIF", "IMAGE"]], width, height,
-                            handleanimated=True, resize=False)
+            await improcess(ctx, improcessing.resize, [["VIDEO", "GIF", "IMAGE"]], width, height, resize=False)
 
         @commands.command(aliases=["short", "kyle"])
         @commands.cooldown(1, config.cooldown, commands.BucketType.user)
@@ -606,7 +605,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             """
             Rotates and/or flips media
 
-            :Usage=$rotate `[type]`
+            :Usage=$rotate `type`
             :Param=type - 90: 90° clockwise, 90ccw: 90° counter clockwise, 180: 180°, vflip: vertical flip, hflip: horizontal flip
             :Param=media - A video, gif, or image. (automatically found in channel)
             """
@@ -634,6 +633,26 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                 await ctx.send(f"{config.emojis['warning']} Volume must be between 0 and 32.")
                 return
             await improcess(ctx, improcessing.volume, [["VIDEO", "AUDIO"]], volume)
+
+        @commands.command()
+        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
+        async def vibrato(self, ctx, frequency: float = 5, depth: float = 1):
+            """
+            Applies a "wavy pitch"/vibrato effect to audio.
+            officially described as "Sinusoidal phase modulation"
+            see https://ffmpeg.org/ffmpeg-filters.html#tremolo
+            :Usage=$vibrato `[frequency]` `[depth]`
+            :Param=frequency - Modulation frequency in Hertz. must be between 0.1 and 20000. defaults to 5.
+            :Param=depth - Depth of modulation as a percentage. must be between 0 and 1. defaults to 1.
+            :Param=media - A video or audio file. (automatically found in channel)
+            """
+            if not 0.1 <= frequency <= 20000:
+                await ctx.send(f"{config.emojis['warning']} Frequency must be between 0.1 and 20000.")
+                return
+            if not 0 <= depth <= 1:
+                await ctx.send(f"{config.emojis['warning']} Depth must be between 0 and 1.")
+                return
+            await improcess(ctx, improcessing.vibrato, [["VIDEO", "AUDIO"]], frequency, depth)
 
         @commands.command(aliases=["concat", "combinev"])
         @commands.cooldown(1, config.cooldown, commands.BucketType.user)

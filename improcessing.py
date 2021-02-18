@@ -195,7 +195,7 @@ async def splitaudio(video):
     if ifaudio:
         logging.info("Splitting audio...")
         name = temp_file("aac")
-        await run_command("ffmpeg", "-hide_banner", "-i", video, "-vn", "-acodec", "copy", name)
+        await run_command("ffmpeg", "-hide_banner", "-i", video, "-vn", "-acodec", "aac", name)
         return name
     else:
         logging.info("No audio detected.")
@@ -253,7 +253,8 @@ async def assurefilesize(media: str, ctx: discord.ext.commands.Context):
             logging.info("Image too big!")
             msg = await ctx.reply(f"{config.emojis['warning']} Resulting file too big! ({humanize.naturalsize(size)}) "
                                   f"Downsizing result...")
-            imagenew = await handleanimated(media, captionfunctions.halfsize, ctx)
+            imagenew = await resize(media, "iw/2", "ih/2")
+            # imagenew = await handleanimated(media, captionfunctions.halfsize, ctx)
             os.remove(media)
             media = imagenew
             await msg.delete()
@@ -320,19 +321,19 @@ async def ensureduration(media, ctx):
         return media
 
 
-async def forcesize(files):
-    # this code is bugged, it shuffles frames around...
-    logging.info("Forcing all frames to same size...")
-    res = await get_resolution(files[0])
-    out = []
-    jobs = []
-    for f in files:
-        n = temp_file("png")
-        out.append(n)
-        # captionfunctions.resize(f, res, n)
-        jobs.append(renderpool.submit(captionfunctions.resize, f, res, n))
-    await asyncio.wait(jobs)
-    return out
+# async def forcesize(files):
+#     # this code is bugged, it shuffles frames around...
+#     logging.info("Forcing all frames to same size...")
+#     res = await get_resolution(files[0])
+#     out = []
+#     jobs = []
+#     for f in files:
+#         n = temp_file("png")
+#         out.append(n)
+#         # captionfunctions.resize(f, res, n)
+#         jobs.append(renderpool.submit(captionfunctions.resize, f, res, n))
+#     await asyncio.wait(jobs)
+#     return out
 
 
 async def handleanimated(media: str, capfunction: callable, ctx, *caption):
@@ -372,23 +373,23 @@ async def handleanimated(media: str, capfunction: callable, ctx, *caption):
         # result = await renderpool.
         logging.info(f"Joining {len(frames)} frames...")
         # frames = await forcesize(glob.glob(name.replace('.png', '_rendered.png').replace('%09d', '*')))
-        frames = glob.glob(name.replace('.png', '_rendered.png').replace('%09d', '*'))
+
         if imty == "GIF":
+            frames = glob.glob(name.replace('.png', '_rendered.png').replace('%09d', '*'))
             outname = temp_file("gif")
             await run_command("gifski", "--quiet", "--fast", "-o", outname, "--fps", str(fps), "--width", "1000",
                               *frames)
         else:  # imty == "VIDEO":
             outname = temp_file("mp4")
+            frames = name.replace('.png', '_rendered.png')
             if audio:
-                await run_command("ffmpeg", "-hide_banner", "-r", str(fps), "-start_number", "1", "-i",
-                                  *frames,
+                await run_command("ffmpeg", "-hide_banner", "-r", str(fps), "-i", frames,
                                   "-i", audio, "-c:a", "aac", "-shortest",
                                   "-c:v", "libx264", "-crf", "25", "-pix_fmt", "yuv420p",
                                   "-vf", "crop=trunc(iw/2)*2:trunc(ih/2)*2", outname)
                 os.remove(audio)
             else:
-                await run_command("ffmpeg", "-hide_banner", "-r", str(fps), "-start_number", "1", "-i",
-                                  name.replace('.png', '_rendered.png'),
+                await run_command("ffmpeg", "-hide_banner", "-r", str(fps), "-i", frames,
                                   "-c:v", "libx264", "-crf", "25", "-pix_fmt", "yuv420p",
                                   "-vf", "crop=trunc(iw/2)*2:trunc(ih/2)*2", outname)
         # cleanup
@@ -398,7 +399,7 @@ async def handleanimated(media: str, capfunction: callable, ctx, *caption):
                 os.remove(f)
             except FileNotFoundError:
                 pass
-        for f in frames:
+        for f in glob.glob(name.replace('.png', '_rendered.png').replace('%09d', '*')):
             try:
                 os.remove(f)
             except FileNotFoundError:
@@ -748,19 +749,20 @@ async def ensuresize(ctx, file, minsize, maxsize):
     if w < minsize:
         # the min(-1,maxsize) thing is to prevent a case where someone puts in like a 1x1000 image and it gets resized
         # to 200x200000 which is very large so even though it wont preserve aspect ratio it's an edge case anyways
-        file = await handleanimated(file, captionfunctions.resize, ctx, minsize, f"min(-1, {maxsize * 2})")
+
+        file = await resize(file, minsize, f"min(-1, {maxsize * 2})")
         w, h = await get_resolution(file)
         resized = True
     if h < minsize:
-        file = await handleanimated(file, captionfunctions.resize, ctx, f"min(-1, {maxsize * 2})", minsize)
+        file = await resize(file, f"min(-1, {maxsize * 2})", minsize)
         w, h = await get_resolution(file)
         resized = True
     if w > maxsize:
-        file = await handleanimated(file, captionfunctions.resize, ctx, maxsize, "-1")
+        file = await resize(file, ctx, maxsize, "-1")
         w, h = await get_resolution(file)
         resized = True
     if h > maxsize:
-        file = await handleanimated(file, captionfunctions.resize, ctx, "-1", maxsize)
+        file = await resize(file, ctx, "-1", maxsize)
         w, h = await get_resolution(file)
         resized = True
     if resized:
@@ -804,4 +806,45 @@ async def volume(file, vol):
     vol = 10 * math.log(vol, 2)
     # for some reason aac has audio caps but libmp3lame works fine lol
     await run_command("ffmpeg", "-i", file, "-af", f"volume={vol}dB", "-c:a", "libmp3lame", out)
+    return out
+
+
+async def vibrato(file, frequency=5, depth=0.5):  # https://ffmpeg.org/ffmpeg-filters.html#tremolo
+    mt = mediatype(file)
+    exts = {
+        "AUDIO": "mp3",
+        "VIDEO": "mp4"
+    }
+    out = temp_file(exts[mt])
+    # for some reason aac has audio caps but libmp3lame works fine lol
+    await run_command("ffmpeg", "-i", file, "-af", f"vibrato=f={frequency}:d={depth}", out)
+    return out
+
+
+async def resize(image, width, height):
+    """
+    resizes image
+
+    :param image: file
+    :param width: new width, thrown directly into ffmpeg so it can be things like -1 or iw/2
+    :param height: new height, same as width
+    :param tosavename: optionally specify the file to save it to
+    :return: processed media
+    """
+    mt = mediatype(image)
+    exts = {
+        "AUDIO": "mp3",
+        "VIDEO": "mp4",
+        "GIF": "mp4",
+        "IMAGE": "png"
+    }
+    out = temp_file(exts[mt])
+    await run_command("ffmpeg", "-i", image,
+                      "-sws_flags", "spline+accurate_rnd+full_chroma_int+full_chroma_inp",
+                      "-vf", f"scale='{width}:{height}',setsar=1:1", "-c:v", "png", out)
+
+    if mt == "GIF":
+        out = await mp4togif(out)
+    elif mt == "VIDEO":
+        out = await reencode(out)
     return out
