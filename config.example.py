@@ -17,7 +17,7 @@ max_frames = 1024
 # amount of seconds cooldown per user commands have. set to 0 to disable cooldown
 cooldown = 3
 # minimum height/width that media will be sized up to if below
-min_size = 50
+min_size = 100
 # maximum height/width that media will be downsized to if above
 max_size = 2000
 # maximum size, in bytes, to download. see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Length
@@ -35,8 +35,7 @@ emojis = {
 # up to 25 tips that can show when using $help tips. type \n for a newline
 tips = {
     "Media Searching": "MediaForge automatically searches for any media in a channel. Reply to a message with the command to search that message first.",
-    "GIFs and MP4s": "MediaForge works faster with MP4 files, due to GIF conversion not being fast.",
-    "Tenor GIFs": "All tenor GIFs are interpreted as MP4s by default due to their superior quality. Use `tenorgif` to send the raw GIF url or `togif` to convert any video to a gif.",
+    "File Formats": "MediaForge supports static image formats like PNG, animated image formats like GIF, and video formats like MP4.",
     "Self-Hosting": "MediaForge is completely open source and anyone can host a clone themself!\nhttps://github.com/HexCodeFFF/captionbot"
 }
 

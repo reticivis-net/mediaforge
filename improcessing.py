@@ -212,7 +212,7 @@ async def forceaudio(video):
         return video
     else:
         outname = temp_file("mp4")
-        await run_command("ffmpeg", "-hide_banner", "-f", "lavfi", "-i", "anullsrc", "-i", video, "-c:v", "libx264",
+        await run_command("ffmpeg", "-hide_banner", "-f", "lavfi", "-i", "anullsrc", "-i", video, "-c:v", "png",
                           "-c:a", "aac",
                           "-map", "0:a", "-map", "1:v", "-shortest", outname)
         os.remove(video)
@@ -240,6 +240,10 @@ async def assurefilesize(media: str, ctx: discord.ext.commands.Context):
     """
     if not media:
         raise Exception(f"Processing function returned nothing!")
+    if mediatype(media) == "VIDEO":
+        # this is in assurefilesize since all output media gets sent through here
+        # it removes transparency if its a actual video and not a gif, since like nothing can play transparent videos
+        media = await reencode(media)
     for i in range(5):
         size = os.path.getsize(media)
         logging.info(f"Resulting file is {humanize.naturalsize(size)}")
@@ -316,6 +320,7 @@ async def ensureduration(media, ctx):
 
 
 async def forcesize(files):
+    # this code is bugged, it shuffles frames around...
     logging.info("Forcing all frames to same size...")
     res = await get_resolution(files[0])
     out = []
@@ -365,8 +370,8 @@ async def handleanimated(media: str, capfunction: callable, ctx, *caption):
         # await run_in_exec(result.get)
         # result = await renderpool.
         logging.info(f"Joining {len(frames)} frames...")
-        frames = await forcesize(glob.glob(name.replace('.png', '_rendered.png').replace('%09d', '*')))
-        # frames = glob.glob(name.replace('.png', '_rendered.png').replace('%09d', '*'))
+        # frames = await forcesize(glob.glob(name.replace('.png', '_rendered.png').replace('%09d', '*')))
+        frames = glob.glob(name.replace('.png', '_rendered.png').replace('%09d', '*'))
         if imty == "GIF":
             outname = temp_file("gif")
             await run_command("gifski", "--quiet", "--fast", "-o", outname, "--fps", str(fps), "--width", "1000",
@@ -424,6 +429,13 @@ async def mp4togif(mp4):
         return outname
 
 
+async def reencode(mp4):  # reencodes mp4 as libx264 since the png format used cant be played by like literally anything
+    outname = temp_file("mp4")
+    await run_command("ffmpeg", "-hide_banner", "-i", mp4, "-c:v", "libx264", "-c:a", "aac", outname)
+    os.remove(mp4)
+    return outname
+
+
 async def giftomp4(gif):
     """
     converts gif to mp4
@@ -470,7 +482,7 @@ async def speed(file, sp):
     duration = await get_duration(file)
     await run_command("ffmpeg", "-hide_banner", "-i", await forceaudio(file), "-filter_complex",
                       f"[0:v]setpts=PTS/{sp},fps={fps}[v];[0:a]atempo={sp}[a]",
-                      "-map", "[v]", "-map", "[a]", "-t", str(duration / float(sp)), outname)
+                      "-map", "[v]", "-map", "[a]", "-t", str(duration / float(sp)), "-c:v", "png", outname)
     if mt == "GIF":
         outname = await mp4togif(outname)
     return outname
@@ -485,7 +497,7 @@ async def reverse(file):
     mt = mediatype(file)
     outname = temp_file("mp4")
     await run_command("ffmpeg", "-hide_banner", "-i", await forceaudio(file), "-vf", "reverse", "-af", "areverse",
-                      outname)
+                      "-c:v", "png", outname)
     if mt == "GIF":
         outname = await mp4togif(outname)
     return outname
@@ -503,6 +515,7 @@ async def quality(file, crf, qa):
     outname = temp_file("mp4")
     await run_command("ffmpeg", "-hide_banner", "-i", await forceaudio(file), "-crf", str(crf), "-c:a", "aac", "-ar",
                       str(qa), outname)
+    # png cannot be supported here because crf and qa are libx264 params lmao
     if mt == "GIF":
         outname = await mp4togif(outname)
     return outname
@@ -517,7 +530,7 @@ async def changefps(file, fps):
     """
     mt = mediatype(file)
     outname = temp_file("mp4")
-    await run_command("ffmpeg", "-hide_banner", "-i", file, "-filter:v", f"fps=fps={fps}", outname)
+    await run_command("ffmpeg", "-hide_banner", "-i", file, "-filter:v", f"fps=fps={fps}", "-c:v", "png", outname)
     if mt == "GIF":
         outname = await mp4togif(outname)
     return outname
@@ -535,7 +548,8 @@ async def pad(file):
     else:
         outname = temp_file("mp4")
     await run_command("ffmpeg", "-hide_banner", "-i", file, "-vf",
-                      "pad=width='max(iw,ih)':height='max(iw,ih)':x='(ih-iw)/2':y='(iw-ih)/2':color=white", outname)
+                      "pad=width='max(iw,ih)':height='max(iw,ih)':x='(ih-iw)/2':y='(iw-ih)/2':color=white", "-c:v",
+                      "png", outname)
     if mt == "GIF":
         outname = await mp4togif(outname)
     return outname
@@ -708,7 +722,7 @@ async def trim(file, length):
         "GIF": "mp4"
     }
     out = temp_file(exts[mt])
-    await run_command("ffmpeg", "-hide_banner", "-i", file, "-t", str(length), out)
+    await run_command("ffmpeg", "-hide_banner", "-i", file, "-t", str(length), "-c:v", "png", out)
     if mt == "GIF":
         out = await mp4togif(out)
     return out
@@ -766,10 +780,11 @@ async def rotate(file, rottype):
     exts = {
         "AUDIO": "mp3",
         "VIDEO": "mp4",
-        "GIF": "mp4"
+        "GIF": "mp4",
+        "IMAGE": "png"
     }
     out = temp_file(exts[mt])
-    await run_command("ffmpeg", "-i", file, "-vf", types[rottype], out)
+    await run_command("ffmpeg", "-i", file, "-vf", types[rottype], "-c:v", "png", out)
     if mt == "GIF":
         out = await mp4togif(out)
     return out

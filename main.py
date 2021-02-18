@@ -81,7 +81,8 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
         :param extension: force a file extension
         :return: local path of saved file
         """
-        if url.startswith("https://media.tenor.com") and url.endswith("/mp4"):  # tenor >:(
+        tenorgif = url.startswith("https://media.tenor.com") and url.endswith("/mp4")  # tenor >:(
+        if tenorgif:
             extension = "mp4"
         if extension is None:
             extension = url.split(".")[-1].split("?")[0]
@@ -105,7 +106,10 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                     logging.error(f"aiohttp status {resp.status}")
                     logging.error(f"aiohttp status {await resp.read()}")
                     raise Exception(f"aiohttp status {resp.status} {await resp.read()}")
-
+        if tenorgif:
+            mp4 = name
+            name = await improcessing.mp4togif(name)
+            os.remove(mp4)
         return name
 
 
@@ -1046,7 +1050,16 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                 await ctx.send(f.read())
 
         @commands.cooldown(1, config.cooldown, commands.BucketType.user)
-        @commands.command()
+        @commands.command(aliases=["pong"])
+        async def ping(self, ctx):
+            """
+            Pong!
+            :Usage=$ping
+            """
+            await ctx.reply(f"🏓 Pong! `{round(bot.latency * 1000, 1)}ms`")
+
+        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
+        @commands.command(aliases=["emoji", "emojiimage"])
         async def emojiurl(self, ctx, *, msg):
             """
             Extracts the raw file from up to 5 custom emojis.
