@@ -621,20 +621,17 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
         @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         async def volume(self, ctx, volume: float):
             """
-            Changes the volume of media in decibels.
-            Decibels are logarithmic, so:
-            +10dB is double the perceived audio level
-            +20dB is quadruple the perceived audio level
-            +30dB is 8x the audio level... etc etc
-            NOTE: THIS COMMAND IS UNCAPPED, VERY VERY LOUD AUDIO CAN BE CREATED
+            Changes the volume of media.
+            To make 2x as loud, use `$volume 2`.
+            This command changes *perceived loudness*, not the raw audio level.
+            WARNING: ***VERY*** LOUD AUDIO CAN BE CREATED
 
             :Usage=$volume `volume`
-            :Param=volume - volume in decibels to increase/decrease (if negative) the input media by.
+            :Param=volume - number to multiply the percieved audio level by. Must be between 0 and 32.
             :Param=media - A video or audio file. (automatically found in channel)
             """
-            if not -60 <= volume <= 60:
-                # not noted in docs because 60db is literally 64x louder who needs more then that
-                await ctx.send(f"{config.emojis['warning']} Volume must be between -60dB and 60dB.")
+            if not 0 <= volume <= 32:
+                await ctx.send(f"{config.emojis['warning']} Volume must be between 0 and 32.")
                 return
             await improcess(ctx, improcessing.volume, [["VIDEO", "AUDIO"]], volume)
 
