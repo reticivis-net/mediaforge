@@ -434,7 +434,7 @@ async def mp4togif(mp4):
 async def reencode(mp4):  # reencodes mp4 as libx264 since the png format used cant be played by like literally anything
     outname = temp_file("mp4")
     # mp3 used because aac causes problems with $volume
-    await run_command("ffmpeg", "-hide_banner", "-i", mp4, "-c:v", "libx264", "-c:a", "libmp3lame", outname)
+    await run_command("ffmpeg", "-hide_banner", "-i", mp4, "-c:v", "libx264", "-c:a", "aac", outname)
     os.remove(mp4)
     return outname
 
@@ -816,7 +816,6 @@ async def vibrato(file, frequency=5, depth=0.5):  # https://ffmpeg.org/ffmpeg-fi
         "VIDEO": "mp4"
     }
     out = temp_file(exts[mt])
-    # for some reason aac has audio caps but libmp3lame works fine lol
     await run_command("ffmpeg", "-i", file, "-af", f"vibrato=f={frequency}:d={depth}", out)
     return out
 
