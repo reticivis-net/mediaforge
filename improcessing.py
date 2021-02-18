@@ -3,6 +3,7 @@ import concurrent.futures
 import glob
 import json
 import logging
+import math
 import urllib.parse
 import multiprocessing
 import os
@@ -431,7 +432,8 @@ async def mp4togif(mp4):
 
 async def reencode(mp4):  # reencodes mp4 as libx264 since the png format used cant be played by like literally anything
     outname = temp_file("mp4")
-    await run_command("ffmpeg", "-hide_banner", "-i", mp4, "-c:v", "libx264", "-c:a", "aac", outname)
+    # mp3 used because aac causes problems with $volume
+    await run_command("ffmpeg", "-hide_banner", "-i", mp4, "-c:v", "libx264", "-c:a", "libmp3lame", outname)
     os.remove(mp4)
     return outname
 
@@ -797,6 +799,9 @@ async def volume(file, vol):
         "VIDEO": "mp4"
     }
     out = temp_file(exts[mt])
+    # convert vol % to db
+    # http://www.sengpielaudio.com/calculator-loudness.htm
+    vol = 10 * math.log(vol, 2)
     # for some reason aac has audio caps but libmp3lame works fine lol
     await run_command("ffmpeg", "-i", file, "-af", f"volume={vol}dB", "-c:a", "libmp3lame", out)
     return out
