@@ -30,6 +30,8 @@ This file contains the discord.py functions, which call other files to do the ac
 # TODO: reddit moment caption
 # TODO: donal trump tweet
 # TODO: github version command
+# TODO: expand imageaudio to a general audio merge command
+# TODO: add start time for $trim
 
 # configure logging https://coloredlogs.readthedocs.io/en/latest/api.html#id28
 field_styles = {
@@ -299,7 +301,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                         else:
                             result = await func(filesforcommand, *args)
                     else:
-                        result = await func(*args)
+                        result = await renderpool.submit(func, *args)
                     result = await improcessing.assurefilesize(result, ctx)
                     if result:
                         logging.info("Uploading...")
@@ -909,7 +911,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             :Usage=$eminem `text`
             :Param=text - The text to put next to eminem.
             """
-            await improcess(ctx, captionfunctions.eminem, [], text)
+            await improcess(ctx, captionfunctions.eminem, [], [text])
 
 
     class Other(commands.Cog, name="Other"):
