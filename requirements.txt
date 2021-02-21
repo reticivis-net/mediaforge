@@ -7,3 +7,4 @@ python-magic-win64~=0.4.13
 selenium~=3.141.0
 discord.py~=1.6.0
 youtube_dl
+dblpy
