@@ -3,6 +3,8 @@
 bot_token = "EXAMPLE_TOKEN"
 # tenor API key https://tenor.com/developer/keyregistration
 tenor_key = "EXAMPLE_KEY"
+# top.gg token. set to None to disable. https://docs.top.gg/
+topgg_token = None
 # windows executable for chromedriver https://chromedriver.chromium.org/
 chrome_driver_windows = "chromedriver87.exe"
 # linux binary for chromedriver https://chromedriver.chromium.org/

@@ -30,6 +30,17 @@ This file contains functions for processing and editing media
 """
 
 
+class NonBugError(Exception):
+    """When this is raised instead of a normal Exception, on_command_error() will not attach a traceback or github
+    link. """
+    pass
+
+
+class CMDError(Exception):
+    """raised by run_command"""
+    pass
+
+
 # https://stackoverflow.com/a/65966787/9044183
 class Pool:
     def __init__(self, nworkers, initf):
@@ -46,8 +57,9 @@ class Pool:
         finally:
             self._submitted -= 1
 
-    def shutdown(self):
-        self._executor.shutdown()
+    async def shutdown(self):
+        await asyncio.wait([renderpool.submit(chromiumrender.closedriver)] * self._nworkers)
+        self._executor.shutdown(wait=True)
 
     def stats(self):
         queued = max(0, self._submitted - self._nworkers)
@@ -121,7 +133,7 @@ async def run_command(*args):
             f"PID {process.pid} Failed: {args} result: {stderr.decode().strip()}",
         )
         # adds command output to traceback
-        raise Exception(f"Command {args} failed.") from Exception(stderr.decode().strip())
+        raise CMDError(f"Command {args} failed.") from Exception(stderr.decode().strip())
     result = stdout.decode().strip() + stderr.decode().strip()
     # Result
 
@@ -241,7 +253,8 @@ async def assurefilesize(media: str, ctx: discord.ext.commands.Context):
     """
     if not media:
         raise Exception(f"Processing function returned nothing!")
-    if mediatype(media) == "VIDEO":
+    mt = mediatype(media)
+    if mt == "VIDEO":
         # this is in assurefilesize since all output media gets sent through here
         # it removes transparency if its a actual video and not a gif, since like nothing can play transparent videos
         media = await reencode(media)
@@ -262,6 +275,10 @@ async def assurefilesize(media: str, ctx: discord.ext.commands.Context):
             return media
     await ctx.send(f"{config.emojis['warning']} Max downsizes reached. File is way too big.")
     return False
+
+
+async def watermark(media):
+    await run_command("exiftool", "-overwrite_original", "-artist=MediaForge", "-overwrite_original", media)
 
 
 def mediatype(image):
@@ -422,7 +439,7 @@ async def mp4togif(mp4):
     outname = temp_file("gif")
     n = glob.glob(name.replace('%09d', '*'))
     if len(n) <= 1:
-        raise Exception(f"Output file only has {len(n)} frames, GIFs must have at least 2.")
+        raise NonBugError(f"Output file only has {len(n)} frames, GIFs must have at least 2.")
     else:
         await run_command("gifski", "--quiet", "--fast", "-o", outname, "--fps", str(fps), *n)
         logging.info("Cleaning files...")
@@ -711,11 +728,12 @@ async def freezemotivate(files, *caption):
     return final
 
 
-async def trim(file, length):
+async def trim(file, length, start):
     """
     trims media to length seconds
     :param file: media
     :param length: duration to set video to in seconds
+    :param start: time in seconds to begin the trimmed video
     :return: processed media
     """
     mt = mediatype(file)
@@ -724,8 +742,11 @@ async def trim(file, length):
         "VIDEO": "mp4",
         "GIF": "mp4"
     }
+    dur = await get_duration(file)
+    if start > dur:
+        raise NonBugError(f"Trim start ({start}s) is outside the range of the file ({dur}s)")
     out = temp_file(exts[mt])
-    await run_command("ffmpeg", "-hide_banner", "-i", file, "-t", str(length), "-c:v", "png", out)
+    await run_command("ffmpeg", "-hide_banner", "-i", file, "-t", str(length), "-ss", str(start), "-c:v", "png", out)
     if mt == "GIF":
         out = await mp4togif(out)
     return out
@@ -758,11 +779,11 @@ async def ensuresize(ctx, file, minsize, maxsize):
         w, h = await get_resolution(file)
         resized = True
     if w > maxsize:
-        file = await resize(file, ctx, maxsize, "-1")
+        file = await resize(file, maxsize, "-1")
         w, h = await get_resolution(file)
         resized = True
     if h > maxsize:
-        file = await resize(file, ctx, "-1", maxsize)
+        file = await resize(file, "-1", maxsize)
         w, h = await get_resolution(file)
         resized = True
     if resized:
@@ -847,3 +868,14 @@ async def resize(image, width, height):
     elif mt == "VIDEO":
         out = await reencode(out)
     return out
+
+
+async def checkwatermark(file):
+    # see watermark()
+    etdata = await run_command("exiftool", "-artist", "-json", file)
+    logging.info(etdata)
+    etdata = json.loads(etdata)[0]
+    if "Artist" in etdata:
+        if etdata["Artist"] == "MediaForge":
+            return True
+    return False

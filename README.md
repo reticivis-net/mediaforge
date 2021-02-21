@@ -33,6 +33,7 @@ the bot uses many CLI programs for media processing.
     - ChromeDriver requires there to be an installation of chrome on your system accessible via path or similair. Your
       chrome version doesn't have to be the exact same as your chromedriver version, but it should be similar
 - ImageMagick - not included but [downloadable here](https://imagemagick.org/script/download.php)
+- ExifTool - windows executable is included. installable on linux with `sudo apt-get install exiftool` https://exiftool.org/
 
 ### pip libraries
 
