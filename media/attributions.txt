@@ -11,6 +11,7 @@ PyCharm - <https://www.jetbrains.com/pycharm/> - used for development
 Twemoji - <https://twemoji.twitter.com/> - Emoji font used for caption commands
 gifski - <https://gif.ski/> - used to create high quality gifs
 pngquant - <https://pngquant.org/> - compresses PNG images
+ExifTool - <https://exiftool.org/>
 **Honorable Mentions**
 wkhtmltoimage - <https://wkhtmltopdf.org/> - formerly used to render captions
 PyQt - <https://pypi.org/project/PyQt5/> - formerly used to render captions

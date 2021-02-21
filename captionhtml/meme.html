@@ -49,15 +49,15 @@
             left: 0;
             right: 0;
             position: absolute;
-            max-height: 100%;
+            /*max-height: 100%;*/
             width: 100%;
         }
 
         .container {
             position: absolute;
-            height: 50%;
+            height: 30%;
             width: 100%;
-            overflow: hidden;
+            /*overflow: hidden;*/
             /*TODO: get better text fitting,*/
         }
 
@@ -75,19 +75,36 @@
 <body>
 <div class="wrap">
     <img src="rendering/demoimage.png" alt="An error has occurred loading your image.">
-    <div class="top container caption">
+    <div class="top container caption" id="fitin1">
         <span class="caption top">CaptionText1</span>
     </div>
-    <div class="bottom container">
+    <div class="bottom container" id="fitin2">
         <span class="caption bottom">CaptionText2</span>
     </div>
 
 </div>
 </body>
 <script>
-    // function beforerender() {
-    //     fitty(".container");
-    // }
+    /**
+     * @param {string} elemid
+     */
+    function fit(elemid) {
+        let elem = document.getElementById(elemid)
+        let elemc = elem.children[0]
+        while (outerHeight(elem) < outerHeight(elemc)) {
+            // https://stackoverflow.com/a/15195345/9044183
+            let style = window.getComputedStyle(elemc, null).getPropertyValue('font-size');
+            let fontSize = parseFloat(style);
+            elemc.style.fontSize = (fontSize - 1) + 'px';
+        }
+    }
+
+    function beforerender() {
+        // rewrite of https://stackoverflow.com/a/6112914/9044183
+        // resizes text to fit
+        fit("fitin1")
+        fit("fitin2")
+    }
 
     function outerHeight(element) {
         const height = element.offsetHeight,

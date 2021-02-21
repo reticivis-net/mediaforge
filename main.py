@@ -4,14 +4,13 @@ import glob
 import json
 import logging
 import os
-import random
 import re
-import string
 import traceback
 import urllib.parse
 # pip libs
 import aiohttp
 import coloredlogs
+import dbl
 import discord
 from discord.ext import commands
 import aiofiles
@@ -31,7 +30,6 @@ This file contains the discord.py functions, which call other files to do the ac
 # TODO: donal trump tweet
 # TODO: github version command
 # TODO: expand imageaudio to a general audio merge command
-# TODO: add start time for $trim
 
 # configure logging https://coloredlogs.readthedocs.io/en/latest/api.html#id28
 field_styles = {
@@ -54,6 +52,8 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
     renderpool = improcessing.initializerenderpool()
     if not os.path.exists("temp"):
         os.mkdir("temp")
+    for f in glob.glob('temp/*'):
+        os.remove(f)
     bot = commands.Bot(command_prefix=config.command_prefix, help_command=None, case_insensitive=True)
 
 
@@ -303,6 +303,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                     else:
                         result = await renderpool.submit(func, *args)
                     result = await improcessing.assurefilesize(result, ctx)
+                    await improcessing.watermark(result)
                     if result:
                         logging.info("Uploading...")
                         await msg.edit(content=f"{config.emojis['working']} Uploading...")
@@ -767,15 +768,16 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
 
         @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         @commands.command()
-        async def trim(self, ctx, length: float):
+        async def trim(self, ctx, length: float, start: float = 0):
             """
             Trims media.
 
-            :Usage=$trim `[length]`
+            :Usage=$trim `[length]` `start`
             :Param=length - Length in seconds to trim the media to.
+            :Param=start - Time in seconds to start the trimmed media at.
             :Param=media - A video, gif, or audio file. (automatically found in channel)
             """
-            await improcess(ctx, improcessing.trim, [["VIDEO", "GIF", "AUDIO"]], length)
+            await improcess(ctx, improcessing.trim, [["VIDEO", "GIF", "AUDIO"]], length, start)
 
 
     class Conversion(commands.Cog, name="Conversion"):
@@ -1142,7 +1144,26 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                 os.remove(f)
             await ctx.send(f"✅ Removed {l} files.")
 
-        @commands.command(hidden=True, aliases=["stop", "close"])
+        @commands.command(hidden=True, aliases=["verify", "check", "watermark", "integrity", "verifywatermark"])
+        @commands.is_owner()
+        async def checkwatermark(self, ctx):
+            """
+            searches for MediaForge metadata
+            """
+            async with ctx.channel.typing():
+                file = await imagesearch(ctx, 1)
+                if file:
+                    file = await saveurls(file)
+                    result = await improcessing.checkwatermark(file[0])
+                    if result:
+                        await ctx.reply(f"{config.emojis['working']} This file was made by MediaForge.")
+                    else:
+                        await ctx.reply(f"{config.emojis['x']} This file does not appear to have been made by MediaForge.")
+                    os.remove(file[0])
+                else:
+                    await ctx.send(f"{config.emojis['x']} No file found.")
+
+        @commands.command(hidden=True, aliases=["stop", "close", "die", "kill"])
         @commands.is_owner()
         async def shutdown(self, ctx):
             """
@@ -1150,7 +1171,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             """
             await ctx.send("✅ Shutting Down...")
             logging.log(25, "Shutting Down...")
-            renderpool.shutdown()
+            await renderpool.shutdown()
             await bot.logout()
             await bot.close()
 
@@ -1182,6 +1203,11 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                     f"is complete!")
 
 
+    def get_full_class_name(obj):
+        module = obj.__class__.__module__
+        if module is None or module == str.__class__.__module__:
+            return obj.__class__.__name__
+        return module + '.' + obj.__class__.__name__
     @bot.listen()
     async def on_command_error(ctx, commanderror):
         if isinstance(commanderror, discord.ext.commands.errors.CommandNotFound):
@@ -1206,7 +1232,12 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                   str(commanderror).replace("@", "\\@") + "`"
             logging.warning(err)
             await ctx.reply(err)
+        elif isinstance(commanderror, discord.ext.commands.errors.CommandInvokeError) and \
+                isinstance(commanderror.original, improcessing.NonBugError):
+            await ctx.reply(f"{config.emojis['2exclamation']}" + str(commanderror.original)[:1000].replace("@", "\\@"))
         else:
+            if isinstance(commanderror, discord.ext.commands.errors.CommandInvokeError):
+                commanderror = commanderror.original
             logging.error(commanderror, exc_info=(type(commanderror), commanderror, commanderror.__traceback__))
             tr = improcessing.temp_file("txt")
             trheader = f"DATETIME:{datetime.datetime.now()}\nCOMMAND:{ctx.message.content}\nTRACEBACK:\n"
@@ -1215,22 +1246,44 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                     traceback.format_exception(etype=type(commanderror), value=commanderror,
                                                tb=commanderror.__traceback__)))
             embed = discord.Embed(color=0xed1c24,
-                                  description="Please report this error with the attached traceback file to the github.")
+                                  description="Please report this error with the attached traceback file to the GitHub.")
             embed.add_field(name=f"{config.emojis['2exclamation']} Report Issue to GitHub",
                             value=f"[Create New Issue](https://github.com/HexCodeFFF/captionbot"
-                                  f"/issues/new?assignees=&labels=bug&template=bug_report.md&title"
+                                  f"/issues/new?labels=bug&template=bug_report.md&title"
                                   f"={urllib.parse.quote(str(commanderror)[:128], safe='')})\n[View Issu"
                                   f"es](https://github.com/HexCodeFFF/captionbot/issues)")
-            await ctx.reply(f"{config.emojis['2exclamation']} `" + str(commanderror)[:128].replace("@", "\\@") + "`",
+            await ctx.reply(f"{config.emojis['2exclamation']} `{get_full_class_name(commanderror)}: " +
+                            str(commanderror)[:128].replace("@", "\\@") + "`",
                             file=discord.File(tr), embed=embed)
             os.remove(tr)
+
+
+    class TopGG(commands.Cog):
+        """
+        Handles interactions with the top.gg API
+        https://docs.top.gg/libraries/python/
+        """
+
+        def __init__(self, bot):
+            self.bot = bot
+            self.token = config.topgg_token  # set this to your DBL token
+            self.dblpy = dbl.DBLClient(self.bot, self.token,
+                                       autopost=True)  # Autopost will post your guild count every 30 minutes
+
+        async def on_guild_post(self):
+            logging.info("Server count posted successfully")
+
+
+    def setup(bot):
+        bot.add_cog(TopGG(bot))
 
 
     logging.info(f"discord.py {discord.__version__}")
 
     # bot.remove_command('help')
-    for f in glob.glob('temp/*'):
-        os.remove(f)
+
+    if config.topgg_token is not None:
+        bot.add_cog(TopGG(bot))
     bot.add_cog(Caption(bot))
     bot.add_cog(Media(bot))
     bot.add_cog(Conversion(bot))
