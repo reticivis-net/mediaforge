@@ -4,6 +4,7 @@ import glob
 import json
 import logging
 import math
+import shutil
 import urllib.parse
 import multiprocessing
 import os
@@ -133,7 +134,7 @@ async def run_command(*args):
             f"PID {process.pid} Failed: {args} result: {stderr.decode().strip()}",
         )
         # adds command output to traceback
-        raise CMDError(f"Command {args} failed.") from Exception(stderr.decode().strip())
+        raise CMDError(f"Command {args} failed.") from CMDError(stderr.decode().strip())
     result = stdout.decode().strip() + stderr.decode().strip()
     # Result
 
@@ -278,7 +279,19 @@ async def assurefilesize(media: str, ctx: discord.ext.commands.Context):
 
 
 async def watermark(media):
-    await run_command("exiftool", "-overwrite_original", "-artist=MediaForge", "-overwrite_original", media)
+    if mediatype(media) == "AUDIO":  # exiftool doesnt support it :/
+        try:
+            t = temp_file("mp3")
+            await run_command("ffmpeg", "-i", media, "-c", "copy", "-metadata", "artist=MediaForge", t)
+            shutil.copy2(t, media)
+            os.remove(t)
+        except CMDError:
+            logging.warning(f"ffmpeg audio watermarking of {media} failed")
+    else:
+        try:
+            await run_command("exiftool", "-overwrite_original", "-artist=MediaForge", media)
+        except CMDError:
+            logging.warning(f"exiftool watermarking of {media} failed")
 
 
 def mediatype(image):
@@ -451,6 +464,7 @@ async def mp4togif(mp4):
 async def reencode(mp4):  # reencodes mp4 as libx264 since the png format used cant be played by like literally anything
     outname = temp_file("mp4")
     await run_command("ffmpeg", "-hide_banner", "-i", mp4, "-c:v", "libx264", "-c:a", "copy", "-pix_fmt", "yuv420p",
+                      "-max_muxing_queue_size", "9999",
                       "-vf", "scale=trunc(iw/2)*2:trunc(ih/2)*2", outname)
     os.remove(mp4)
     return outname
@@ -468,6 +482,17 @@ async def giftomp4(gif):
                       "scale=trunc(iw/2)*2:trunc(ih/2)*2", outname)
 
     return outname
+
+
+async def toaudio(media):
+    """
+    converts video to only audio
+    :param media: video or audio ig
+    :return: aac
+    """
+    name = temp_file("mp3")  # discord wont embed aac
+    await run_command("ffmpeg", "-hide_banner", "-i", media, "-vn", name)
+    return name
 
 
 async def mediatopng(media):
@@ -602,6 +627,31 @@ async def imageaudio(files):
     return outname
 
 
+async def addaudio(files):
+    """
+    adds audio to media
+    :param files: [media, audiotoadd]
+    :return: video or audio
+    """
+    # TODO: this can trim media short? not sure why...
+    audio = files[1]
+    media = files[0]
+    mt = mediatype(media)
+    if mt == "IMAGE":
+        # no use reinventing the wheel
+        return await imageaudio(files)
+    else:
+        media = await forceaudio(media)
+        if mt == "AUDIO":
+            outname = temp_file("mp3")
+        else:
+            outname = temp_file("mp4")
+        await run_command("ffmpeg", "-i", media, "-i", audio, "-filter_complex",
+                          "[0:a][1:a]amix=inputs=2:dropout_transition=100000:duration=longest[a];[a]volume=2[a]",
+                          "-map", "0:v", "-map", "[a]", "-c:a", "aac", outname)
+        return outname
+
+
 async def concatv(files):
     """
     concatenates 2 videos
@@ -641,11 +691,12 @@ async def stack(files, style):
     :param style: "hstack" or "vstack"
     :return: processed media
     """
-    if mediatype(files[0]) == "IMAGE" and mediatype(files[1]) == "IMAGE":  # easier to just make this an edge case
+    mts = [mediatype(files[0]), mediatype(files[1])]
+    if mts[0] == "IMAGE" and mts[1] == "IMAGE":  # easier to just make this an edge case
         return await imagestack(files, style)
     video0 = await forceaudio(files[0])
     fixedvideo0 = temp_file("mp4")
-    await run_command("ffmpeg", "-hide_banner", "-i", video0, "-c:v", "libx264", "-c:a", "aac", "-ar", "48000",
+    await run_command("ffmpeg", "-hide_banner", "-i", video0, "-c:v", "png", "-c:a", "aac", "-ar", "48000",
                       "-max_muxing_queue_size", "4096", fixedvideo0)
     video1 = await forceaudio(files[1])
     w, h = await get_resolution(video0)
@@ -662,10 +713,12 @@ async def stack(files, style):
     outname = temp_file("mp4")
     await run_command("ffmpeg", "-hide_banner", "-i", fixedvideo0, "-i", fixedfixedvideo1, "-filter_complex",
                       f"{'h' if style == 'hstack' else 'v'}stack=inputs=2;amix=inputs=2:dropout_transition=0", "-c:v",
-                      "libx264", "-c:a",
+                      "png", "-c:a",
                       "aac", outname)
     for file in [video0, video1, fixedvideo1, fixedvideo0, fixedfixedvideo1]:
         os.remove(file)
+    if mts[0] != "VIDEO" and mts[1] != "VIDEO":  # one or more gifs and no videos
+        outname = await mp4togif(outname)
     return outname
 
 
@@ -859,8 +912,8 @@ async def resize(image, width, height):
         "IMAGE": "png"
     }
     out = temp_file(exts[mt])
-    await run_command("ffmpeg", "-i", image,
-                      "-sws_flags", "spline+accurate_rnd+full_chroma_int+full_chroma_inp",
+    await run_command("ffmpeg", "-i", image, "-max_muxing_queue_size", "9999", "-sws_flags",
+                      "spline+accurate_rnd+full_chroma_int+full_chroma_inp",
                       "-vf", f"scale='{width}:{height}',setsar=1:1", "-c:v", "png", out)
 
     if mt == "GIF":
