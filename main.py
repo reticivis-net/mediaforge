@@ -504,6 +504,18 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
 
         @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         @commands.command()
+        async def addaudio(self, ctx):
+            """
+            Adds audio to media.
+
+            :Usage=$addaudio
+            :Param=media - Any valid media file. (automatically found in channel)
+            :Param=audio - An audio file. (automatically found in channel)
+            """
+            await improcess(ctx, improcessing.addaudio, [["IMAGE", "GIF", "VIDEO", "AUDIO"], ["AUDIO"]])
+
+        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
+        @commands.command()
         async def jpeg(self, ctx, strength: int = 30, stretch: int = 20, quality: int = 10):
             """
             Makes media into a low quality jpeg
@@ -788,17 +800,18 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
         def __init__(self, bot):
             self.bot = bot
 
-        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
-        @commands.command()
-        async def imageaudio(self, ctx):
-            """
-            Combines an image and audio into a video.
-
-            :Usage=$imageaudio
-            :Param=image - An image. (automatically found in channel)
-            :Param=audio - An audio file. (automatically found in channel)
-            """
-            await improcess(ctx, improcessing.imageaudio, [["IMAGE"], ["AUDIO"]])
+        # superceded by $addaudio
+        # @commands.cooldown(1, config.cooldown, commands.BucketType.user)
+        # @commands.command()
+        # async def imageaudio(self, ctx):
+        #     """
+        #     Combines an image and audio into a video.
+        #
+        #     :Usage=$imageaudio
+        #     :Param=image - An image. (automatically found in channel)
+        #     :Param=audio - An audio file. (automatically found in channel)
+        #     """
+        #     await improcess(ctx, improcessing.imageaudio, [["IMAGE"], ["AUDIO"]])
 
         @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         @commands.command(aliases=["youtube", "youtubedownload", "youtubedl", "ytdownload", "download", "dl", "ytdl"])
@@ -839,6 +852,17 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             :Param=video - A video. (automatically found in channel)
             """
             await improcess(ctx, improcessing.mp4togif, [["VIDEO"]])
+
+        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
+        @commands.command(aliases=["audio", "mp3", "tomp3", "aac", "toaac"])
+        async def toaudio(self, ctx):
+            """
+            Converts a video to only audio.
+
+            :Usage=$toaudio
+            :Param=video - A video. (automatically found in channel)
+            """
+            await improcess(ctx, improcessing.toaudio, [["VIDEO", "AUDIO"]])
 
         @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         @commands.command()
@@ -956,7 +980,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                                       description=f"Run `{config.command_prefix}help category` to list commands from "
                                                   f"that category.")
                 for c in bot.cogs.values():
-                    if c.qualified_name != "Owner Only":
+                    if c.qualified_name not in ["Owner Only", "TopGG"]:
                         embed.add_field(name=c.qualified_name, value=c.description)
                 embed.add_field(name="Tips", value="A list of tips for using the bot.")
                 await ctx.reply(embed=embed)
@@ -1158,7 +1182,8 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                     if result:
                         await ctx.reply(f"{config.emojis['working']} This file was made by MediaForge.")
                     else:
-                        await ctx.reply(f"{config.emojis['x']} This file does not appear to have been made by MediaForge.")
+                        await ctx.reply(
+                            f"{config.emojis['x']} This file does not appear to have been made by MediaForge.")
                     os.remove(file[0])
                 else:
                     await ctx.send(f"{config.emojis['x']} No file found.")
@@ -1208,6 +1233,8 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
         if module is None or module == str.__class__.__module__:
             return obj.__class__.__name__
         return module + '.' + obj.__class__.__name__
+
+
     @bot.listen()
     async def on_command_error(ctx, commanderror):
         if isinstance(commanderror, discord.ext.commands.errors.CommandNotFound):
@@ -1271,11 +1298,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                                        autopost=True)  # Autopost will post your guild count every 30 minutes
 
         async def on_guild_post(self):
-            logging.info("Server count posted successfully")
-
-
-    def setup(bot):
-        bot.add_cog(TopGG(bot))
+            logging.info("top.gg Server count posted successfully")
 
 
     logging.info(f"discord.py {discord.__version__}")
@@ -1283,7 +1306,10 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
     # bot.remove_command('help')
 
     if config.topgg_token is not None:
+        logging.info("top.gg token detected. attempting to initialize.")
         bot.add_cog(TopGG(bot))
+    else:
+        logging.info("no top.gg token is set.")
     bot.add_cog(Caption(bot))
     bot.add_cog(Media(bot))
     bot.add_cog(Conversion(bot))
