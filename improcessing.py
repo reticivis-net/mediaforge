@@ -513,7 +513,6 @@ async def ffprobe(file):
 
 
 # https://stackoverflow.com/questions/65728616/how-to-get-ffmpeg-to-consistently-apply-speed-effect-to-first-few-frames
-# TODO: some way to preserve gif transparency?
 async def speed(file, sp):
     """
     changes speed of media
@@ -781,7 +780,7 @@ async def freezemotivate(files, *caption):
     return final
 
 
-async def trim(file, length, start):
+async def trim(file, length, start=0):
     """
     trims media to length seconds
     :param file: media

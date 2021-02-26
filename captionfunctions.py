@@ -2,7 +2,7 @@ import io
 import random
 import re
 import subprocess
-from PIL import Image
+from PIL import Image, UnidentifiedImageError
 import chromiumrender
 from improcessing import filetostring, temp_file, mediatype
 
@@ -92,6 +92,10 @@ def meme(image, caption, tosavename=None):
     return htmlcap("captionhtml/meme.html", image, caption, tosavename)
 
 
+def tenorcap(image, caption, tosavename=None):
+    return htmlcap("captionhtml/tenorcap.html", image, caption, tosavename)
+
+
 def twittercap(image, caption, tosavename=None):
     return htmlcap("captionhtml/twittercaption.html", image, caption, tosavename)
 
@@ -106,6 +110,9 @@ def eminemcap(image, caption, tosavename=None):
 
 def eminem(caption, tosavename=None):
     return htmlcap("captionhtml/eminem.html", None, caption, tosavename)
+
+def dontweet(caption, tosavename=None):
+    return htmlcap("captionhtml/dontweet.html", None, caption, tosavename)
 
 
 def resize(image, size, tosavename=None):
@@ -127,18 +134,6 @@ def resize(image, size, tosavename=None):
                            "-sws_flags", "spline+accurate_rnd+full_chroma_int+full_chroma_inp",
                            "-vf", f"scale='{width}:{height}'", "-pix_fmt", "yuva420p", name],
                           stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL)
-    return name
-
-
-def halfsize(image, _, tosavename=None):
-    """
-    cuts the width and height of an image in half
-    :param image: file
-    :param _: caption arg to keep compatibility with handleanimated(), too lazy to fix
-    :param tosavename: optionally specify the file to save it to
-    :return: processed media
-    """
-    name = resize(image, ("iw/2", "ih/2"), tosavename)
     return name
 
 
@@ -172,6 +167,43 @@ def jpeg(image, params: list, tosavename=None):
     return name
 
 
+def jpegcorrupt(image, randomchance, tosavename=None):
+    """
+    :param image: image
+    :param randomchance: [% chance to randomly change jpeg byte]
+    :param tosavename: optionally specify file to save it to
+    :return:
+    """
+    randomchance = float(randomchance[0] / 100)
+    # slight modification of https://github.com/HexCodeFFF/jpegcorruption
+    if tosavename is None:
+        tosavename = temp_file("png")
+    im = Image.open(image)
+    im = im.convert("RGB")
+    stream = io.BytesIO()
+    im.save(stream, format="jpeg")  # save image as jpeg to bytes
+    stream.seek(0)
+    imagebytes = stream.read()
+    corrupting = True
+    while corrupting:  # easy way to do a retry loop if corruption breaks the jpeg
+        try:  # if image is invalid, PIL throws an error.
+            cimagebytes = bytearray(imagebytes)  # easiest to deal with
+
+            for i, byte in enumerate(imagebytes):
+                if random.random() < randomchance:  # random.random() is 0-1
+                    rb = random.randint(0, 255)  # get random byte
+                    cimagebytes[i] = rb  # set corrupted byte
+            # raise Exception(f"{len(cimagebytes)} {len(imagebytes)} {image}")
+            imc = Image.open(io.BytesIO(cimagebytes))  # import corrupted jpeg to PIL image
+            # an error will be thrown if image is invalid
+            imc.save(tosavename)  # save frame
+            corrupting = False  # this frame was successful, exit the while loop and go onto the next frame
+        # errors that can be thrown if image is broken
+        except (OSError, UnidentifiedImageError, Image.DecompressionBombError):
+            pass
+    return tosavename
+
+
 def magick(file, strength, tosavename=None):
     assert mediatype(file) == "IMAGE"
     if tosavename is None:
@@ -180,5 +212,3 @@ def magick(file, strength, tosavename=None):
                           stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL)
 
     return tosavename
-
-

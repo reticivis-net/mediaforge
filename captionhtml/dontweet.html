@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<!--modified version of https://www.tweetgen.com/-->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="rendering/twemoji/twemoji.js"></script>
+    <style>
+        body {
+            text-align: left;
+            margin: 0;
+            word-break: break-word;
+        }
+
+        img.emoji {
+            height: 1em;
+            width: 1em;
+            margin: 0 .05em 0 .1em;
+            vertical-align: -0.1em;
+        }
+
+        /* custom font for icons, as html2canvas has issues with SVGs */
+        @font-face {
+            font-family: "Tweetgen Icons";
+            src: url('rendering/fonts/TweetgenIcons.woff');
+        }
+
+        .css-1dbjc4n {
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            margin: 0;
+            flex-basis: auto;
+            flex-shrink: 0;
+            min-height: 0px;
+            min-width: 0px;
+            padding: 0px;
+            position: relative;
+            z-index: 0;
+            align-items: stretch;
+            border: 0px solid black;
+        }
+
+        .tweetContainer {
+            width: 480px;
+            padding: 10px 15px 0 15px;
+            /*margin: 0 auto;*/
+            font-family: "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Ubuntu, "Helvetica Neue", sans-serif, "Tweetgen Icons";
+        }
+
+        .tweetIcon {
+            font-family: "Tweetgen Icons" !important;
+        }
+
+        .tweetContainer[theme=light] {
+            background-color: #ffffff;
+        }
+
+        .tweetContainer[theme=dim] {
+            background-color: rgb(21, 32, 43);
+        }
+
+        .tweetContainer[theme=dark] {
+            background-color: #000000;
+        }
+
+        .tweetContainer[theme=light] .name, .tweetContainer[theme=light] .tweetText, .tweetContainer[theme=light] .tweetNumbers b {
+            color: #000000;
+        }
+
+        .tweetContainer[theme=dim] .name, .tweetContainer[theme=dim] .tweetText, .tweetContainer[theme=dim] .tweetNumbers b {
+            color: #ffffff;
+        }
+
+        .tweetContainer[theme=dark] .name, .tweetContainer[theme=dark] .tweetText, .tweetContainer[theme=dark] .tweetNumbers b {
+            color: rgb(217, 217, 217);
+        }
+
+        .simulatedLink {
+            color: rgb(27, 149, 224);
+        }
+
+        .tweetContainer .headerContainer {
+            margin: 0 -5px 5px -5px;
+            display: flex;
+            flex-shrink: 0;
+            position: relative;
+            max-width: 100%;
+            flex-direction: row;
+        }
+
+        .tweetContainer .pfp {
+            margin: 0 5px;
+            display: flex;
+            flex-basis: 49px;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        .tweetContainer .headerRight {
+            display: flex;
+            flex-basis: 0px;
+            flex-grow: 1;
+            margin: 0 5px;
+            align-items: stretch;
+            justify-content: space-between;
+            flex-direction: row;
+        }
+
+        .tweetContainer .pfp img {
+            border-radius: 9999px;
+        }
+
+        .tweetContainer .userinfo {
+            display: flex;
+            justify-content: space-between;
+            flex-direction: column;
+            flex-shrink: 1;
+            justify-content: center;
+        }
+
+        .tweetContainer .nameContainer, .tweetContainer .username {
+            display: flex;
+            font-size: 15px;
+            max-width: 100%;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            overflow-wrap: break-word;
+            flex-direction: row;
+        }
+
+        .tweetContainer .nameContainer span {
+            display: inline;
+            overflow-wrap: break-word;
+        }
+
+        .tweetContainer .nameContainer .name {
+            font-weight: bold;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .tweetContainer[theme=light] .verified {
+            color: rgb(29, 161, 242);
+        }
+
+        .tweetContainer[theme=dim] .verified {
+            color: #ffffff;
+        }
+
+        .tweetContainer[theme=dark] {
+            color: rgb(217, 217, 217);
+        }
+
+        .tweetContainer .verified {
+            fill: currentcolor;
+            margin-left: 2px;
+            min-width: 0px;
+            height: 1.25em;
+            width: 1.25em;
+            flex-shrink: 0;
+        }
+
+        .tweetContainer .verified svg, .tweetContainer .verified .tweetIcon {
+            vertical-align: text-bottom;
+            font-size: 1.25em;
+            line-height: 1;
+        }
+
+        .tweetContainer[theme=light] .username, .tweetContainer[theme=light] .tweetDetails, .tweetContainer[theme=light] .tweetDropdown, .tweetContainer[theme=light] .tweetNumbers, .tweetContainer[theme=light] .tweetButton {
+            color: rgb(101, 119, 134);
+        }
+
+        .tweetContainer[theme=dim] .username, .tweetContainer[theme=dim] .tweetDetails, .tweetContainer[theme=dim] .tweetDropdown, .tweetContainer[theme=dim] .tweetNumbers, .tweetContainer[theme=dim] .tweetButton {
+            color: rgb(136, 153, 166);
+        }
+
+        .tweetContainer[theme=dark] .username, .tweetContainer[theme=dark] .tweetDetails, .tweetContainer[theme=dark] .tweetDropdown, .tweetContainer[theme=dark] .tweetNumbers, .tweetContainer[theme=dark] .tweetButton {
+            color: rgb(110, 118, 125);
+        }
+
+        .tweetContainer .tweetDropdown {
+            display: flex;
+            align-self: flex-start;
+            justify-content: flex-start;
+            margin-left: 20px;
+            flex-direction: row;
+            fill: currentcolor;
+        }
+
+        .tweetContainer .tweetDropdown svg {
+            width: 1em;
+            height: 1em;
+        }
+
+        .tweetContainer .tweetText {
+            margin-top: 10px;
+            font-size: 23px;
+            line-height: 1.3125;
+            overflow-wrap: break-word;
+        }
+
+        .tweetContainer .tweetText span {
+            white-space: pre-wrap;
+        }
+
+        .tweetContainer .imgContainer {
+            margin-top: 6px;
+            border: 1px solid rgb(204, 214, 221);
+            border-radius: 14px;
+            overflow: hidden;
+        }
+
+        .tweetContainer .tweetImg {
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .tweetContainer .debunk {
+            color: rgb(27, 149, 224);
+            border-bottom: 1px solid rgb(230, 236, 240);
+            display: inline-flex;
+            align-items: center;
+            z-index: 0;
+            position: relative;
+            flex-basis: auto;
+            flex-shrink: 0;
+            overflow-wrap: break-word;
+            width: 100%;
+            padding: 10px 0 5px;
+        }
+
+        .tweetContainer .debunkIcon {
+            font-size: 26px;
+            width: 26px;
+            height: 26px;
+            align-self: flex-start;
+            margin-right: 7px;
+            line-height: 1;
+        }
+
+        .tweetContainer .debunkText {
+            font-size: 14px;
+            margin-top: -2px;
+            overflow: hidden;
+        }
+
+        .tweetContainer .tweetDetails {
+            margin: 15px 15px 15px 0;
+            font-size: 15px;
+            overflow-wrap: break-word;
+        }
+
+        .tweetContainer .client, .tweetContainer a {
+            color: rgb(27, 149, 224);
+        }
+
+        .tweetContainer .tweetNumbers {
+            border-top: 1px solid rgb(230, 236, 240);
+            padding: 15px 0;
+        }
+
+        .tweetContainer .retweets, .tweetContainer .quotes {
+            margin-right: 20px;
+        }
+
+        .tweetContainer .buttonsContainer {
+            border-top: 1px solid rgb(230, 236, 240);
+            display: flex;
+            justify-content: space-around;
+            height: 49px;
+            flex-direction: row;
+        }
+
+        .tweetContainer[theme=dim] .imgContainer, .tweetContainer[theme=dim] .tweetNumbers, .tweetContainer[theme=dim] .buttonsContainer, .tweetContainer[theme=dim] .debunk {
+            border-color: rgb(56, 68, 77);
+        }
+
+        .tweetContainer[theme=dark] .imgContainer, .tweetContainer[theme=dark] .tweetNumbers, .tweetContainer[theme=dark] .buttonsContainer, .tweetContainer[theme=dark] .debunk {
+            border-color: rgb(47, 51, 54);
+        }
+
+        .tweetContainer .tweetButton {
+            display: inline-flex;
+            padding: 0 0.85rem;
+            fill: currentcolor;
+            white-space: nowrap;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.5em;
+        }
+
+        .tweetContainer .tweetButton svg {
+            height: 1.5em;
+            width: 1.5em;
+        }
+
+        .cloneframe {
+            visibility: hidden !important;
+            position: fixed;
+            left: -10000px;
+            top: 0px;
+            border: none;
+        }</style>
+</head>
+<body>
+<div class="tweetContainer" id="tweetContainer" theme="dim">
+    <div class="headerContainer css-1dbjc4n">
+        <div class="pfp css-1dbjc4n">
+            <img src="rendering/donal.jpg" width="49" height="49" id="pfpOutput">
+        </div>
+        <div class="headerRight css-1dbjc4n">
+            <div class="userinfo css-1dbjc4n">
+                <div class="nameContainer css-1dbjc4n">
+                    <span class="name" id="nameOutput">Donald J. Trump</span>
+                    <span class="verified" id="verifiedOutput" style="">
+                                                    <span class="tweetIcon"></span>
+                        <!--<svg viewBox="0 0 24 24"><g><path d="M22.5 12.5c0-1.58-.875-2.95-2.148-3.6.154-.435.238-.905.238-1.4 0-2.21-1.71-3.998-3.818-3.998-.47 0-.92.084-1.336.25C14.818 2.415 13.51 1.5 12 1.5s-2.816.917-3.437 2.25c-.415-.165-.866-.25-1.336-.25-2.11 0-3.818 1.79-3.818 4 0 .494.083.964.237 1.4-1.272.65-2.147 2.018-2.147 3.6 0 1.495.782 2.798 1.942 3.486-.02.17-.032.34-.032.514 0 2.21 1.708 4 3.818 4 .47 0 .92-.086 1.335-.25.62 1.334 1.926 2.25 3.437 2.25 1.512 0 2.818-.916 3.437-2.25.415.163.865.248 1.336.248 2.11 0 3.818-1.79 3.818-4 0-.174-.012-.344-.033-.513 1.158-.687 1.943-1.99 1.943-3.484zm-6.616-3.334l-4.334 6.5c-.145.217-.382.334-.625.334-.143 0-.288-.04-.416-.126l-.115-.094-2.415-2.415c-.293-.293-.293-.768 0-1.06s.768-.294 1.06 0l1.77 1.767 3.825-5.74c.23-.345.696-.436 1.04-.207.346.23.44.696.21 1.04z"></path></g></svg>-->
+                                                </span>
+                </div>
+                <div class="username css-1dbjc4n">
+                    <span>@</span><span id="usernameOutput">realDonaldTrump</span>
+                </div>
+            </div>
+            <div class="tweetDropdown css-1dbjc4n">
+                <svg viewBox="0 0 24 24">
+                    <g>
+                        <path d="M20.207 8.147c-.39-.39-1.023-.39-1.414 0L12 14.94 5.207 8.147c-.39-.39-1.023-.39-1.414 0-.39.39-.39 1.023 0 1.414l7.5 7.5c.195.196.45.294.707.294s.512-.098.707-.293l7.5-7.5c.39-.39.39-1.022 0-1.413z"></path>
+                    </g>
+                </svg>
+            </div>
+        </div>
+    </div>
+    <div class="tweetText" dir="auto">
+        <span id="tweetTextOutput">CaptionText</span>
+    </div>
+    <div class="debunk" id="debunkDisplay" style="display:none;">
+        <div class="debunkIcon tweetIcon"></div>
+        <div class="debunkText" id="debunkText"></div>
+    </div>
+    <div class="tweetDetails"><span>
+                                    <span id="timeOutput">11:17 AM</span> · <span id="dateOutput">Feb 26, 2021</span>
+        <span id="clientDisplay" style=""> · <span
+                class="client" id="clientOutput">Twitter for MediaForge</span></span>
+                                </span></div>
+    <div class="tweetNumbers" id="tweetNumbers" style="">
+        <span class="retweets" id="retweetDisplay" style=""><b id="retweetOutput">4</b> Retweet<span
+                id="rtPlural">s</span></span>
+        <span class="quotes" id="quotesDisplay" style=""><b id="quotesOutput">1</b> Quote Tweet<span
+                id="quotesPlural">s</span></span>
+        <span class="likes" id="likeDisplay" style=""><b id="likeOutput">233</b> Like<span
+                id="likePlural">s</span></span>
+    </div>
+    <div class="buttonsContainer">
+        <div class="tweetButton">
+            <span class="tweetIcon"></span>
+            <!--<svg viewBox="0 0 24 24"><g><path d="M14.046 2.242l-4.148-.01h-.002c-4.374 0-7.8 3.427-7.8 7.802 0 4.098 3.186 7.206 7.465 7.37v3.828c0 .108.044.286.12.403.142.225.384.347.632.347.138 0 .277-.038.402-.118.264-.168 6.473-4.14 8.088-5.506 1.902-1.61 3.04-3.97 3.043-6.312v-.017c-.006-4.367-3.43-7.787-7.8-7.788zm3.787 12.972c-1.134.96-4.862 3.405-6.772 4.643V16.67c0-.414-.335-.75-.75-.75h-.396c-3.66 0-6.318-2.476-6.318-5.886 0-3.534 2.768-6.302 6.3-6.302l4.147.01h.002c3.532 0 6.3 2.766 6.302 6.296-.003 1.91-.942 3.844-2.514 5.176z"></path></g></svg>-->
+        </div>
+        <div class="tweetButton">
+            <span class="tweetIcon"></span>
+            <!--<svg viewBox="0 0 24 24"><g><path d="M23.77 15.67c-.292-.293-.767-.293-1.06 0l-2.22 2.22V7.65c0-2.068-1.683-3.75-3.75-3.75h-5.85c-.414 0-.75.336-.75.75s.336.75.75.75h5.85c1.24 0 2.25 1.01 2.25 2.25v10.24l-2.22-2.22c-.293-.293-.768-.293-1.06 0s-.294.768 0 1.06l3.5 3.5c.145.147.337.22.53.22s.383-.072.53-.22l3.5-3.5c.294-.292.294-.767 0-1.06zm-10.66 3.28H7.26c-1.24 0-2.25-1.01-2.25-2.25V6.46l2.22 2.22c.148.147.34.22.532.22s.384-.073.53-.22c.293-.293.293-.768 0-1.06l-3.5-3.5c-.293-.294-.768-.294-1.06 0l-3.5 3.5c-.294.292-.294.767 0 1.06s.767.293 1.06 0l2.22-2.22V16.7c0 2.068 1.683 3.75 3.75 3.75h5.85c.414 0 .75-.336.75-.75s-.337-.75-.75-.75z"></path></g></svg>-->
+        </div>
+        <div class="tweetButton">
+            <span class="tweetIcon"></span>
+            <!--<svg viewBox="0 0 24 24"><g><path d="M12 21.638h-.014C9.403 21.59 1.95 14.856 1.95 8.478c0-3.064 2.525-5.754 5.403-5.754 2.29 0 3.83 1.58 4.646 2.73.814-1.148 2.354-2.73 4.645-2.73 2.88 0 5.404 2.69 5.404 5.755 0 6.376-7.454 13.11-10.037 13.157H12zM7.354 4.225c-2.08 0-3.903 1.988-3.903 4.255 0 5.74 7.034 11.596 8.55 11.658 1.518-.062 8.55-5.917 8.55-11.658 0-2.267-1.823-4.255-3.903-4.255-2.528 0-3.94 2.936-3.952 2.965-.23.562-1.156.562-1.387 0-.014-.03-1.425-2.965-3.954-2.965z"></path></g></svg>-->
+        </div>
+        <div class="tweetButton">
+            <span class="tweetIcon"></span>
+            <!--<svg viewBox="0 0 24 24"><g><path d="M17.53 7.47l-5-5c-.293-.293-.768-.293-1.06 0l-5 5c-.294.293-.294.768 0 1.06s.767.294 1.06 0l3.72-3.72V15c0 .414.336.75.75.75s.75-.336.75-.75V4.81l3.72 3.72c.146.147.338.22.53.22s.384-.072.53-.22c.293-.293.293-.767 0-1.06z"></path><path d="M19.708 21.944H4.292C3.028 21.944 2 20.916 2 19.652V14c0-.414.336-.75.75-.75s.75.336.75.75v5.652c0 .437.355.792.792.792h15.416c.437 0 .792-.355.792-.792V14c0-.414.336-.75.75-.75s.75.336.75.75v5.652c0 1.264-1.028 2.292-2.292 2.292z"></path></g></svg>-->
+        </div>
+    </div>
+</div>
+<script>
+    function outerHeight(element) {
+        const height = element.offsetHeight,
+            style = window.getComputedStyle(element)
+
+        return ['top', 'bottom']
+            .map(side => parseInt(style[`margin-${side}`]))
+            .reduce((total, side) => total + side, height)
+    }
+
+    function abbrNumber(str) {
+        let n = Number(str);
+        if (n < 1e3) return n;
+        if (n >= 1e3 && n < 1e6) return +(n / 1e3).toFixed(1) + "K";
+        if (n >= 1e6 && n < 1e9) return +(n / 1e6).toFixed(1) + "M";
+        if (n >= 1e9 && n < 1e12) return +(n / 1e9).toFixed(1) + "B";
+    }
+
+    function randint(min, max) {
+        return Math.floor(Math.random() * (max - min)) + min;
+    }
+
+    function randfloat(min, max) {
+        return Math.random() * (max - min) + min
+    }
+
+    function beforerender() {
+        document.getElementById("likeOutput").innerText = abbrNumber(randint(100000, 1000000))
+        let rt = randint(10000, 100000)
+        document.getElementById("retweetOutput").innerText = abbrNumber(rt)
+        document.getElementById("quotesOutput").innerText = abbrNumber(rt / randfloat(4, 10))
+        let now = new Date();
+        let hours = now.getHours();
+        let minutes = now.getMinutes();
+        let ampm = hours >= 12 ? 'PM' : 'AM';
+        hours = hours % 12;
+        hours = hours ? hours : 12; // the hour '0' should be '12'
+        minutes = minutes < 10 ? '0' + minutes : minutes;
+        document.getElementById("timeOutput").innerText = `${hours}:${minutes} ${ampm}`;
+        let months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+        document.getElementById("dateOutput").innerText = `${months[now.getMonth()]} ${now.getDate()}, ${now.getFullYear()}`;
+    }
+</script>
+<script>twemoji.parse(document.body);</script>
+</body>
+</html>

@@ -27,9 +27,7 @@ This file contains the discord.py functions, which call other files to do the ac
 """
 
 # TODO: reddit moment caption
-# TODO: donal trump tweet
 # TODO: github version command
-# TODO: expand imageaudio to a general audio merge command
 
 # configure logging https://coloredlogs.readthedocs.io/en/latest/api.html#id28
 field_styles = {
@@ -99,7 +97,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                     size = int(resp.headers["Content-Length"])
                     logging.info(f"Url is {humanize.naturalsize(size)}")
                     if config.max_file_size < size:  # file size to download must be under ~50MB
-                        raise Exception(f"File is too big ({humanize.naturalsize(size)})!")
+                        raise improcessing.NonBugError(f"File is too big ({humanize.naturalsize(size)})!")
                     logging.info(f"Saving url {url} as {name}")
                     f = await aiofiles.open(name, mode='wb')
                     await f.write(await resp.read())
@@ -291,19 +289,23 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                 else:
                     logging.info("Processing...")
                     msg = await ctx.reply(f"{config.emojis['working']} Processing...", mention_author=False)
-                    if allowedtypes:
-                        if len(files) == 1:
-                            filesforcommand = files[0]
+                    try:
+                        if allowedtypes:
+                            if len(files) == 1:
+                                filesforcommand = files[0]
+                            else:
+                                filesforcommand = files.copy()
+                            if handleanimated:
+                                result = await improcessing.handleanimated(filesforcommand, func, ctx, *args)
+                            else:
+                                result = await func(filesforcommand, *args)
                         else:
-                            filesforcommand = files.copy()
-                        if handleanimated:
-                            result = await improcessing.handleanimated(filesforcommand, func, ctx, *args)
-                        else:
-                            result = await func(filesforcommand, *args)
-                    else:
-                        result = await renderpool.submit(func, *args)
-                    result = await improcessing.assurefilesize(result, ctx)
-                    await improcessing.watermark(result)
+                            result = await renderpool.submit(func, *args)
+                        result = await improcessing.assurefilesize(result, ctx)
+                        await improcessing.watermark(result)
+                    except Exception as e:  # delete the processing message if it errors
+                        await msg.delete()
+                        raise e
                     if result:
                         logging.info("Uploading...")
                         await msg.edit(content=f"{config.emojis['working']} Uploading...")
@@ -357,6 +359,22 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             if len(caption) == 1:
                 caption.append("")
             await improcess(ctx, captionfunctions.meme, [["VIDEO", "GIF", "IMAGE"]], *caption,
+                            handleanimated=True)
+
+        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
+        @commands.command(aliases=["tenor"])
+        async def tenorcap(self, ctx, *, caption):
+            """
+            Captions media in the style of tenor.
+
+            :Usage=$tenorcap `toptext`|`bottomtext`
+            :Param=caption - The caption text. Optionally add a bottom text with a `|` character.
+            :Param=media - A video, gif, or image. (automatically found in channel)
+            """
+            caption = caption.split("|")
+            if len(caption) == 1:
+                caption.append("")
+            await improcess(ctx, captionfunctions.tenorcap, [["VIDEO", "GIF", "IMAGE"]], *caption,
                             handleanimated=True)
 
         @commands.command(name="caption", aliases=["cap"])
@@ -538,6 +556,23 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             await improcess(ctx, captionfunctions.jpeg, [["VIDEO", "GIF", "IMAGE"]], strength, stretch, quality,
                             handleanimated=True)
 
+        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
+        @commands.command()
+        async def corrupt(self, ctx, strength: float = 0.05):
+            """
+            Intentionally glitches media
+            Effect is achieved through randomly changing a % of bytes in a jpeg image.
+
+            :Usage=$corrupt `strength`
+            :Param=strength - % chance to randomly change a byte of the input image. defaults to 0.05%
+            :Param=media - A video, gif, or image. (automatically found in channel)
+            """
+            if not 0 <= strength <= 0.5:
+                await ctx.send(f"{config.emojis['warning']} Strength must be between 0% and 0.5%.")
+                return
+            await improcess(ctx, captionfunctions.jpegcorrupt, [["VIDEO", "GIF", "IMAGE"]], strength,
+                            handleanimated=True)
+
         @commands.command(aliases=["pad"])
         @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         async def square(self, ctx):
@@ -555,7 +590,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             """
             Resizes an image.
 
-            :Usage=$resize width height
+            :Usage=$resize `width` `height`
             :Param=width - width of output image. set to -1 to determine automatically based on height and aspect ratio.
             :Param=height - height of output image. also can be set to -1.
             :Param=media - A video, gif, or image. (automatically found in channel)
@@ -938,6 +973,17 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             :Param=text - The text to put next to eminem.
             """
             await improcess(ctx, captionfunctions.eminem, [], [text])
+
+        @commands.command(aliases=["donald", "donalttrump", "trump", "trumptweet", "donaldtrumptweet", "dontweet",
+                                   "donal", "donaltweet"])
+        async def donaldtweet(self, ctx, *, text):
+            """
+            Makes a fake Donald Trump tweet.
+
+            :Usage=donaldtweet `text`
+            :Param=text - The text to put in the fake tweet.
+            """
+            await improcess(ctx, captionfunctions.dontweet, [], [text])
 
 
     class Other(commands.Cog, name="Other"):
