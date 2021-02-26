@@ -4,10 +4,11 @@
     <meta charset="UTF-8">
     <title>motivate</title>
     <script src="rendering/twemoji/twemoji.js"></script>
+<!--    <base href="../rendering">-->
     <style>
         @font-face {
-            font-family: impact;
-            src: url(rendering/fonts/ImpactMix.ttf);
+            font-family: tenor;
+            src: url(rendering/fonts/Ubuntu-R.ttf);
         }
 
         body {
@@ -31,21 +32,19 @@
         }
 
         .caption {
-            font-family: impact, Impact, sans-serif;
+            font-family: tenor, Ubuntu, sans-serif;
             color: white;
             font-size: 10vw;
-            text-transform: uppercase;
             letter-spacing: 1px;
             /* https://codepen.io/MetalEscape/pen/WrYxVM */
-            text-shadow: 0.6vw 0.6vw 0 #000,
-            -0.6vw -0.6vw 0 #000,
-            0.6vw -0.6vw 0 #000,
-            -0.6vw 0.6vw 0 #000,
-            0 0.6vw 0 #000,
-            0.6vw 0 0 #000,
-            0 -0.6vw 0 #000,
-            -0.6vw 0 0 #000,
-            0.6vw 0.6vw 1vw #000;
+            text-shadow: /* Outline */ -1px -1px 0 #000000,
+            1px -1px 0 #000000,
+            -1px 1px 0 #000000,
+            1px 1px 0 #000000,
+            -2px 0 0 #000000,
+            2px 0 0 #000000,
+            0 2px 0 #000000,
+            0 -2px 0 #000000;
             left: 0;
             right: 0;
             position: absolute;

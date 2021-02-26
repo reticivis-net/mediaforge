@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="AnalysisUIOptions">
+    <option name="SCOPE_TYPE" value="3" />
+  </component>
   <component name="BranchesTreeState">
     <expand>
       <path>
@@ -26,8 +29,15 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="ef38d419-8cc3-42ef-bbef-6fd62fc27c52" name="Default Changelist" comment="added $vibrato, changed the way resizing works, and fixed a lot of bugs">
-      <change afterPath="$PROJECT_DIR$/.idea/csv-plugin.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/captionhtml/dontweet.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/captionhtml/tenorcap.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/rendering/donal.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/rendering/fonts/TweetgenIcons.woff" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/rendering/fonts/Ubuntu-R.ttf" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/csv-plugin.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/csv-plugin.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/captionfunctions.py" beforeDir="false" afterPath="$PROJECT_DIR$/captionfunctions.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/captionhtml/meme.html" beforeDir="false" afterPath="$PROJECT_DIR$/captionhtml/meme.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/improcessing.py" beforeDir="false" afterPath="$PROJECT_DIR$/improcessing.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
     </list>
@@ -39,9 +49,9 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="HTML File" />
         <option value="Python Stub" />
         <option value="Python Script" />
+        <option value="HTML File" />
       </list>
     </option>
   </component>
@@ -84,7 +94,7 @@
     <property name="WebServerToolWindowPanel.toolwindow.show.permissions" value="false" />
     <property name="WebServerToolWindowPanel.toolwindow.show.size" value="false" />
     <property name="add_unversioned_files" value="$PROJECT_DIR$/token.txt&#10;C:/Users/minec/PycharmProjects/captionbot/tenorkey.txt&#10;C:/Users/minec/PycharmProjects/captionbot/config.py" />
-    <property name="last_opened_file_path" value="$USER_HOME$/.local/bin/pipenv.exe" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/captionhtml" />
     <property name="node.js.detected.package.eslint" value="true" />
     <property name="node.js.detected.package.tslint" value="true" />
     <property name="node.js.path.for.package.eslint" value="project" />
@@ -94,22 +104,23 @@
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
     <property name="restartRequiresConfirmation" value="false" />
+    <property name="run.code.analysis.last.selected.profile" value="pProject Default" />
     <property name="settings.editor.selected.configurable" value="vcs.Git" />
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\minec\PycharmProjects\captionbot\captionhtml" />
       <recent name="C:\Users\minec\PycharmProjects\captionbot" />
       <recent name="C:\Users\minec\PycharmProjects\captionbot\temp" />
       <recent name="C:\Users\minec\PycharmProjects\captionbot\rendering" />
       <recent name="C:\Users\minec\PycharmProjects\captionbot\rendering\fonts" />
-      <recent name="C:\Users\minec\PycharmProjects\CaptionX" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\minec\PycharmProjects\captionbot\rendering\fonts" />
+      <recent name="C:\Users\minec\PycharmProjects\captionbot\captionhtml" />
       <recent name="C:\Users\minec\PycharmProjects\captionbot" />
       <recent name="C:\Users\minec\PycharmProjects\captionbot\media" />
       <recent name="C:\Users\minec\PycharmProjects\captionbot\rendering" />
-      <recent name="C:\Users\minec\PycharmProjects\captionbot\captionhtml" />
-      <recent name="C:\Users\minec\PycharmProjects\CaptionX" />
     </key>
   </component>
   <component name="RunManager" selected="Python.main">
@@ -342,14 +353,14 @@
       <workItem from="1613884400903" duration="341000" />
       <workItem from="1613884793885" duration="9337000" />
       <workItem from="1613895108442" duration="167000" />
-      <workItem from="1614010421442" duration="6033000" />
-    </task>
-    <task id="LOCAL-00043" summary="MY GOAL IS ACHIEVED! POOL WORKERS ARE INITIALIZED AT STARTUP AND ARE AVAILABLE FOR WORK UNTIL SHUTDOWN. BIG SPEED">
-      <created>1611349253285</created>
-      <option name="number" value="00043" />
-      <option name="presentableId" value="LOCAL-00043" />
-      <option name="project" value="LOCAL" />
-      <updated>1611349253285</updated>
+      <workItem from="1614010421442" duration="6282000" />
+      <workItem from="1614122448414" duration="1053000" />
+      <workItem from="1614123696342" duration="1859000" />
+      <workItem from="1614184340944" duration="170000" />
+      <workItem from="1614185009069" duration="601000" />
+      <workItem from="1614268103568" duration="5188000" />
+      <workItem from="1614282522763" duration="757000" />
+      <workItem from="1614353637701" duration="9593000" />
     </task>
     <task id="LOCAL-00044" summary="who remembers?">
       <created>1611376070581</created>
@@ -687,7 +698,14 @@
       <option name="project" value="LOCAL" />
       <updated>1613895257033</updated>
     </task>
-    <option name="localTasksCounter" value="92" />
+    <task id="LOCAL-00092" summary="update some new commands i forgot lmao">
+      <created>1614022445112</created>
+      <option name="number" value="00092" />
+      <option name="presentableId" value="LOCAL-00092" />
+      <option name="project" value="LOCAL" />
+      <updated>1614022445112</updated>
+    </task>
+    <option name="localTasksCounter" value="93" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -742,7 +760,6 @@
     <option name="CHECK_CODE_CLEANUP_BEFORE_PROJECT_COMMIT" value="true" />
     <option name="CHECK_NEW_TODO" value="false" />
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="image size correction and fixed bug with FFmpeg resizing losing color detail" />
     <MESSAGE value="minor improvements" />
     <MESSAGE value="implement linux-specific fixes" />
     <MESSAGE value="fixed weird linux connection bugs?" />
@@ -767,14 +784,15 @@
     <MESSAGE value="added $vibrato, changed the way resizing works, and fixed a lot of bugs" />
     <MESSAGE value="just a whole lot of improvements and bug fixes&#10;also i added &quot;watermarking&quot; with exiftool" />
     <MESSAGE value="oops lol" />
-    <option name="LAST_COMMIT_MESSAGE" value="oops lol" />
+    <MESSAGE value="update some new commands i forgot lmao" />
+    <option name="LAST_COMMIT_MESSAGE" value="update some new commands i forgot lmao" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/CaptionX$improcessing.coverage" NAME="improcessing Coverage Results" MODIFIED="1606284753774" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/CaptionX$qtrenderer.coverage" NAME="qtrenderer Coverage Results" MODIFIED="1611025320241" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/caption_bot$main.coverage" NAME="main Coverage Results" MODIFIED="1606184268706" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/CaptionX$sus.coverage" NAME="sus Coverage Results" MODIFIED="1611175143620" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/captionbot$main.coverage" NAME="main Coverage Results" MODIFIED="1614022344322" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/captionbot$main.coverage" NAME="main Coverage Results" MODIFIED="1614362859682" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/CaptionX$chromiumrender.coverage" NAME="chromiumrender Coverage Results" MODIFIED="1611107683335" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/CaptionX$main.coverage" NAME="main Coverage Results" MODIFIED="1611273027854" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
