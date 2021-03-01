@@ -108,8 +108,13 @@ def eminemcap(image, caption, tosavename=None):
     return htmlcap("captionhtml/eminemcap.html", image, caption, tosavename)
 
 
+def givemeyourphone(image, _, tosavename=None):
+    return htmlcap("captionhtml/givemeyourphone.html", image, None, tosavename)
+
+
 def eminem(caption, tosavename=None):
     return htmlcap("captionhtml/eminem.html", None, caption, tosavename)
+
 
 def dontweet(caption, tosavename=None):
     return htmlcap("captionhtml/dontweet.html", None, caption, tosavename)

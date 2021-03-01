@@ -258,7 +258,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
 
 
     async def improcess(ctx: discord.ext.commands.Context, func: callable, allowedtypes: list, *args,
-                        handleanimated=False, resize=True):
+                        handleanimated=False, resize=True, forcerenderpool=False):
         """
         The core function of the bot.
         :param ctx: discord context. media is gathered using imagesearch() with this.
@@ -290,7 +290,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                     logging.info("Processing...")
                     msg = await ctx.reply(f"{config.emojis['working']} Processing...", mention_author=False)
                     try:
-                        if allowedtypes:
+                        if allowedtypes and not forcerenderpool:
                             if len(files) == 1:
                                 filesforcommand = files[0]
                             else:
@@ -974,6 +974,16 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             """
             await improcess(ctx, captionfunctions.eminem, [], [text])
 
+        @commands.command(aliases=["handitover", "takeit", "giveme"])
+        async def givemeyourphone(self, ctx):
+            """
+            Eminem says something.
+
+            :Usage=$givemeyourphone
+            :Param=media - The media to be overlayed over his hand. (automatically found in channel)
+            """
+            await improcess(ctx, captionfunctions.givemeyourphone, [["IMAGE", "VIDEO", "GIF"]], handleanimated=True)
+
         @commands.command(aliases=["donald", "donalttrump", "trump", "trumptweet", "donaldtrumptweet", "dontweet",
                                    "donal", "donaltweet"])
         async def donaldtweet(self, ctx, *, text):
@@ -1172,6 +1182,29 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                     await ctx.reply(url)
             else:
                 await ctx.reply(f"{config.emojis['warning']} Your message doesn't contain any custom emojis!")
+
+        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
+        @commands.command()
+        async def twemoji(self, ctx, *, msg):
+            """
+            Sends the twemoji image for an emoji.
+            Twemoji is the open source emoji set that discord desktop and twitter use. https://twemoji.twitter.com/
+            Only one emoji is supported in the command for now due to emojis sometimes taking multiple characters.
+            It's easier to get the right emoji if I know only one is sent
+
+            :Usage=$twemoji `emoji`
+            :Param=emoji - ONE default emoji.
+            """
+            chars = []
+            for char in msg:
+                chars.append(f"{ord(char):x}")  # get hex code of char
+            chars = "-".join(chars)
+            fpath = f"rendering/twemoji/72x72/{chars}.png"
+            if os.path.exists(fpath):
+                await ctx.reply(file=discord.File(fpath))
+            else:
+                await ctx.reply(f"{config.emojis['warning']} No twemoji image found! Make sure to send only ONE emoji a"
+                                f"nd no other characters.")
 
 
     class Debug(commands.Cog, name="Owner Only"):
