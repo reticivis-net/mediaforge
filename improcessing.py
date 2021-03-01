@@ -239,6 +239,7 @@ async def compresspng(png):
     :param png: file
     :return: filename of compressed png
     """
+
     outname = temp_file("png")
     await run_command("pngquant", "--quality=0-80", "--output", outname, png)
     os.remove(png)
@@ -900,7 +901,6 @@ async def resize(image, width, height):
     :param image: file
     :param width: new width, thrown directly into ffmpeg so it can be things like -1 or iw/2
     :param height: new height, same as width
-    :param tosavename: optionally specify the file to save it to
     :return: processed media
     """
     mt = mediatype(image)
@@ -911,9 +911,9 @@ async def resize(image, width, height):
         "IMAGE": "png"
     }
     out = temp_file(exts[mt])
-    await run_command("ffmpeg", "-i", image, "-max_muxing_queue_size", "9999", "-sws_flags",
-                      "spline+accurate_rnd+full_chroma_int+full_chroma_inp",
-                      "-vf", f"scale='{width}:{height}',setsar=1:1", "-c:v", "png", out)
+    await run_command("ffmpeg", "-i", image, "-pix_fmt", "yuva444p", "-max_muxing_queue_size", "9999", "-sws_flags",
+                      "spline+accurate_rnd+full_chroma_int+full_chroma_inp+bitexact",
+                      "-vf", f"scale='{width}:{height}',setsar=1:1", "-c:v", "png", "-pix_fmt", "yuva444p", out)
 
     if mt == "GIF":
         out = await mp4togif(out)

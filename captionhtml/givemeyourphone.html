@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <base href="../">
+    <style>
+        body {
+            margin: 0;
+        }
+
+        #base {
+            position: relative;
+            top: 0;
+            left: 0;
+        }
+
+        #overlay {
+            position: absolute;
+            top: 350px;
+            left: 150px;
+            width: 200px;
+            height: 200px;
+            line-height: 200px;
+        }
+
+        #overlayimg {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+    </style>
+</head>
+<body>
+<img src="rendering/givemeyourphone.jpg" id="base">
+<div id="overlay">
+    <img src="rendering/demoimage.png" id="overlayimg">
+</div>
+
+</body>
+<script>
+    function outerHeight(element) {
+        const height = element.offsetHeight,
+            style = window.getComputedStyle(element)
+
+        return ['top', 'bottom']
+            .map(side => parseInt(style[`margin-${side}`]))
+            .reduce((total, side) => total + side, height)
+    }
+</script>
+</html>
