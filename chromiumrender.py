@@ -80,6 +80,7 @@ def initdriver():
         driver = webdriver.Chrome(config.chrome_driver_windows, options=opts)
     else:
         driver = webdriver.Chrome(config.chrome_driver_linux, options=opts)
+    driver.get("file:///" + os.path.abspath("rendering/warmup.html").replace("\\", "/"))
     return driver
 
 

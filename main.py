@@ -164,6 +164,10 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             for att in m.attachments:
                 if not att.filename.endswith("txt"):  # it was reading traceback attachments >:(
                     detectedfiles.append(att.url)
+        if len(m.stickers):
+            for sticker in m.stickers:
+                if sticker.image_url:
+                    detectedfiles.append(str(sticker.image_url))
         return detectedfiles
 
 
@@ -977,7 +981,8 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
         @commands.command(aliases=["handitover", "takeit", "giveme"])
         async def givemeyourphone(self, ctx):
             """
-            Eminem says something.
+            Overlays an image over the hand of the boy in the "give me your phone" meme.
+            https://knowyourmeme.com/memes/give-me-your-phone
 
             :Usage=$givemeyourphone
             :Param=media - The media to be overlayed over his hand. (automatically found in channel)
@@ -1217,7 +1222,10 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             """
             Make the bot say something
             """
-            await ctx.message.delete()
+            try:
+                await ctx.message.delete()
+            except discord.errors.Forbidden:
+                pass
             await ctx.channel.send(msg)
 
         @commands.command(hidden=True)
