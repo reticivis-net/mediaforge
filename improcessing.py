@@ -170,6 +170,20 @@ async def get_duration(filename):
     logging.info("Getting duration...")
     out = await run_command("ffprobe", "-v", "error", "-show_entries", "format=duration", "-of",
                             "default=noprint_wrappers=1:nokey=1", filename)
+    if out == "N/A":  # happens with APNGs?
+        # https://stackoverflow.com/a/38114903/9044183
+        dur2 = await run_command("ffprobe", filename, "-count_frames", "-show_entries",
+                                 "stream=nb_read_frames,avg_frame_rate,r_frame_rate", "-print_format", "json", "-v",
+                                 "quiet")
+        dur2 = json.loads(dur2)
+        dur2 = dur2["streams"][0]
+        avg_fps = dur2["avg_frame_rate"].split("/")
+        if len(avg_fps) == 1:
+            avg_fps = float(avg_fps[0])
+        elif len(avg_fps) == 2:
+            avg_fps = float(avg_fps[0]) / float(avg_fps[1])
+        return float(dur2["nb_read_frames"]) / avg_fps
+
     return float(out)
 
 
@@ -192,10 +206,10 @@ async def ffmpegsplit(media):
     :return: [list of files, ffmpeg key to find files]
     """
     logging.info("Splitting frames...")
-    await run_command("ffmpeg", "-hide_banner", "-i", media, "-vsync", "1", f"{media.split('.')[0]}%09d.png")
-    files = glob.glob(f"{media.split('.')[0]}*.png")
+    await run_command("ffmpeg", "-hide_banner", "-i", media, "-vsync", "1", f"{media.split('.')[0]}_%09d.png")
+    files = glob.glob(f"{media.split('.')[0]}_*.png")
 
-    return files, f"{media.split('.')[0]}%09d.png"
+    return files, f"{media.split('.')[0]}_%09d.png"
 
 
 async def splitaudio(video):
@@ -521,6 +535,7 @@ async def speed(file, sp):
     :param sp: speed to multiply media by
     :return: processed media
     """
+    # TODO: some weird bug here caused by 100fps gifski gifs that slows down gifs?
     outname = temp_file("mp4")
     mt = mediatype(file)
     fps = await get_frame_rate(file)
