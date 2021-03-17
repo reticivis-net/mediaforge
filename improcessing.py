@@ -42,6 +42,11 @@ class CMDError(Exception):
     pass
 
 
+class ReturnedNothing(Exception):
+    """raised by improcess()"""
+    pass
+
+
 # https://stackoverflow.com/a/65966787/9044183
 class Pool:
     def __init__(self, nworkers, initf):
@@ -268,7 +273,7 @@ async def assurefilesize(media: str, ctx: discord.ext.commands.Context):
     :return: filename of fixed media if it works, False if it still is too big.
     """
     if not media:
-        raise Exception(f"Processing function returned nothing!")
+        raise ReturnedNothing(f"assurefilesize() was passed no media.")
     mt = mediatype(media)
     if mt == "VIDEO":
         # this is in assurefilesize since all output media gets sent through here
@@ -281,8 +286,9 @@ async def assurefilesize(media: str, ctx: discord.ext.commands.Context):
         if size >= 8388119:
             if mt in ["VIDEO", "IMAGE", "GIF"]:
                 logging.info("Image too big!")
-                msg = await ctx.reply(f"{config.emojis['warning']} Resulting file too big! ({humanize.naturalsize(size)}) "
-                                      f"Downsizing result...")
+                msg = await ctx.reply(
+                    f"{config.emojis['warning']} Resulting file too big! ({humanize.naturalsize(size)}) "
+                    f"Downsizing result...")
                 imagenew = await resize(media, "iw/2", "ih/2")
                 # imagenew = await handleanimated(media, captionfunctions.halfsize, ctx)
                 os.remove(media)
@@ -950,3 +956,24 @@ async def checkwatermark(file):
         if etdata["Artist"] == "MediaForge":
             return True
     return False
+
+
+async def add_emoji(file, guild: discord.Guild, name):
+    """
+    adds emoji to guild
+    :param file: emoji to add
+    :param guild: guild to add it to
+    :param name: emoji name
+    :return:
+    """
+    with open(file, "rb") as f:
+        data = f.read()
+    try:
+        emoji = await guild.create_custom_emoji(name=name, image=data, reason="$addemoji command")
+    except discord.Forbidden:
+        return f"{config.emojis['x']} I don't have permission to create an emoji. Make sure I have the Manage Emojis " \
+               f"permission. "
+    except discord.HTTPException as e:
+        return f"{config.emojis['2exclamation']} Something went wrong trying to add your emoji! ```{e}```"
+    else:
+        return f"Emoji successfully added: {emoji}"
