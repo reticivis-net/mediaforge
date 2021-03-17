@@ -874,6 +874,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                 msg = await ctx.reply(f"{config.emojis['working']} Downloading from site...", mention_author=False)
                 try:
                     r = await improcessing.run_in_exec(ytdownload, url, form)
+                    r = await improcessing.assurefilesize(r, ctx)
                     await msg.edit(content=f"{config.emojis['working']} Uploading to Discord...")
                     await ctx.reply(file=discord.File(r))
                     os.remove(r)
