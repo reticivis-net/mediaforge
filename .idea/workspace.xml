@@ -29,10 +29,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="ef38d419-8cc3-42ef-bbef-6fd62fc27c52" name="Default Changelist" comment="fixed $donaldtweet font">
+      <change afterPath="$PROJECT_DIR$/chromedriver89.exe" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/rendering/trollface/bottom.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/rendering/trollface/mask.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/rendering/trollface/top.png" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/captionhtml/motivate.html" beforeDir="false" afterPath="$PROJECT_DIR$/captionhtml/motivate.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/chromiumrender.py" beforeDir="false" afterPath="$PROJECT_DIR$/chromiumrender.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/improcessing.py" beforeDir="false" afterPath="$PROJECT_DIR$/improcessing.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/captionfunctions.py" beforeDir="false" afterPath="$PROJECT_DIR$/captionfunctions.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -110,9 +112,9 @@
       <recent name="C:\Users\minec\PycharmProjects\captionbot\temp" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\minec\PycharmProjects\captionbot" />
       <recent name="C:\Users\minec\PycharmProjects\captionbot\rendering\fonts" />
       <recent name="C:\Users\minec\PycharmProjects\captionbot\captionhtml" />
-      <recent name="C:\Users\minec\PycharmProjects\captionbot" />
       <recent name="C:\Users\minec\PycharmProjects\captionbot\media" />
       <recent name="C:\Users\minec\PycharmProjects\captionbot\rendering" />
     </key>
@@ -366,14 +368,7 @@
       <workItem from="1615305383362" duration="35000" />
       <workItem from="1615433220908" duration="837000" />
       <workItem from="1615844201168" duration="142000" />
-      <workItem from="1615943984207" duration="1376000" />
-    </task>
-    <task id="LOCAL-00049" summary="config is now a thing woo">
-      <created>1611606977590</created>
-      <option name="number" value="00049" />
-      <option name="presentableId" value="LOCAL-00049" />
-      <option name="project" value="LOCAL" />
-      <updated>1611606977590</updated>
+      <workItem from="1615943984207" duration="4835000" />
     </task>
     <task id="LOCAL-00050" summary="h">
       <created>1611607869795</created>
@@ -711,7 +706,14 @@
       <option name="project" value="LOCAL" />
       <updated>1615433465051</updated>
     </task>
-    <option name="localTasksCounter" value="98" />
+    <task id="LOCAL-00098" summary="closes #10&#10;motivate.html  code has been updated to use the image size instead of vw, its annoying so i wont do it for everything but its there">
+      <created>1615945635750</created>
+      <option name="number" value="00098" />
+      <option name="presentableId" value="LOCAL-00098" />
+      <option name="project" value="LOCAL" />
+      <updated>1615945635750</updated>
+    </task>
+    <option name="localTasksCounter" value="99" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -766,7 +768,6 @@
     <option name="CHECK_CODE_CLEANUP_BEFORE_PROJECT_COMMIT" value="true" />
     <option name="CHECK_NEW_TODO" value="false" />
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="pipenv" />
     <MESSAGE value="H" />
     <MESSAGE value="cleande up readme lol!" />
     <MESSAGE value="dumbass" />
@@ -791,14 +792,15 @@
     <MESSAGE value="added $givemeyourphone and fixed some glithce" />
     <MESSAGE value="added support for most discord stickers" />
     <MESSAGE value="fixes bug in $vibrato" />
-    <option name="LAST_COMMIT_MESSAGE" value="fixes bug in $vibrato" />
+    <MESSAGE value="closes #10&#10;motivate.html  code has been updated to use the image size instead of vw, its annoying so i wont do it for everything but its there" />
+    <option name="LAST_COMMIT_MESSAGE" value="closes #10&#10;motivate.html  code has been updated to use the image size instead of vw, its annoying so i wont do it for everything but its there" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/CaptionX$improcessing.coverage" NAME="improcessing Coverage Results" MODIFIED="1606284753774" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/CaptionX$qtrenderer.coverage" NAME="qtrenderer Coverage Results" MODIFIED="1611025320241" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/caption_bot$main.coverage" NAME="main Coverage Results" MODIFIED="1606184268706" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/CaptionX$sus.coverage" NAME="sus Coverage Results" MODIFIED="1611175143620" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/captionbot$main.coverage" NAME="main Coverage Results" MODIFIED="1615109027402" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/captionbot$main.coverage" NAME="main Coverage Results" MODIFIED="1615948433410" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/CaptionX$chromiumrender.coverage" NAME="chromiumrender Coverage Results" MODIFIED="1611107683335" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/CaptionX$main.coverage" NAME="main Coverage Results" MODIFIED="1611273027854" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
