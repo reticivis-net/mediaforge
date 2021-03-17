@@ -193,7 +193,6 @@ def jpegcorrupt(image, randomchance, tosavename=None):
     while corrupting:  # easy way to do a retry loop if corruption breaks the jpeg
         try:  # if image is invalid, PIL throws an error.
             cimagebytes = bytearray(imagebytes)  # easiest to deal with
-
             for i, byte in enumerate(imagebytes):
                 if random.random() < randomchance:  # random.random() is 0-1
                     rb = random.randint(0, 255)  # get random byte
@@ -216,4 +215,29 @@ def magick(file, strength, tosavename=None):
     subprocess.check_call(["magick", file, "-liquid-rescale", f"{strength[0]}%x{strength[0]}%", tosavename],
                           stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL)
 
+    return tosavename
+
+
+def trollface(file, _, tosavename=None):
+    if tosavename is None:
+        tosavename = temp_file("png")
+    """
+    top
+    ↓
+    detail
+    ↓ (mask)
+    bottom
+    """
+    bottom = Image.open("rendering/trollface/bottom.png")
+    mask = Image.open("rendering/trollface/mask.png")
+    detail = Image.open(file)
+    detail = detail.resize((bottom.width, bottom.height))
+    top = Image.open("rendering/trollface/top.png")
+    im = Image.new("RGBA", (bottom.width, bottom.height))
+    im.alpha_composite(bottom)
+    im.paste(detail, mask=mask)
+    # im = Image.alpha_composite(im, detail, mask)
+    # im.alpha_composite(detail, mask=mask)
+    im.alpha_composite(top)
+    im.save(tosavename)
     return tosavename

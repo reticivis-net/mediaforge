@@ -955,6 +955,17 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
         def __init__(self, bot):
             self.bot = bot
 
+        @commands.command(aliases=["troll"])
+        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
+        async def trollface(self, ctx):
+            """
+            Colors a trollface with an image.
+
+            :Usage=$trollface
+            :Param=media - A video, gif, or image. (automatically found in channel)
+            """
+            await improcess(ctx, captionfunctions.trollface, [["VIDEO", "GIF", "IMAGE"]], handleanimated=True)
+
         @commands.command(aliases=['sus', 'imposter'])
         async def jermatext(self, ctx, *, text="when the imposter is sus!😳"):
             """
