@@ -223,21 +223,19 @@ def trollface(file, _, tosavename=None):
         tosavename = temp_file("png")
     """
     top
-    ↓
+    ↓ (alpha_composite)
     detail
-    ↓ (mask)
+    ↓ (mask paste)
     bottom
     """
     bottom = Image.open("rendering/trollface/bottom.png")
     mask = Image.open("rendering/trollface/mask.png")
     detail = Image.open(file)
-    detail = detail.resize((bottom.width, bottom.height))
+    detail = detail.resize((bottom.width, bottom.height), resample=Image.LANCZOS)
     top = Image.open("rendering/trollface/top.png")
     im = Image.new("RGBA", (bottom.width, bottom.height))
-    im.alpha_composite(bottom)
+    im.paste(bottom)
     im.paste(detail, mask=mask)
-    # im = Image.alpha_composite(im, detail, mask)
-    # im.alpha_composite(detail, mask=mask)
     im.alpha_composite(top)
     im.save(tosavename)
     return tosavename
