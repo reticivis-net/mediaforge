@@ -1022,7 +1022,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             self.bot = bot
 
         @commands.cooldown(1, config.cooldown, commands.BucketType.user)
-        @commands.command(aliases=["statistics", "botinfo"])
+        @commands.command(aliases=["statistics"])
         async def stats(self, ctx):
             """
             Displays some stats about what the bot is currently doing.
@@ -1037,6 +1037,22 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             embed.add_field(name="Currently Executing Tasks", value=f"{stats[1]}")
             embed.add_field(name="Available Workers", value=f"{config.chrome_driver_instances - stats[1]}")
             embed.add_field(name="Total Workers", value=f"{config.chrome_driver_instances}")
+            await ctx.reply(embed=embed)
+
+        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
+        @commands.command(aliases=["discord", "invite", "botinfo"])
+        async def about(self, ctx):
+            """
+            Lists important links related to MediaForge such as the official server.
+
+            :Usage=$stats
+            """
+            embed = discord.Embed(color=discord.Color(0xD262BA), title="MediaForge")
+            embed.add_field(name="Official MediaForge Discord Server", value=f"https://discord.gg/xwWjgyVqBz")
+            embed.add_field(name="top.gg link", value=f"https://top.gg/bot/780570413767983122")
+            embed.add_field(name="Vote for MediaForge on top.gg", value=f"https://top.gg/bot/780570413767983122/vote")
+            embed.add_field(name="Add MediaForge to your server", value=f"https://discord.com/api/oauth2/authorize?client_id=780570413767983122&permissions=379904&scope=bot")
+            embed.add_field(name="MediaForge GitHub", value=f"https://github.com/HexCodeFFF/captionbot")
             await ctx.reply(embed=embed)
 
         @commands.cooldown(1, config.cooldown, commands.BucketType.user)
@@ -1099,7 +1115,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                                 inline=False)
                 for k, v in fields.items():
                     if k == "Param":
-                        k = "Paramaters"
+                        k = "Parameters"
                     embed.add_field(name=k, value=v.replace("$", config.command_prefix), inline=False)
                 if cmd.aliases:
                     embed.add_field(name="Aliases", value=", ".join([config.command_prefix + a for a in cmd.aliases]))
