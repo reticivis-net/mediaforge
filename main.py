@@ -27,7 +27,6 @@ This file contains the discord.py functions, which call other files to do the ac
 """
 
 # TODO: reddit moment caption
-# TODO: github version command
 
 # configure logging https://coloredlogs.readthedocs.io/en/latest/api.html#id28
 field_styles = {
@@ -262,14 +261,16 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
 
 
     async def improcess(ctx: discord.ext.commands.Context, func: callable, allowedtypes: list, *args,
-                        handleanimated=False, resize=True, forcerenderpool=False):
+                        handleanimated=False, resize=True, forcerenderpool=False, expectresult=True):
         """
-        The core function of the bot.
+        The core function of the bot. Gathers media and sends it to the proper function.
+
         :param ctx: discord context. media is gathered using imagesearch() with this.
         :param func: function to process input media with
         :param allowedtypes: list of lists of strings. each inner list is an argument, the strings it contains are the types that arg must be. or just False/[] if no media needed
         :param args: any non-media arguments, passed into func()
         :param handleanimated: if func() only works on still images, set to True to process each frame individually.
+        :param expectresult: is func() supposed to return a result? if true, it expects an image. if false, can use a string.
         :return: nothing, all processing and uploading is done in this function
         """
         async with ctx.channel.typing():
@@ -305,12 +306,21 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                                 result = await func(filesforcommand, *args)
                         else:
                             result = await renderpool.submit(func, *args)
-                        result = await improcessing.assurefilesize(result, ctx)
-                        await improcessing.watermark(result)
+                        if expectresult:
+                            if not result:
+                                raise improcessing.ReturnedNothing(f"Expected image, {func} returned nothing.")
+                            result = await improcessing.assurefilesize(result, ctx)
+                            await improcessing.watermark(result)
+                        else:
+                            if not result:
+                                raise improcessing.ReturnedNothing(f"Expected string, {func} returned nothing.")
+                            else:
+                                await ctx.reply(result)
+                                await msg.delete()
                     except Exception as e:  # delete the processing message if it errors
                         await msg.delete()
                         raise e
-                    if result:
+                    if result and expectresult:
                         logging.info("Uploading...")
                         await msg.edit(content=f"{config.emojis['working']} Uploading...")
                         await ctx.reply(file=discord.File(result))
@@ -1022,6 +1032,18 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             self.bot = bot
 
         @commands.cooldown(1, config.cooldown, commands.BucketType.user)
+        @commands.command(aliases=["createemoji"])
+        async def addemoji(self, ctx, name):
+            """
+            Adds a file as an emoji to a server.
+
+            :Usage=$addemoji `caption`
+            :Param=name - The emoji name. Must be at least 2 characters.
+            :Param=media - A gif or image. (automatically found in channel)
+            """
+            await improcess(ctx, improcessing.add_emoji, [["GIF", "IMAGE"]], ctx.guild, name, expectresult=False)
+
+        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         @commands.command(aliases=["statistics"])
         async def stats(self, ctx):
             """
@@ -1051,9 +1073,24 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             embed.add_field(name="Official MediaForge Discord Server", value=f"https://discord.gg/xwWjgyVqBz")
             embed.add_field(name="top.gg link", value=f"https://top.gg/bot/780570413767983122")
             embed.add_field(name="Vote for MediaForge on top.gg", value=f"https://top.gg/bot/780570413767983122/vote")
-            embed.add_field(name="Add MediaForge to your server", value=f"https://discord.com/api/oauth2/authorize?client_id=780570413767983122&permissions=379904&scope=bot")
+            embed.add_field(name="Add MediaForge to your server",
+                            value=f"https://discord.com/api/oauth2/authorize?client_id=780570413767983122&permissions=3"
+                                  f"79904&scope=bot")
             embed.add_field(name="MediaForge GitHub", value=f"https://github.com/HexCodeFFF/captionbot")
             await ctx.reply(embed=embed)
+
+        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
+        @commands.command(aliases=["github", "git"])
+        async def version(self, ctx):
+            """
+            Shows information on how this copy of MediaForge compares to the latest code.
+            This command returns the output of `git status`.
+
+            :Usage=$version
+            """
+            await improcessing.run_command("git", "fetch")
+            status = await improcessing.run_command("git", "status")
+            await ctx.reply(f"```{status}```")
 
         @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         @commands.command()
