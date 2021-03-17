@@ -30,9 +30,6 @@
   <component name="ChangeListManager">
     <list default="true" id="ef38d419-8cc3-42ef-bbef-6fd62fc27c52" name="Default Changelist" comment="fixed $donaldtweet font">
       <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/captionfunctions.py" beforeDir="false" afterPath="$PROJECT_DIR$/captionfunctions.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -366,14 +363,7 @@
       <workItem from="1615433220908" duration="837000" />
       <workItem from="1615844201168" duration="142000" />
       <workItem from="1615943984207" duration="6957000" />
-      <workItem from="1616015916710" duration="944000" />
-    </task>
-    <task id="LOCAL-00051" summary="docstrings">
-      <created>1611692367564</created>
-      <option name="number" value="00051" />
-      <option name="presentableId" value="LOCAL-00051" />
-      <option name="project" value="LOCAL" />
-      <updated>1611692367565</updated>
+      <workItem from="1616015916710" duration="1299000" />
     </task>
     <task id="LOCAL-00052" summary="MediaForge is a decent name">
       <created>1611695220141</created>
@@ -711,7 +701,14 @@
       <option name="project" value="LOCAL" />
       <updated>1615948887058</updated>
     </task>
-    <option name="localTasksCounter" value="100" />
+    <task id="LOCAL-00100" summary="minor changes">
+      <created>1616017452649</created>
+      <option name="number" value="00100" />
+      <option name="presentableId" value="LOCAL-00100" />
+      <option name="project" value="LOCAL" />
+      <updated>1616017452649</updated>
+    </task>
+    <option name="localTasksCounter" value="101" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -766,7 +763,6 @@
     <option name="CHECK_CODE_CLEANUP_BEFORE_PROJECT_COMMIT" value="true" />
     <option name="CHECK_NEW_TODO" value="false" />
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="cleande up readme lol!" />
     <MESSAGE value="dumbass" />
     <MESSAGE value="major cleanup and decluttering of root directory" />
     <MESSAGE value="$ytdl, $rotate, $volume" />
@@ -791,7 +787,8 @@
     <MESSAGE value="fixes bug in $vibrato" />
     <MESSAGE value="closes #10&#10;motivate.html  code has been updated to use the image size instead of vw, its annoying so i wont do it for everything but its there" />
     <MESSAGE value="adds d$trollface" />
-    <option name="LAST_COMMIT_MESSAGE" value="adds d$trollface" />
+    <MESSAGE value="minor changes" />
+    <option name="LAST_COMMIT_MESSAGE" value="minor changes" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/CaptionX$improcessing.coverage" NAME="improcessing Coverage Results" MODIFIED="1606284753774" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
