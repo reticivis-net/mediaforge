@@ -1035,13 +1035,24 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
         @commands.command(aliases=["createemoji"])
         async def addemoji(self, ctx, name):
             """
-            Adds a file as an emoji to a server.
+            Adds a file as an emoji to a server. Both MediaForge and the command caller must have the Manage Emojis permission.
 
             :Usage=$addemoji `caption`
             :Param=name - The emoji name. Must be at least 2 characters.
             :Param=media - A gif or image. (automatically found in channel)
             """
-            await improcess(ctx, improcessing.add_emoji, [["GIF", "IMAGE"]], ctx.guild, name, expectresult=False)
+            if not isinstance(ctx.channel, discord.TextChannel):  # checking its not dms
+                await ctx.send(f"{config.emojis['warning']} Command must be run in a server!")
+                return
+            if not ctx.author.permissions_in(ctx.channel).manage_emojis:
+                await ctx.send(f"{config.emojis['warning']} You don't have permission to manage emojis in this server.")
+                return
+            if not ctx.me.permissions_in(ctx.channel).manage_emojis:
+                await ctx.send(f"{config.emojis['warning']} I don't have permission to manage emojis in this server. "
+                               f"Add the 'Manage Emojis' permission to MediaForge.")
+                return
+            await improcess(ctx, improcessing.add_emoji, [["GIF", "IMAGE"]], ctx.guild, name, expectresult=False,
+                            resize=False)
 
         @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         @commands.command(aliases=["statistics"])
