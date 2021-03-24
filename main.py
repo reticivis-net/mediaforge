@@ -457,7 +457,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                             handleanimated=True)
 
         @commands.cooldown(1, config.cooldown, commands.BucketType.user)
-        @commands.command()
+        @commands.command(aliases=["esm", "&caption", "essemcaption", "esmbotcaption", "esmcap"])
         async def esmcaption(self, ctx, *, caption):
             """
             Captions media in the style of Essem's esmBot.
@@ -1086,7 +1086,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             embed.add_field(name="Vote for MediaForge on top.gg", value=f"https://top.gg/bot/780570413767983122/vote")
             embed.add_field(name="Add MediaForge to your server",
                             value=f"https://discord.com/api/oauth2/authorize?client_id=780570413767983122&permissions=3"
-                                  f"79904&scope=bot")
+                                  f"79968&scope=bot")
             embed.add_field(name="MediaForge GitHub", value=f"https://github.com/HexCodeFFF/captionbot")
             await ctx.reply(embed=embed)
 
@@ -1094,7 +1094,8 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
         @commands.command(aliases=["github", "git"])
         async def version(self, ctx):
             """
-            Shows information on how this copy of MediaForge compares to the latest code.
+            Shows information on how this copy of MediaForge compares to the latest code on github.
+            https://github.com/HexCodeFFF/captionbot
             This command returns the output of `git status`.
 
             :Usage=$version
