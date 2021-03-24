@@ -1,10 +1,16 @@
 # ![MediaForge](media/banner.png)
 
-[![MediaForge Discord](https://discordapp.com/api/guilds/803788965215338546/embed.png)](https://discord.gg/xwWjgyVqBz)
+
+[![MediaForge Discord](https://discordapp.com/api/guilds/803788965215338546/widget.png)](https://discord.gg/xwWjgyVqBz)
+[![Discord Bots](https://top.gg/api/widget/status/780570413767983122.svg)](https://top.gg/bot/780570413767983122)
+[![Discord Bots](https://top.gg/api/widget/servers/780570413767983122.svg)](https://top.gg/bot/780570413767983122)
+[![Discord Bots](https://top.gg/api/widget/upvotes/780570413767983122.svg)](https://top.gg/bot/780570413767983122)
+
 ![Total Lines](https://img.shields.io/tokei/lines/github/HexCodeFFF/captionbot)
-![Downloads](https://img.shields.io/github/downloads/HexCodeFFF/captionbot/total)
 ![discord.py](https://img.shields.io/github/pipenv/locked/dependency-version/hexcodefff/captionbot/discord.py)
 ![python](https://img.shields.io/github/pipenv/locked/python-version/hexcodefff/captionbot)
+
+[comment]: <> (![Downloads]&#40;https://img.shields.io/github/downloads/HexCodeFFF/captionbot/total&#41;)
 
 ### A Discord bot for editing and creating videos, images, GIFs, and more!
 
@@ -55,5 +61,6 @@ the bot uses many CLI programs for media processing.
 ### to run
 
 - once you've set up all of the libraries, just run the program with `python main.py` (or `python3.8 main.py` or
-  whatever your python is named). make sure it can read and write to the directory it lives in.
+  whatever your python is named). make sure it can read and write to the directory it lives in and also access/execute 
+  all the aforementioned libraries
 - terminate the bot by running the `shutdown` command, this will _probably_ close better than a termination
