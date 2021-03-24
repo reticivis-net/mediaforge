@@ -119,7 +119,6 @@ def html2png(html, png):
     for _ in range(4):
         size = driver.execute_script(f"return [document.documentElement.scrollWidth, outerHeight(document.body)];")
         driver.set_window_size(size[0], size[1])
-        print(size)
     driver.execute_script("if (typeof beforerender === \"function\") {beforerender()}")
     send(driver, "Emulation.setDefaultBackgroundColorOverride", {'color': {'r': 0, 'g': 0, 'b': 0, 'a': 0}})
     driver.get_screenshot_as_file(png)
