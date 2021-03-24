@@ -3,6 +3,8 @@ import os
 import random
 import string
 import sys
+import time
+
 from selenium import webdriver
 import config
 
@@ -80,7 +82,10 @@ def initdriver():
         driver = webdriver.Chrome(config.chrome_driver_windows, options=opts)
     else:
         driver = webdriver.Chrome(config.chrome_driver_linux, options=opts)
+    driver.implicitly_wait(10)
     driver.get("file:///" + os.path.abspath("rendering/warmup.html").replace("\\", "/"))
+    while driver.execute_script('return document.readyState;') != "complete":
+        time.sleep(0.25)
     return driver
 
 
@@ -100,12 +105,28 @@ def html2png(html, png):
     """
     driver.set_window_size(1, 1)
     tempfile = loadhtml(driver, html)
-    for _ in range(2):
+    # wait for load just in case
+    while driver.execute_script('return document.readyState;') != "complete":
+        time.sleep(0.25)
+    # for image width based styles, this will be a pixel value. for any other html it will be a blank string. if it's
+    # 0px, it tried to get the width before the image loaded and that is no good
+    while driver.execute_script(
+            "return window.getComputedStyle(document.documentElement).getPropertyValue('--1vw');") == "0px":
+        driver.execute_script("document.querySelector(':root').style.setProperty('--1vw', `${document.getElementById('i"
+                              "mg').scrollWidth / 100}px`);")
+        time.sleep(0.25)
+    # driver.execute_script("return window.getComputedStyle(document.documentElement).getPropertyValue('--1vw');")
+    for _ in range(4):
         size = driver.execute_script(f"return [document.documentElement.scrollWidth, outerHeight(document.body)];")
         driver.set_window_size(size[0], size[1])
+        print(size)
     driver.execute_script("if (typeof beforerender === \"function\") {beforerender()}")
     send(driver, "Emulation.setDefaultBackgroundColorOverride", {'color': {'r': 0, 'g': 0, 'b': 0, 'a': 0}})
     driver.get_screenshot_as_file(png)
     os.remove(tempfile)
 
-# html2png("<p>test</p>", "test.png")
+
+# initdriver()
+# with open("captionhtml/motivate.html", 'r', encoding="UTF-8") as file:
+#     data = file.read()
+# html2png(data, "test.png")
