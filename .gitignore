@@ -5,3 +5,4 @@ debug.log
 __pycache__
 # linux chmod being wacky :/
 chromedriver87
+.idea
