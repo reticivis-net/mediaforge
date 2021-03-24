@@ -647,8 +647,9 @@ async def imageaudio(files):
     image = files[0]
     outname = temp_file("mp4")
     duration = await get_duration(audio)  # it is a couple seconds too long without it :(
-    await run_command("ffmpeg", "-hide_banner", "-i", audio, "-loop", "1", "-i", image, "-c:v", "libx264",
-                      "-c:a", "aac", "-shortest", "-t", str(duration), outname)
+    await run_command("ffmpeg", "-hide_banner", "-i", audio, "-loop", "1", "-i", image, "-vf",
+                      "crop=trunc(iw/2)*2:trunc(ih/2)*2", "-c:v", "libx264", "-c:a", "aac", "-shortest", "-t",
+                      str(duration), outname)
     return outname
 
 
