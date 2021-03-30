@@ -1,9 +1,11 @@
 import json
+import logging
 import os
-import random
-import string
 import sys
 import time
+
+import tempfiles
+from tempfiles import temp_file
 
 from selenium import webdriver
 import config
@@ -22,17 +24,6 @@ def send(driver, cmd, params=None):
     response = driver.command_executor._request('POST', url, body)
     # if response['status']: raise Exception(response.get('value'))
     return response.get('value')
-
-
-def get_random_string(length):
-    return ''.join(random.choice(string.ascii_letters) for _ in range(length))
-
-
-def temp_file(extension="png"):
-    while True:
-        name = f"temp/{get_random_string(8)}.{extension}"
-        if not os.path.exists(name):
-            return name
 
 
 def loadhtml(driver, html):
@@ -61,11 +52,13 @@ def initdriver():
     used by pool workers to initialize the web driver
     :return: the driver, not sure if this is used from the return?
     """
+    # tempfiles.tempid = tfid
     global opts
     global driver
     opts = webdriver.ChromeOptions()
     opts.headless = True
     opts.add_experimental_option('excludeSwitches', ['enable-logging'])
+    opts.add_argument("--log-level=3")
     opts.add_argument('--no-proxy-server')
     opts.add_argument("--window-size=0,0")
     opts.add_argument("--hide-scrollbars")
@@ -79,9 +72,11 @@ def initdriver():
     opts.add_argument("--no-sandbox")
     # https://chromedriver.storage.googleapis.com/index.html?path=87.0.4280.88/
     if sys.platform == "win32":
-        driver = webdriver.Chrome(config.chrome_driver_windows, options=opts)
+        driver = webdriver.Chrome(config.chrome_driver_windows, options=opts, service_log_path='NUL')
     else:
-        driver = webdriver.Chrome(config.chrome_driver_linux, options=opts)
+        driver = webdriver.Chrome(config.chrome_driver_linux, options=opts, service_log_path='/dev/null')
+    logger = logging.getLogger('selenium.webdriver.remote.remote_connection')
+    logger.setLevel(logging.WARNING)
     driver.implicitly_wait(10)
     driver.get("file:///" + os.path.abspath("rendering/warmup.html").replace("\\", "/"))
     while driver.execute_script('return document.readyState;') != "complete":
@@ -122,7 +117,7 @@ def html2png(html, png):
     driver.execute_script("if (typeof beforerender === \"function\") {beforerender()}")
     send(driver, "Emulation.setDefaultBackgroundColorOverride", {'color': {'r': 0, 'g': 0, 'b': 0, 'a': 0}})
     driver.get_screenshot_as_file(png)
-    os.remove(tempfile)
+    # os.remove(tempfile)
 
 
 # initdriver()

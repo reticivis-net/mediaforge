@@ -21,10 +21,12 @@ if sys.platform == "win32":  # this hopefully wont cause any problems :>
 else:
     import magic
 # project files
+from tempfiles import temp_file
 import captionfunctions
 import humanize
 import chromiumrender
 import config
+import tempfiles
 
 """
 This file contains functions for processing and editing media
@@ -47,17 +49,27 @@ class ReturnedNothing(Exception):
     pass
 
 
+def pass_temp_session(fn, args, kwargs, sessionlist):
+    """used in Pool to pass the current TempFileSession into the process"""
+    tempfiles.globallist = sessionlist
+    result = fn(*args, **kwargs)
+    tempfiles.globallist = None
+    return result
+
+
 # https://stackoverflow.com/a/65966787/9044183
 class Pool:
-    def __init__(self, nworkers, initf):
-        self._executor = concurrent.futures.ProcessPoolExecutor(nworkers, initializer=initf)
+    def __init__(self, nworkers, initf, initargs=()):
+        self._executor = concurrent.futures.ProcessPoolExecutor(nworkers, initializer=initf, initargs=initargs)
         self._nworkers = nworkers
         self._submitted = 0
 
-    async def submit(self, fn, *args, **kwargs):
+    async def submit(self, fn, *args, ses=None, **kwargs):
         self._submitted += 1
+        if ses is None:
+            ses = tempfiles.get_session_list()
         loop = asyncio.get_event_loop()
-        fut = loop.run_in_executor(self._executor, fn, *args, **kwargs)
+        fut = loop.run_in_executor(self._executor, pass_temp_session, fn, args, kwargs, ses)
         try:
             return await fut
         finally:
@@ -94,22 +106,6 @@ def filetostring(f):
     with open(f, 'r', encoding="UTF-8") as file:
         data = file.read()
     return data
-
-
-def get_random_string(length):
-    return ''.join(random.choice(string.ascii_letters) for i in range(length))
-
-
-def temp_file(extension="png"):
-    """
-    generates the name of a non-existing file for usage in temp/
-    :param extension: the extension of the file
-    :return: the name of the file (no file is created by this function)
-    """
-    while True:
-        name = f"temp/{get_random_string(8)}.{extension}"
-        if not os.path.exists(name):
-            return name
 
 
 # https://fredrikaverpil.github.io/2017/06/20/async-and-await-with-subprocesses/
@@ -213,6 +209,7 @@ async def ffmpegsplit(media):
     logging.info("Splitting frames...")
     await run_command("ffmpeg", "-hide_banner", "-i", media, "-vsync", "1", f"{media.split('.')[0]}_%09d.png")
     files = glob.glob(f"{media.split('.')[0]}_*.png")
+    tempfiles.reserve_names(files)
 
     return files, f"{media.split('.')[0]}_%09d.png"
 
@@ -248,7 +245,6 @@ async def forceaudio(video):
         await run_command("ffmpeg", "-hide_banner", "-f", "lavfi", "-i", "anullsrc", "-i", video, "-c:v", "png",
                           "-c:a", "aac",
                           "-map", "0:a", "-map", "1:v", "-shortest", outname)
-        os.remove(video)
         return outname
 
 
@@ -261,7 +257,6 @@ async def compresspng(png):
 
     outname = temp_file("png")
     await run_command("pngquant", "--quality=0-80", "--output", outname, png)
-    os.remove(png)
     return outname
 
 
@@ -291,7 +286,6 @@ async def assurefilesize(media: str, ctx: discord.ext.commands.Context):
                     f"Downsizing result...")
                 imagenew = await resize(media, "iw/2", "ih/2")
                 # imagenew = await handleanimated(media, captionfunctions.halfsize, ctx)
-                os.remove(media)
                 media = imagenew
                 await msg.delete()
             else:
@@ -420,9 +414,13 @@ async def handleanimated(media: str, capfunction: callable, ctx, *caption):
 
         logging.info(f"Processing {len(frames)} frames...")
         framefuncs = []
+
+        ses = tempfiles.get_session_list()
         for i, frame in enumerate(frames):
-            framefuncs.append(renderpool.submit(capfunction, frame, caption, frame.replace('.png', '_rendered.png')))
+            framefuncs.append(renderpool.submit(capfunction, frame, caption, frame.replace('.png', '_rendered.png'),
+                                                ses=ses))
         await asyncio.wait(framefuncs)
+        tempfiles.reserve_names(glob.glob(name.replace('.png', '_rendered.png').replace('%09d', '*')))
         # result = renderpool.starmap_async(capfunction, capargs)
         # await run_in_exec(result.get)
         # result = await renderpool.
@@ -442,23 +440,22 @@ async def handleanimated(media: str, capfunction: callable, ctx, *caption):
                                   "-i", audio, "-c:a", "aac", "-shortest",
                                   "-c:v", "libx264", "-crf", "25", "-pix_fmt", "yuv420p",
                                   "-vf", "crop=trunc(iw/2)*2:trunc(ih/2)*2", outname)
-                os.remove(audio)
             else:
                 await run_command("ffmpeg", "-hide_banner", "-r", str(fps), "-i", frames,
                                   "-c:v", "libx264", "-crf", "25", "-pix_fmt", "yuv420p",
                                   "-vf", "crop=trunc(iw/2)*2:trunc(ih/2)*2", outname)
         # cleanup
-        logging.info("Cleaning files...")
-        for f in glob.glob(name.replace('%09d', '*')):
-            try:
-                os.remove(f)
-            except FileNotFoundError:
-                pass
-        for f in glob.glob(name.replace('.png', '_rendered.png').replace('%09d', '*')):
-            try:
-                os.remove(f)
-            except FileNotFoundError:
-                pass
+        # logging.info("Cleaning files...")
+        # for f in glob.glob(name.replace('%09d', '*')):
+        #     try:
+        #         os.remove(f)
+        #     except FileNotFoundError:
+        #         pass
+        # for f in glob.glob(name.replace('.png', '_rendered.png').replace('%09d', '*')):
+        #     try:
+        #         os.remove(f)
+        #     except FileNotFoundError:
+        #         pass
         return outname
 
 
@@ -481,8 +478,8 @@ async def mp4togif(mp4):
     else:
         await run_command("gifski", "--quiet", "--fast", "-o", outname, "--fps", str(fps), *n)
         logging.info("Cleaning files...")
-        for f in glob.glob(name.replace('%09d', '*')):
-            os.remove(f)
+        # for f in glob.glob(name.replace('%09d', '*')):
+        #     os.remove(f)
         return outname
 
 
@@ -491,7 +488,6 @@ async def reencode(mp4):  # reencodes mp4 as libx264 since the png format used c
     await run_command("ffmpeg", "-hide_banner", "-i", mp4, "-c:v", "libx264", "-c:a", "copy", "-pix_fmt", "yuv420p",
                       "-max_muxing_queue_size", "9999",
                       "-vf", "scale=trunc(iw/2)*2:trunc(ih/2)*2", outname)
-    os.remove(mp4)
     return outname
 
 
@@ -705,8 +701,8 @@ async def concatv(files):
     outname = temp_file("mp4")
     await run_command("ffmpeg", "-hide_banner", "-f", "concat", "-i", concatdemuxer, "-c:v", "png", "-c:a", "aac",
                       outname)
-    for file in [video0, video1, fixedvideo1, fixedvideo0, fixedfixedvideo1, concatdemuxer]:
-        os.remove(file)
+    # for file in [video0, video1, fixedvideo1, fixedvideo0, fixedfixedvideo1, concatdemuxer]:
+    #     os.remove(file)
     return outname
 
 
@@ -741,8 +737,8 @@ async def stack(files, style):
                       f"{'h' if style == 'hstack' else 'v'}stack=inputs=2;amix=inputs=2:dropout_transition=0", "-c:v",
                       "png", "-c:a",
                       "aac", outname)
-    for file in [video0, video1, fixedvideo1, fixedvideo0, fixedfixedvideo1]:
-        os.remove(file)
+    # for file in [video0, video1, fixedvideo1, fixedvideo0, fixedfixedvideo1]:
+    #     os.remove(file)
     if mts[0] != "VIDEO" and mts[1] != "VIDEO":  # one or more gifs and no videos
         outname = await mp4togif(outname)
     return outname
@@ -802,8 +798,8 @@ async def freezemotivate(files, *caption):
     clastframe = await handleanimated(lastframe, captionfunctions.motivate, None, *caption)
     freezeframe = await imageaudio([clastframe, audio])
     final = await concatv([video, freezeframe])
-    for file in [lastframe, clastframe]:
-        os.remove(file)
+    # for file in [lastframe, clastframe]:
+    #     os.remove(file)
     return final
 
 

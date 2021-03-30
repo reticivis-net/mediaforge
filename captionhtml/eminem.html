@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <title>&caption</title>
     <script src="rendering/twemoji/twemoji.js"></script>
+    <base href="../">
     <style>
         @font-face {
             font-family: caption;
@@ -81,12 +82,13 @@
         .row {
             background: white;
             display: flex;
-            flex:1;
+            flex: 1;
         }
 
         .stuff {
             width: 50%;
         }
+
         .stuff img {
             width: 100%;
         }
@@ -96,7 +98,8 @@
 
 <div class="row">
 
-    <div class="caption column"><span class="t">CaptionText</span></div>'
+    <div class="caption column"><span class="t">CaptionText</span></div>
+    '
     <div class="column stuff">
         <img class="stuff" src="rendering/eminem.png" alt="stuff"/>
     </div>
@@ -115,6 +118,17 @@
         return ['top', 'bottom']
             .map(side => parseInt(style[`margin-${side}`]))
             .reduce((total, side) => total + side, height)
+    }
+
+    function fit(elemid) {
+        let elem = document.getElementById(elemid)
+        let elemc = elem.children[0]
+        while (outerHeight(elem) < outerHeight(elemc)) {
+            // https://stackoverflow.com/a/15195345/9044183
+            let style = window.getComputedStyle(elemc, null).getPropertyValue('font-size');
+            let fontSize = parseFloat(style);
+            elemc.style.fontSize = (fontSize - 1) + 'px';
+        }
     }
 </script>
 </html>
