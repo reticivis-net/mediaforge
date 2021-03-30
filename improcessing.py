@@ -901,7 +901,7 @@ async def volume(file, vol):
     # http://www.sengpielaudio.com/calculator-loudness.htm
     vol = 10 * math.log(vol, 2)
     # for some reason aac has audio caps but libmp3lame works fine lol
-    await run_command("ffmpeg", "-i", file, "-af", f"volume={vol}dB", "-c:a", "libmp3lame", out)
+    await run_command("ffmpeg", "-i", file, "-af", f"volume={vol}dB", "-strict", "-1", "-c:a", "libmp3lame", out)
     return out
 
 
@@ -912,7 +912,8 @@ async def vibrato(file, frequency=5, depth=0.5):  # https://ffmpeg.org/ffmpeg-fi
         "VIDEO": "mp4"
     }
     out = temp_file(exts[mt])
-    await run_command("ffmpeg", "-i", file, "-af", f"vibrato=f={frequency}:d={depth}", "-c:a", "aac", out)
+    await run_command("ffmpeg", "-i", file, "-af", f"vibrato=f={frequency}:d={depth}", "-strict", "-1", "-c:a", "aac",
+                      out)
     return out
 
 
