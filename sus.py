@@ -1,6 +1,7 @@
 import os
 import random
 import string
+from tempfiles import temp_file
 
 from PIL import Image, ImageDraw, ImageFont
 
@@ -9,11 +10,6 @@ def get_random_string(length):
     return ''.join(random.choice(string.ascii_letters) for i in range(length))
 
 
-def temp_file(extension="png"):
-    while True:
-        name = f"temp/{get_random_string(8)}.{extension}"
-        if not os.path.exists(name):
-            return name
 
 
 # this codebase is FUCKED

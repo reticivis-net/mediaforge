@@ -1,4 +1,5 @@
 # standard libs
+import asyncio
 import datetime
 import glob
 import json
@@ -21,6 +22,8 @@ import captionfunctions
 import improcessing
 import sus
 import config
+import tempfiles
+from tempfiles import temp_file, get_random_string, TempFileSession
 
 """
 This file contains the discord.py functions, which call other files to do the actual processing.
@@ -44,6 +47,10 @@ logging.addLevelName(21, "COMMAND")
 coloredlogs.install(level=config.log_level, fmt='[%(asctime)s] [%(filename)s:%(funcName)s:%(lineno)d] '
                                                 '%(levelname)s %(message)s',
                     datefmt='%m/%d/%Y %I:%M:%S %p', field_styles=field_styles, level_styles=level_styles)
+dlogger = logging.getLogger('discord')
+dlogger.setLevel(logging.WARNING)
+logger = logging.getLogger('selenium.webdriver.remote.remote_connection')
+logger.setLevel(logging.WARNING)
 
 if __name__ == "__main__":  # prevents multiprocessing workers from running bot code
     renderpool = improcessing.initializerenderpool()
@@ -85,7 +92,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             extension = "mp4"
         if extension is None:
             extension = url.split(".")[-1].split("?")[0]
-        name = improcessing.temp_file(extension)
+        name = temp_file(extension)
         # https://github.com/aio-libs/aiohttp/issues/3904#issuecomment-632661245
         async with aiohttp.ClientSession(headers={'Connection': 'keep-alive'}) as session:
             # i used to make a head request to check size first, but for some reason head requests can be super slow
@@ -108,13 +115,13 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
         if tenorgif:
             mp4 = name
             name = await improcessing.mp4togif(name)
-            os.remove(mp4)
+            # os.remove(mp4)
         return name
 
 
     def ytdownload(vid, form):
         while True:
-            name = f"temp/{improcessing.get_random_string(12)}"
+            name = f"temp/{get_random_string(12)}"
             if len(glob.glob(name + ".*")) == 0:
                 break
         opts = {
@@ -177,23 +184,29 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
         :param nargs: amount of media to return
         :return: False if none or not enough media found, list of file paths if found
         """
+        messageschecked = []
         outfiles = []
         if ctx.message.reference:
             m = ctx.message.reference.resolved
+            messageschecked.append(m)
             hm = await handlemessagesave(m)
             outfiles += hm
             if len(outfiles) >= nargs:
                 return outfiles[:nargs]
         m = ctx.message
-        hm = await handlemessagesave(m)
-        outfiles += hm
-        if len(outfiles) >= nargs:
-            return outfiles[:nargs]
-        async for m in ctx.channel.history(limit=50, before=ctx.message):
+        if m not in messageschecked:
+            messageschecked.append(m)
             hm = await handlemessagesave(m)
             outfiles += hm
             if len(outfiles) >= nargs:
                 return outfiles[:nargs]
+        async for m in ctx.channel.history(limit=50, before=ctx.message):
+            if m not in messageschecked:
+                messageschecked.append(m)
+                hm = await handlemessagesave(m)
+                outfiles += hm
+                if len(outfiles) >= nargs:
+                    return outfiles[:nargs]
         return False
 
 
@@ -273,67 +286,72 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
         :param expectresult: is func() supposed to return a result? if true, it expects an image. if false, can use a string.
         :return: nothing, all processing and uploading is done in this function
         """
-        async with ctx.channel.typing():
-            if allowedtypes:
-                urls = await imagesearch(ctx, len(allowedtypes))
-                files = await saveurls(urls)
-            else:
-                files = []
-            if files or not allowedtypes:
-                for i, file in enumerate(files):
-                    if (imtype := improcessing.mediatype(file)) not in allowedtypes[i]:
-                        await ctx.reply(
-                            f"{config.emojis['warning']} Media #{i + 1} is {imtype}, it must be: {', '.join(allowedtypes[i])}")
-                        logging.warning(f"Media {i} type {imtype} is not in {allowedtypes[i]}")
-                        for f in files:
-                            os.remove(f)
-                        break
-                    else:
-                        if resize:
-                            files[i] = await improcessing.ensuresize(ctx, file, config.min_size, config.max_size)
+        with TempFileSession() as tempfilesession:
+            async with ctx.channel.typing():
+                if allowedtypes:
+                    urls = await imagesearch(ctx, len(allowedtypes))
+                    files = await saveurls(urls)
                 else:
-                    logging.info("Processing...")
-                    msg = await ctx.reply(f"{config.emojis['working']} Processing...", mention_author=False)
-                    try:
-                        if allowedtypes and not forcerenderpool:
-                            if len(files) == 1:
-                                filesforcommand = files[0]
-                            else:
-                                filesforcommand = files.copy()
-                            if handleanimated:
-                                result = await improcessing.handleanimated(filesforcommand, func, ctx, *args)
-                            else:
-                                result = await func(filesforcommand, *args)
+                    files = []
+                if files or not allowedtypes:
+                    for i, file in enumerate(files):
+                        if (imtype := improcessing.mediatype(file)) not in allowedtypes[i]:
+                            await ctx.reply(
+                                f"{config.emojis['warning']} Media #{i + 1} is {imtype}, it must be: {', '.join(allowedtypes[i])}")
+                            logging.warning(f"Media {i} type {imtype} is not in {allowedtypes[i]}")
+                            # for f in files:
+                            #     os.remove(f)
+                            # break
                         else:
-                            result = await renderpool.submit(func, *args)
-                        if expectresult:
-                            if not result:
-                                raise improcessing.ReturnedNothing(f"Expected image, {func} returned nothing.")
-                            result = await improcessing.assurefilesize(result, ctx)
-                            await improcessing.watermark(result)
-                        else:
-                            if not result:
-                                raise improcessing.ReturnedNothing(f"Expected string, {func} returned nothing.")
+                            if resize:
+                                files[i] = await improcessing.ensuresize(ctx, file, config.min_size, config.max_size)
+                    else:
+                        logging.info("Processing...")
+                        msgtask = asyncio.create_task(
+                            ctx.reply(f"{config.emojis['working']} Processing...", mention_author=False))
+                        try:
+                            if allowedtypes and not forcerenderpool:
+                                if len(files) == 1:
+                                    filesforcommand = files[0]
+                                else:
+                                    filesforcommand = files.copy()
+                                if handleanimated:
+                                    result = await improcessing.handleanimated(filesforcommand, func, ctx, *args)
+                                else:
+                                    result = await func(filesforcommand, *args)
                             else:
-                                await ctx.reply(result)
-                                await msg.delete()
-                    except Exception as e:  # delete the processing message if it errors
-                        await msg.delete()
-                        raise e
-                    if result and expectresult:
-                        logging.info("Uploading...")
-                        await msg.edit(content=f"{config.emojis['working']} Uploading...")
-                        await ctx.reply(file=discord.File(result))
-                        await msg.delete()
-                        for f in files:
-                            try:
-                                os.remove(f)
-                            except FileNotFoundError:
-                                pass
-                        os.remove(result)
-            else:
-                logging.warning("No media found.")
-                await ctx.send(f"{config.emojis['x']} No file found.")
+                                result = await renderpool.submit(func, *args)
+                            if expectresult:
+                                if not result:
+                                    raise improcessing.ReturnedNothing(f"Expected image, {func} returned nothing.")
+                                result = await improcessing.assurefilesize(result, ctx)
+                                await improcessing.watermark(result)
+                            else:
+                                if not result:
+                                    raise improcessing.ReturnedNothing(f"Expected string, {func} returned nothing.")
+                                else:
+                                    await ctx.reply(result)
+                                    msg = await msgtask
+                                    await msg.delete()
+                        except Exception as e:  # delete the processing message if it errors
+                            msg = await msgtask
+                            await msg.delete()
+                            raise e
+                        if result and expectresult:
+                            logging.info("Uploading...")
+                            msg = await msgtask
+                            await msg.edit(content=f"{config.emojis['working']} Uploading...")
+                            await ctx.reply(file=discord.File(result))
+                            await msg.delete()
+                            # for f in files:
+                            #     try:
+                            #         os.remove(f)
+                            #     except FileNotFoundError:
+                            #         pass
+                            # os.remove(result)
+                else:
+                    logging.warning("No media found.")
+                    await ctx.send(f"{config.emojis['x']} No file found.")
 
 
     class Caption(commands.Cog, name="Captioning"):
@@ -722,9 +740,8 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
         @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         async def concatv(self, ctx):
             """
-            Combines 2 video files.
-            The output video will take on all of the settings of the FIRST video, and the second
-            video will take on those settings.
+            Makes one video file play right after another.
+            The output video will take on all of the settings of the FIRST video. The second video will be scaled to fit.
 
             :Usage=$concatv
             :Param=video1 - A video or gif. (automatically found in channel)
@@ -879,18 +896,20 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                 await ctx.send(f"{config.emojis['warning']} Download format must be `video` or `audio`.")
                 return
             # await improcessing.ytdl(url, form)
-            async with ctx.channel.typing():
-                # logging.info(url)
-                msg = await ctx.reply(f"{config.emojis['working']} Downloading from site...", mention_author=False)
-                try:
-                    r = await improcessing.run_in_exec(ytdownload, url, form)
-                    r = await improcessing.assurefilesize(r, ctx)
-                    await msg.edit(content=f"{config.emojis['working']} Uploading to Discord...")
-                    await ctx.reply(file=discord.File(r))
-                    os.remove(r)
-                    await msg.delete()
-                except youtube_dl.DownloadError as e:
-                    await ctx.reply(f"{config.emojis['2exclamation']} {e}")
+            with TempFileSession() as tempfilesession:
+                async with ctx.channel.typing():
+                    # logging.info(url)
+                    msg = await ctx.reply(f"{config.emojis['working']} Downloading from site...", mention_author=False)
+                    try:
+                        r = await improcessing.run_in_exec(ytdownload, url, form)
+                        tempfiles.reserve_names(r)
+                        r = await improcessing.assurefilesize(r, ctx)
+                        await msg.edit(content=f"{config.emojis['working']} Uploading to Discord...")
+                        await ctx.reply(file=discord.File(r))
+                        # os.remove(r)
+                        await msg.delete()
+                    except youtube_dl.DownloadError as e:
+                        await ctx.reply(f"{config.emojis['2exclamation']} {e}")
 
         @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         @commands.command(aliases=["gif", "videotogif"])
@@ -986,9 +1005,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             :Usage=$sus `text`
             :Param=text - The text to cut and splice.
             """
-            file = sus.sus(text)
-            await ctx.reply(file=discord.File(file))
-            os.remove(file)
+            await improcess(ctx, sus.sus, [], text)
 
         @commands.command(aliases=["emsay"])
         async def eminemsay(self, ctx, *, text):
@@ -1180,15 +1197,16 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             :Usage=$info
             :Param=media - Any media file. (automatically found in channel)
             """
-            async with ctx.channel.typing():
-                file = await imagesearch(ctx, 1)
-                if file:
-                    file = await saveurls(file)
-                    result = await improcessing.ffprobe(file[0])
-                    await ctx.reply(f"`{result[1]}` `{result[2]}`\n```{result[0]}```")
-                    os.remove(file[0])
-                else:
-                    await ctx.send(f"{config.emojis['x']} No file found.")
+            with TempFileSession() as tempfilesession:
+                async with ctx.channel.typing():
+                    file = await imagesearch(ctx, 1)
+                    if file:
+                        file = await saveurls(file)
+                        result = await improcessing.ffprobe(file[0])
+                        await ctx.reply(f"`{result[1]}` `{result[2]}`\n```{result[0]}```")
+                        # os.remove(file[0])
+                    else:
+                        await ctx.send(f"{config.emojis['x']} No file found.")
 
         @commands.command()
         @commands.cooldown(1, config.cooldown, commands.BucketType.user)
@@ -1338,19 +1356,19 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             """
             searches for MediaForge metadata
             """
-            async with ctx.channel.typing():
-                file = await imagesearch(ctx, 1)
-                if file:
-                    file = await saveurls(file)
-                    result = await improcessing.checkwatermark(file[0])
-                    if result:
-                        await ctx.reply(f"{config.emojis['working']} This file was made by MediaForge.")
+            with TempFileSession() as tempfilesession:
+                async with ctx.channel.typing():
+                    file = await imagesearch(ctx, 1)
+                    if file:
+                        file = await saveurls(file)
+                        result = await improcessing.checkwatermark(file[0])
+                        if result:
+                            await ctx.reply(f"{config.emojis['working']} This file was made by MediaForge.")
+                        else:
+                            await ctx.reply(
+                                f"{config.emojis['x']} This file does not appear to have been made by MediaForge.")
                     else:
-                        await ctx.reply(
-                            f"{config.emojis['x']} This file does not appear to have been made by MediaForge.")
-                    os.remove(file[0])
-                else:
-                    await ctx.send(f"{config.emojis['x']} No file found.")
+                        await ctx.send(f"{config.emojis['x']} No file found.")
 
         @commands.command(hidden=True, aliases=["stop", "close", "die", "kill"])
         @commands.is_owner()
@@ -1401,6 +1419,15 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
 
     @bot.listen()
     async def on_command_error(ctx, commanderror):
+        if isinstance(commanderror, discord.Forbidden):
+            if not ctx.me.permissions_in(ctx.channel).send_messages:
+                if ctx.me.permissions_in(ctx.author).send_messages:
+                    err = f"{config.emojis['x']} I don't have permissions to send messages in that channel."
+                    await ctx.author.send(err)
+                    logging.warning(err)
+                    return
+                else:
+                    logging.warning("No permissions to send in command channel or to DM author.")
         if isinstance(commanderror, discord.ext.commands.errors.CommandNotFound):
             msg = ctx.message.content.replace("@", "\\@")
             err = f"{config.emojis['exclamation_question']} Command `{msg.split(' ')[0]}` does not exist."
@@ -1430,23 +1457,23 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             if isinstance(commanderror, discord.ext.commands.errors.CommandInvokeError):
                 commanderror = commanderror.original
             logging.error(commanderror, exc_info=(type(commanderror), commanderror, commanderror.__traceback__))
-            tr = improcessing.temp_file("txt")
-            trheader = f"DATETIME:{datetime.datetime.now()}\nCOMMAND:{ctx.message.content}\nTRACEBACK:\n"
-            with open(tr, "w+", encoding="UTF-8") as t:
-                t.write(trheader + ''.join(
-                    traceback.format_exception(etype=type(commanderror), value=commanderror,
-                                               tb=commanderror.__traceback__)))
-            embed = discord.Embed(color=0xed1c24,
-                                  description="Please report this error with the attached traceback file to the GitHub.")
-            embed.add_field(name=f"{config.emojis['2exclamation']} Report Issue to GitHub",
-                            value=f"[Create New Issue](https://github.com/HexCodeFFF/captionbot"
-                                  f"/issues/new?labels=bug&template=bug_report.md&title"
-                                  f"={urllib.parse.quote(str(commanderror)[:128], safe='')})\n[View Issu"
-                                  f"es](https://github.com/HexCodeFFF/captionbot/issues)")
-            await ctx.reply(f"{config.emojis['2exclamation']} `{get_full_class_name(commanderror)}: " +
-                            str(commanderror)[:128].replace("@", "\\@") + "`",
-                            file=discord.File(tr), embed=embed)
-            os.remove(tr)
+            with TempFileSession() as tempfilesession:
+                tr = temp_file("txt")
+                trheader = f"DATETIME:{datetime.datetime.now()}\nCOMMAND:{ctx.message.content}\nTRACEBACK:\n"
+                with open(tr, "w+", encoding="UTF-8") as t:
+                    t.write(trheader + ''.join(
+                        traceback.format_exception(etype=type(commanderror), value=commanderror,
+                                                   tb=commanderror.__traceback__)))
+                embed = discord.Embed(color=0xed1c24,
+                                      description="Please report this error with the attached traceback file to the GitHub.")
+                embed.add_field(name=f"{config.emojis['2exclamation']} Report Issue to GitHub",
+                                value=f"[Create New Issue](https://github.com/HexCodeFFF/captionbot"
+                                      f"/issues/new?labels=bug&template=bug_report.md&title"
+                                      f"={urllib.parse.quote(str(commanderror)[:128], safe='')})\n[View Issu"
+                                      f"es](https://github.com/HexCodeFFF/captionbot/issues)")
+                await ctx.reply(f"{config.emojis['2exclamation']} `{get_full_class_name(commanderror)}: " +
+                                str(commanderror)[:128].replace("@", "\\@") + "`",
+                                file=discord.File(tr), embed=embed)
 
 
     class TopGG(commands.Cog):
