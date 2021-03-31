@@ -322,7 +322,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                             logger.info("Uploading...")
                             asyncio.create_task(ctx.reply(file=discord.File(result)))
                             msg = await msgtask
-                            asyncio.create_task(msg.edit(content=f"{config.emojis['working']} Uploading..."))
+                            await msg.edit(content=f"{config.emojis['working']} Uploading...")
                             asyncio.create_task(msg.delete())
                             # for f in files:
                             #     try:
@@ -332,7 +332,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                             # os.remove(result)
                 else:
                     logger.warning("No media found.")
-                    await ctx.send(f"{config.emojis['x']} No file found.")
+                    asyncio.create_task(ctx.send(f"{config.emojis['x']} No file found."))
 
 
     class Caption(commands.Cog, name="Captioning"):
