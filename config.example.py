@@ -24,7 +24,7 @@ min_size = 100
 max_size = 2000
 # maximum size, in bytes, to download. see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Length
 max_file_size = 25000000
-# the text to use for different messages, can be custom emojis or just unicode
+# the text to use for different messages, can be custom emojis or just any text
 emojis = {
     "x": "<:xmark:803792052932444180>",
     "warning": "<:wmark:803791399782580284>",
@@ -32,7 +32,12 @@ emojis = {
     "exclamation_question": "<:eqmark:803791399501168641>",
     "2exclamation": "<:eemark:803791399710883871>",
     "working": "<a:working:803801825605320754>",
-    "clock": "<:clockmark:803803703169515541>"
+    "clock": "<:clockmark:803803703169515541>",
+    "one": "<:one:826643438555758622>",
+    "two": "<:two:826643438421671987>",
+    "three": "<:three:826643438723923968>",
+    "resize": "<:resize:826643438354694165>",
+    "check": "<:check:826643438652489778>"
 }
 # up to 25 tips that can show when using $help tips. type \n for a newline
 tips = {

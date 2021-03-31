@@ -629,6 +629,17 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             await improcess(ctx, captionfunctions.resize, [["VIDEO", "GIF", "IMAGE"]], "iw*2", "ih",
                             handleanimated=True)
 
+        @commands.command(aliases=["tall", "long", "antikyle"])
+        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
+        async def squish(self, ctx):
+            """
+            makes media twice as tall
+
+            :Usage=$wide
+            """
+            await improcess(ctx, captionfunctions.resize, [["VIDEO", "GIF", "IMAGE"]], "iw", "ih*2",
+                            handleanimated=True)
+
         @commands.command(aliases=["magic", "magik", "contentawarescale", "liquidrescale"])
         @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         async def magick(self, ctx, strength: int = 50):
@@ -883,7 +894,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                     msg = await ctx.reply(f"{config.emojis['working']} Downloading from site...", mention_author=False)
                     try:
                         r = await improcessing.run_in_exec(ytdownload, url, form)
-                        tempfiles.reserve_names(r)
+                        tempfiles.reserve_names([r])
                         r = await improcessing.assurefilesize(r, ctx)
                         await msg.edit(content=f"{config.emojis['working']} Uploading to Discord...")
                         await ctx.reply(file=discord.File(r))

@@ -1,7 +1,6 @@
 # configure logging https://coloredlogs.readthedocs.io/en/latest/api.html#id28
 import logging
 import coloredlogs
-
 import config
 
 logger = logging.getLogger(__name__)
