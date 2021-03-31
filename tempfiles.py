@@ -7,6 +7,7 @@ import logging
 from multiprocessing import current_process
 import config
 import inspect
+from clogs import logger
 
 if current_process().name == 'MainProcess':
     mgr = multiprocessing.Manager()
@@ -37,7 +38,7 @@ def get_session_list():
             frame = frame.f_back
         return frame.f_locals["tempfilesession"]
     except AttributeError:
-        logging.warning("Session list requested outside of TempFileSession")
+        logger.warning("Session list requested outside of TempFileSession")
         return False
 
 
@@ -59,8 +60,8 @@ def temp_file(extension="png", temp_name=None):
         if globallist is not None:
             globallist.append(temp_name)
         else:
-            logging.warning("Temp file created outside TempFileSession.")
-    logging.debug(f"temp_file reserved {temp_name}")
+            logger.warning("Temp file created outside TempFileSession.")
+    logger.debug(f"temp_file reserved {temp_name}")
     return temp_name
 
 
@@ -72,19 +73,20 @@ def reserve_names(names):
 class TempFileSession(object):
     def __init__(self):
         self.id = random.randint(0, 999999999999)
-        logging.debug(f"Temp File Session #{self.id} init.")
+        logger.debug(f"Temp File Session #{self.id} init.")
         self.files_created = mgr.list()
 
     def __enter__(self):
-        logging.debug(f"Temp File Session #{self.id} entered.")
+        logger.debug(f"Temp File Session #{self.id} entered.")
         return self.files_created
 
     def __exit__(self, type, value, traceback):
-        logging.debug(f"Temp File Session #{self.id} exiting.")
+        logger.info(f"Cleaning up {len(self.files_created)} files created by TFS #{self.id}")
+        # logger.debug(f"Temp File Session #{self.id} exiting.")
         for file in self.files_created:
             try:
                 os.remove(file)
-                logging.debug(f"Removed {file}")
+                logger.debug(f"Removed {file}")
             except FileNotFoundError:
-                logging.debug(f"Tried to remove {file}, already removed.")
-        logging.debug(f"Temp File Session #{self.id} exited.")
+                logger.debug(f"Tried to remove {file}, already removed.")
+        logger.debug(f"Temp File Session #{self.id} exited.")

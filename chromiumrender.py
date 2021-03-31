@@ -3,10 +3,7 @@ import logging
 import os
 import sys
 import time
-
-import tempfiles
 from tempfiles import temp_file
-
 from selenium import webdriver
 import config
 

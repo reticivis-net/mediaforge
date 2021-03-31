@@ -24,6 +24,7 @@ import sus
 import config
 import tempfiles
 from tempfiles import temp_file, get_random_string, TempFileSession
+from clogs import logger
 
 """
 This file contains the discord.py functions, which call other files to do the actual processing.
@@ -31,26 +32,6 @@ This file contains the discord.py functions, which call other files to do the ac
 
 # TODO: reddit moment caption
 
-# configure logging https://coloredlogs.readthedocs.io/en/latest/api.html#id28
-field_styles = {
-    'levelname': {'bold': True, 'color': 'blue'},
-    'asctime': {'color': 2},
-    'filename': {'color': 6},
-    'funcName': {'color': 5},
-    'lineno': {'color': 13}
-}
-level_styles = coloredlogs.DEFAULT_LEVEL_STYLES
-level_styles['COMMAND'] = {'color': 4}
-logging.addLevelName(25, "NOTICE")
-logging.addLevelName(35, "SUCCESS")
-logging.addLevelName(21, "COMMAND")
-coloredlogs.install(level=config.log_level, fmt='[%(asctime)s] [%(filename)s:%(funcName)s:%(lineno)d] '
-                                                '%(levelname)s %(message)s',
-                    datefmt='%m/%d/%Y %I:%M:%S %p', field_styles=field_styles, level_styles=level_styles)
-dlogger = logging.getLogger('discord')
-dlogger.setLevel(logging.WARNING)
-logger = logging.getLogger('selenium.webdriver.remote.remote_connection')
-logger.setLevel(logging.WARNING)
 
 if __name__ == "__main__":  # prevents multiprocessing workers from running bot code
     renderpool = improcessing.initializerenderpool()
@@ -63,12 +44,12 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
 
     @bot.event
     async def on_ready():
-        logging.log(35, f"Logged in as {bot.user.name}!")
+        logger.log(35, f"Logged in as {bot.user.name}!")
         game = discord.Activity(name=f"with your media | {config.command_prefix}help",
                                 type=discord.ActivityType.playing)
         await bot.change_presence(activity=game)
         # while True:
-        #     logging.info(renderpool.stats())
+        #     logger.info(renderpool.stats())
         #     await asyncio.sleep(1)
 
 
@@ -101,16 +82,16 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                     if "Content-Length" not in resp.headers:  # size of file to download
                         raise Exception("Cannot determine filesize!")
                     size = int(resp.headers["Content-Length"])
-                    logging.info(f"Url is {humanize.naturalsize(size)}")
+                    logger.info(f"Url is {humanize.naturalsize(size)}")
                     if config.max_file_size < size:  # file size to download must be under ~50MB
                         raise improcessing.NonBugError(f"File is too big ({humanize.naturalsize(size)})!")
-                    logging.info(f"Saving url {url} as {name}")
+                    logger.info(f"Saving url {url} as {name}")
                     f = await aiofiles.open(name, mode='wb')
                     await f.write(await resp.read())
                     await f.close()
                 else:
-                    logging.error(f"aiohttp status {resp.status}")
-                    logging.error(f"aiohttp status {await resp.read()}")
+                    logger.error(f"aiohttp status {resp.status}")
+                    logger.error(f"aiohttp status {await resp.read()}")
                     raise Exception(f"aiohttp status {resp.status} {await resp.read()}")
         if tenorgif:
             mp4 = name
@@ -161,7 +142,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                     tenor = json.loads(tenor)
                     if 'error' in tenor:
                         # await ctx.reply(f"{config.emojis['2exclamation']} Tenor Error! `{tenor['error']}`")
-                        logging.error(f"Tenor Error! `{tenor['error']}`")
+                        logger.error(f"Tenor Error! `{tenor['error']}`")
                     else:
                         detectedfiles.append(tenor['results'][0]['media'][0]['mp4']['url'])
                 elif embed.type in ["image", "video", "audio"]:
@@ -239,7 +220,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                     f"https://api.tenor.com/v1/gifs?ids={m.embeds[0].url.split('-').pop()}&key={config.tenor_key}")
                 tenor = json.loads(tenor)
                 if 'error' in tenor:
-                    logging.error(tenor['error'])
+                    logger.error(tenor['error'])
                     await ctx.send(f"{config.emojis['2exclamation']} Tenor Error! `{tenor['error']}`")
                     return False
                 else:
@@ -298,7 +279,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                         if (imtype := improcessing.mediatype(file)) not in allowedtypes[i]:
                             await ctx.reply(
                                 f"{config.emojis['warning']} Media #{i + 1} is {imtype}, it must be: {', '.join(allowedtypes[i])}")
-                            logging.warning(f"Media {i} type {imtype} is not in {allowedtypes[i]}")
+                            logger.warning(f"Media {i} type {imtype} is not in {allowedtypes[i]}")
                             # for f in files:
                             #     os.remove(f)
                             # break
@@ -306,7 +287,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                             if resize:
                                 files[i] = await improcessing.ensuresize(ctx, file, config.min_size, config.max_size)
                     else:
-                        logging.info("Processing...")
+                        logger.info("Processing...")
                         msgtask = asyncio.create_task(
                             ctx.reply(f"{config.emojis['working']} Processing...", mention_author=False))
                         try:
@@ -330,19 +311,19 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                                 if not result:
                                     raise improcessing.ReturnedNothing(f"Expected string, {func} returned nothing.")
                                 else:
-                                    await ctx.reply(result)
+                                    asyncio.create_task(ctx.reply(result))
                                     msg = await msgtask
-                                    await msg.delete()
+                                    asyncio.create_task(msg.delete())
                         except Exception as e:  # delete the processing message if it errors
                             msg = await msgtask
-                            await msg.delete()
+                            asyncio.create_task(msg.delete())
                             raise e
                         if result and expectresult:
-                            logging.info("Uploading...")
+                            logger.info("Uploading...")
+                            asyncio.create_task(msg.edit(content=f"{config.emojis['working']} Uploading..."))
+                            asyncio.create_task(ctx.reply(file=discord.File(result)))
                             msg = await msgtask
-                            await msg.edit(content=f"{config.emojis['working']} Uploading...")
-                            await ctx.reply(file=discord.File(result))
-                            await msg.delete()
+                            asyncio.create_task(msg.delete())
                             # for f in files:
                             #     try:
                             #         os.remove(f)
@@ -350,7 +331,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                             #         pass
                             # os.remove(result)
                 else:
-                    logging.warning("No media found.")
+                    logger.warning("No media found.")
                     await ctx.send(f"{config.emojis['x']} No file found.")
 
 
@@ -898,7 +879,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             # await improcessing.ytdl(url, form)
             with TempFileSession() as tempfilesession:
                 async with ctx.channel.typing():
-                    # logging.info(url)
+                    # logger.info(url)
                     msg = await ctx.reply(f"{config.emojis['working']} Downloading from site...", mention_author=False)
                     try:
                         r = await improcessing.run_in_exec(ytdownload, url, form)
@@ -945,11 +926,11 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             :Usage=$tenorgif
             :Param=gif - any gif sent from tenor. (automatically found in channel)
             """
-            logging.info("Getting tenor gif...")
+            logger.info("Getting tenor gif...")
             file = await tenorsearch(ctx, True)
             if file:
                 await ctx.send(file)
-                logging.info("Complete!")
+                logger.info("Complete!")
             else:
                 await ctx.send(f"{config.emojis['x']} No tenor gif found.")
 
@@ -1298,8 +1279,9 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             chars = []
             for char in msg:
                 chars.append(f"{ord(char):x}")  # get hex code of char
-            chars = "-".join(chars)
+            chars = "-".join(chars).replace("/", "")
             fpath = f"rendering/twemoji/72x72/{chars}.png"
+            logger.debug(f"trying twemoji {fpath}")
             if os.path.exists(fpath):
                 await ctx.reply(file=discord.File(fpath))
             else:
@@ -1377,7 +1359,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             Shut down the bot
             """
             await ctx.send("✅ Shutting Down...")
-            logging.log(25, "Shutting Down...")
+            logger.log(25, "Shutting Down...")
             await renderpool.shutdown()
             await bot.logout()
             await bot.close()
@@ -1393,21 +1375,21 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
     @bot.listen()
     async def on_command(ctx):
         if isinstance(ctx.channel, discord.DMChannel):
-            logging.log(25,
-                        f"@{ctx.message.author.name}#{ctx.message.author.discriminator} ran "
-                        f"'{logcommand(ctx.message.content)}' in DMs")
+            logger.log(25,
+                       f"@{ctx.message.author.name}#{ctx.message.author.discriminator} ran "
+                       f"'{logcommand(ctx.message.content)}' in DMs")
         else:
-            logging.log(25,
-                        f"@{ctx.message.author.name}#{ctx.message.author.discriminator}"
-                        f" ({ctx.message.author.display_name}) ran '{logcommand(ctx.message.content)}' in channel "
-                        f"#{ctx.channel.name} in server {ctx.guild}")
+            logger.log(25,
+                       f"@{ctx.message.author.name}#{ctx.message.author.discriminator}"
+                       f" ({ctx.message.author.display_name}) ran '{logcommand(ctx.message.content)}' in channel "
+                       f"#{ctx.channel.name} in server {ctx.guild}")
 
 
     @bot.listen()
     async def on_command_completion(ctx):
-        logging.log(35,
-                    f"Command '{logcommand(ctx.message.content)}' by @{ctx.message.author.name}#{ctx.message.author.discriminator} "
-                    f"is complete!")
+        logger.log(35,
+                   f"Command '{logcommand(ctx.message.content)}' by @{ctx.message.author.name}#{ctx.message.author.discriminator} "
+                   f"is complete!")
 
 
     def get_full_class_name(obj):
@@ -1424,31 +1406,31 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                 if ctx.me.permissions_in(ctx.author).send_messages:
                     err = f"{config.emojis['x']} I don't have permissions to send messages in that channel."
                     await ctx.author.send(err)
-                    logging.warning(err)
+                    logger.warning(err)
                     return
                 else:
-                    logging.warning("No permissions to send in command channel or to DM author.")
+                    logger.warning("No permissions to send in command channel or to DM author.")
         if isinstance(commanderror, discord.ext.commands.errors.CommandNotFound):
             msg = ctx.message.content.replace("@", "\\@")
             err = f"{config.emojis['exclamation_question']} Command `{msg.split(' ')[0]}` does not exist."
-            logging.warning(err)
+            logger.warning(err)
             await ctx.reply(err)
         elif isinstance(commanderror, discord.ext.commands.errors.NotOwner):
             err = f"{config.emojis['x']} You are not authorized to use this command."
-            logging.warning(err)
+            logger.warning(err)
             await ctx.reply(err)
         elif isinstance(commanderror, discord.ext.commands.errors.CommandOnCooldown):
             err = f"{config.emojis['clock']} " + str(commanderror).replace("@", "\\@")
-            logging.warning(err)
+            logger.warning(err)
             await ctx.reply(err)
         elif isinstance(commanderror, discord.ext.commands.errors.MissingRequiredArgument):
             err = f"{config.emojis['question']} " + str(commanderror).replace("@", "\\@")
-            logging.warning(err)
+            logger.warning(err)
             await ctx.reply(err)
         elif isinstance(commanderror, discord.ext.commands.errors.BadArgument):
             err = f"{config.emojis['warning']} Bad Argument! Did you put text where a number should be? `" + \
                   str(commanderror).replace("@", "\\@") + "`"
-            logging.warning(err)
+            logger.warning(err)
             await ctx.reply(err)
         elif isinstance(commanderror, discord.ext.commands.errors.CommandInvokeError) and \
                 isinstance(commanderror.original, improcessing.NonBugError):
@@ -1456,7 +1438,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
         else:
             if isinstance(commanderror, discord.ext.commands.errors.CommandInvokeError):
                 commanderror = commanderror.original
-            logging.error(commanderror, exc_info=(type(commanderror), commanderror, commanderror.__traceback__))
+            logger.error(commanderror, exc_info=(type(commanderror), commanderror, commanderror.__traceback__))
             with TempFileSession() as tempfilesession:
                 tr = temp_file("txt")
                 trheader = f"DATETIME:{datetime.datetime.now()}\nCOMMAND:{ctx.message.content}\nTRACEBACK:\n"
@@ -1489,18 +1471,18 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                                        autopost=True)  # Autopost will post your guild count every 30 minutes
 
         async def on_guild_post(self):
-            logging.info("top.gg Server count posted successfully")
+            logger.debug("top.gg Server count posted successfully")
 
 
-    logging.info(f"discord.py {discord.__version__}")
+    logger.info(f"discord.py {discord.__version__}")
 
     # bot.remove_command('help')
 
     if config.topgg_token is not None:
-        logging.info("top.gg token detected. attempting to initialize.")
+        logger.info("top.gg token detected. attempting to initialize.")
         bot.add_cog(TopGG(bot))
     else:
-        logging.info("no top.gg token is set.")
+        logger.debug("no top.gg token is set.")
     bot.add_cog(Caption(bot))
     bot.add_cog(Media(bot))
     bot.add_cog(Conversion(bot))
