@@ -9,6 +9,7 @@ python-magic - <https://github.com/ahupp/python-magic> - detects filetypes
 PyCharm - <https://www.jetbrains.com/pycharm/> - used for development
 <https://github.com/aechaechaech/Jerma-Imposter-Message-Generator> - jermatext uses a modified version of this code.
 Twemoji - <https://twemoji.twitter.com/> - Emoji font used for caption commands
+FontAwesome - <https://fontawesome.com/license> - Used for some emojis
 gifski - <https://gif.ski/> - used to create high quality gifs
 pngquant - <https://pngquant.org/> - compresses PNG images
 ExifTool - <https://exiftool.org/>

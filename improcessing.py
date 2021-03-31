@@ -2,14 +2,9 @@
 import concurrent.futures
 import glob
 import json
-import logging
 import math
 import shutil
-import urllib.parse
-import multiprocessing
 import os
-import random
-import string
 import sys
 import asyncio
 # pip libs
@@ -27,6 +22,7 @@ import humanize
 import chromiumrender
 import config
 import tempfiles
+from clogs import logger
 
 """
 This file contains functions for processing and editing media
@@ -91,7 +87,7 @@ def initializerenderpool():
     :return: the worker pool
     """
     global renderpool
-    logging.info(f"Starting {config.chrome_driver_instances} pool processes...")
+    logger.info(f"Starting {config.chrome_driver_instances} pool processes...")
     # renderpool = multiprocessing.Pool(config.chrome_driver_instances, initializer=chromiumrender.initdriver)
     renderpool = Pool(config.chrome_driver_instances, chromiumrender.initdriver)
     return renderpool
@@ -121,17 +117,17 @@ async def run_command(*args):
     )
 
     # Status
-    logging.log(21, f"PID {process.pid} Started: {args}")
+    logger.log(21, f"PID {process.pid} Started: {args}")
 
     # Wait for the subprocess to finish
     stdout, stderr = await process.communicate()
 
     # Progress
     if process.returncode == 0:
-        logging.debug(f"PID {process.pid} Done.")
-        logging.debug(f"Results: {stdout.decode().strip() + stderr.decode().strip()}")
+        logger.debug(f"PID {process.pid} Done.")
+        logger.debug(f"Results: {stdout.decode().strip() + stderr.decode().strip()}")
     else:
-        logging.error(
+        logger.error(
             f"PID {process.pid} Failed: {args} result: {stderr.decode().strip()}",
         )
         # adds command output to traceback
@@ -150,7 +146,7 @@ async def get_frame_rate(filename):
     :param filename: filename
     :return: FPS
     """
-    logging.info("Getting FPS...")
+    logger.info("Getting FPS...")
     out = await run_command("ffprobe", filename, "-v", "0", "-select_streams", "v", "-print_format", "flat",
                             "-show_entries", "stream=r_frame_rate")
     rate = out.split('=')[1].strip()[1:-1].split('/')
@@ -168,7 +164,7 @@ async def get_duration(filename):
     :param filename: filename
     :return: duration
     """
-    logging.info("Getting duration...")
+    logger.info("Getting duration...")
     out = await run_command("ffprobe", "-v", "error", "-show_entries", "format=duration", "-of",
                             "default=noprint_wrappers=1:nokey=1", filename)
     if out == "N/A":  # happens with APNGs?
@@ -206,7 +202,7 @@ async def ffmpegsplit(media):
     :param media: file
     :return: [list of files, ffmpeg key to find files]
     """
-    logging.info("Splitting frames...")
+    logger.info("Splitting frames...")
     await run_command("ffmpeg", "-hide_banner", "-i", media, "-vsync", "1", f"{media.split('.')[0]}_%09d.png")
     files = glob.glob(f"{media.split('.')[0]}_*.png")
     tempfiles.reserve_names(files)
@@ -222,12 +218,12 @@ async def splitaudio(video):
     """
     ifaudio = await run_command("ffprobe", "-i", video, "-show_streams", "-select_streams", "a", "-loglevel", "error")
     if ifaudio:
-        logging.info("Splitting audio...")
+        logger.info("Splitting audio...")
         name = temp_file("aac")
         await run_command("ffmpeg", "-hide_banner", "-i", video, "-vn", "-acodec", "aac", name)
         return name
     else:
-        logging.info("No audio detected.")
+        logger.info("No audio detected.")
         return False
 
 
@@ -276,11 +272,11 @@ async def assurefilesize(media: str, ctx: discord.ext.commands.Context):
         media = await reencode(media)
     for i in range(5):
         size = os.path.getsize(media)
-        logging.info(f"Resulting file is {humanize.naturalsize(size)}")
+        logger.info(f"Resulting file is {humanize.naturalsize(size)}")
         # https://www.reddit.com/r/discordapp/comments/aflp3p/the_truth_about_discord_file_upload_limits/
         if size >= 8388119:
             if mt in ["VIDEO", "IMAGE", "GIF"]:
-                logging.info("Image too big!")
+                logger.info("Image too big!")
                 msg = await ctx.reply(
                     f"{config.emojis['warning']} Resulting file too big! ({humanize.naturalsize(size)}) "
                     f"Downsizing result...")
@@ -305,12 +301,12 @@ async def watermark(media):
             shutil.copy2(t, media)
             os.remove(t)
         except CMDError:
-            logging.warning(f"ffmpeg audio watermarking of {media} failed")
+            logger.warning(f"ffmpeg audio watermarking of {media} failed")
     else:
         try:
             await run_command("exiftool", "-overwrite_original", "-artist=MediaForge", media)
         except CMDError:
-            logging.warning(f"exiftool watermarking of {media} failed")
+            logger.warning(f"exiftool watermarking of {media} failed")
 
 
 def mediatype(image):
@@ -372,7 +368,7 @@ async def ensureduration(media, ctx):
 
 # async def forcesize(files):
 #     # this code is bugged, it shuffles frames around...
-#     logging.info("Forcing all frames to same size...")
+#     logger.info("Forcing all frames to same size...")
 #     res = await get_resolution(files[0])
 #     out = []
 #     jobs = []
@@ -395,11 +391,11 @@ async def handleanimated(media: str, capfunction: callable, ctx, *caption):
     :return: processed media
     """
     imty = mediatype(media)
-    logging.info(f"Detected type {imty}.")
+    logger.info(f"Detected type {imty}.")
     if imty is None:
         raise Exception(f"File {media} is invalid!")
     elif imty == "IMAGE":
-        logging.info(f"Processing frame...")
+        logger.info(f"Processing frame...")
         # media = minimagesize(media, 200)
         result = await renderpool.submit(capfunction, media, caption)
         # capped = await run_in_exec(result.get)
@@ -409,10 +405,10 @@ async def handleanimated(media: str, capfunction: callable, ctx, *caption):
         frames, name = await ffmpegsplit(media)
         audio = await splitaudio(media)
         fps = await get_frame_rate(media)
-        # logging.info(
+        # logger.info(
         #     f"Processing {len(frames)} frames with {min(len(frames), POOLWORKERS)} processes...")
 
-        logging.info(f"Processing {len(frames)} frames...")
+        logger.info(f"Processing {len(frames)} frames...")
         framefuncs = []
 
         ses = tempfiles.get_session_list()
@@ -424,7 +420,7 @@ async def handleanimated(media: str, capfunction: callable, ctx, *caption):
         # result = renderpool.starmap_async(capfunction, capargs)
         # await run_in_exec(result.get)
         # result = await renderpool.
-        logging.info(f"Joining {len(frames)} frames...")
+        logger.info(f"Joining {len(frames)} frames...")
         # frames = await forcesize(glob.glob(name.replace('.png', '_rendered.png').replace('%09d', '*')))
 
         if imty == "GIF":
@@ -445,7 +441,7 @@ async def handleanimated(media: str, capfunction: callable, ctx, *caption):
                                   "-c:v", "libx264", "-crf", "25", "-pix_fmt", "yuv420p",
                                   "-vf", "crop=trunc(iw/2)*2:trunc(ih/2)*2", outname)
         # cleanup
-        # logging.info("Cleaning files...")
+        # logger.info("Cleaning files...")
         # for f in glob.glob(name.replace('%09d', '*')):
         #     try:
         #         os.remove(f)
@@ -477,7 +473,7 @@ async def mp4togif(mp4):
         raise NonBugError(f"Output file only has {len(n)} frames, GIFs must have at least 2.")
     else:
         await run_command("gifski", "--quiet", "--fast", "-o", outname, "--fps", str(fps), *n)
-        logging.info("Cleaning files...")
+        # logger.info("Cleaning files...")
         # for f in glob.glob(name.replace('%09d', '*')):
         #     os.remove(f)
         return outname
@@ -862,7 +858,7 @@ async def ensuresize(ctx, file, minsize, maxsize):
         w, h = await get_resolution(file)
         resized = True
     if resized:
-        logging.info(f"Resized from {owidth}x{oheight} to {w}x{h}")
+        logger.info(f"Resized from {owidth}x{oheight} to {w}x{h}")
         await ctx.reply(f"Resized input media from {int(owidth)}x{int(oheight)} to {int(w)}x{int(h)}.", delete_after=5,
                         mention_author=False)
     return file
@@ -948,7 +944,7 @@ async def resize(image, width, height):
 async def checkwatermark(file):
     # see watermark()
     etdata = await run_command("exiftool", "-artist", "-json", file)
-    logging.info(etdata)
+    logger.info(etdata)
     etdata = json.loads(etdata)[0]
     if "Artist" in etdata:
         if etdata["Artist"] == "MediaForge":
