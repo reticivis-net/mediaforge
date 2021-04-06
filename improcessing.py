@@ -668,7 +668,7 @@ async def addaudio(files):
             outname = temp_file("mp4")
         await run_command("ffmpeg", "-i", media, "-i", audio, "-filter_complex",
                           "[0:a][1:a]amix=inputs=2:dropout_transition=100000:duration=longest[a];[a]volume=2[a]",
-                          "-map", "0:v", "-map", "[a]", "-c:a", "aac", outname)
+                          "-map", "0:v?", "-map", "[a]", "-c:a", "aac", outname)
         return outname
 
 
@@ -1002,7 +1002,7 @@ async def saveurl(url, extension=None):
                 size = int(resp.headers["Content-Length"])
                 logger.info(f"Url is {humanize.naturalsize(size)}")
                 if config.max_file_size < size:  # file size to download must be under ~50MB
-                    raise improcessing.NonBugError(f"File is too big ({humanize.naturalsize(size)})!")
+                    raise NonBugError(f"File is too big ({humanize.naturalsize(size)})!")
                 logger.info(f"Saving url {url} as {name}")
                 f = await aiofiles.open(name, mode='wb')
                 await f.write(await resp.read())
@@ -1013,6 +1013,6 @@ async def saveurl(url, extension=None):
                 raise Exception(f"aiohttp status {resp.status} {await resp.read()}")
     if tenorgif:
         mp4 = name
-        name = await improcessing.mp4togif(name)
+        name = await mp4togif(name)
         # os.remove(mp4)
     return name
