@@ -868,11 +868,11 @@ async def ensuresize(ctx, file, minsize, maxsize):
 
 async def rotate(file, rottype):
     types = {  # command input to ffmpeg vf
-        "90": "transpose=1,format=yuv420p",
-        "90ccw": "transpose=2,format=yuv420p",
-        "180": "vflip,hflip,format=yuv420p",
-        "vflip": "vflip,format=yuv420p",
-        "hflip": "hflip,format=yuv420p"
+        "90": "transpose=1",
+        "90ccw": "transpose=2,",
+        "180": "vflip,hflip",
+        "vflip": "vflip",
+        "hflip": "hflip"
     }
     mt = mediatype(file)
     exts = {
@@ -882,7 +882,7 @@ async def rotate(file, rottype):
         "IMAGE": "png"
     }
     out = temp_file(exts[mt])
-    await run_command("ffmpeg", "-i", file, "-vf", types[rottype], "-c:v", "png", out)
+    await run_command("ffmpeg", "-i", file, "-vf", types[rottype] + ",format=yuva420p", "-c:v", "png", out)
     if mt == "GIF":
         out = await mp4togif(out)
     return out
