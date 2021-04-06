@@ -241,7 +241,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                             logger.warning(f"Media {i} type {imtype} is not in {allowedtypes[i]}")
                             # for f in files:
                             #     os.remove(f)
-                            # break
+                            break
                         else:
                             if resize:
                                 files[i] = await improcessing.ensuresize(ctx, file, config.min_size, config.max_size)
