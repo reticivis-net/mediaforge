@@ -279,9 +279,10 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                             raise e
                         if result and expectresult:
                             logger.info("Uploading...")
-                            asyncio.create_task(ctx.reply(file=discord.File(result)))
+                            uploadtask = asyncio.create_task(ctx.reply(file=discord.File(result)))
                             msg = await msgtask
                             await msg.edit(content=f"{config.emojis['working']} Uploading...")
+                            await uploadtask
                             asyncio.create_task(msg.delete())
                             # for f in files:
                             #     try:
