@@ -14,6 +14,7 @@ selenium = "~=3.141.0"
 Pillow = "~=8.0.1"
 youtube-dl = "*"
 dblpy = "*"
+lottie = "*"
 
 [dev-packages]
 

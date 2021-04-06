@@ -8,6 +8,8 @@ import os
 import sys
 import asyncio
 # pip libs
+import aiofiles
+import aiohttp
 import discord.ext
 from PIL import Image, UnidentifiedImageError
 
@@ -971,3 +973,42 @@ async def add_emoji(file, guild: discord.Guild, name):
         return f"{config.emojis['2exclamation']} Something went wrong trying to add your emoji! ```{e}```"
     else:
         return f"Emoji successfully added: {emoji}"
+
+
+async def saveurl(url, extension=None):
+    """
+    save a url to /temp
+    :param url: web url of a file
+    :param extension: force a file extension
+    :return: local path of saved file
+    """
+    tenorgif = url.startswith("https://media.tenor.com") and url.endswith("/mp4")  # tenor >:(
+    if tenorgif:
+        extension = "mp4"
+    if extension is None:
+        extension = url.split(".")[-1].split("?")[0]
+    name = temp_file(extension)
+    # https://github.com/aio-libs/aiohttp/issues/3904#issuecomment-632661245
+    async with aiohttp.ClientSession(headers={'Connection': 'keep-alive'}) as session:
+        # i used to make a head request to check size first, but for some reason head requests can be super slow
+        async with session.get(url) as resp:
+            if resp.status == 200:
+                if "Content-Length" not in resp.headers:  # size of file to download
+                    raise Exception("Cannot determine filesize!")
+                size = int(resp.headers["Content-Length"])
+                logger.info(f"Url is {humanize.naturalsize(size)}")
+                if config.max_file_size < size:  # file size to download must be under ~50MB
+                    raise improcessing.NonBugError(f"File is too big ({humanize.naturalsize(size)})!")
+                logger.info(f"Saving url {url} as {name}")
+                f = await aiofiles.open(name, mode='wb')
+                await f.write(await resp.read())
+                await f.close()
+            else:
+                logger.error(f"aiohttp status {resp.status}")
+                logger.error(f"aiohttp status {await resp.read()}")
+                raise Exception(f"aiohttp status {resp.status} {await resp.read()}")
+    if tenorgif:
+        mp4 = name
+        name = await improcessing.mp4togif(name)
+        # os.remove(mp4)
+    return name

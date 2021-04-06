@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "da3e5d79db65eee848d7b248b72f83adf2c4a3a714cb131d719d184d9717df0a"
+            "sha256": "6b868fd32bd27029d8be5c5989ad9ce1bb22a75cb62907c6b3664a7e723b7b41"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -242,6 +242,13 @@
             "markers": "python_version >= '3.4'",
             "version": "==3.1"
         },
+        "lottie": {
+            "hashes": [
+                "sha256:27c1e512f5e4814d6904b5f0a21032de799c41e975f0ebd5c6312b64e079a7c1"
+            ],
+            "index": "pypi",
+            "version": "==0.6.7"
+        },
         "multidict": {
             "hashes": [
                 "sha256:1ece5a3369835c20ed57adadc663400b5525904e53bae59ec854a5d36b39b21a",
@@ -381,11 +388,11 @@
         },
         "urllib3": {
             "hashes": [
-                "sha256:1b465e494e3e0d8939b50680403e3aedaa2bc434b7d5af64dfd3c958d7f5ae80",
-                "sha256:de3eedaad74a2683334e282005cd8d7f22f4d55fa690a2a1020a416cb0a47e73"
+                "sha256:2f4da4594db7e1e110a944bb1b551fdf4e6c136ad42e4234131391e21eb5b0df",
+                "sha256:e7b021f7241115872f92f43c6508082facffbd1c048e3c6e2bb9c2a157e28937"
             ],
             "markers": "python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4' and python_version < '4'",
-            "version": "==1.26.3"
+            "version": "==1.26.4"
         },
         "yarl": {
             "hashes": [
@@ -412,11 +419,11 @@
         },
         "youtube-dl": {
             "hashes": [
-                "sha256:b390cddbd4d605bd887d0d4063988cef0fa13f916d2e1e3564badbb22504d754",
-                "sha256:e7d48cd42f3081e1e0064e69f31f2856508ef31c0fc80eeebd8e70c6a031a24d"
+                "sha256:2715ca9fc4cd3c0eafa56cba9dfacc699fa6176ca083e903becaddd108d8db7b",
+                "sha256:efbac0e19accccd36e597749a59b095e60439240c777bf1fa1e80ad00e5073dc"
             ],
             "index": "pypi",
-            "version": "==2021.2.10"
+            "version": "==2021.4.1"
         }
     },
     "develop": {}
