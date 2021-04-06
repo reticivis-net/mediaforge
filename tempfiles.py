@@ -82,11 +82,13 @@ class TempFileSession(object):
 
     def __exit__(self, type, value, traceback):
         logger.info(f"Cleaning up {len(self.files_created)} files created by TFS #{self.id}")
-        # logger.debug(f"Temp File Session #{self.id} exiting.")
+        logger.debug(f"Temp File Session #{self.id} exiting.")
         for file in self.files_created:
             try:
                 os.remove(file)
                 logger.debug(f"Removed {file}")
             except FileNotFoundError:
                 logger.debug(f"Tried to remove {file}, already removed.")
+            except PermissionError:
+                logger.debug(f"Tried to remove {file}, file is in use.")
         logger.debug(f"Temp File Session #{self.id} exited.")

@@ -695,7 +695,7 @@ async def concatv(files):
     fixedfixedvideo1 = await changefps(fixedvideo1, fps)
     concatdemuxer = temp_file("txt")
     with open(concatdemuxer, "w+") as f:
-        f.write(f"file '{fixedvideo0}'\nfile '{fixedfixedvideo1}'".replace("temp/", ""))
+        f.write(f"file '{fixedvideo0}'\nfile '{fixedfixedvideo1}'".replace(config.temp_dir, ""))
     outname = temp_file("mp4")
     await run_command("ffmpeg", "-hide_banner", "-f", "concat", "-i", concatdemuxer, "-c:v", "png", "-c:a", "aac",
                       outname)
@@ -796,8 +796,6 @@ async def freezemotivate(files, *caption):
     clastframe = await handleanimated(lastframe, captionfunctions.motivate, None, *caption)
     freezeframe = await imageaudio([clastframe, audio])
     final = await concatv([video, freezeframe])
-    # for file in [lastframe, clastframe]:
-    #     os.remove(file)
     return final
 
 
