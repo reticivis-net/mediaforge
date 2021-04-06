@@ -897,9 +897,13 @@ async def volume(file, vol):
     out = temp_file(exts[mt])
     # convert vol % to db
     # http://www.sengpielaudio.com/calculator-loudness.htm
-    vol = 10 * math.log(vol, 2)
-    # for some reason aac has audio caps but libmp3lame works fine lol
-    await run_command("ffmpeg", "-i", file, "-af", f"volume={vol}dB", "-strict", "-1", "-c:a", "libmp3lame", out)
+    if vol > 0:
+        vol = 10 * math.log(vol, 2)
+        # for some reason aac has audio caps but libmp3lame works fine lol
+        await run_command("ffmpeg", "-i", file, "-af", f"volume={vol}dB", "-strict", "-1", "-c:a", "libmp3lame", out)
+    else:
+        await run_command("ffmpeg", "-i", file, "-an", out)
+
     return out
 
 
