@@ -1,15 +1,14 @@
-
 import random
 import string
 from tempfiles import temp_file
-
 from PIL import Image, ImageDraw, ImageFont
+from PIL import ImageFile
+
+ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 
 def get_random_string(length):
     return ''.join(random.choice(string.ascii_letters) for i in range(length))
-
-
 
 
 # this codebase is FUCKED
@@ -87,7 +86,7 @@ def sus(input_string: str):
             chars = master_x_dict[char]
             ind = stringsofar.count(char) % len(chars)
             x_coords = chars[ind]
-
+            # this line causes #14 but i have zero idea why
             letter = master_im.crop((x_coords[0], 0, x_coords[1], y_coord_split))
             face = master_im.crop((x_coords[0], y_coord_split, x_coords[1], master_im.height))
 
