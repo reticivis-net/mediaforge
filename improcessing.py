@@ -979,6 +979,17 @@ async def add_emoji(file, guild: discord.Guild, name):
         return f"Emoji successfully added: {emoji}"
 
 
+async def contentlength(url):
+    async with aiohttp.ClientSession(headers={'Connection': 'keep-alive'}) as session:
+        # i used to make a head request to check size first, but for some reason head requests can be super slow
+        async with session.get(url) as resp:
+            if resp.status == 200:
+                if "Content-Length" not in resp.headers:  # size of file to download
+                    return False
+                else:
+                    return int(resp.headers["Content-Length"])
+
+
 async def saveurl(url, extension=None):
     """
     save a url to /temp
