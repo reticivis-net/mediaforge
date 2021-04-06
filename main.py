@@ -105,7 +105,8 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                     else:
                         detectedfiles.append(tenor['results'][0]['media'][0]['mp4']['url'])
                 elif embed.type in ["image", "video", "audio"]:
-                    detectedfiles.append(embed.url)
+                    if await improcessing.contentlength(embed.url):  # prevent adding youtube videos and such
+                        detectedfiles.append(embed.url)
         if len(m.attachments):
             for att in m.attachments:
                 if not att.filename.endswith("txt"):  # it was reading traceback attachments >:(
@@ -906,7 +907,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                 await ctx.send(f"{config.emojis['x']} No tenor gif found.")
 
         @commands.cooldown(1, config.cooldown, commands.BucketType.user)
-        @commands.command(aliases=["video", "giftovideo"])
+        @commands.command(aliases=["video", "giftovideo", "tomp4"])
         async def tovideo(self, ctx):
             """
             Converts a GIF to a video.
