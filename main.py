@@ -9,18 +9,21 @@ import re
 import traceback
 import urllib.parse
 # pip libs
+import aiofiles
 import aiohttp
 import dbl
 import discord
+import humanize
 from discord.ext import commands
 import youtube_dl
 # project files
 import captionfunctions
 import improcessing
+import lottiestickers
 import sus
 import config
 import tempfiles
-from improcessing import saveurl
+from improcessing import NonBugError, mp4togif
 from tempfiles import temp_file, get_random_string, TempFileSession
 from clogs import logger
 
@@ -115,6 +118,9 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             for sticker in m.stickers:
                 if sticker.image_url:
                     detectedfiles.append(str(sticker.image_url))
+                # this is commented out due to the lottie render code being buggy
+                # if sticker.format == discord.StickerType.lottie:
+                #     detectedfiles.append("LOTTIE|" + lottiestickers.stickerurl(sticker))
         return detectedfiles
 
 
@@ -149,6 +155,49 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                 if len(outfiles) >= nargs:
                     return outfiles[:nargs]
         return False
+
+
+    async def saveurl(url, extension=None):
+        """
+        save a url to /temp
+        :param url: web url of a file
+        :param extension: force a file extension
+        :return: local path of saved file
+        """
+        tenorgif = url.startswith("https://media.tenor.com") and url.endswith("/mp4")  # tenor >:(
+        if tenorgif:
+            extension = "mp4"
+        lottie = url.startswith("LOTTIE|")
+        if lottie:
+            url = url.lstrip('LOTTIE|')
+        if extension is None:
+            extension = url.split(".")[-1].split("?")[0]
+        name = temp_file(extension)
+        # https://github.com/aio-libs/aiohttp/issues/3904#issuecomment-632661245
+        async with aiohttp.ClientSession(headers={'Connection': 'keep-alive'}) as session:
+            # i used to make a head request to check size first, but for some reason head requests can be super slow
+            async with session.get(url) as resp:
+                if resp.status == 200:
+                    if not lottie:  # discord why
+                        if "Content-Length" not in resp.headers:  # size of file to download
+                            raise Exception("Cannot determine filesize!")
+                        size = int(resp.headers["Content-Length"])
+                        logger.info(f"Url is {humanize.naturalsize(size)}")
+                        if config.max_file_size < size:  # file size to download must be under ~50MB
+                            raise improcessing.NonBugError(f"File is too big ({humanize.naturalsize(size)})!")
+                    logger.info(f"Saving url {url} as {name}")
+                    f = await aiofiles.open(name, mode='wb')
+                    await f.write(await resp.read())
+                    await f.close()
+                else:
+                    logger.error(f"aiohttp status {resp.status}")
+                    logger.error(f"aiohttp status {await resp.read()}")
+                    raise Exception(f"aiohttp status {resp.status} {await resp.read()}")
+        if tenorgif:
+            name = await improcessing.mp4togif(name)
+        if lottie:
+            name = await renderpool.submit(lottiestickers.lottiestickertogif, name)
+        return name
 
 
     async def saveurls(urls: list):
@@ -813,7 +862,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
 
     class Conversion(commands.Cog, name="Conversion"):
         """
-        Commands to convert one type of media to another
+        Commands to convert media types and download internet-hosted media.
         """
 
         def __init__(self, bot):
@@ -831,6 +880,28 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
         #     :Param=audio - An audio file. (automatically found in channel)
         #     """
         #     await improcess(ctx, improcessing.imageaudio, [["IMAGE"], ["AUDIO"]])
+        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
+        @commands.command(aliases=["avatar", "pfp", "profilepicture", "profilepic", "ayowhothismf"])
+        async def icon(self, ctx, *, userorserver):
+            """
+            Grabs the icon url of a Discord user or server.
+            This command works off IDs. user mentions contain the ID internally so mentioning a user will work.
+            To get the icon of a guild, copy the guild id and use that as the parameter.
+            To get the icon of a webhook message, copy the message ID and ***in the same channel as the message*** use the message ID as the parameter. This will also work for normal users though i have no idea why you'd do it that way.
+
+            :Usage=$icon `body`
+            :Param=body - must contain a user, guild, or message ID.
+            """
+            id_regex = re.compile(r'([0-9]{15,20})')
+            tasks = []
+            for m in re.finditer(id_regex, userorserver):
+                tasks.append(improcessing.iconfromsnowflakeid(int(m.group(0)), bot, ctx))
+            result = await asyncio.gather(*tasks)
+            result = list(filter(None, result))  # remove Nones
+            if result:
+                await ctx.reply("\n".join(result)[0:2000])
+            else:
+                await ctx.send(f"{config.emojis['warning']} No valid user, guild, or message ID found.")
 
         @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         @commands.command(aliases=["youtube", "youtubedownload", "youtubedl", "ytdownload", "download", "dl", "ytdl"])
@@ -846,7 +917,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             types = ["video", "audio"]
             form = form.lower()
             if form not in types:
-                await ctx.send(f"{config.emojis['warning']} Download format must be `video` or `audio`.")
+                await ctx.reply(f"{config.emojis['warning']} Download format must be `video` or `audio`.")
                 return
             # await improcessing.ytdl(url, form)
             with TempFileSession() as tempfilesession:
