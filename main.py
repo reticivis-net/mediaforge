@@ -68,7 +68,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             if len(glob.glob(name + ".*")) == 0:
                 break
         opts = {
-            "max_filesize": 8388119,
+            "max_filesize": config.file_upload_limit,
             "quiet": True,
             "outtmpl": f"{name}.%(ext)s",
             "default_search": "auto",
@@ -84,8 +84,11 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             }]
         with youtube_dl.YoutubeDL(opts) as ydl:
             ydl.download([vid])
-        filename = glob.glob(name + ".*")[0]
-        return filename
+        filename = glob.glob(name + ".*")
+        if len(filename) > 0:
+            return filename[0]
+        else:
+            return None
 
 
     async def handlemessagesave(m: discord.Message):
@@ -926,10 +929,14 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                     msg = await ctx.reply(f"{config.emojis['working']} Downloading from site...", mention_author=False)
                     try:
                         r = await improcessing.run_in_exec(ytdownload, url, form)
-                        tempfiles.reserve_names([r])
-                        r = await improcessing.assurefilesize(r, ctx)
-                        await msg.edit(content=f"{config.emojis['working']} Uploading to Discord...")
-                        await ctx.reply(file=discord.File(r))
+                        if r:
+                            tempfiles.reserve_names([r])
+                            r = await improcessing.assurefilesize(r, ctx)
+                            await msg.edit(content=f"{config.emojis['working']} Uploading to Discord...")
+                            await ctx.reply(file=discord.File(r))
+                        else:
+                            await ctx.reply(f"{config.emojis['warning']} No available downloads found within Discord's "
+                                            f"file upload limit.")
                         # os.remove(r)
                         await msg.delete()
                     except youtube_dl.DownloadError as e:

@@ -275,7 +275,7 @@ async def assurefilesize(media: str, ctx: discord.ext.commands.Context):
         size = os.path.getsize(media)
         logger.info(f"Resulting file is {humanize.naturalsize(size)}")
         # https://www.reddit.com/r/discordapp/comments/aflp3p/the_truth_about_discord_file_upload_limits/
-        if size >= 8388119:
+        if size >= config.file_upload_limit:
             if mt in ["VIDEO", "IMAGE", "GIF"]:
                 logger.info("Image too big!")
                 msg = await ctx.reply(
@@ -288,7 +288,7 @@ async def assurefilesize(media: str, ctx: discord.ext.commands.Context):
             else:
                 await ctx.send(f"{config.emojis['warning']} Audio file is too big to upload.")
                 return False
-        if os.path.getsize(media) < 8388119:
+        if os.path.getsize(media) < config.file_upload_limit:
             return media
     await ctx.send(f"{config.emojis['warning']} Max downsizes reached. File is way too big.")
     return False

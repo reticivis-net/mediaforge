@@ -47,5 +47,9 @@ tips = {
 }
 # the directory to store temporary files in. must end with a slash.
 temp_dir = "temp/"
+# https://www.reddit.com/r/discordapp/comments/aflp3p/the_truth_about_discord_file_upload_limits/
+# configured upload limit, in bytes, for files.
+# dont change this unless you have a really good reason to. i dont have error handling for overly large files
+file_upload_limit = 8388119
 # prefix for commands
 command_prefix = "$"
