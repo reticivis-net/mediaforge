@@ -1,6 +1,5 @@
 # ![MediaForge](media/banner.png)
 
-
 [![MediaForge Discord](https://discordapp.com/api/guilds/803788965215338546/widget.png)](https://discord.gg/xwWjgyVqBz)
 [![Discord Bots](https://top.gg/api/widget/status/780570413767983122.svg)](https://top.gg/bot/780570413767983122)
 [![Discord Bots](https://top.gg/api/widget/servers/780570413767983122.svg)](https://top.gg/bot/780570413767983122)
@@ -24,7 +23,8 @@
 
 ## to self-host
 
-verified working on windows 10 and ubuntu 18.04
+verified working on windows 10 and ubuntu 18.04. will _probably_ work on macos and other linux distros if the below
+libraries are available but theyre untested and unsupported.
 
 ### external libraries
 
@@ -40,7 +40,10 @@ the bot uses many CLI programs for media processing.
       chrome version doesn't have to be the exact same as your chromedriver version, but it should be similar
     - you may need to run `sudo chmod +x ./chromedriver87` on linux to make it a working executable.
 - ImageMagick - not included but [downloadable here](https://imagemagick.org/script/download.php)
-- ExifTool - windows executable is included. installable on linux with `sudo apt-get install exiftool` https://exiftool.org/
+- ExifTool - windows executable is included. installable on linux
+  with `sudo apt-get install exiftool` https://exiftool.org/
+- cairo - install on linux with `sudo apt-get install libcairo2-dev`. installable on windows by downloading
+  GTK+. https://www.cairographics.org/download/
 
 ### pip libraries
 
@@ -61,6 +64,6 @@ the bot uses many CLI programs for media processing.
 ### to run
 
 - once you've set up all of the libraries, just run the program with `python main.py` (or `python3.8 main.py` or
-  whatever your python is named). make sure it can read and write to the directory it lives in and also access/execute 
+  whatever your python is named). make sure it can read and write to the directory it lives in and also access/execute
   all the aforementioned libraries
 - terminate the bot by running the `shutdown` command, this will _probably_ close better than a termination
