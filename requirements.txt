@@ -1,4 +1,4 @@
-Pillow~=8.0.1
+Pillow~=8.2.0
 aiohttp[speedups]~=3.6.3
 aiofiles~=0.6.0
 humanize~=3.2.0

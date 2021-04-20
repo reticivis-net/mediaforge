@@ -4,8 +4,6 @@ from tempfiles import temp_file
 from PIL import Image, ImageDraw, ImageFont
 from PIL import ImageFile
 
-ImageFile.LOAD_TRUNCATED_IMAGES = True
-
 
 def get_random_string(length):
     return ''.join(random.choice(string.ascii_letters) for i in range(length))

@@ -1006,7 +1006,54 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             """
             await improcess(ctx, improcessing.mediatopng, [["VIDEO", "GIF", "IMAGE"]])
 
+        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
+        @commands.command(aliases=["emoji", "emojiimage"])
+        async def emojiurl(self, ctx, *, msg):
+            """
+            Extracts the raw file from up to 5 custom emojis.
+            Each emoji is sent as a separate message intentionally to allow replying with a media command.
 
+            :Usage=$emojiurl `emojis`
+            :Param=emojis - Up to 5 custom emojis to send the URL of.
+            """
+            urls = []
+            emojiregex = "<(?P<animated>a?):(?P<name>[a-zA-Z0-9_]{2,32}):(?P<id>[0-9]{18,22})>"
+            for i, match in enumerate(re.finditer(emojiregex, msg)):
+                if i == 5:
+                    break
+                emojiid = int(match.group(3))
+                anim = bool(match.group(1))
+                url = str(discord.PartialEmoji(id=emojiid, name="", animated=anim).url)
+                urls.append(url)
+            if urls:
+                for url in urls:
+                    await ctx.reply(url)
+            else:
+                await ctx.reply(f"{config.emojis['warning']} Your message doesn't contain any custom emojis!")
+
+        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
+        @commands.command()
+        async def twemoji(self, ctx, *, msg):
+            """
+            Sends the twemoji image for an emoji.
+            Twemoji is the open source emoji set that discord desktop and twitter use. https://twemoji.twitter.com/
+            Only one emoji is supported in the command for now due to emojis sometimes taking multiple characters.
+            It's easier to get the right emoji if I know only one is sent
+
+            :Usage=$twemoji `emoji`
+            :Param=emoji - ONE default emoji.
+            """
+            chars = []
+            for char in msg:
+                chars.append(f"{ord(char):x}")  # get hex code of char
+            chars = "-".join(chars).replace("/", "")
+            fpath = f"rendering/twemoji/72x72/{chars}.png"
+            logger.debug(f"trying twemoji {fpath}")
+            if os.path.exists(fpath):
+                await ctx.reply(file=discord.File(fpath))
+            else:
+                await ctx.reply(f"{config.emojis['warning']} No twemoji image found! Make sure to send only ONE emoji a"
+                                f"nd no other characters.")
     class Image(commands.Cog, name="Creation"):
         """
         Generate images from a template.
@@ -1289,54 +1336,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             """
             await ctx.reply(f"🏓 Pong! `{round(bot.latency * 1000, 1)}ms`")
 
-        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
-        @commands.command(aliases=["emoji", "emojiimage"])
-        async def emojiurl(self, ctx, *, msg):
-            """
-            Extracts the raw file from up to 5 custom emojis.
-            Each emoji is sent as a separate message intentionally to allow replying with a media command.
 
-            :Usage=$emojiurl `emojis`
-            :Param=emojis - Up to 5 custom emojis to send the URL of.
-            """
-            urls = []
-            emojiregex = "<(?P<animated>a?):(?P<name>[a-zA-Z0-9_]{2,32}):(?P<id>[0-9]{18,22})>"
-            for i, match in enumerate(re.finditer(emojiregex, msg)):
-                if i == 5:
-                    break
-                emojiid = int(match.group(3))
-                anim = bool(match.group(1))
-                url = str(discord.PartialEmoji(id=emojiid, name="", animated=anim).url)
-                urls.append(url)
-            if urls:
-                for url in urls:
-                    await ctx.reply(url)
-            else:
-                await ctx.reply(f"{config.emojis['warning']} Your message doesn't contain any custom emojis!")
-
-        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
-        @commands.command()
-        async def twemoji(self, ctx, *, msg):
-            """
-            Sends the twemoji image for an emoji.
-            Twemoji is the open source emoji set that discord desktop and twitter use. https://twemoji.twitter.com/
-            Only one emoji is supported in the command for now due to emojis sometimes taking multiple characters.
-            It's easier to get the right emoji if I know only one is sent
-
-            :Usage=$twemoji `emoji`
-            :Param=emoji - ONE default emoji.
-            """
-            chars = []
-            for char in msg:
-                chars.append(f"{ord(char):x}")  # get hex code of char
-            chars = "-".join(chars).replace("/", "")
-            fpath = f"rendering/twemoji/72x72/{chars}.png"
-            logger.debug(f"trying twemoji {fpath}")
-            if os.path.exists(fpath):
-                await ctx.reply(file=discord.File(fpath))
-            else:
-                await ctx.reply(f"{config.emojis['warning']} No twemoji image found! Make sure to send only ONE emoji a"
-                                f"nd no other characters.")
 
 
     class Debug(commands.Cog, name="Owner Only"):
