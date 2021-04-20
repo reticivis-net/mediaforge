@@ -860,6 +860,12 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             :Param=start - Time in seconds to start the trimmed media at.
             :Param=media - A video, gif, or audio file. (automatically found in channel)
             """
+            if not 0 < length:
+                await ctx.send(f"{config.emojis['warning']} Length must be more than 0.")
+                return
+            if not 0 < start:
+                await ctx.send(f"{config.emojis['warning']} Start must be equal to or more than 0.")
+                return
             await improcess(ctx, improcessing.trim, [["VIDEO", "GIF", "AUDIO"]], length, start)
 
 
