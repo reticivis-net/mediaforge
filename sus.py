@@ -11,7 +11,7 @@ def get_random_string(length):
 
 # this codebase is FUCKED
 
-master_im = Image.open("rendering/imposter.jpg")
+master_im = Image.open("rendering/imposter.png")
 
 # the y coordinate for where the text and the face split
 y_coord_split = 22
