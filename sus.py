@@ -11,7 +11,6 @@ def get_random_string(length):
 
 # this codebase is FUCKED
 
-master_im = Image.open("rendering/imposter.png")
 
 # the y coordinate for where the text and the face split
 y_coord_split = 22
@@ -64,6 +63,9 @@ def sus(input_string: str):
     :param input_string: text to make the message with
     :return: filename of generated image
     """
+    master_im = Image.open("rendering/imposter.png")  # inefficient but might fix #14!
+    master_im.load()
+
     input_string = input_string.lower().replace(":flushed:", "😳")
 
     font = ImageFont.truetype("arial.ttf", 13)
