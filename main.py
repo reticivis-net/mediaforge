@@ -1016,6 +1016,8 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             :Usage=$emojiurl `emojis`
             :Param=emojis - Up to 5 custom emojis to send the URL of.
             """
+            if ctx.message.reference:
+                msg = ctx.message.reference.resolved.content
             urls = []
             emojiregex = "<(?P<animated>a?):(?P<name>[a-zA-Z0-9_]{2,32}):(?P<id>[0-9]{18,22})>"
             for i, match in enumerate(re.finditer(emojiregex, msg)):
@@ -1043,6 +1045,8 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             :Usage=$twemoji `emoji`
             :Param=emoji - ONE default emoji.
             """
+            if ctx.message.reference:
+                msg = ctx.message.reference.resolved.content
             chars = []
             for char in msg:
                 chars.append(f"{ord(char):x}")  # get hex code of char
@@ -1199,7 +1203,6 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             status = await improcessing.run_command("git", "status")
             await ctx.reply(f"```{status}```")
 
-        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         @commands.command()
         async def help(self, ctx, *, arg=None):
             """
