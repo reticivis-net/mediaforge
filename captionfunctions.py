@@ -2,10 +2,11 @@ import io
 import random
 import re
 import subprocess
-from PIL import Image, UnidentifiedImageError
+from PIL import Image, UnidentifiedImageError, ImageEnhance
 import chromiumrender
 from improcessing import filetostring, mediatype
 from tempfiles import temp_file
+import numpy as np
 
 """
 This file contains all media processing functions that only work on one image/frame of video and must be run through 
@@ -216,6 +217,34 @@ def magick(file, strength, tosavename=None):
     subprocess.check_call(["magick", file, "-liquid-rescale", f"{strength[0]}%x{strength[0]}%", tosavename],
                           stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL)
 
+    return tosavename
+
+
+def gaussiannoise(image, strength):
+    image = np.array(image)
+    print(image.shape)
+    row, col, ch = image.shape
+    mean = 0
+    sigma = strength
+    gauss = np.random.normal(mean, sigma, (row, col, ch))
+    noisy = image + gauss
+    noisy = np.uint8(np.clip(noisy, 0, 255))
+    return Image.fromarray(noisy)
+
+
+def deepfry(file, args, tosavename=None):
+    if tosavename is None:
+        tosavename = temp_file("png")
+    brightness, contrast, sharpness, saturation, noise, jpegstrength = args
+    im = Image.open(file)
+    im = im.convert("RGBA")
+    im = ImageEnhance.Brightness(im).enhance(brightness)
+    im = ImageEnhance.Contrast(im).enhance(contrast)
+    im = ImageEnhance.Sharpness(im).enhance(sharpness)
+    im = ImageEnhance.Color(im).enhance(saturation)
+    im = gaussiannoise(im, noise)
+    im.save(tosavename)
+    tosavename = jpeg(tosavename, [jpegstrength, 0, 10])
     return tosavename
 
 

@@ -584,6 +584,44 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
 
         @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         @commands.command()
+        async def deepfry(self, ctx, brightness: float = 1.5, contrast: float = 1.5, sharpness: float = 1.5,
+                          saturation: float = 1.5, noise: int = 40, jpegstrength: int = 20):
+            """
+            Applies several filters to the input media to make it appear "deep fried" in the style of deep fried memes.
+            See https://pillow.readthedocs.io/en/3.0.x/reference/ImageEnhance.html
+
+            :Usage=$deepfry
+            :Param=brightness - value of 1 makes no change to the image. must be between 0 and 5. defaults to 1.5.
+            :Param=contrast - value of 1 makes no change to the image. must be between 0 and 5. defaults to 1.5.
+            :Param=sharpness - value of 1 makes no change to the image. must be between 0 and 5. defaults to 1.5.
+            :Param=saturation - value of 1 makes no change to the image. must be between 0 and 5. defaults to 1.5.
+            :Param=noise - value of 0 makes no change to the image. must be between 0 and 255. defaults to 40.
+            :Param=jpegstrength - value of 0 makes no change to the image. must be between 0 and 100. defaults to 20.
+            :Param=media - A video, gif, or image. (automatically found in channel)
+            """
+            if not 0 <= brightness <= 5:
+                await ctx.send(f"{config.emojis['warning']} Brightness must be between 0 and 5.")
+                return
+            if not 0 <= contrast <= 5:
+                await ctx.send(f"{config.emojis['warning']} Contrast must be between 0 and 5.")
+                return
+            if not 0 <= sharpness <= 5:
+                await ctx.send(f"{config.emojis['warning']} Sharpness must be between 0 and 5.")
+                return
+            if not 0 <= saturation <= 5:
+                await ctx.send(f"{config.emojis['warning']} Saturation must be between 0 and 5.")
+                return
+            if not 0 <= noise <= 255:
+                await ctx.send(f"{config.emojis['warning']} Noise must be between 0 and 255.")
+                return
+            if not 0 < jpegstrength <= 100:
+                await ctx.send(f"{config.emojis['warning']} JPEG strength must be between 0 and 100.")
+                return
+            await improcess(ctx, captionfunctions.deepfry, [["VIDEO", "GIF", "IMAGE"]], brightness, contrast, sharpness,
+                            saturation, noise, jpegstrength, handleanimated=True)
+
+        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
+        @commands.command()
         async def corrupt(self, ctx, strength: float = 0.05):
             """
             Intentionally glitches media
@@ -1064,6 +1102,8 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             else:
                 await ctx.reply(f"{config.emojis['warning']} No twemoji image found! Make sure to send only ONE emoji a"
                                 f"nd no other characters.")
+
+
     class Image(commands.Cog, name="Creation"):
         """
         Generate images from a template.
@@ -1344,8 +1384,6 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             :Usage=$ping
             """
             await ctx.reply(f"🏓 Pong! `{round(bot.latency * 1000, 1)}ms`")
-
-
 
 
     class Debug(commands.Cog, name="Owner Only"):
