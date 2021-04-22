@@ -1,4 +1,4 @@
-Pillow~=8.2.0
+Pillow~=8.0.1
 aiohttp[speedups]~=3.6.3
 aiofiles~=0.6.0
 humanize~=3.2.0
@@ -8,4 +8,6 @@ selenium~=3.141.0
 discord.py~=1.6.0
 youtube-dl
 dblpy
-lottie[GIF]
+lottie[GIF]~=0.6.7
+numpy~=1.20.2
+python-magic~=0.4.13
