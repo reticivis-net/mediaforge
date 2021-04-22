@@ -222,7 +222,6 @@ def magick(file, strength, tosavename=None):
 
 def gaussiannoise(image, strength):
     image = np.array(image)
-    print(image.shape)
     row, col, ch = image.shape
     mean = 0
     sigma = strength
