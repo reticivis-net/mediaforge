@@ -901,7 +901,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             if not 0 < length:
                 await ctx.send(f"{config.emojis['warning']} Length must be more than 0.")
                 return
-            if not 0 < start:
+            if not 0 <= start:
                 await ctx.send(f"{config.emojis['warning']} Start must be equal to or more than 0.")
                 return
             await improcess(ctx, improcessing.trim, [["VIDEO", "GIF", "AUDIO"]], length, start)
