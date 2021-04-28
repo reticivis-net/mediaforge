@@ -36,9 +36,9 @@ This file contains the discord.py functions, which call other files to do the ac
 
 if __name__ == "__main__":  # prevents multiprocessing workers from running bot code
     renderpool = improcessing.initializerenderpool()
-    if not os.path.exists("temp"):
-        os.mkdir("temp")
-    for f in glob.glob('temp/*'):
+    if not os.path.exists(config.temp_dir.rstrip("/")):
+        os.mkdir(config.temp_dir.rstrip("/"))
+    for f in glob.glob(f'{config.temp_dir}*'):
         os.remove(f)
     bot = commands.Bot(command_prefix=config.command_prefix, help_command=None, case_insensitive=True)
 
