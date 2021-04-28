@@ -1249,6 +1249,15 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             status = await improcessing.run_command("git", "status")
             await ctx.reply(f"```{status}```")
 
+        def showcog(self, cog):
+            showcog = False
+            # check if there are any non-hidden commands in the cog, if not, dont show it in the help menu.
+            for com in cog.get_commands():
+                if not com.hidden:
+                    showcog = True
+                    break
+            return showcog
+
         @commands.command()
         async def help(self, ctx, *, arg=None):
             """
@@ -1262,7 +1271,9 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                                       description=f"Run `{config.command_prefix}help category` to list commands from "
                                                   f"that category.")
                 for c in bot.cogs.values():
-                    if c.qualified_name not in ["Owner Only", "TopGG"]:
+                    if self.showcog(c):
+                        if not c.description:
+                            c.description = "No Description."
                         embed.add_field(name=c.qualified_name, value=c.description)
                 embed.add_field(name="Tips", value="A list of tips for using the bot.")
                 await ctx.reply(embed=embed)
@@ -1271,7 +1282,8 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                 for tip, tipv in config.tips.items():
                     embed.add_field(name=tip, value=tipv, inline=False)
                 await ctx.reply(embed=embed)
-            elif arg.lower() in [c.lower() for c in bot.cogs]:
+            # if the command argument matches the name of any of the cogs that contain any not hidden commands
+            elif arg.lower() in [c.lower() for c, v in self.bot.cogs.items() if self.showcog(v)]:
                 cogs_lower = {k.lower(): v for k, v in bot.cogs.items()}
                 cog = cogs_lower[arg.lower()]
                 embed = discord.Embed(title=cog.qualified_name,
@@ -1279,12 +1291,14 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                                                                     f"more information on a command.",
                                       color=discord.Color(0xD262BA))
                 for cmd in sorted(cog.get_commands(), key=lambda x: x.name):
-                    embed.add_field(name=f"{config.command_prefix}{cmd.name}", value=cmd.short_doc)
+                    if not cmd.hidden:
+                        desc = cmd.short_doc if cmd.short_doc else "No Description."
+                        embed.add_field(name=f"{config.command_prefix}{cmd.name}", value=desc)
                 await ctx.reply(embed=embed)
             # elif arg.lower() in [c.name for c in bot.commands]:
             else:
                 for all_cmd in bot.commands:
-                    if all_cmd.name == arg.lower() or arg.lower() in all_cmd.aliases:
+                    if (all_cmd.name == arg.lower() or arg.lower() in all_cmd.aliases) and not all_cmd.hidden:
                         cmd: discord.ext.commands.Command = all_cmd
                         break
                 else:
@@ -1386,7 +1400,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             await ctx.reply(f"🏓 Pong! `{round(bot.latency * 1000, 1)}ms`")
 
 
-    class Debug(commands.Cog, name="Owner Only"):
+    class Debug(commands.Cog, name="Owner Only", command_attrs=dict(hidden=True)):
         def __init__(self, bot):
             self.bot = bot
 
@@ -1555,7 +1569,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                                 file=discord.File(tr), embed=embed)
 
 
-    class TopGG(commands.Cog):
+    class TopGG(commands.Cog, command_attrs=dict(hidden=True)):
         """
         Handles interactions with the top.gg API
         https://docs.top.gg/libraries/python/
