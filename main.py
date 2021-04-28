@@ -1177,6 +1177,9 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             self.bot = bot
 
         @commands.cooldown(1, config.cooldown, commands.BucketType.user)
+        @commands.guild_only()
+        @commands.has_guild_permissions(manage_emojis=True)
+        @commands.bot_has_guild_permissions(manage_emojis=True)
         @commands.command(aliases=["createemoji"])
         async def addemoji(self, ctx, name):
             """
@@ -1186,16 +1189,6 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             :Param=name - The emoji name. Must be at least 2 characters.
             :Param=media - A gif or image. (automatically found in channel)
             """
-            if not isinstance(ctx.channel, discord.TextChannel):  # checking its not dms
-                await ctx.send(f"{config.emojis['warning']} Command must be run in a server!")
-                return
-            if not ctx.author.permissions_in(ctx.channel).manage_emojis:
-                await ctx.send(f"{config.emojis['warning']} You don't have permission to manage emojis in this server.")
-                return
-            if not ctx.me.permissions_in(ctx.channel).manage_emojis:
-                await ctx.send(f"{config.emojis['warning']} I don't have permission to manage emojis in this server. "
-                               f"Add the 'Manage Emojis' permission to MediaForge.")
-                return
             await improcess(ctx, improcessing.add_emoji, [["GIF", "IMAGE"]], ctx.guild, name, expectresult=False,
                             resize=False)
 
@@ -1541,6 +1534,18 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
         elif isinstance(commanderror, discord.ext.commands.errors.BadArgument):
             err = f"{config.emojis['warning']} Bad Argument! Did you put text where a number should be? `" + \
                   str(commanderror).replace("@", "\\@") + "`"
+            logger.warning(err)
+            await ctx.reply(err)
+        elif isinstance(commanderror, discord.ext.commands.errors.NoPrivateMessage):
+            err = f"{config.emojis['warning']} " + str(commanderror).replace("@", "\\@")
+            logger.warning(err)
+            await ctx.reply(err)
+        elif isinstance(commanderror, discord.ext.commands.errors.MissingPermissions):
+            err = f"{config.emojis['warning']} " + str(commanderror).replace("@", "\\@")
+            logger.warning(err)
+            await ctx.reply(err)
+        elif isinstance(commanderror, discord.ext.commands.errors.BotMissingPermissions):
+            err = f"{config.emojis['warning']} " + str(commanderror).replace("@", "\\@")
             logger.warning(err)
             await ctx.reply(err)
         elif isinstance(commanderror, discord.ext.commands.errors.CommandInvokeError) and \
