@@ -104,7 +104,7 @@ def html2png(html, png):
             driver.set_window_size(1, 1)
         # sometimes the drivers/chromes can just be killed by the OS so this restarts it if necessary
         except (selenium.common.exceptions.InvalidSessionIdException, ConnectionRefusedError,
-                urllib3.exceptions.MaxRetryError):
+                urllib3.exceptions.MaxRetryError, selenium.common.exceptions.WebDriverException):
             try:
                 driver.close()
             except:
