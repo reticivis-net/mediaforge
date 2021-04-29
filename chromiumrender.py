@@ -3,6 +3,10 @@ import logging
 import os
 import sys
 import time
+
+import selenium.common
+import urllib3
+
 from tempfiles import temp_file
 from selenium import webdriver
 import config
@@ -95,7 +99,19 @@ def html2png(html, png):
     :param html: html string
     :param png: filename to save
     """
-    driver.set_window_size(1, 1)
+    while True:
+        try:
+            driver.set_window_size(1, 1)
+        # sometimes the drivers/chromes can just be killed by the OS so this restarts it if necessary
+        except (selenium.common.exceptions.InvalidSessionIdException, ConnectionRefusedError,
+                urllib3.exceptions.MaxRetryError):
+            try:
+                driver.close()
+            except:
+                pass
+            initdriver()
+        else:
+            break
     tempfile = loadhtml(driver, html)
     # wait for load just in case
     while driver.execute_script('return document.readyState;') != "complete":
@@ -115,7 +131,6 @@ def html2png(html, png):
     send(driver, "Emulation.setDefaultBackgroundColorOverride", {'color': {'r': 0, 'g': 0, 'b': 0, 'a': 0}})
     driver.get_screenshot_as_file(png)
     # os.remove(tempfile)
-
 
 # initdriver()
 # with open("captionhtml/motivate.html", 'r', encoding="UTF-8") as file:
