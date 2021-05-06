@@ -1,6 +1,7 @@
 # standard libs
 import asyncio
 import datetime
+import difflib
 import glob
 import json
 import logging
@@ -1052,28 +1053,19 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
 
         @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         @commands.command(aliases=["emoji", "emojiimage"])
-        async def emojiurl(self, ctx, *, msg):
+        async def emojiurl(self, ctx, *emojis: discord.PartialEmoji):
             """
-            Extracts the raw file from up to 5 custom emojis.
+            Sends the raw image for a custom Discord emoji.
             Each emoji is sent as a separate message intentionally to allow replying with a media command.
 
             :Usage=$emojiurl `emojis`
-            :Param=emojis - Up to 5 custom emojis to send the URL of.
+            :Param=emojis - Custom emojis to send the URL of. Be sure to put a space between them.
             """
-            if ctx.message.reference:
-                msg = ctx.message.reference.resolved.content
-            urls = []
-            emojiregex = "<(?P<animated>a?):(?P<name>[a-zA-Z0-9_]{2,32}):(?P<id>[0-9]{18,22})>"
-            for i, match in enumerate(re.finditer(emojiregex, msg)):
-                if i == 5:
-                    break
-                emojiid = int(match.group(3))
-                anim = bool(match.group(1))
-                url = str(discord.PartialEmoji(id=emojiid, name="", animated=anim).url)
-                urls.append(url)
-            if urls:
-                for url in urls:
-                    await ctx.reply(url)
+            if emojis:
+                out = []
+                for emoji in emojis:
+                    out.append(str(emoji.url))
+                await ctx.send("\n".join(out))
             else:
                 await ctx.reply(f"{config.emojis['warning']} Your message doesn't contain any custom emojis!")
 
@@ -1516,7 +1508,15 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                     logger.warning("No permissions to send in command channel or to DM author.")
         if isinstance(commanderror, discord.ext.commands.errors.CommandNotFound):
             msg = ctx.message.content.replace("@", "\\@")
-            err = f"{config.emojis['exclamation_question']} Command `{msg.split(' ')[0]}` does not exist."
+            cmd = msg.split(' ')[0]
+            allcmds = []
+            for botcom in bot.commands:
+                if not botcom.hidden:
+                    allcmds.append(botcom.name)
+                    allcmds += botcom.aliases
+            match = difflib.get_close_matches(cmd.replace(config.command_prefix, "", 1), allcmds, n=1, cutoff=0)[0]
+            err = f"{config.emojis['exclamation_question']} Command `{cmd}` does not exist. " \
+                  f"Did you mean **{config.command_prefix}{match}**?"
             logger.warning(err)
             await ctx.reply(err)
         elif isinstance(commanderror, discord.ext.commands.errors.NotOwner):
