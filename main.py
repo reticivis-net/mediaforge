@@ -710,11 +710,19 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                 return
             await improcess(ctx, captionfunctions.magick, [["VIDEO", "GIF", "IMAGE"]], strength, handleanimated=True)
 
-        @commands.command(aliases=["loop"])
+        @commands.command(aliases=["repeat"], hidden=True)
+        async def loop(self, ctx):
+            await ctx.reply("MediaForge has 2 loop commands.\nUse `$gifloop` to change/limit the amount of times a GIF "
+                            "loops. This ONLY works on GIFs.\nUse `$videoloop` to loop a video. This command "
+                            "duplicates the video contents."
+                            .replace("$", config.command_prefix))
+
+        @commands.command(aliases=["gloop"])
         @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         async def gifloop(self, ctx, loop: int = 0):
             """
             Changes the amount of times a gif loops
+            See $videoloop for videos.
 
             :Usage=$gifloop `[loop]`
             :Param=loop - number of times to loop. -1 for no loop, 0 for infinite loop.
@@ -724,6 +732,24 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                 await ctx.send(f"{config.emojis['warning']} Loop must be -1 or more.")
                 return
             await improcess(ctx, improcessing.gifloop, [["GIF"]], loop)
+
+        @commands.command(aliases=["vloop"])
+        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
+        async def videoloop(self, ctx, loop: int = 1):
+            """
+            Loops a video
+            This command technically works on GIFs but its better to use `$gifloop` which takes advantage of GIFs'
+            loop metadata.
+            See $gifloop for gifs.
+
+            :Usage=$loop `[loop]`
+            :Param=loop - number of times to loop.
+            :Param=media - A video or GIF. (automatically found in channel)
+            """
+            if not 1 <= loop <= 15:
+                await ctx.send(f"{config.emojis['warning']} Loop must be between 1 and 15.")
+                return
+            await improcess(ctx, improcessing.videoloop, [["VIDEO", "GIF"]], loop)
 
         @commands.command(aliases=["flip", "rot"])
         @commands.cooldown(1, config.cooldown, commands.BucketType.user)
