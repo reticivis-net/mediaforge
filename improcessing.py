@@ -630,6 +630,23 @@ async def gifloop(file, loop):
     return outname
 
 
+async def videoloop(file, loop):
+    """
+    loops a gif
+    :param file: gif
+    :param loop: # of times to loop
+    :return: processed media
+    """
+    mt = mediatype(file)
+    exts = {
+        "VIDEO": "mp4",
+        "GIF": "gif"
+    }
+    outname = temp_file(exts[mt])
+    await run_command("ffmpeg", "-hide_banner", "-stream_loop", str(loop), "-i", file, "-vcodec", "copy", outname)
+    return outname
+
+
 async def imageaudio(files):
     """
     combines an image an an audio file into a video
