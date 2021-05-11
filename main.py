@@ -8,6 +8,7 @@ import logging
 import os
 import re
 import traceback
+import typing
 import urllib.parse
 # pip libs
 import aiofiles
@@ -1415,17 +1416,14 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
         def __init__(self, bot):
             self.bot = bot
 
-        @commands.command(hidden=True)
+        @commands.command()
         @commands.is_owner()
-        async def say(self, ctx, *, msg):
-            """
-            Make the bot say something
-            """
-            try:
-                await ctx.message.delete()
-            except discord.errors.Forbidden:
-                pass
-            await ctx.channel.send(msg)
+        async def say(self, ctx, channel: typing.Optional[typing.Union[discord.TextChannel, discord.User]], *, msg):
+            if not channel:
+                channel = ctx.channel
+            if ctx.me.permissions_in(ctx.channel).manage_messages:
+                asyncio.create_task(ctx.message.delete())
+            asyncio.create_task(channel.send(msg))
 
         @commands.command(hidden=True)
         @commands.is_owner()
