@@ -827,8 +827,8 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             Stacks 2 videos horizontally
 
             :Usage=$hstack
-            :Param=video1 - A video or gif. (automatically found in channel)
-            :Param=video2 - A video or gif. (automatically found in channel)
+            :Param=video1 - A video, image, or gif. (automatically found in channel)
+            :Param=video2 - A video, image, or gif. (automatically found in channel)
             """
             await improcess(ctx, improcessing.stack, [["VIDEO", "GIF", "IMAGE"], ["VIDEO", "GIF", "IMAGE"]],
                             "hstack")
@@ -840,11 +840,27 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             Stacks 2 videos horizontally
 
             :Usage=$vstack
-            :Param=video1 - A video or gif. (automatically found in channel)
-            :Param=video2 - A video or gif. (automatically found in channel)
+            :Param=video1 - A video, image, or gif. (automatically found in channel)
+            :Param=video2 - A video, image, or gif. (automatically found in channel)
             """
             await improcess(ctx, improcessing.stack, [["VIDEO", "GIF", "IMAGE"], ["VIDEO", "GIF", "IMAGE"]],
                             "vstack")
+
+        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
+        @commands.command()
+        async def overlay(self, ctx, opacity: float = 0.5):
+            """
+            Overlays the second input over the first
+
+            :Usage=$vstack
+            :Param=opacity - the opacity of the top video. must be between 0 and 1. defaults to 0.5.
+            :Param=video1 - A video or gif. (automatically found in channel)
+            :Param=video2 - A video or gif. (automatically found in channel)
+            """
+            if not 0 <= opacity <= 1:
+                await ctx.send(f"{config.emojis['warning']} Opacity must be between 0 and 1.")
+                return
+            await improcess(ctx, improcessing.overlay, [["VIDEO", "GIF", "IMAGE"], ["VIDEO", "GIF", "IMAGE"]], opacity)
 
         @commands.command(name="speed")
         @commands.cooldown(1, config.cooldown, commands.BucketType.user)
@@ -1427,7 +1443,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
 
         @commands.command(hidden=True)
         @commands.is_owner()
-        async def error(self, ctx):
+        async def error(self, _):
             """
             Raise an error
             """
