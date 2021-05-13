@@ -744,7 +744,7 @@ async def stack(files, style):
         scale = f"scale={w}:-2"
     await run_command("ffmpeg", "-hide_banner", "-i", video1, "-sws_flags",
                       "spline+accurate_rnd+full_chroma_int+full_chroma_inp", "-vf", scale, "-c:v",
-                      "libx264", "-c:a", "aac", "-ar", "48000", fixedvideo1)
+                      "png", "-c:a", "aac", "-ar", "48000", fixedvideo1)
     fixedfixedvideo1 = await changefps(fixedvideo1, fps)
     outname = temp_file("mp4")
     await run_command("ffmpeg", "-hide_banner", "-i", fixedvideo0, "-i", fixedfixedvideo1, "-filter_complex",
@@ -754,6 +754,44 @@ async def stack(files, style):
     # for file in [video0, video1, fixedvideo1, fixedvideo0, fixedfixedvideo1]:
     #     os.remove(file)
     if mts[0] != "VIDEO" and mts[1] != "VIDEO":  # one or more gifs and no videos
+        outname = await mp4togif(outname)
+    return outname
+
+
+async def overlay(files, opacity: float):
+    """
+    stacks media
+    :param files: [media, media]
+    :param opacity: opacity of top media, 0-1
+    :return: processed media
+    """
+    assert 0 <= opacity <= 1
+    mts = [mediatype(files[0]), mediatype(files[1])]
+    video0 = await forceaudio(files[0])
+    fixedvideo0 = temp_file("mp4")
+    await run_command("ffmpeg", "-hide_banner", "-i", video0, "-c:v", "png", "-c:a", "aac", "-ar", "48000",
+                      "-max_muxing_queue_size", "4096", fixedvideo0)
+    video1 = await forceaudio(files[1])
+    w, h = await get_resolution(video0)
+    fps = await get_frame_rate(video0)
+    fixedvideo1 = temp_file("mp4")
+    scale = f"scale={w}:{h}"
+    await run_command("ffmpeg", "-hide_banner", "-i", video1, "-sws_flags",
+                      "spline+accurate_rnd+full_chroma_int+full_chroma_inp", "-vf", scale, "-c:v",
+                      "png", "-c:a", "aac", "-ar", "48000", fixedvideo1)
+    fixedfixedvideo1 = await changefps(fixedvideo1, fps)
+    outname = temp_file("mp4")
+    await run_command("ffmpeg", "-hide_banner", "-i", fixedvideo0, "-i", fixedfixedvideo1, "-filter_complex",
+                      f"[1:v]geq=r='r(X,Y)':a='{opacity}*alpha(X,Y)'[1v];"
+                      f"[0:v][1v]overlay;amix=inputs=2:dropout_transition=0", "-c:v",
+                      "png", "-c:a",
+                      "aac", outname)
+    # for file in [video0, video1, fixedvideo1, fixedvideo0, fixedfixedvideo1]:
+    #     os.remove(file)
+    if mts[0] == "IMAGE" and mts[1] == "IMAGE":
+        outname = await mediatopng(outname)
+    # one or more gifs and no videos
+    elif mts[0] != "VIDEO" and mts[1] != "VIDEO":
         outname = await mp4togif(outname)
     return outname
 
