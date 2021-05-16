@@ -6,7 +6,7 @@ import glob
 import json
 import logging
 import os
-import re
+import regex as re
 import traceback
 import typing
 import urllib.parse
@@ -952,6 +952,18 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             await improcess(ctx, improcessing.trim, [["VIDEO", "GIF", "AUDIO"]], length, start)
 
 
+    def emojis_in(text):
+
+        emoji_list = []
+        data = re.findall(r'\X', text)
+        flags = re.findall(u'[\U0001F1E6-\U0001F1FF]', text)
+        for word in data:
+            if any(char in emoji.UNICODE_EMOJI['en'] for char in word):
+                emoji_list.append(word)
+
+        return emoji_list + flags
+
+
     class Conversion(commands.Cog, name="Conversion"):
         """
         Commands to convert media types and download internet-hosted media.
@@ -1125,7 +1137,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             """
             if ctx.message.reference:
                 msg = ctx.message.reference.resolved.content
-            emojis = [c for c in msg if c in emoji.UNICODE_EMOJI['en']][:5]
+            emojis = emojis_in(msg)[:5]
             if emojis:
                 for e in emojis:
                     chars = []
