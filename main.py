@@ -18,6 +18,7 @@ import discord
 import humanize
 from discord.ext import commands
 import youtube_dl
+import emoji
 # project files
 import captionfunctions
 import improcessing
@@ -1118,25 +1119,25 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             """
             Sends the twemoji image for an emoji.
             Twemoji is the open source emoji set that discord desktop and twitter use. https://twemoji.twitter.com/
-            Only one emoji is supported in the command for now due to emojis sometimes taking multiple characters.
-            It's easier to get the right emoji if I know only one is sent
 
             :Usage=$twemoji `emoji`
-            :Param=emoji - ONE default emoji.
+            :Param=emoji - Up to 5 default emojis.
             """
             if ctx.message.reference:
                 msg = ctx.message.reference.resolved.content
-            chars = []
-            for char in msg:
-                chars.append(f"{ord(char):x}")  # get hex code of char
-            chars = "-".join(chars).replace("/", "")
-            fpath = f"rendering/twemoji/72x72/{chars}.png"
-            logger.debug(f"trying twemoji {fpath}")
-            if os.path.exists(fpath):
-                await ctx.reply(file=discord.File(fpath))
+            emojis = [c for c in msg if c in emoji.UNICODE_EMOJI['en']][:5]
+            if emojis:
+                for e in emojis:
+                    chars = []
+                    for char in e:
+                        chars.append(f"{ord(char):x}")  # get hex code of char
+                    chars = "-".join(chars).replace("/", "")
+                    fpath = f"rendering/twemoji/72x72/{chars}.png"
+                    logger.debug(f"trying twemoji {fpath}")
+                    if os.path.exists(fpath):
+                        await ctx.reply(file=discord.File(fpath))
             else:
-                await ctx.reply(f"{config.emojis['warning']} No twemoji image found! Make sure to send only ONE emoji a"
-                                f"nd no other characters.")
+                await ctx.reply(f"{config.emojis['x']} No default emojis found!")
 
 
     class Image(commands.Cog, name="Creation"):

@@ -16,6 +16,7 @@ youtube-dl = "*"
 dblpy = "*"
 lottie = {extras = ["gif"], version = "*"}
 numpy = "*"
+emoji = "*"
 
 [dev-packages]
 
