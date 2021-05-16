@@ -17,6 +17,7 @@ dblpy = "*"
 lottie = {extras = ["gif"], version = "*"}
 numpy = "*"
 emoji = "*"
+regex = "*"
 
 [dev-packages]
 
