@@ -24,7 +24,10 @@ def is_named_used(name):
 
 def temp_file_name(extension="png"):
     while True:
-        name = f"{config.temp_dir}{get_random_string(8)}.{extension}"
+        if extension is not None:
+            name = f"{config.temp_dir}{get_random_string(8)}.{extension}"
+        else:
+            name = f"{config.temp_dir}{get_random_string(8)}"
         if not is_named_used(name):
             return name
 
