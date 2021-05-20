@@ -3,6 +3,7 @@ import asyncio
 import datetime
 import difflib
 import glob
+import inspect
 import json
 import logging
 import os
@@ -273,7 +274,8 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
 
 
     async def improcess(ctx: discord.ext.commands.Context, func: callable, allowedtypes: list, *args,
-                        handleanimated=False, resize=True, forcerenderpool=False, expectresult=True):
+                        handleanimated=False, resize=True, forcerenderpool=False, expectresult=True,
+                        filename=None, spoiler=False):
         """
         The core function of the bot. Gathers media and sends it to the proper function.
 
@@ -283,6 +285,8 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
         :param args: any non-media arguments, passed into func()
         :param handleanimated: if func() only works on still images, set to True to process each frame individually.
         :param expectresult: is func() supposed to return a result? if true, it expects an image. if false, can use a string.
+        :param filename: filename of the uploaded file. if None, not passed.
+        :param spoiler: wether to spoil the uploaded file or not.
         :return: nothing, all processing and uploading is done in this function
         """
         with TempFileSession() as tempfilesession:
@@ -317,7 +321,11 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                                 if handleanimated:
                                     result = await improcessing.handleanimated(filesforcommand, func, ctx, *args)
                                 else:
-                                    result = await func(filesforcommand, *args)
+                                    if inspect.iscoroutinefunction(func):
+                                        result = await func(filesforcommand, *args)
+                                    else:
+                                        logger.warning(f"{func} is not coroutine!")
+                                        result = func(filesforcommand, *args)
                             else:
                                 result = await renderpool.submit(func, *args)
                             if expectresult:
@@ -338,7 +346,11 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                             raise e
                         if result and expectresult:
                             logger.info("Uploading...")
-                            uploadtask = asyncio.create_task(ctx.reply(file=discord.File(result)))
+                            if filename is not None:
+                                uploadtask = asyncio.create_task(ctx.reply(file=discord.File(result, spoiler=spoiler,
+                                                                                             filename=filename)))
+                            else:
+                                uploadtask = asyncio.create_task(ctx.reply(file=discord.File(result, spoiler=spoiler)))
                             msg = await msgtask
                             await msg.edit(content=f"{config.emojis['working']} Uploading...")
                             await uploadtask
@@ -985,6 +997,29 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
         #     :Param=audio - An audio file. (automatically found in channel)
         #     """
         #     await improcess(ctx, improcessing.imageaudio, [["IMAGE"], ["AUDIO"]])
+        @commands.command(aliases=["filename", "name", "setname"])
+        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
+        async def rename(self, ctx, filename: str):
+            """
+            Renames media.
+            Note: Discord's spoiler feature is dependent on filenames starting with "SPOILER_". renaming files may unspoiler them.
+
+            :Usage=$rename `name`
+            :Param=media - Any valid media. (automatically found in channel)
+            """
+            await improcess(ctx, lambda x: x, [["VIDEO", "GIF", "IMAGE", "AUDIO"]], filename=filename)
+
+        @commands.command(aliases=["spoil", "censor", "cw", "tw"])
+        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
+        async def spoiler(self, ctx):
+            """
+            Spoilers media.
+
+            :Usage=$spoiler
+            :Param=media - Any valid media. (automatically found in channel)
+            """
+            await improcess(ctx, lambda x: x, [["VIDEO", "GIF", "IMAGE", "AUDIO"]], spoiler=True)
+
         @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         @commands.command(aliases=["avatar", "pfp", "profilepicture", "profilepic", "ayowhothismf"])
         async def icon(self, ctx, *, userorserver):
