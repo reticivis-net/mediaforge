@@ -177,7 +177,10 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
         if lottie:
             url = url.lstrip('LOTTIE|')
         if extension is None:
-            extension = url.split(".")[-1].split("?")[0]
+            after_slash = url.split("/")[-1].split("?")[0]
+            if "." in after_slash:
+                extension = after_slash.split(".")[-1]
+            # extension will stay None if no extension detected.
         name = temp_file(extension)
         # https://github.com/aio-libs/aiohttp/issues/3904#issuecomment-632661245
         async with aiohttp.ClientSession(headers={'Connection': 'keep-alive'}) as session:
@@ -953,14 +956,12 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
 
 
     def emojis_in(text):
-
         emoji_list = []
         data = re.findall(r'\X', text)
         flags = re.findall(u'[\U0001F1E6-\U0001F1FF]', text)
         for word in data:
             if any(char in emoji.UNICODE_EMOJI['en'] for char in word):
                 emoji_list.append(word)
-
         return emoji_list + flags
 
 

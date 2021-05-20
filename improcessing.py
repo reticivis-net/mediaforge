@@ -336,12 +336,12 @@ def mediatype(image):
     return None
 
 
-def run_in_exec(func, *args, **kwargs):
+async def run_in_exec(func, *args, **kwargs):
     """
     prevents intense non-async functions from blocking event loop
     """
     loop = asyncio.get_running_loop()
-    return loop.run_in_executor(None, lambda: func(*args, **kwargs))
+    return await loop.run_in_executor(None, lambda: func(*args, **kwargs))
 
 
 async def ensureduration(media, ctx):
