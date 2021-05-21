@@ -1277,6 +1277,41 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                             resize=False)
 
         @commands.cooldown(1, config.cooldown, commands.BucketType.user)
+        @commands.guild_only()
+        @commands.has_guild_permissions(manage_guild=True)
+        @commands.bot_has_guild_permissions(manage_guild=True)
+        @commands.command(aliases=["guildbanner", "serverbanner", "banner"])
+        async def setbanner(self, ctx):
+            """
+            Sets a file as the server banner.
+            Server must support banners.
+
+            :Usage=$setbanner
+            :Param=media - An image. (automatically found in channel)
+            """
+            if "BANNER" not in ctx.guild.features:
+                await ctx.reply(f"{config.emojis['x']} This guild does not support banners.")
+                return
+            await improcess(ctx, improcessing.set_banner, [["IMAGE"]], ctx.guild, expectresult=False,
+                            resize=False)
+
+        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
+        @commands.guild_only()
+        @commands.has_guild_permissions(manage_guild=True)
+        @commands.bot_has_guild_permissions(manage_guild=True)
+        @commands.command(aliases=["setguildicon", "guildicon", "servericon", "seticon"])
+        async def setservericon(self, ctx):
+            """
+            Sets a file as the server icon.
+            If setting a gif, server must support animated icons.
+
+            :Usage=$seticon
+            :Param=media - An image or gif. (automatically found in channel)
+            """
+            await improcess(ctx, improcessing.set_icon, [["IMAGE", "GIF"]], ctx.guild, expectresult=False,
+                            resize=False)
+
+        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         @commands.command(aliases=["statistics"])
         async def stats(self, ctx):
             """

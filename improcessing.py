@@ -1041,10 +1041,53 @@ async def add_emoji(file, guild: discord.Guild, name):
     else:
         count = await count_emoji(guild)
         if emoji.animated:
-            return f"Animated emoji successfully added: {emoji}\n{guild.emoji_limit - count['animated']} slots are le" \
-                   f"ft."
+            return f"{config.emojis['check']} Animated emoji successfully added: " \
+                   f"{emoji}\n{guild.emoji_limit - count['animated']} slots are left."
         else:
-            return f"Emoji successfully added: {emoji}\n{guild.emoji_limit - count['static']} slots are left."
+            return f"{config.emojis['check']} Emoji successfully added: " \
+                   f"{emoji}\n{guild.emoji_limit - count['static']} slots are left."
+
+
+async def set_banner(file, guild: discord.Guild):
+    """
+    sets guild banner
+    :param file: banner file
+    :param guild: guild to add it to
+    :return:
+    """
+    with open(file, "rb") as f:
+        data = f.read()
+    try:
+        await guild.edit(banner=bytes(data))
+    except discord.Forbidden:
+        return f"{config.emojis['x']} I don't have permission to set your banner. Make sure I have the Manage Server " \
+               f"permission. "
+    except discord.HTTPException as e:
+        return f"{config.emojis['2exclamation']} Something went wrong trying to set your banner! ```{e}```"
+    else:
+        return f"{config.emojis['check']} Successfully changed guild banner."
+
+
+async def set_icon(file, guild: discord.Guild):
+    """
+    sets guild icon
+    :param file: icon file
+    :param guild: guild to add it to
+    :return:
+    """
+    if mediatype(file) == "GIF" and "ANIMATEd_ICON" not in guild.features:
+        return f"{config.emojis['x']} This guild does not support animated icons."
+    with open(file, "rb") as f:
+        data = f.read()
+    try:
+        await guild.edit(icon=bytes(data))
+    except discord.Forbidden:
+        return f"{config.emojis['x']} I don't have permission to set your icon. Make sure I have the Manage Server " \
+               f"permission. "
+    except discord.HTTPException as e:
+        return f"{config.emojis['2exclamation']} Something went wrong trying to set your icon! ```{e}```"
+    else:
+        return "Successfully changed guild icon."
 
 
 async def contentlength(url):
