@@ -1628,6 +1628,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
 
     @bot.listen()
     async def on_command_error(ctx, commanderror):
+        errorstring = discord.utils.escape_mentions(discord.utils.escape_markdown(str(commanderror)))
         if isinstance(commanderror, discord.Forbidden):
             if not ctx.me.permissions_in(ctx.channel).send_messages:
                 if ctx.me.permissions_in(ctx.author).send_messages:
@@ -1638,8 +1639,8 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                 else:
                     logger.warning("No permissions to send in command channel or to DM author.")
         if isinstance(commanderror, discord.ext.commands.errors.CommandNotFound):
-            msg = ctx.message.content.replace("@", "\\@")
-            cmd = msg.split(' ')[0]
+            msg = ctx.message.content
+            cmd = discord.utils.escape_mentions(msg.split(' ')[0])
             allcmds = []
             for botcom in bot.commands:
                 if not botcom.hidden:
@@ -1655,29 +1656,29 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             logger.warning(err)
             await ctx.reply(err)
         elif isinstance(commanderror, discord.ext.commands.errors.CommandOnCooldown):
-            err = f"{config.emojis['clock']} " + str(commanderror).replace("@", "\\@")
+            err = f"{config.emojis['clock']} {errorstring}"
             logger.warning(err)
             await ctx.reply(err)
         elif isinstance(commanderror, discord.ext.commands.errors.MissingRequiredArgument):
-            err = f"{config.emojis['question']} " + str(commanderror).replace("@", "\\@")
+            err = f"{config.emojis['question']} {errorstring}"
             logger.warning(err)
             await ctx.reply(err)
         elif isinstance(commanderror, discord.ext.commands.errors.BadArgument):
-            err = f"{config.emojis['warning']} Bad Argument! Did you put text where a number should be? `" + \
-                  str(commanderror).replace("@", "\\@") + "`"
+            err = f"{config.emojis['warning']} Bad Argument! Did you put text where a number should be? `{errorstring}`"
             logger.warning(err)
             await ctx.reply(err)
         elif isinstance(commanderror, discord.ext.commands.errors.NoPrivateMessage):
-            err = f"{config.emojis['warning']} " + str(commanderror).replace("@", "\\@")
+            err = f"{config.emojis['warning']} {errorstring}"
             logger.warning(err)
             await ctx.reply(err)
         elif isinstance(commanderror, discord.ext.commands.errors.CheckFailure):
-            err = f"{config.emojis['x']} " + str(commanderror).replace("@", "\\@")
+            err = f"{config.emojis['x']} {errorstring}"
             logger.warning(err)
             await ctx.reply(err)
         elif isinstance(commanderror, discord.ext.commands.errors.CommandInvokeError) and \
                 isinstance(commanderror.original, improcessing.NonBugError):
-            await ctx.reply(f"{config.emojis['2exclamation']}" + str(commanderror.original)[:1000].replace("@", "\\@"))
+            await ctx.reply(f"{config.emojis['2exclamation']}" +
+                            discord.utils.escape_mentions(str(commanderror.original)[:1000]))
         else:
             if isinstance(commanderror, discord.ext.commands.errors.CommandInvokeError):
                 commanderror = commanderror.original
@@ -1689,16 +1690,16 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                     t.write(trheader + ''.join(
                         traceback.format_exception(etype=type(commanderror), value=commanderror,
                                                    tb=commanderror.__traceback__)))
-                embed = discord.Embed(color=0xed1c24,
-                                      description="Please report this error with the attached traceback file to the GitHub.")
+                embed = discord.Embed(color=0xed1c24, description="Please report this error with the attached "
+                                                                  "traceback file to the GitHub.")
                 embed.add_field(name=f"{config.emojis['2exclamation']} Report Issue to GitHub",
                                 value=f"[Create New Issue](https://github.com/HexCodeFFF/captionbot"
                                       f"/issues/new?labels=bug&template=bug_report.md&title"
                                       f"={urllib.parse.quote(str(commanderror)[:128], safe='')})\n[View Issu"
                                       f"es](https://github.com/HexCodeFFF/captionbot/issues)")
-                await ctx.reply(f"{config.emojis['2exclamation']} `{get_full_class_name(commanderror)}: " +
-                                str(commanderror)[:128].replace("@", "\\@") + "`",
-                                file=discord.File(tr), embed=embed)
+                await ctx.reply(f"{config.emojis['2exclamation']} `{get_full_class_name(commanderror)}: "
+                                f"{errorstring[:128]}`",
+                                file=discord.File(tr, filename="traceback.txt"), embed=embed)
 
 
     class TopGG(commands.Cog, command_attrs=dict(hidden=True)):
