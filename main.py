@@ -1618,6 +1618,13 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             return obj.__class__.__name__
         return module + '.' + obj.__class__.__name__
 
+    @bot.check
+    def block_filter(ctx):
+        for block in config.blocked_words:
+            if block.lower() in ctx.message.content.lower():
+                raise commands.CheckFailure("Your command contains one or more blocked words.")
+        return True
+
 
     @bot.listen()
     async def on_command_error(ctx, commanderror):
@@ -1664,12 +1671,8 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             err = f"{config.emojis['warning']} " + str(commanderror).replace("@", "\\@")
             logger.warning(err)
             await ctx.reply(err)
-        elif isinstance(commanderror, discord.ext.commands.errors.MissingPermissions):
-            err = f"{config.emojis['warning']} " + str(commanderror).replace("@", "\\@")
-            logger.warning(err)
-            await ctx.reply(err)
-        elif isinstance(commanderror, discord.ext.commands.errors.BotMissingPermissions):
-            err = f"{config.emojis['warning']} " + str(commanderror).replace("@", "\\@")
+        elif isinstance(commanderror, discord.ext.commands.errors.CheckFailure):
+            err = f"{config.emojis['x']} " + str(commanderror).replace("@", "\\@")
             logger.warning(err)
             await ctx.reply(err)
         elif isinstance(commanderror, discord.ext.commands.errors.CommandInvokeError) and \

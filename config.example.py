@@ -54,5 +54,9 @@ temp_dir = "temp/"
 # configured upload limit, in bytes, for files.
 # dont change this unless you have a really good reason to. i dont have error handling for overly large files
 file_upload_limit = 8388119
+# this applies to every command. if any string arguments contain any of these words, the command will instantly
+# fail. this is intended to block hateful language like slurs. not case sensitive. its in the config so i dont have to
+# upload slurs to github
+blocked_words = []
 # prefix for commands
 command_prefix = "$"
