@@ -24,6 +24,9 @@ min_size = 100
 max_size = 2000
 # maximum size, in bytes, to download. see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Length
 max_file_size = 25000000
+# maximum file size, in bytes, that a file can be. if resulting file is bigger than this, mediaforge instantly gives
+# up and does not try to upload nor resize the file.
+way_too_big_size = 100000000
 # the text to use for different messages, can be custom emojis or just any text
 emojis = {
     "x": "<:xmark:803792052932444180>",

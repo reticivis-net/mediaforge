@@ -274,6 +274,10 @@ async def assurefilesize(media: str, ctx: discord.ext.commands.Context):
     for i in range(5):
         size = os.path.getsize(media)
         logger.info(f"Resulting file is {humanize.naturalsize(size)}")
+        if size > config.way_too_big_size:
+            await ctx.send(f"{config.emojis['warning']} Resulting file is {humanize.naturalsize(size)}. "
+                           f"File is way too big.")
+            return
         # https://www.reddit.com/r/discordapp/comments/aflp3p/the_truth_about_discord_file_upload_limits/
         if size >= config.file_upload_limit:
             if mt in ["VIDEO", "IMAGE", "GIF"]:
