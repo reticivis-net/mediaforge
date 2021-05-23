@@ -8,9 +8,12 @@ import os
 import sys
 import asyncio
 # pip libs
+import typing
+
 import aiohttp
 import discord.ext
 from PIL import Image, UnidentifiedImageError
+from discord.ext import commands
 
 if sys.platform == "win32":  # this hopefully wont cause any problems :>
     from winmagic import magic
@@ -348,7 +351,7 @@ async def run_in_exec(func, *args, **kwargs):
     return await loop.run_in_executor(None, lambda: func(*args, **kwargs))
 
 
-async def ensureduration(media, ctx):
+async def ensureduration(media, ctx: typing.Union[commands.Context, None]):
     """
     ensures that media is under or equal to the config minimum frame count
     :param media: media to trim
@@ -363,11 +366,13 @@ async def ensureduration(media, ctx):
         return media
     else:
         newdur = config.max_frames / fps
-        tmsg = f"{config.emojis['warning']} input file is too long (~{frames} frames)! Trimming to {round(newdur, 1)}" \
-               f"s (~{config.max_frames} frames)... "
-        msg = await ctx.reply(tmsg)
+        if ctx is not None:
+            tmsg = f"{config.emojis['warning']} input file is too long (~{frames} frames)! Trimming to {round(newdur, 1)}" \
+                   f"s (~{config.max_frames} frames)... "
+            msg = await ctx.reply(tmsg)
         media = await trim(media, newdur)
-        await msg.edit(content=tmsg + " Done!", delete_after=5)
+        if ctx is not None:
+            await msg.edit(content=tmsg + " Done!", delete_after=5)
         return media
 
 
@@ -992,6 +997,8 @@ async def resize(image, width, height):
         "IMAGE": "png"
     }
     out = temp_file(exts[mt])
+    if mt in ["VIDEO", "GIF"]:
+        image = await ensureduration(image, None)
     await run_command("ffmpeg", "-i", image, "-pix_fmt", "yuva444p", "-max_muxing_queue_size", "9999", "-sws_flags",
                       "spline+accurate_rnd+full_chroma_int+full_chroma_inp+bitexact",
                       "-vf", f"scale='{width}:{height}',setsar=1:1", "-c:v", "png", "-pix_fmt", "yuva444p", out)
