@@ -1,10 +1,11 @@
 import os
 
-from tempfiles import temp_file
 import discord
 import lottie
-from lottie.importers import importers
 from lottie.exporters import exporters
+from lottie.importers import importers
+
+from tempfiles import temp_file
 
 
 def stickerurl(sticker: discord.Sticker):

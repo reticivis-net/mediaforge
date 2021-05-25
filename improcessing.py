@@ -1,32 +1,33 @@
 # standard libs
+import asyncio
 import concurrent.futures
 import glob
 import json
 import math
-import shutil
 import os
+import shutil
 import sys
-import asyncio
 # pip libs
 import typing
 
 import aiohttp
 import discord.ext
-from PIL import Image, UnidentifiedImageError
 from discord.ext import commands
+from PIL import Image, UnidentifiedImageError
 
 if sys.platform == "win32":  # this hopefully wont cause any problems :>
     from winmagic import magic
 else:
     import magic
 # project files
-from tempfiles import temp_file
-import captionfunctions
 import humanize
+
+import captionfunctions
 import chromiumrender
 import config
 import tempfiles
 from clogs import logger
+from tempfiles import temp_file
 
 """
 This file contains functions for processing and editing media

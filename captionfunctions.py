@@ -2,11 +2,13 @@ import io
 import random
 import re
 import subprocess
-from PIL import Image, UnidentifiedImageError, ImageEnhance
+
+import numpy as np
+from PIL import Image, ImageEnhance, UnidentifiedImageError
+
 import chromiumrender
 from improcessing import filetostring, mediatype
 from tempfiles import temp_file
-import numpy as np
 
 """
 This file contains all media processing functions that only work on one image/frame of video and must be run through 

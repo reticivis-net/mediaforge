@@ -1,8 +1,9 @@
 import random
 import string
+
+from PIL import Image, ImageDraw, ImageFile, ImageFont
+
 from tempfiles import temp_file
-from PIL import Image, ImageDraw, ImageFont
-from PIL import ImageFile
 
 
 def get_random_string(length):
