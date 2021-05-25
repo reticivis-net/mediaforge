@@ -7,9 +7,9 @@ import math
 import os
 import shutil
 import sys
-# pip libs
 import typing
 
+# pip libs
 import aiohttp
 import discord.ext
 from discord.ext import commands
