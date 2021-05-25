@@ -7,29 +7,31 @@ import inspect
 import json
 import logging
 import os
-import regex as re
 import traceback
 import typing
 import urllib.parse
+
 # pip libs
 import aiofiles
 import aiohttp
 import dbl
 import discord
-import humanize
-from discord.ext import commands
-import youtube_dl
 import emoji
+import humanize
+import regex as re
+import youtube_dl
+from discord.ext import commands
+
 # project files
 import captionfunctions
+import config
 import improcessing
 import lottiestickers
 import sus
-import config
 import tempfiles
-from improcessing import NonBugError, mp4togif
-from tempfiles import temp_file, get_random_string, TempFileSession
 from clogs import logger
+from improcessing import NonBugError, mp4togif
+from tempfiles import TempFileSession, get_random_string, temp_file
 
 """
 This file contains the discord.py functions, which call other files to do the actual processing.

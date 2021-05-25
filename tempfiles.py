@@ -1,12 +1,13 @@
 import collections
+import inspect
+import logging
 import multiprocessing
 import os
 import random
 import string
-import logging
 from multiprocessing import current_process
+
 import config
-import inspect
 from clogs import logger
 
 if current_process().name == 'MainProcess':

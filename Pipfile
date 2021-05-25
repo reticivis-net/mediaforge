@@ -18,6 +18,7 @@ lottie = {extras = ["gif"], version = "*"}
 numpy = "*"
 emoji = "*"
 regex = "*"
+isort = {extras = ["pipfile_deprecated_finder", "requirements_deprecated_finder"], version = "*"}
 
 [dev-packages]
 

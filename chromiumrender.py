@@ -7,10 +7,10 @@ from concurrent.futures.process import BrokenProcessPool
 
 import selenium.common
 import urllib3
-
-from tempfiles import temp_file
 from selenium import webdriver
+
 import config
+from tempfiles import temp_file
 
 
 def send(driver, cmd, params=None):
