@@ -1144,7 +1144,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             await improcess(ctx, improcessing.mediatopng, [["VIDEO", "GIF", "IMAGE"]])
 
         @commands.cooldown(1, config.cooldown, commands.BucketType.user)
-        @commands.command(aliases=["emoji", "emojiimage"])
+        @commands.command(aliases=["emoji", "emojiimage", "emote", "emoteurl"])
         async def emojiurl(self, ctx, *emojis: discord.PartialEmoji):
             """
             Sends the raw image for a custom Discord emoji.
