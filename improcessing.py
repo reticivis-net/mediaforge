@@ -963,7 +963,7 @@ async def volume(file, vol):
         # for some reason aac has audio caps but libmp3lame works fine lol
         await run_command("ffmpeg", "-i", file, "-af", f"volume={vol}dB", "-strict", "-1", "-c:a", "libmp3lame", out)
     else:
-        await run_command("ffmpeg", "-i", file, "-an", out)
+        await run_command("ffmpeg", "-i", file, "-af", f"volume=0", "-strict", "-1", "-c:a", "libmp3lame", out)
 
     return out
 
