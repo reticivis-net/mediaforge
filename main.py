@@ -18,6 +18,7 @@ import dbl
 import discord
 import emoji
 import humanize
+import pronouncing
 import regex as re
 import youtube_dl
 from discord.ext import commands
@@ -1587,6 +1588,53 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             await bot.close()
 
 
+    class Slashscript(commands.Cog, name="Slashscript"):
+        """
+        Commands that don't fit in the other categories.
+        """
+
+        def __init__(self, bot):
+            self.bot = bot
+            self.slashnemes = {"AA": "a", "AE": "a", "AH": "E", "AO": "o", "AW": "ao", "AY": "ai", "B": "b", "CH": "tS",
+                               "D": "d", "DH": "D", "EH": "e", "ER": "er", "EY": "ei", "F": "f", "G": "g", "HH": "h",
+                               "IH": "i", "IY": "i", "JH": "dZ", "K": "k", "L": "l", "M": "m", "N": "n", "NG": "N",
+                               "OW": "o", "OY": "oi", "P": "p", "R": "r", "S": "s", "SH": "S", "T": "t", "TH": "T",
+                               "UH": "u", "UW": "u", "V": "v", "W": "w", "Y": "y", "Z": "z", "ZH": "Z"}
+
+        # @commands.command()
+        # async def slashscript(self, ctx, *, text):
+        #     """
+        #     Eminem says something.
+        #
+        #     :Usage=$eminem `text`
+        #     :Param=text - The text to put next to eminem.
+        #     """
+        #     await improcess(ctx, captionfunctions.slashscript, [], [text])
+
+        @commands.command(hidden=True, aliases=["slashscript", "slashscriptconvert", "ssconvert"])
+        async def sconvert(self, ctx, *, text):
+            """
+            Converts text into a custom writing system known as SlashScript.
+            """
+            out = []
+            for word in re.finditer("([a-zA-Z0-9!@#$%)>]+|[,.])", text.strip()):
+                word = word.group(0)
+                word_phonemes = pronouncing.phones_for_word(word.lower())
+                if word_phonemes and not word.startswith(">"):  # pronunication known
+                    ph_list = (''.join(i for i in word_phonemes[0] if not i.isdigit())).split(" ")
+                    out.append(''.join(self.slashnemes[ph] for ph in ph_list if ph in self.slashnemes))
+                elif word.startswith(">") or word in [".", ","]:
+                    out.append(word.replace(">", ""))
+                else:
+                    await ctx.reply(f"No pronunciation found for `{word}`. To render literal slashnemes, begin the "
+                                    f"word with `>`.", allowed_mentions=discord.AllowedMentions.none())
+                    return
+            out = " ".join(out)
+            # clear out any whitespace touching punctuation
+            out = re.sub(r"(\s(?=[,.])|(?<=[,.])\s)", "", out)
+            await improcess(ctx, captionfunctions.slashscript, [], [out])
+
+
     def logcommand(cmd):
         cmd = cmd.replace("\n", "\\n")
         if len(cmd) > 100:
@@ -1619,6 +1667,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
         if module is None or module == str.__class__.__module__:
             return obj.__class__.__name__
         return module + '.' + obj.__class__.__name__
+
 
     @bot.check
     def block_filter(ctx):
@@ -1735,5 +1784,6 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
     bot.add_cog(Image(bot))
     bot.add_cog(Other(bot))
     bot.add_cog(Debug(bot))
+    bot.add_cog(Slashscript(bot))
 
     bot.run(config.bot_token)

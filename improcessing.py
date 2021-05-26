@@ -14,14 +14,13 @@ import aiohttp
 import discord.ext
 from discord.ext import commands
 from PIL import Image, UnidentifiedImageError
-
+import humanize
 if sys.platform == "win32":  # this hopefully wont cause any problems :>
     from winmagic import magic
 else:
     import magic
-# project files
-import humanize
 
+# project files
 import captionfunctions
 import chromiumrender
 import config
