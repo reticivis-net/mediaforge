@@ -120,6 +120,10 @@ def eminem(caption, tosavename=None):
     return htmlcap("captionhtml/eminem.html", None, caption, tosavename)
 
 
+def slashscript(caption, tosavename=None):
+    return htmlcap("captionhtml/slashscript.html", None, caption, tosavename)
+
+
 def dontweet(caption, tosavename=None):
     return htmlcap("captionhtml/dontweet.html", None, caption, tosavename)
 
