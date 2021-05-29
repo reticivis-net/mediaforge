@@ -1802,7 +1802,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             self.bot = bot
             self.api = discordlists.Client(self.bot)  # Create a Client instance
             if config.bot_list_data:
-                for k, v in config.bot_list_data:
+                for k, v in config.bot_list_data.items():
                     if "token" in v and v["token"]:
                         self.api.set_auth(k, v["token"])
             self.api.start_loop()  # Posts the server count automatically every 30 minutes
