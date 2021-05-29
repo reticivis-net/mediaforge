@@ -977,8 +977,7 @@ async def vibrato(file, frequency=5, depth=0.5):  # https://ffmpeg.org/ffmpeg-fi
     }
     out = temp_file(exts[mt])
     await run_command("ffmpeg", "-i", file, "-af", f"vibrato=f={frequency}:d={depth}", "-strict", "-1", "-c:a",
-                      "aac" if mt == "VIDEO" else "libmp3lame",
-                      out)
+                      "aac" if mt == "VIDEO" else "libmp3lame", out)
     return out
 
 
