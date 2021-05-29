@@ -59,9 +59,14 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
         if not ready:
             ready = True
             while True:
-                game = discord.Activity(name=f"with your media in {len(bot.guilds)} servers | "
-                                             f"{config.command_prefix}help",
-                                        type=discord.ActivityType.playing)
+                if datetime.datetime.now().month == 6:  # june (pride month)
+                    game = discord.Activity(name=f"LGBTQ+ pride in {len(bot.guilds)} servers! | "
+                                                 f"{config.command_prefix}help",
+                                            type=discord.ActivityType.watching)
+                else:
+                    game = discord.Activity(name=f"with your media in {len(bot.guilds)} servers | "
+                                                 f"{config.command_prefix}help",
+                                            type=discord.ActivityType.playing)
                 await bot.change_presence(activity=game)
                 await asyncio.sleep(60)
 
@@ -1816,7 +1821,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             try:
                 result = await self.api.post_count()
             except Exception as e:
-                await ctx.send("Request failed: `{}`".format(e))
+                await ctx.send(f"Request failed: `{e}`")
                 return
 
             await ctx.send("Successfully manually posted server count ({:,}) to {:,} lists."
