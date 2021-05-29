@@ -3,8 +3,14 @@
 bot_token = "EXAMPLE_TOKEN"
 # tenor API key https://tenor.com/developer/keyregistration
 tenor_key = "EXAMPLE_KEY"
-# top.gg token. set to None to disable. https://docs.top.gg/
-topgg_token = None
+# BotBlock tokens. see https://pypi.org/project/discordlists.py/
+bot_list_data = None
+# bot_list_data = {
+#         "examplebotlist.com": {
+#             "token": "exampletoken"
+#         },
+# }
+
 # windows executable for chromedriver https://chromedriver.chromium.org/
 chrome_driver_windows = "chromedriver89.exe"
 # linux binary for chromedriver https://chromedriver.chromium.org/

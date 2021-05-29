@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "2dd211fe6a73adc457e76c47b5ddad7b10ace52a1d8190a1337a22a103dcf57e"
+            "sha256": "bec04d9e28f0a4b0b32856743625539b32957c995fd32a46e57c8c7e17e51201"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -302,6 +302,15 @@
             ],
             "index": "pypi",
             "version": "==1.6.0"
+        },
+        "discordlists.py": {
+            "hashes": [
+                "sha256:0211aecde3c3b3881239511aadc0c753f3cece423d8374d01fa815e958ca2537",
+                "sha256:3ef38ee36fe469dce267a85633067087bb92c0840f8eb60033df05f5866f3bbe",
+                "sha256:f6d49c93c3eb1d5ffbaeddf663d3bfa80bb3073a4fc43787b832ea55de49113d"
+            ],
+            "index": "pypi",
+            "version": "==1.1.1"
         },
         "distlib": {
             "hashes": [
