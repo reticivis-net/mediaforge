@@ -15,6 +15,7 @@ import discord.ext
 from discord.ext import commands
 from PIL import Image, UnidentifiedImageError
 import humanize
+
 if sys.platform == "win32":  # this hopefully wont cause any problems :>
     from winmagic import magic
 else:
@@ -975,7 +976,8 @@ async def vibrato(file, frequency=5, depth=0.5):  # https://ffmpeg.org/ffmpeg-fi
         "VIDEO": "mp4"
     }
     out = temp_file(exts[mt])
-    await run_command("ffmpeg", "-i", file, "-af", f"vibrato=f={frequency}:d={depth}", "-strict", "-1", "-c:a", "aac",
+    await run_command("ffmpeg", "-i", file, "-af", f"vibrato=f={frequency}:d={depth}", "-strict", "-1", "-c:a",
+                      "aac" if mt == "VIDEO" else "libmp3lame",
                       out)
     return out
 
