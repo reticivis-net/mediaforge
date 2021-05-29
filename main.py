@@ -66,7 +66,6 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                 await asyncio.sleep(60)
 
 
-
     async def fetch(url):
         async with aiohttp.ClientSession(headers={'Connection': 'keep-alive'}) as session:
             async with session.get(url) as response:
@@ -1830,11 +1829,9 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
 
     # bot.remove_command('help')
 
-    # if config.topgg_token is not None:
-    #     logger.info("top.gg token detected. attempting to initialize.")
-    #     bot.add_cog(TopGG(bot))
-    # else:
-    #     logger.debug("no top.gg token is set.")
+    if config.bot_list_data:
+        logger.info("initializing BotBlock")
+        bot.add_cog(DiscordListsPost(bot))
     bot.add_cog(Caption(bot))
     bot.add_cog(Media(bot))
     bot.add_cog(Conversion(bot))
