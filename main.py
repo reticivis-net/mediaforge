@@ -15,8 +15,8 @@ import urllib.parse
 # pip libs
 import aiofiles
 import aiohttp
-import dbl
 import discord
+import discordlists
 import emoji
 import humanize
 import pronouncing
@@ -41,8 +41,9 @@ This file contains the discord.py functions, which call other files to do the ac
 
 # TODO: reddit moment caption
 
-
+ready = False
 if __name__ == "__main__":  # prevents multiprocessing workers from running bot code
+    logger.log(25, "Hello World!")
     renderpool = improcessing.initializerenderpool()
     if not os.path.exists(config.temp_dir.rstrip("/")):
         os.mkdir(config.temp_dir.rstrip("/"))
@@ -53,13 +54,17 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
 
     @bot.event
     async def on_ready():
+        global ready
         logger.log(35, f"Logged in as {bot.user.name}!")
-        game = discord.Activity(name=f"with your media | {config.command_prefix}help",
-                                type=discord.ActivityType.playing)
-        await bot.change_presence(activity=game)
-        # while True:
-        #     logger.info(renderpool.stats())
-        #     await asyncio.sleep(1)
+        if not ready:
+            ready = True
+            while True:
+                game = discord.Activity(name=f"with your media in {len(bot.guilds)} servers | "
+                                             f"{config.command_prefix}help",
+                                        type=discord.ActivityType.playing)
+                await bot.change_presence(activity=game)
+                await asyncio.sleep(60)
+
 
 
     async def fetch(url):
@@ -1793,20 +1798,32 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                                 file=discord.File(tr, filename="traceback.txt"), embed=embed)
 
 
-    class TopGG(commands.Cog, command_attrs=dict(hidden=True)):
-        """
-        Handles interactions with the top.gg API
-        https://docs.top.gg/libraries/python/
-        """
-
+    class DiscordListsPost(commands.Cog):
         def __init__(self, bot):
             self.bot = bot
-            self.token = config.topgg_token  # set this to your DBL token
-            self.dblpy = dbl.DBLClient(self.bot, self.token,
-                                       autopost=True)  # Autopost will post your guild count every 30 minutes
+            self.api = discordlists.Client(self.bot)  # Create a Client instance
+            if config.bot_list_data:
+                for k, v in config.bot_list_data:
+                    if "token" in v and v["token"]:
+                        self.api.set_auth(k, v["token"])
+            self.api.start_loop()  # Posts the server count automatically every 30 minutes
 
-        async def on_guild_post(self):
-            logger.debug("top.gg Server count posted successfully")
+        @commands.command(hidden=True)
+        @commands.is_owner()
+        async def post(self, ctx: commands.Context):
+            """
+            Manually posts guild count using discordlists.py (BotBlock)
+            """
+            try:
+                result = await self.api.post_count()
+            except Exception as e:
+                await ctx.send("Request failed: `{}`".format(e))
+                return
+
+            await ctx.send("Successfully manually posted server count ({:,}) to {:,} lists."
+                           "\nFailed to post server count to {:,} lists.".format(self.api.server_count,
+                                                                                 len(result["success"].keys()),
+                                                                                 len(result["failure"].keys())))
 
 
     logger.info(f"discord.py {discord.__version__}")
