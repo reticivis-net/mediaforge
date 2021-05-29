@@ -4,6 +4,7 @@ import datetime
 import difflib
 import glob
 import inspect
+import io
 import json
 import logging
 import os
@@ -568,7 +569,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             self.bot = bot
 
         @commands.cooldown(1, config.cooldown, commands.BucketType.user)
-        @commands.command()
+        @commands.command(aliases=["audioadd", "dub"])
         async def addaudio(self, ctx):
             """
             Adds audio to media.
@@ -1255,6 +1256,16 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             await improcess(ctx, captionfunctions.dontweet, [], [text])
 
 
+    def showcog(cog):
+        show_cog = False
+        # check if there are any non-hidden commands in the cog, if not, dont show it in the help menu.
+        for com in cog.get_commands():
+            if not com.hidden:
+                show_cog = True
+                break
+        return show_cog
+
+
     class Other(commands.Cog, name="Other"):
         """
         Commands that don't fit in the other categories.
@@ -1351,6 +1362,29 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             await ctx.reply(embed=embed)
 
         @commands.cooldown(1, config.cooldown, commands.BucketType.user)
+        @commands.command(aliases=["privacypolicy"])
+        async def privacy(self, ctx):
+            """
+            Shows MediaForge's privacy policy
+
+            :Usage=$privacy
+            """
+            embed = discord.Embed(color=discord.Color(0xD262BA), title="Privacy Policy")
+            embed.add_field(name="What MediaForge Collects",
+                            value=f"MediaForge contains **no** long term data storage. It saves media uploaded through "
+                                  f"Discord, processes it, uploads the processed version, and deletes all files created"
+                                  f" during processing, even if the command fails. MediaForge displays limited info "
+                                  f"about commands being run to the console of the host machine for debugging purposes."
+                                  f" This data is not stored.")
+            embed.add_field(name="Contact about data", value=f"There really isn't anything to contact me about since "
+                                                             f"MediaForge doesn't have any form of long term data "
+                                                             f"storage, but you can join the MediaForge discord "
+                                                             f"server (https://discord.gg/QhMyz3n4V7) or raise an "
+                                                             f"issue on the GitHub ("
+                                                             f"https://github.com/HexCodeFFF/captionbot).")
+            await ctx.reply(embed=embed)
+
+        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         @commands.command(aliases=["github", "git"])
         async def version(self, ctx):
             """
@@ -1363,15 +1397,6 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             await improcessing.run_command("git", "fetch")
             status = await improcessing.run_command("git", "status")
             await ctx.reply(f"```{status}```")
-
-        def showcog(self, cog):
-            showcog = False
-            # check if there are any non-hidden commands in the cog, if not, dont show it in the help menu.
-            for com in cog.get_commands():
-                if not com.hidden:
-                    showcog = True
-                    break
-            return showcog
 
         @commands.command()
         async def help(self, ctx, *, arg=None):
@@ -1386,7 +1411,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                                       description=f"Run `{config.command_prefix}help category` to list commands from "
                                                   f"that category.")
                 for c in bot.cogs.values():
-                    if self.showcog(c):
+                    if showcog(c):
                         if not c.description:
                             c.description = "No Description."
                         embed.add_field(name=c.qualified_name, value=c.description)
@@ -1398,7 +1423,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                     embed.add_field(name=tip, value=tipv, inline=False)
                 await ctx.reply(embed=embed)
             # if the command argument matches the name of any of the cogs that contain any not hidden commands
-            elif arg.lower() in [c.lower() for c, v in self.bot.cogs.items() if self.showcog(v)]:
+            elif arg.lower() in [c.lower() for c, v in self.bot.cogs.items() if showcog(v)]:
                 cogs_lower = {k.lower(): v for k, v in bot.cogs.items()}
                 cog = cogs_lower[arg.lower()]
                 embed = discord.Embed(title=cog.qualified_name,
@@ -1587,6 +1612,21 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             await bot.logout()
             await bot.close()
 
+        @commands.command()
+        @commands.is_owner()
+        async def generate_command_list(self, ctx):
+            out = ""
+            for cog in bot.cogs.values():
+                if not showcog(cog): continue
+                out += f"### {cog.qualified_name}\n"
+                for command in sorted(cog.get_commands(), key=lambda x: x.name):
+                    if not command.hidden:
+                        out += f"- **${command.name}**: {command.short_doc}\n"
+            with io.StringIO() as buf:
+                buf.write(out)
+                buf.seek(0)
+                await ctx.reply(file=discord.File(buf, filename="commands.md"))
+
 
     class Slashscript(commands.Cog, name="Slashscript"):
         """
@@ -1773,11 +1813,11 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
 
     # bot.remove_command('help')
 
-    if config.topgg_token is not None:
-        logger.info("top.gg token detected. attempting to initialize.")
-        bot.add_cog(TopGG(bot))
-    else:
-        logger.debug("no top.gg token is set.")
+    # if config.topgg_token is not None:
+    #     logger.info("top.gg token detected. attempting to initialize.")
+    #     bot.add_cog(TopGG(bot))
+    # else:
+    #     logger.debug("no top.gg token is set.")
     bot.add_cog(Caption(bot))
     bot.add_cog(Media(bot))
     bot.add_cog(Conversion(bot))
