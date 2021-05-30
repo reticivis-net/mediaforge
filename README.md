@@ -8,7 +8,7 @@
 ![Total Lines](https://img.shields.io/tokei/lines/github/HexCodeFFF/captionbot)
 ![discord.py](https://img.shields.io/github/pipenv/locked/dependency-version/hexcodefff/captionbot/discord.py)
 ![python](https://img.shields.io/github/pipenv/locked/python-version/hexcodefff/captionbot)
-![stars](https://img.shields.io/github/stars/HexCodeFFF/captionbot?style=social)
+[![stars](https://img.shields.io/github/stars/HexCodeFFF/captionbot?style=social)](https://github.com/HexCodeFFF/captionbot/stargazers)
 [![built with immense swag](https://img.shields.io/static/v1?label=built+with&message=immense+swag&color=D262BA)](https://knowyourmeme.com/memes/trollface)
 
 ### A Discord bot for editing and creating videos, images, GIFs, and more!
