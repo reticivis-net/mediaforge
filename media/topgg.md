@@ -1,4 +1,7 @@
 # ![MediaForge](https://raw.githubusercontent.com/HexCodeFFF/captionbot/master/media/banner.png)
+[![Discord Bots](https://top.gg/api/widget/status/780570413767983122.svg)](https://top.gg/bot/780570413767983122)
+[![Discord Bots](https://top.gg/api/widget/servers/780570413767983122.svg)](https://top.gg/bot/780570413767983122)
+[![Discord Bots](https://top.gg/api/widget/upvotes/780570413767983122.svg)](https://top.gg/bot/780570413767983122)
 ## A Discord bot for editing and creating videos, images, GIFs, and more!
 
 MediaForge is a general purpose media editing tool mainly for meme creation, inspired by [Essem's esmBot](https://github.com/esmBot/esmBot).

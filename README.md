@@ -8,8 +8,8 @@
 ![Total Lines](https://img.shields.io/tokei/lines/github/HexCodeFFF/captionbot)
 ![discord.py](https://img.shields.io/github/pipenv/locked/dependency-version/hexcodefff/captionbot/discord.py)
 ![python](https://img.shields.io/github/pipenv/locked/python-version/hexcodefff/captionbot)
-
-[comment]: <> (![Downloads]&#40;https://img.shields.io/github/downloads/HexCodeFFF/captionbot/total&#41;)
+![stars](https://img.shields.io/github/stars/HexCodeFFF/captionbot?style=social)
+[![built with immense swag](https://img.shields.io/static/v1?label=built+with&message=immense+swag&color=D262BA)](https://knowyourmeme.com/memes/trollface)
 
 ### A Discord bot for editing and creating videos, images, GIFs, and more!
 
@@ -44,6 +44,8 @@ the bot uses many CLI programs for media processing.
   with `sudo apt-get install exiftool` https://exiftool.org/
 - cairo - install on linux with `sudo apt-get install libcairo2-dev`. installable on windows by downloading
   GTK+. https://www.cairographics.org/download/
+    - this library is not yet used. it is needed to render lottie stickers but the library for rendering them is bugged
+      so it isnt used yet.
 
 ### pip libraries
 
@@ -66,4 +68,6 @@ the bot uses many CLI programs for media processing.
 - once you've set up all of the libraries, just run the program with `python main.py` (or `python3.8 main.py` or
   whatever your python is named). make sure it can read and write to the directory it lives in and also access/execute
   all the aforementioned libraries
+    - if using pipenv, run `pipenv run python main.py` or open the venv shell with `pipenv shell` and then
+      run `python main.py`
 - terminate the bot by running the `shutdown` command, this will _probably_ close better than a termination
