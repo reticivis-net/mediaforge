@@ -1405,7 +1405,11 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             """
             await improcessing.run_command("git", "fetch")
             status = await improcessing.run_command("git", "status")
-            await ctx.reply(f"```{status}```")
+            with io.StringIO() as buf:
+                buf.write(status)
+                buf.seek(0)
+                await ctx.reply("Output of `git status` (the differences between this copy of MediaForge and the latest"
+                                " code on GitHub)", file=discord.File(buf, filename="gitstatus.txt"))
 
         @commands.command()
         async def help(self, ctx, *, arg=None):
