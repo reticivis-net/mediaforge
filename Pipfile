@@ -21,6 +21,7 @@ regex = "*"
 isort = {extras = ["pipfile_deprecated_finder", "requirements_deprecated_finder"], version = "*"}
 pronouncing = "*"
 "discordlists.py" = "*"
+aiosqlite = "*"
 
 [dev-packages]
 

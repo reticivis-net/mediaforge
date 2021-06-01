@@ -8,6 +8,7 @@ import io
 import json
 import logging
 import os
+import sqlite3
 import traceback
 import typing
 import urllib.parse
@@ -15,6 +16,7 @@ import urllib.parse
 # pip libs
 import aiofiles
 import aiohttp
+import aiosqlite
 import discord
 import discordlists
 import emoji
@@ -44,12 +46,35 @@ This file contains the discord.py functions, which call other files to do the ac
 ready = False
 if __name__ == "__main__":  # prevents multiprocessing workers from running bot code
     logger.log(25, "Hello World!")
+    logger.info(f"discord.py {discord.__version__}")
     renderpool = improcessing.initializerenderpool()
     if not os.path.exists(config.temp_dir.rstrip("/")):
         os.mkdir(config.temp_dir.rstrip("/"))
     for f in glob.glob(f'{config.temp_dir}*'):
         os.remove(f)
-    bot = commands.Bot(command_prefix=config.command_prefix, help_command=None, case_insensitive=True)
+    logger.debug("Initializing DB")
+    # create table if it doesnt exist
+    # this isnt done with aiosqlite because its easier to just not do things asyncly during startup.
+    db = sqlite3.connect(config.db_filename)
+    with db:
+        cur = db.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='guild_prefixes'")
+        if not cur.fetchall():
+            db.execute("create table guild_prefixes("
+                       "guild int not null constraint table_name_pk primary key,prefix text not null)")
+    db.close()
+
+
+    async def prefix_function(dbot: commands.Bot, message: discord.Message):
+        async with aiosqlite.connect(config.db_filename) as db:
+            async with db.execute("SELECT prefix from guild_prefixes WHERE guild=?", (message.guild.id,)) as cur:
+                pfx = await cur.fetchone()
+                if pfx:
+                    return pfx[0]
+                else:
+                    return config.default_command_prefix
+
+
+    bot = commands.Bot(command_prefix=prefix_function, help_command=None, case_insensitive=True)
 
 
     @bot.event
@@ -61,11 +86,11 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             while True:
                 if datetime.datetime.now().month == 6:  # june (pride month)
                     game = discord.Activity(name=f"LGBTQ+ pride in {len(bot.guilds)} servers! | "
-                                                 f"{config.command_prefix}help",
+                                                 f"{config.default_command_prefix}help",
                                             type=discord.ActivityType.watching)
                 else:
                     game = discord.Activity(name=f"with your media in {len(bot.guilds)} servers | "
-                                                 f"{config.command_prefix}help",
+                                                 f"{config.default_command_prefix}help",
                                             type=discord.ActivityType.playing)
                 await bot.change_presence(activity=game)
                 await asyncio.sleep(60)
@@ -745,7 +770,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             await ctx.reply("MediaForge has 2 loop commands.\nUse `$gifloop` to change/limit the amount of times a GIF "
                             "loops. This ONLY works on GIFs.\nUse `$videoloop` to loop a video. This command "
                             "duplicates the video contents."
-                            .replace("$", config.command_prefix))
+                            .replace("$", await prefix_function(bot, ctx.message)))
 
         @commands.command(aliases=["gloop"])
         @commands.cooldown(1, config.cooldown, commands.BucketType.user)
@@ -1034,8 +1059,8 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             await improcess(ctx, lambda x: x, [["VIDEO", "GIF", "IMAGE", "AUDIO"]], spoiler=True)
 
         @commands.cooldown(1, config.cooldown, commands.BucketType.user)
-        @commands.command(aliases=["avatar", "pfp", "profilepicture", "profilepic", "ayowhothismf"])
-        async def icon(self, ctx, *, userorserver):
+        @commands.command(aliases=["avatar", "pfp", "profilepicture", "profilepic", "ayowhothismf", "av"])
+        async def icon(self, ctx, *, userorserver=None):
             """
             Grabs the icon url of a Discord user or server.
             This command works off IDs. user mentions contain the ID internally so mentioning a user will work.
@@ -1043,14 +1068,17 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             To get the icon of a webhook message, copy the message ID and ***in the same channel as the message*** use the message ID as the parameter. This will also work for normal users though i have no idea why you'd do it that way.
 
             :Usage=$icon `body`
-            :Param=body - must contain a user, guild, or message ID.
+            :Param=body - must contain a user, guild, or message ID. if left blank, the author's avatar will be sent.
             """
-            id_regex = re.compile(r'([0-9]{15,20})')
-            tasks = []
-            for m in re.finditer(id_regex, userorserver):
-                tasks.append(improcessing.iconfromsnowflakeid(int(m.group(0)), bot, ctx))
-            result = await asyncio.gather(*tasks)
-            result = list(filter(None, result))  # remove Nones
+            if userorserver is None:
+                result = await improcessing.iconfromsnowflakeid(ctx.author.id, bot, ctx)
+            else:
+                id_regex = re.compile(r'([0-9]{15,20})')
+                tasks = []
+                for m in re.finditer(id_regex, userorserver):
+                    tasks.append(improcessing.iconfromsnowflakeid(int(m.group(0)), bot, ctx))
+                result = await asyncio.gather(*tasks)
+                result = list(filter(None, result))  # remove Nones
             if result:
                 await ctx.reply("\n".join(result)[0:2000])
             else:
@@ -1283,6 +1311,40 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
         def __init__(self, bot):
             self.bot = bot
 
+        @commands.cooldown(1, config.cooldown, commands.BucketType.guild)
+        @commands.guild_only()
+        @commands.has_guild_permissions(manage_guild=True)
+        @commands.command(aliases=["pfx", "setprefix", "changeprefix", "botprefix", "commandprefix"])
+        async def prefix(self, ctx, prefix=None):
+            """
+            Changes the bot's prefix for this guild.
+
+            :Usage=prefix `prefix`
+            :Param=prefix - The new prefix for the bot to use.
+            """
+            if prefix is None:
+                async with aiosqlite.connect(config.db_filename) as db:
+                    await db.execute("DELETE FROM guild_prefixes WHERE guild=?", (ctx.guild.id,))
+                    await db.commit()
+                await ctx.reply(f"{config.emojis['check']} Set guild prefix back to global default "
+                                f"(`{config.default_command_prefix}`).")
+
+            else:
+                if not 50 >= len(prefix) > 0:
+                    await ctx.reply(f"{config.emojis['x']} prefix must be between 1 and 50 characters.")
+                    return
+                # check for invalid characters by returning all invalid characters
+                invalids = re.findall(r"[^a-zA-Z0-9!$%^&()_\-=+,<.>\/?;:'[{\]}|]", prefix)
+                if invalids:
+                    await ctx.reply(f"{config.emojis['x']} Found invalid characters: "
+                                    f"{', '.join([discord.utils.escape_markdown(i) for i in invalids])}")
+                else:
+                    async with aiosqlite.connect(config.db_filename) as db:
+                        await db.execute("REPLACE INTO guild_prefixes(guild, prefix) VALUES (?,?)",
+                                         (ctx.guild.id, prefix))
+                        await db.commit()
+                    await ctx.reply(f"{config.emojis['check']} Set guild prefix to `{prefix}`")
+
         @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         @commands.guild_only()
         @commands.has_guild_permissions(manage_emojis=True)
@@ -1380,11 +1442,11 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             """
             embed = discord.Embed(color=discord.Color(0xD262BA), title="Privacy Policy")
             embed.add_field(name="What MediaForge Collects",
-                            value=f"MediaForge contains **no** long term data storage. It saves media uploaded through "
-                                  f"Discord, processes it, uploads the processed version, and deletes all files created"
-                                  f" during processing, even if the command fails. MediaForge displays limited info "
+                            value=f"MediaForge has a sqlite database with the **sole purpose** of storing "
+                                  f"guild-specific command prefixes. **All** other data is *always* deleted when it is "
+                                  f"done with. MediaForge displays limited info "
                                   f"about commands being run to the console of the host machine for debugging purposes."
-                                  f" This data is not stored.")
+                                  f" This data is not stored either.")
             embed.add_field(name="Contact about data", value=f"There really isn't anything to contact me about since "
                                                              f"MediaForge doesn't have any form of long term data "
                                                              f"storage, but you can join the MediaForge discord "
@@ -1419,9 +1481,10 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             :Usage=$help `[inquiry]`
             :Param=inquiry - the name of a command or command category. If none is provided, all categories are shown.
             """
+            prefix = await prefix_function(bot, ctx.message)
             if arg is None:
                 embed = discord.Embed(title="Help", color=discord.Color(0xB565D9),
-                                      description=f"Run `{config.command_prefix}help category` to list commands from "
+                                      description=f"Run `{prefix}help category` to list commands from "
                                                   f"that category.")
                 for c in bot.cogs.values():
                     if showcog(c):
@@ -1440,13 +1503,13 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                 cogs_lower = {k.lower(): v for k, v in bot.cogs.items()}
                 cog = cogs_lower[arg.lower()]
                 embed = discord.Embed(title=cog.qualified_name,
-                                      description=cog.description + f"\nRun `{config.command_prefix}help command` for "
+                                      description=cog.description + f"\nRun `{prefix}help command` for "
                                                                     f"more information on a command.",
                                       color=discord.Color(0xD262BA))
                 for cmd in sorted(cog.get_commands(), key=lambda x: x.name):
                     if not cmd.hidden:
                         desc = cmd.short_doc if cmd.short_doc else "No Description."
-                        embed.add_field(name=f"{config.command_prefix}{cmd.name}", value=desc)
+                        embed.add_field(name=f"{prefix}{cmd.name}", value=desc)
                 await ctx.reply(embed=embed)
             # elif arg.lower() in [c.name for c in bot.commands]:
             else:
@@ -1458,7 +1521,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                     await ctx.reply(
                         f"{config.emojis['warning']} `{arg}` is not the name of a command or a command category!")
                     return
-                embed = discord.Embed(title=config.command_prefix + cmd.name, description=cmd.cog_name,
+                embed = discord.Embed(title=prefix + cmd.name, description=cmd.cog_name,
                                       color=discord.Color(0xEE609C))
                 fields = {}
                 fhelp = []
@@ -1471,14 +1534,14 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                     else:
                         fhelp.append(line)
                 fhelp = "\n".join(fhelp)
-                embed.add_field(name="Command Information", value=fhelp.replace("$", config.command_prefix),
+                embed.add_field(name="Command Information", value=fhelp.replace("$", prefix),
                                 inline=False)
                 for k, v in fields.items():
                     if k == "Param":
                         k = "Parameters"
-                    embed.add_field(name=k, value=v.replace("$", config.command_prefix), inline=False)
+                    embed.add_field(name=k, value=v.replace("$", prefix), inline=False)
                 if cmd.aliases:
-                    embed.add_field(name="Aliases", value=", ".join([config.command_prefix + a for a in cmd.aliases]))
+                    embed.add_field(name="Aliases", value=", ".join([prefix + a for a in cmd.aliases]))
                 await ctx.reply(embed=embed)
 
         @commands.command(aliases=["ffprobe"])
@@ -1709,6 +1772,12 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
 
 
     @bot.listen()
+    async def on_message(message):
+        if f"<@{bot.user.id}>" in message.content or f"<@!{bot.user.id}>" in message.content:
+            await message.reply(f"My command prefix is `{await prefix_function(bot, message)}`.", delete_after=10)
+
+
+    @bot.listen()
     async def on_command_completion(ctx):
         logger.log(35,
                    f"Command '{logcommand(ctx.message.content)}' by @{ctx.message.author.name}#{ctx.message.author.discriminator} "
@@ -1750,9 +1819,10 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                 if not botcom.hidden:
                     allcmds.append(botcom.name)
                     allcmds += botcom.aliases
-            match = difflib.get_close_matches(cmd.replace(config.command_prefix, "", 1), allcmds, n=1, cutoff=0)[0]
+            prefix = await prefix_function(bot, ctx.message)
+            match = difflib.get_close_matches(cmd.replace(prefix, "", 1), allcmds, n=1, cutoff=0)[0]
             err = f"{config.emojis['exclamation_question']} Command `{cmd}` does not exist. " \
-                  f"Did you mean **{config.command_prefix}{match}**?"
+                  f"Did you mean **{prefix}{match}**?"
             logger.warning(err)
             await ctx.reply(err)
         elif isinstance(commanderror, discord.ext.commands.errors.NotOwner):
@@ -1834,10 +1904,8 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                                                                                  len(result["failure"].keys())))
 
 
-    logger.info(f"discord.py {discord.__version__}")
-
     # bot.remove_command('help')
-
+    logger.debug(f"initializing cogs")
     if config.bot_list_data:
         logger.info("initializing BotBlock")
         bot.add_cog(DiscordListsPost(bot))
@@ -1849,4 +1917,5 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
     bot.add_cog(Debug(bot))
     bot.add_cog(Slashscript(bot))
 
+    logger.debug("running bot")
     bot.run(config.bot_token)
