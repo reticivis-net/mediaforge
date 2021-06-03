@@ -498,6 +498,19 @@ async def reencode(mp4):  # reencodes mp4 as libx264 since the png format used c
     return outname
 
 
+async def allreencode(file):
+    mt = mediatype(file)
+    if mt == "IMAGE":
+        return await compresspng(await mediatopng(file))
+    elif mt == "VIDEO":
+        return await reencode(file)
+    elif mt == "AUDIO":
+        outname = temp_file("mp3")
+        await run_command("ffmpeg",  "-hide_banner", "-i", file, "-c:a", "libmp3lame", outname)
+        return outname
+
+
+
 async def giftomp4(gif):
     """
     converts gif to mp4
