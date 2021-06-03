@@ -1682,7 +1682,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             """
             Shut down the bot
             """
-            await ctx.send("✅ Shutting Down...")
+            await ctx.send(f"{config.emojis['check']} Shutting Down...")
             logger.log(25, "Shutting Down...")
             await renderpool.shutdown()
             await bot.logout()
