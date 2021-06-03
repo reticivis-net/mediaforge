@@ -694,7 +694,7 @@ async def addaudio(files):
             outname = temp_file("mp4")
         await run_command("ffmpeg", "-i", media, "-i", audio, "-filter_complex",
                           "[0:a][1:a]amix=inputs=2:dropout_transition=100000:duration=longest[a];[a]volume=2[a]",
-                          "-map", "0:v?", "-map", "[a]", "-c:a", "aac", outname)
+                          "-map", "0:v?", "-map", "[a]", "-c:a", "lbmp3lame" if mt == "AUDIO" else "aac", outname)
         return outname
 
 
