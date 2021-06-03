@@ -178,15 +178,16 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
         """
         messageschecked = []
         outfiles = []
-        if ctx.message.reference:
-            m = ctx.message.reference.resolved
+
+        m = ctx.message
+        if m not in messageschecked:
             messageschecked.append(m)
             hm = await handlemessagesave(m)
             outfiles += hm
             if len(outfiles) >= nargs:
                 return outfiles[:nargs]
-        m = ctx.message
-        if m not in messageschecked:
+        if ctx.message.reference:
+            m = ctx.message.reference.resolved
             messageschecked.append(m)
             hm = await handlemessagesave(m)
             outfiles += hm
@@ -601,6 +602,27 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
 
         def __init__(self, bot):
             self.bot = bot
+
+        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
+        @commands.command(aliases=["copy"])
+        async def repost(self, ctx):
+            """
+            Reposts media as-is.
+            :Usage=$repost
+            :Param=media - Any valid media. (automatically found in channel)
+            """
+            await improcess(ctx, lambda x: x, [["VIDEO", "GIF", "IMAGE", "AUDIO"]])
+
+        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
+        @commands.command(aliases=["clean", "remake"])
+        async def reencode(self, ctx):
+            """
+            Re-encodes media.
+            Videos become libx264 mp4s, audio files become libmp3lame mp3s, images become pngs.
+            :Usage=reencode
+            :Param=media - A video, image, or audio file. (automatically found in channel)
+            """
+            await improcess(ctx, improcessing.allreencode, [["VIDEO", "IMAGE", "AUDIO"]])
 
         @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         @commands.command(aliases=["audioadd", "dub"])
