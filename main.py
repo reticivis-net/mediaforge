@@ -1093,7 +1093,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             :Param=body - must contain a user, guild, or message ID. if left blank, the author's avatar will be sent.
             """
             if userorserver is None:
-                result = await improcessing.iconfromsnowflakeid(ctx.author.id, bot, ctx)
+                result = [await improcessing.iconfromsnowflakeid(ctx.author.id, bot, ctx)]
             else:
                 id_regex = re.compile(r'([0-9]{15,20})')
                 tasks = []
