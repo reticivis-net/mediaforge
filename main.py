@@ -1,5 +1,6 @@
 # standard libs
 import asyncio
+import concurrent.futures
 import datetime
 import difflib
 import glob
@@ -85,13 +86,15 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             ready = True
             while True:
                 if datetime.datetime.now().month == 6:  # june (pride month)
-                    game = discord.Activity(name=f"LGBTQ+ pride in {len(bot.guilds)} servers! | "
-                                                 f"{config.default_command_prefix}help",
-                                            type=discord.ActivityType.watching)
+                    game = discord.Activity(
+                        name=f"LGBTQ+ pride in {len(bot.guilds)} server{'' if len(bot.guilds) == 1 else 's'}! | "
+                             f"{config.default_command_prefix}help",
+                        type=discord.ActivityType.watching)
                 else:
-                    game = discord.Activity(name=f"with your media in {len(bot.guilds)} servers | "
-                                                 f"{config.default_command_prefix}help",
-                                            type=discord.ActivityType.playing)
+                    game = discord.Activity(
+                        name=f"with your media in {len(bot.guilds)} server{'' if len(bot.guilds) == 1 else 's'} | "
+                             f"{config.default_command_prefix}help",
+                        type=discord.ActivityType.playing)
                 await bot.change_presence(activity=game)
                 await asyncio.sleep(60)
 
@@ -968,23 +971,24 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
 
         @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         @commands.command()
-        async def compressv(self, ctx, crf: float = 51, qa: float = 8000):
+        async def compressv(self, ctx, crf: float = 51, qa: float = 20):
             """
             Makes videos terrible quality.
             The strange ranges on the numbers are because they are quality settings in FFmpeg's encoding.
             CRF info is found at https://trac.ffmpeg.org/wiki/Encode/H.264#crf
+            audio quality info is found under https://trac.ffmpeg.org/wiki/Encode/AAC (see `-b:a`)
 
             :Usage=$compressv `[crf]` `[qa]`
             :Param=crf - Controls video quality. Higher is worse quality. must be between 28 and 51. defaults to 51.
-            :Param=qa - Audio sample rate in Hz. lower is worse quality. must be between 8000 and 44100. defaults to 8000
+            :Param=qa - Audio bitrate in kbps. Lower is worse quality. Must be between 10 and 112. defaults to 20.
             :Param=video - A video or gif. (automatically found in channel)
 
             """
             if not 28 <= crf <= 51:
                 await ctx.send(f"{config.emojis['warning']} CRF must be between 28 and 51.")
                 return
-            if not 8000 <= qa <= 44100:
-                await ctx.send(f"{config.emojis['warning']} qa must be between 8000 and 44100.")
+            if not 10 <= qa <= 112:
+                await ctx.send(f"{config.emojis['warning']} qa must be between 1 and 112.")
                 return
             await improcess(ctx, improcessing.quality, [["VIDEO", "GIF"]], crf, qa)
 
@@ -1823,6 +1827,9 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
 
     @bot.listen()
     async def on_command_error(ctx, commanderror):
+        global renderpool
+        if isinstance(commanderror, concurrent.futures.process.BrokenProcessPool):
+            renderpool = improcessing.initializerenderpool()
         errorstring = discord.utils.escape_mentions(discord.utils.escape_markdown(str(commanderror)))
         if isinstance(commanderror, discord.Forbidden):
             if not ctx.me.permissions_in(ctx.channel).send_messages:

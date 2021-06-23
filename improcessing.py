@@ -493,7 +493,7 @@ async def mp4togif(mp4):
 async def reencode(mp4):  # reencodes mp4 as libx264 since the png format used cant be played by like literally anything
     outname = temp_file("mp4")
     await run_command("ffmpeg", "-hide_banner", "-i", mp4, "-c:v", "libx264", "-c:a", "copy", "-pix_fmt", "yuv420p",
-                      "-max_muxing_queue_size", "9999",
+                      "-max_muxing_queue_size", "9999", "-strict", "-1"
                       "-vf", "scale=trunc(iw/2)*2:trunc(ih/2)*2", outname)
     return outname
 
@@ -599,8 +599,8 @@ async def quality(file, crf, qa):
     """
     mt = mediatype(file)
     outname = temp_file("mp4")
-    await run_command("ffmpeg", "-hide_banner", "-i", await forceaudio(file), "-crf", str(crf), "-c:a", "aac", "-ar",
-                      str(qa), outname)
+    await run_command("ffmpeg", "-hide_banner", "-i", await forceaudio(file), "-crf", str(crf), "-c:a", "aac", "-b:a",
+                      f"{qa}k", outname)
     # png cannot be supported here because crf and qa are libx264 params lmao
     if mt == "GIF":
         outname = await mp4togif(outname)
