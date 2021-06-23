@@ -493,7 +493,7 @@ async def mp4togif(mp4):
 async def reencode(mp4):  # reencodes mp4 as libx264 since the png format used cant be played by like literally anything
     outname = temp_file("mp4")
     await run_command("ffmpeg", "-hide_banner", "-i", mp4, "-c:v", "libx264", "-c:a", "copy", "-pix_fmt", "yuv420p",
-                      "-max_muxing_queue_size", "9999", "-strict", "-1"
+                      "-max_muxing_queue_size", "9999",
                       "-vf", "scale=trunc(iw/2)*2:trunc(ih/2)*2", outname)
     return outname
 
