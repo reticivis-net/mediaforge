@@ -1819,6 +1819,9 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
 
     @bot.check
     def block_filter(ctx):
+        # this command is exempt because it only works on URLs and there have been issues with r/okbr
+        if ctx.command.name == "videodl":
+            return True
         for block in config.blocked_words:
             if block.lower() in ctx.message.content.lower():
                 raise commands.CheckFailure("Your command contains one or more blocked words.")
