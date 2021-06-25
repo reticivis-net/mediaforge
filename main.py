@@ -66,6 +66,8 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
 
 
     async def prefix_function(dbot: commands.Bot, message: discord.Message):
+        if not message.guild:
+            return config.default_command_prefix
         async with aiosqlite.connect(config.db_filename) as db:
             async with db.execute("SELECT prefix from guild_prefixes WHERE guild=?", (message.guild.id,)) as cur:
                 pfx = await cur.fetchone()
