@@ -506,9 +506,8 @@ async def allreencode(file):
         return await reencode(file)
     elif mt == "AUDIO":
         outname = temp_file("mp3")
-        await run_command("ffmpeg",  "-hide_banner", "-i", file, "-c:a", "libmp3lame", outname)
+        await run_command("ffmpeg", "-hide_banner", "-i", file, "-c:a", "libmp3lame", outname)
         return outname
-
 
 
 async def giftomp4(gif):
