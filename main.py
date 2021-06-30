@@ -609,7 +609,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             self.bot = bot
 
         @commands.cooldown(1, config.cooldown, commands.BucketType.user)
-        @commands.command(aliases=["copy"])
+        @commands.command(aliases=["copy", "nothing", "noop"])
         async def repost(self, ctx):
             """
             Reposts media as-is.
@@ -760,8 +760,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
 
             :Usage=$wide
             """
-            await improcess(ctx, captionfunctions.resize, [["VIDEO", "GIF", "IMAGE"]], "iw*2", "ih",
-                            handleanimated=True)
+            await improcess(ctx, improcessing.resize, [["VIDEO", "GIF", "IMAGE"]], "iw*2", "ih")
 
         @commands.command(aliases=["tall", "long", "antikyle"])
         @commands.cooldown(1, config.cooldown, commands.BucketType.user)
@@ -771,8 +770,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
 
             :Usage=$wide
             """
-            await improcess(ctx, captionfunctions.resize, [["VIDEO", "GIF", "IMAGE"]], "iw", "ih*2",
-                            handleanimated=True)
+            await improcess(ctx, improcessing.resize, [["VIDEO", "GIF", "IMAGE"]], "iw", "ih*2")
 
         @commands.command(aliases=["magic", "magik", "contentawarescale", "liquidrescale"])
         @commands.cooldown(1, config.cooldown, commands.BucketType.user)
