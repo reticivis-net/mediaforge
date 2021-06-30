@@ -42,6 +42,7 @@ the bot uses many CLI programs for media processing.
 - ImageMagick - not included but [downloadable here](https://imagemagick.org/script/download.php)
 - ExifTool - windows executable is included. installable on linux
   with `sudo apt-get install exiftool` https://exiftool.org/
+- apngasm - windows executable is included. installable on linux with `sudo apt-get install apngasm`
 - cairo - install on linux with `sudo apt-get install libcairo2-dev`. installable on windows by downloading
   GTK+. https://www.cairographics.org/download/
     - this library is not yet used. it is needed to render lottie stickers but the library for rendering them is bugged

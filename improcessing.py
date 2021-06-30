@@ -10,6 +10,8 @@ import sys
 import typing
 
 # pip libs
+from fractions import Fraction
+
 import aiohttp
 import discord.ext
 from discord.ext import commands
@@ -133,10 +135,10 @@ async def run_command(*args):
         logger.debug(f"Results: {stdout.decode().strip() + stderr.decode().strip()}")
     else:
         logger.error(
-            f"PID {process.pid} Failed: {args} result: {stderr.decode().strip()}",
+            f"PID {process.pid} Failed: {args} result: {stdout.decode().strip() + stderr.decode().strip()}",
         )
         # adds command output to traceback
-        raise CMDError(f"Command {args} failed.") from CMDError(stderr.decode().strip())
+        raise CMDError(f"Command {args} failed.") from CMDError(stdout.decode().strip() + stderr.decode().strip())
     result = stdout.decode().strip() + stderr.decode().strip()
     # Result
 
@@ -488,6 +490,16 @@ async def mp4togif(mp4):
         # for f in glob.glob(name.replace('%09d', '*')):
         #     os.remove(f)
         return outname
+
+
+async def toapng(video):
+    frames, name = await ffmpegsplit(video)
+    fps = await get_frame_rate(video)
+    fps = Fraction(1 / fps).limit_denominator()
+    outname = temp_file("png")
+    n = glob.glob(name.replace('%09d', '*'))
+    await run_command("apngasm", outname, *n, str(fps.numerator), str(fps.denominator), "-i5")
+    return outname
 
 
 async def reencode(mp4):  # reencodes mp4 as libx264 since the png format used cant be played by like literally anything
