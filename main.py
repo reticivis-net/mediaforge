@@ -958,6 +958,23 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                 return
             await improcess(ctx, improcessing.speed, [["VIDEO", "GIF"]], speed)
 
+        @commands.command(aliases=["shuffle", "stutter", "nervous"])
+        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
+        async def random(self, ctx, frames: int = 30):
+            """
+            Shuffles the frames of a video around.
+            Currently this command does NOT apply to audio. This is an FFmpeg limitation.
+            see https://ffmpeg.org/ffmpeg-filters.html#random
+
+            :Usage=random `[frames]`
+            :Param=frames - Set size in number of frames of internal cache. must be between 2 and 512. default is 30.
+            :Param=video - A video or gif. (automatically found in channel)
+            """
+            if not 2 <= frames <= 512:
+                await ctx.send(f"{config.emojis['warning']} Frames must be between 2 and 512")
+                return
+            await improcess(ctx, improcessing.random, [["VIDEO", "GIF"]], frames)
+
         @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         @commands.command()
         async def reverse(self, ctx):

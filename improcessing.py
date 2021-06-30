@@ -588,6 +588,23 @@ async def reverse(file):
     return outname
 
 
+async def random(file, frames: int):
+    """
+    shuffle frames
+    :param file: media
+    :param frames: number of frames in internal cache
+    :return: procesed media
+    """
+    mt = mediatype(file)
+    outname = temp_file("mp4")
+    #
+    await run_command("ffmpeg", "-hide_banner", "-i", file, "-filter:v", f"random=frames={frames}",
+                      "-c:v", "png", outname)
+    if mt == "GIF":
+        outname = await mp4togif(outname)
+    return outname
+
+
 async def quality(file, crf, qa):
     """
     changes quality of videos/gifs with ffmpeg compression
