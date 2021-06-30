@@ -12,7 +12,7 @@ bot_list_data = None
 # }
 
 # windows executable for chromedriver https://chromedriver.chromium.org/
-chrome_driver_windows = "chromedriver89.exe"
+chrome_driver_windows = "chromedriver92.exe"
 # linux binary for chromedriver https://chromedriver.chromium.org/
 chrome_driver_linux = "./chromedriver91"
 # the number of instances of chromedriver to run for caption processing.
