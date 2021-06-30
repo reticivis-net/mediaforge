@@ -152,9 +152,9 @@ async def get_frame_rate(filename):
     :return: FPS
     """
     logger.info("Getting FPS...")
-    out = await run_command("ffprobe", filename, "-v", "0", "-select_streams", "v", "-print_format", "flat",
+    out = await run_command("ffprobe", filename, "-v", "panic", "-select_streams", "v:0", "-print_format", "json",
                             "-show_entries", "stream=r_frame_rate")
-    rate = out.split('=')[1].strip()[1:-1].split('/')
+    rate = json.loads(out)["streams"][0]["r_frame_rate"]
     if len(rate) == 1:
         return float(rate[0])
     if len(rate) == 2:
@@ -170,7 +170,7 @@ async def get_duration(filename):
     :return: duration
     """
     logger.info("Getting duration...")
-    out = await run_command("ffprobe", "-v", "error", "-show_entries", "format=duration", "-of",
+    out = await run_command("ffprobe", "-v", "panic", "-show_entries", "format=duration", "-of",
                             "default=noprint_wrappers=1:nokey=1", filename)
     if out == "N/A":  # happens with APNGs?
         # https://stackoverflow.com/a/38114903/9044183
@@ -195,10 +195,10 @@ async def get_resolution(filename):
     :param filename: filename
     :return: [width, height]
     """
-    out = await run_command("ffprobe", "-v", "error", "-show_entries", "stream=width,height", "-of", "csv=p=0:s=x",
-                            filename)
-    out = out.split("x")
-    return [float(out[0]), float(out[1])]
+    out = await run_command("ffprobe", "-v", "panic", "-select_streams", "v:0", "-show_entries", "stream=width,height",
+                            "-print_format", "json", filename)
+    out = json.loads(out)
+    return [out["streams"][0]["width"], out["streams"][0]["height"]]
 
 
 async def ffmpegsplit(media):
@@ -221,7 +221,7 @@ async def splitaudio(video):
     :param video: file
     :return: filename of audio (aac) if file has audio, False if it doesn't
     """
-    ifaudio = await run_command("ffprobe", "-i", video, "-show_streams", "-select_streams", "a", "-loglevel", "error")
+    ifaudio = await run_command("ffprobe", "-i", video, "-show_streams", "-select_streams", "a", "-loglevel", "panic")
     if ifaudio:
         logger.info("Splitting audio...")
         name = temp_file("aac")
@@ -238,7 +238,7 @@ async def forceaudio(video):
     :param video: file
     :return: video filename
     """
-    ifaudio = await run_command("ffprobe", "-i", video, "-show_streams", "-select_streams", "a", "-loglevel", "error")
+    ifaudio = await run_command("ffprobe", "-i", video, "-show_streams", "-select_streams", "a", "-loglevel", "panic")
     if ifaudio:
         return video
     else:
@@ -863,7 +863,7 @@ async def freezemotivate(files, *caption):
     else:  # just default to song lol!
         video = files
         audio = "rendering/what.mp3"
-    framecount = await run_command('ffprobe', '-v', 'error', '-count_frames', '-select_streams', 'v:0', '-show_entries',
+    framecount = await run_command('ffprobe', '-v', 'panic', '-count_frames', '-select_streams', 'v:0', '-show_entries',
                                    'stream=nb_read_frames', '-of', 'default=nokey=1:noprint_wrappers=1', video)
     framecount = int(framecount)
     lastframe = temp_file("png")
