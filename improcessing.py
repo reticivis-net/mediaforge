@@ -154,7 +154,7 @@ async def get_frame_rate(filename):
     logger.info("Getting FPS...")
     out = await run_command("ffprobe", filename, "-v", "panic", "-select_streams", "v:0", "-print_format", "json",
                             "-show_entries", "stream=r_frame_rate")
-    rate = json.loads(out)["streams"][0]["r_frame_rate"]
+    rate = json.loads(out)["streams"][0]["r_frame_rate"].split("/")
     if len(rate) == 1:
         return float(rate[0])
     if len(rate) == 2:
