@@ -1175,6 +1175,17 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             await improcess(ctx, improcessing.mp4togif, [["VIDEO"]])
 
         @commands.cooldown(1, config.cooldown, commands.BucketType.user)
+        @commands.command(aliases=["apng", "videotoapng", "giftoapng"])
+        async def toapng(self, ctx):
+            """
+            Converts a video or gif to an animated png.
+
+            :Usage=$toapng
+            :Param=video - A video or gif. (automatically found in channel)
+            """
+            await improcess(ctx, improcessing.toapng, [["VIDEO", "GIF"]])
+
+        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         @commands.command(aliases=["audio", "mp3", "tomp3", "aac", "toaac"])
         async def toaudio(self, ctx):
             """
