@@ -804,7 +804,7 @@ async def overlay(files, opacity: float):
     fixedfixedvideo1 = await changefps(fixedvideo1, fps)
     outname = temp_file("mp4")
     await run_command("ffmpeg", "-hide_banner", "-i", fixedvideo0, "-i", fixedfixedvideo1, "-filter_complex",
-                      f"[1:v]geq=r='r(X,Y)':a='{opacity}*alpha(X,Y)'[1v];"
+                      f"[1:v]geq=r='r(X,Y)':a='{1 - opacity}*alpha(X,Y)'[1v];"
                       f"[0:v][1v]overlay;amix=inputs=2:dropout_transition=0", "-c:v",
                       "png", "-c:a",
                       "aac", outname)
