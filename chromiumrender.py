@@ -91,7 +91,7 @@ def closedriver():
     close driver
     """
     global driver
-    driver.close()
+    driver.quit()
 
 
 def html2png(html, png):
@@ -108,7 +108,7 @@ def html2png(html, png):
                 urllib3.exceptions.MaxRetryError, selenium.common.exceptions.WebDriverException,
                 BrokenProcessPool):
             try:
-                driver.close()
+                driver.quit()
             except:
                 pass
             initdriver()
