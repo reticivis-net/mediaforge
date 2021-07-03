@@ -68,7 +68,7 @@ blocked_words = []
 db_filename = "database.db"
 # default prefix for commands
 default_command_prefix = "$"
-# healthchecks.io URL
-healthchecksiourl = None
-# how often (in seconds) to request the healthchecks url
-healthchecksiofrequency = 60
+# this url will be sent a periodic request. this is designed to be used with an uptime monitoring service
+heartbeaturl = None
+# how often (in seconds) to request the heartbeat url
+heartbeatfrequency = 60
