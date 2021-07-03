@@ -1936,6 +1936,25 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                                 file=discord.File(tr, filename="traceback.txt"), embed=embed)
 
 
+    async def periodic():
+        async with aiohttp.ClientSession(headers={'Connection': 'keep-alive'}) as session:
+            while True:
+                async with session.get(config.healthchecksiourl, timeout=60) as response:
+                    if response.status != 200:
+                        logger.error(response)
+                    else:
+                        logger.debug("Successfully pinged healthchecks.io URL.")
+                await asyncio.sleep(config.healthchecksiofrequency)
+
+
+    class HealthChecksio(commands.Cog):
+        def __init__(self, bot):
+            self.bot = bot
+            if hasattr(config, "healthchecksiourl") and config.healthchecksiourl:
+                loop = asyncio.get_event_loop()
+                loop.create_task(periodic())
+
+
     class DiscordListsPost(commands.Cog):
         def __init__(self, bot):
             self.bot = bot
@@ -1976,6 +1995,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
     bot.add_cog(Other(bot))
     bot.add_cog(Debug(bot))
     bot.add_cog(Slashscript(bot))
+    bot.add_cog(HealthChecksio(bot))
 
     logger.debug("running bot")
     bot.run(config.bot_token)
