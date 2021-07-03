@@ -1739,7 +1739,6 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             await ctx.send(f"{config.emojis['check']} Shutting Down...")
             logger.log(25, "Shutting Down...")
             await renderpool.shutdown()
-            await bot.logout()
             await bot.close()
 
         @commands.command()
@@ -1939,18 +1938,18 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
     async def periodic():
         async with aiohttp.ClientSession(headers={'Connection': 'keep-alive'}) as session:
             while True:
-                async with session.get(config.healthchecksiourl, timeout=60) as response:
+                async with session.get(config.heartbeaturl, timeout=60) as response:
                     if response.status != 200:
                         logger.error(response)
                     else:
-                        logger.debug("Successfully pinged healthchecks.io URL.")
-                await asyncio.sleep(config.healthchecksiofrequency)
+                        logger.debug("Successfully pinged heartbeat URL.")
+                await asyncio.sleep(config.heartbeatfrequency)
 
 
     class HealthChecksio(commands.Cog):
         def __init__(self, bot):
             self.bot = bot
-            if hasattr(config, "healthchecksiourl") and config.healthchecksiourl:
+            if hasattr(config, "healthchecksiourl") and config.heartbeaturl:
                 loop = asyncio.get_event_loop()
                 loop.create_task(periodic())
 
