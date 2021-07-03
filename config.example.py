@@ -68,3 +68,7 @@ blocked_words = []
 db_filename = "database.db"
 # default prefix for commands
 default_command_prefix = "$"
+# healthchecks.io URL
+healthchecksiourl = None
+# how often (in seconds) to request the healthchecks url
+healthchecksiofrequency = 60
