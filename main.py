@@ -1936,14 +1936,14 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
 
 
     async def periodic():
-        async with aiohttp.ClientSession(headers={'Connection': 'keep-alive'}) as session:
-            while True:
+        while True:
+            async with aiohttp.ClientSession(headers={'Connection': 'keep-alive'}) as session:
                 async with session.get(config.heartbeaturl, timeout=60) as response:
-                    if response.status != 200:
+                    if response.status >= 400:
                         logger.error(response)
                     else:
                         logger.debug("Successfully pinged heartbeat URL.")
-                await asyncio.sleep(config.heartbeatfrequency)
+            await asyncio.sleep(config.heartbeatfrequency)
 
 
     class HealthChecksio(commands.Cog):

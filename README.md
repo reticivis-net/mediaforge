@@ -5,6 +5,8 @@
 [![Discord Bots](https://top.gg/api/widget/servers/780570413767983122.svg)](https://top.gg/bot/780570413767983122)
 [![Discord Bots](https://top.gg/api/widget/upvotes/780570413767983122.svg)](https://top.gg/bot/780570413767983122)
 
+
+
 ![Total Lines](https://img.shields.io/tokei/lines/github/HexCodeFFF/captionbot)
 ![discord.py](https://img.shields.io/github/pipenv/locked/dependency-version/hexcodefff/captionbot/discord.py)
 ![python](https://img.shields.io/github/pipenv/locked/python-version/hexcodefff/captionbot)
