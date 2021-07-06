@@ -35,7 +35,6 @@ import lottiestickers
 import sus
 import tempfiles
 from clogs import logger
-from improcessing import NonBugError, mp4togif
 from tempfiles import TempFileSession, get_random_string, temp_file
 
 """
@@ -1756,6 +1755,15 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                 buf.seek(0)
                 await ctx.reply(file=discord.File(buf, filename="commands.md"))
 
+        @commands.command()
+        @commands.is_owner()
+        async def heartbeat(self, ctx):
+            if hasattr(config, "heartbeaturl"):
+                await fetch(config.heartbeaturl)
+                await ctx.reply("Successfully sent heartbeat.")
+            else:
+                await ctx.reply("No heartbeat URL set in config.")
+
 
     class Slashscript(commands.Cog, name="Slashscript"):
         """
@@ -1952,6 +1960,8 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                 logger.debug(f"Heartbeat URL is {config.heartbeaturl}")
                 loop = asyncio.get_event_loop()
                 loop.create_task(periodic())
+            else:
+                logger.debug("No heart beat url set.")
 
 
     class DiscordListsPost(commands.Cog):

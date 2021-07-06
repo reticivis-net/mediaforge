@@ -4,19 +4,19 @@ import concurrent.futures
 import glob
 import json
 import math
+import multiprocessing
 import os
 import shutil
 import sys
 import typing
-
-# pip libs
 from fractions import Fraction
 
+# pip libs
 import aiohttp
 import discord.ext
-from discord.ext import commands
-from PIL import Image, UnidentifiedImageError
 import humanize
+from PIL import Image, UnidentifiedImageError
+from discord.ext import commands
 
 if sys.platform == "win32":  # this hopefully wont cause any problems :>
     from winmagic import magic
@@ -60,12 +60,22 @@ def pass_temp_session(fn, args, kwargs, sessionlist):
     return result
 
 
+class MyProcess(multiprocessing.Process):
+    def start(self):
+        super(MyProcess, self).start()
+
+
 # https://stackoverflow.com/a/65966787/9044183
 class Pool:
-    def __init__(self, nworkers, initf, initargs=()):
-        self._executor = concurrent.futures.ProcessPoolExecutor(nworkers, initializer=initf, initargs=initargs)
+    def __init__(self, nworkers):
+        self._executor = concurrent.futures.ProcessPoolExecutor(nworkers, initializer=chromiumrender.initdriver)
         self._nworkers = nworkers
         self._submitted = 0
+        # loop = asyncio.get_event_loop()
+        # loop.run_until_complete(self.init())
+
+    async def init(self):
+        await asyncio.gather(*([self.submit(chromiumrender.initdriver)] * self._nworkers))
 
     async def submit(self, fn, *args, ses=None, **kwargs):
         self._submitted += 1
@@ -79,7 +89,7 @@ class Pool:
             self._submitted -= 1
 
     async def shutdown(self):
-        await asyncio.wait([renderpool.submit(chromiumrender.closedriver)] * self._nworkers)
+        await asyncio.wait([self.submit(chromiumrender.closedriver)] * self._nworkers)
         self._executor.shutdown(wait=True)
 
     def stats(self):
@@ -96,7 +106,7 @@ def initializerenderpool():
     global renderpool
     logger.info(f"Starting {config.chrome_driver_instances} pool processes...")
     # renderpool = multiprocessing.Pool(config.chrome_driver_instances, initializer=chromiumrender.initdriver)
-    renderpool = Pool(config.chrome_driver_instances, chromiumrender.initdriver)
+    renderpool = Pool(config.chrome_driver_instances)
     return renderpool
 
 
