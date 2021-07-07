@@ -72,3 +72,5 @@ default_command_prefix = "$"
 heartbeaturl = None
 # how often (in seconds) to request the heartbeat url
 heartbeatfrequency = 60
+# if set to false, bots will not be allowed to run commands.
+allow_bots_to_run_commands = False

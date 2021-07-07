@@ -1864,7 +1864,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
 
 
     @bot.check
-    def block_filter(ctx):
+    def block_filter(ctx: commands.Context):
         # this command is exempt because it only works on URLs and there have been issues with r/okbr
         if ctx.command.name == "videodl":
             return True
@@ -1874,8 +1874,16 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
         return True
 
 
+    @bot.check
+    def is_bot(ctx: commands.Context):
+        if ctx.author.bot and not config.allow_bots_to_run_commands:
+            raise commands.CheckFailure("Bot users are not allowed to run commands.")
+        else:
+            return True
+
+
     @bot.listen()
-    async def on_command_error(ctx, commanderror):
+    async def on_command_error(ctx: commands.Context, commanderror: Exception):
         global renderpool
         if isinstance(commanderror, concurrent.futures.process.BrokenProcessPool):
             renderpool = improcessing.initializerenderpool()
