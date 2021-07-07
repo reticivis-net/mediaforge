@@ -15,8 +15,8 @@ from fractions import Fraction
 import aiohttp
 import discord.ext
 import humanize
-from PIL import Image, UnidentifiedImageError
 from discord.ext import commands
+from PIL import Image, UnidentifiedImageError
 
 if sys.platform == "win32":  # this hopefully wont cause any problems :>
     from winmagic import magic
