@@ -25,7 +25,7 @@ import humanize
 import pronouncing
 import regex as re
 import youtube_dl
-from discord.ext import commands
+from discord.ext import commands, tasks
 
 # project files
 import captionfunctions
@@ -81,23 +81,34 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
 
     @bot.event
     async def on_ready():
-        global ready
         logger.log(35, f"Logged in as {bot.user.name}!")
-        if not ready:
-            ready = True
-            while True:
-                if datetime.datetime.now().month == 6:  # june (pride month)
-                    game = discord.Activity(
-                        name=f"LGBTQ+ pride in {len(bot.guilds)} server{'' if len(bot.guilds) == 1 else 's'}! | "
-                             f"{config.default_command_prefix}help",
-                        type=discord.ActivityType.watching)
-                else:
-                    game = discord.Activity(
-                        name=f"with your media in {len(bot.guilds)} server{'' if len(bot.guilds) == 1 else 's'} | "
-                             f"{config.default_command_prefix}help",
-                        type=discord.ActivityType.playing)
-                await bot.change_presence(activity=game)
-                await asyncio.sleep(60)
+
+
+    class StatusCog(commands.Cog):
+        def __init__(self, bot):
+            self.bot = bot
+            self.changestatus.start()
+
+        def cog_unload(self):
+            self.changestatus.cancel()
+
+        @tasks.loop(seconds=5.0)
+        async def changestatus(self):
+            if datetime.datetime.now().month == 6:  # june (pride month)
+                game = discord.Activity(
+                    name=f"LGBTQ+ pride in {len(bot.guilds)} server{'' if len(bot.guilds) == 1 else 's'}! | "
+                         f"{config.default_command_prefix}help",
+                    type=discord.ActivityType.watching)
+            else:
+                game = discord.Activity(
+                    name=f"with your media in {len(bot.guilds)} server{'' if len(bot.guilds) == 1 else 's'} | "
+                         f"{config.default_command_prefix}help",
+                    type=discord.ActivityType.playing)
+            await bot.change_presence(activity=game)
+
+        @changestatus.before_loop
+        async def before_printer(self):
+            await self.bot.wait_until_ready()
 
 
     async def fetch(url):
@@ -1943,25 +1954,28 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                                 file=discord.File(tr, filename="traceback.txt"), embed=embed)
 
 
-    async def periodic():
-        while True:
+    class HealthChecksio(commands.Cog):
+        def __init__(self, bot):
+            self.bot = bot
+            self.heartbeat_active = hasattr(config, "heartbeaturl") and config.heartbeaturl
+            if self.heartbeat_active:
+                logger.debug(f"Heartbeat URL is {config.heartbeaturl}")
+                self.send_heartbeat.start()
+            else:
+                logger.debug("No heartbeat url set.")
+
+        def cog_unload(self):
+            if self.heartbeat_active:
+                self.send_heartbeat.cancel()
+                logger.warning("heartbeat cog unloaded")
+
+        @tasks.loop(seconds=config.heartbeatfrequency)
+        async def send_heartbeat(self):
             try:
                 await fetch(config.heartbeaturl)
                 logger.debug("Succesfully sent heartbeat.")
             except aiohttp.ClientResponseError as e:
                 logger.error(e, exc_info=(type(e), e, e.__traceback__))
-            await asyncio.sleep(config.heartbeatfrequency)
-
-
-    class HealthChecksio(commands.Cog):
-        def __init__(self, bot):
-            self.bot = bot
-            if hasattr(config, "heartbeaturl") and config.heartbeaturl:
-                logger.debug(f"Heartbeat URL is {config.heartbeaturl}")
-                loop = asyncio.get_event_loop()
-                loop.create_task(periodic())
-            else:
-                logger.debug("No heart beat url set.")
 
 
     class DiscordListsPost(commands.Cog):
@@ -2005,6 +2019,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
     bot.add_cog(Debug(bot))
     bot.add_cog(Slashscript(bot))
     bot.add_cog(HealthChecksio(bot))
+    bot.add_cog(StatusCog(bot))
 
     logger.debug("running bot")
     bot.run(config.bot_token)
