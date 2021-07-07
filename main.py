@@ -1844,9 +1844,10 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
 
 
     @bot.listen()
-    async def on_message(message):
-        if f"<@{bot.user.id}>" in message.content or f"<@!{bot.user.id}>" in message.content:
-            await message.reply(f"My command prefix is `{await prefix_function(bot, message)}`.", delete_after=10)
+    async def on_message(message: discord.Message):
+        if not message.author.bot and bot.user in message.mentions:
+            await message.reply(f"My command prefix is `{await prefix_function(bot, message)}`.", delete_after=10,
+                                mention_author=False)
 
 
     @bot.listen()
@@ -1872,14 +1873,6 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             if block.lower() in ctx.message.content.lower():
                 raise commands.CheckFailure("Your command contains one or more blocked words.")
         return True
-
-
-    @bot.check
-    def is_bot(ctx: commands.Context):
-        if ctx.author.bot and not config.allow_bots_to_run_commands:
-            raise commands.CheckFailure("Bot users are not allowed to run commands.")
-        else:
-            return True
 
 
     @bot.listen()
