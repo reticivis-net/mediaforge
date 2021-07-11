@@ -76,12 +76,13 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                     return config.default_command_prefix
 
 
-    bot = commands.Bot(command_prefix=prefix_function, help_command=None, case_insensitive=True)
+    bot = commands.AutoShardedBot(command_prefix=prefix_function, help_command=None, case_insensitive=True)
 
 
     @bot.event
     async def on_ready():
         logger.log(35, f"Logged in as {bot.user.name}!")
+        logger.debug(f"{len(bot.shards)} shard(s)")
 
 
     class StatusCog(commands.Cog):
@@ -1476,6 +1477,8 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             embed.add_field(name="Currently Executing Tasks", value=f"{stats[1]}")
             embed.add_field(name="Available Workers", value=f"{config.chrome_driver_instances - stats[1]}")
             embed.add_field(name="Total Workers", value=f"{config.chrome_driver_instances}")
+            if isinstance(bot, discord.AutoShardedClient):
+                embed.add_field(name="Total Bot Shards", value=f"{len(bot.shards)}")
             await ctx.reply(embed=embed)
 
         @commands.cooldown(1, config.cooldown, commands.BucketType.user)
