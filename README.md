@@ -3,7 +3,7 @@
 [![MediaForge Discord](https://discordapp.com/api/guilds/803788965215338546/widget.png)](https://discord.gg/xwWjgyVqBz)
 [![Discord Bots](https://top.gg/api/widget/status/780570413767983122.svg)](https://top.gg/bot/780570413767983122)
 [![Discord Bots](https://top.gg/api/widget/servers/780570413767983122.svg)](https://top.gg/bot/780570413767983122)
-[![Discord Bots](https://top.gg/api/widget/upvotes/780570413767983122.svg)](https://top.gg/bot/780570413767983122)
+[![Discord Bots](https://top.gg/api/widget/upvotes/780570413767983122.svg)](https://top.gg/bot/780570413767983122/vote)
 ![uptime](https://app.statuscake.com/button/index.php?Track=6022597&Design=6)
 
 ![Total Lines](https://img.shields.io/tokei/lines/github/HexCodeFFF/captionbot)
@@ -12,7 +12,7 @@
 [![stars](https://img.shields.io/github/stars/HexCodeFFF/captionbot?style=social)](https://github.com/HexCodeFFF/captionbot/stargazers)
 [![built with immense swag](https://img.shields.io/static/v1?label=built+with&message=immense+swag&color=D262BA)](https://knowyourmeme.com/memes/trollface)
 
-<a href="https://www.buymeacoffee.com/reticivis" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-violet.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;" ></a>
+<a href="https://www.buymeacoffee.com/reticivis" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-violet.png" alt="Buy Me A Coffee" height=60px></a>
 
 ### A Discord bot for editing and creating videos, images, GIFs, and more!
 
@@ -61,7 +61,7 @@ the bot uses many CLI programs for media processing.
 
 - create a copy of [`config.example.py`](config.example.py) and name it `config.py`.
 - insert/change the appropriate config settings such as your discord api token. be sure not to add or remove quotes.
-    - the 2 required config settings to change for proper functionality are the discord and tenor tokens.
+- the 2 required config settings to change for proper functionality are the discord and tenor tokens.
 
 ### python
 
@@ -75,3 +75,47 @@ the bot uses many CLI programs for media processing.
     - if using pipenv, run `pipenv run python main.py` or open the venv shell with `pipenv shell` and then
       run `python main.py`
 - terminate the bot by running the `shutdown` command, this will _probably_ close better than a termination
+
+## !!experimental!! heroku-based hosting
+
+1. [install heroku cli and log in](https://devcenter.heroku.com/articles/getting-started-with-python#set-up)
+2. run `heroku create` in the mediaforge directory to create a heroku app
+3. add buildpacks
+    ```shell
+    heroku buildpacks:add https://github.com/jonathanong/heroku-buildpack-ffmpeg-latest.git
+    heroku buildpacks:add https://github.com/heroku/heroku-buildpack-google-chrome.git
+    heroku buildpacks:add https://github.com/heroku/heroku-buildpack-chromedriver.git
+    heroku buildpacks:add heroku-community/apt
+    heroku buildpacks:add heroku/python
+    ```
+4. add [Heroku Postgres addon](https://elements.heroku.com/addons/heroku-postgresql)
+5. set up bot config
+    - [create a local config file](#config)
+        - don't worry about `chrome_driver_linux`, this option is ignored in heroku production.
+    - encode the file as base64
+        - on linux:
+            - `base64 config.py` prints the output to terminal
+            - `base64 config.py > config.txt` writes the output to config.txt
+        - with python:
+            ```python
+            import base64
+            with open("config.py", "rb") as f:
+                out = base64.b64encode(f.read())
+            print(out)  # write to terminal
+            # write to file
+            with open("config.txt", "wb+") as f:
+                f.write(out)
+            ```
+    - save file as config option (replace `<BASE64OUTPUT>` with the output from earlier.)
+        ```shell
+        heroku config:set PRIVATEFILE_config.py=<BASE64OUTPUT>
+        ```
+        - note: if you want other private files deployed to heroku, do the same steps but replace `config.py`
+          in `PRIVATEFILE_config.py` with the filename.
+6. start app
+    ```shell
+    heroku ps:scale worker=1
+    ```
+
+**NOTE:** currently, guild-specific prefixes wont persist after a re-deployment. heroku files are temporary and i
+haven't YET written the code to interface with their databases.
