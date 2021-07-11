@@ -76,8 +76,8 @@ def initdriver():
     if sys.platform == "win32":
         driver = webdriver.Chrome(config.chrome_driver_windows, options=opts, service_log_path='NUL')
     else:
-        if "MEDIAFORGE_HEROKU" in os.environ:  # if on heroku
-            driver = webdriver.Chrome(executable_path=os.environ["GOOGLE_CHROME_BIN"], options=opts,
+        if "GOOGLE_CHROME_SHIM" in os.environ:  # if on heroku
+            driver = webdriver.Chrome(executable_path=os.environ["GOOGLE_CHROME_SHIM"], options=opts,
                                       service_log_path='/dev/null')
         else:
             driver = webdriver.Chrome(config.chrome_driver_linux, options=opts, service_log_path='/dev/null')
