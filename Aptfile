@@ -1,4 +1,4 @@
-ffmpeg
+http://ports.ubuntu.com/pool/universe/f/ffmpeg/ffmpeg_4.3.2-0+deb11u1ubuntu1_arm64.deb
 imagemagick
 https://github.com/ImageOptim/gifski/releases/download/1.4.0/gifski_1.4.0_amd64.deb
 pngquant
