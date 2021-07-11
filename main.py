@@ -1845,7 +1845,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
 
     @bot.listen()
     async def on_message(message: discord.Message):
-        if not message.author.bot and bot.user in message.mentions:
+        if f"<@{bot.user.id}>" in message.content or f"<@!{bot.user.id}>" in message.content:
             await message.reply(f"My command prefix is `{await prefix_function(bot, message)}`.", delete_after=10,
                                 mention_author=False)
 
