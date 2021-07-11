@@ -22,6 +22,7 @@ isort = {extras = ["pipfile_deprecated_finder", "requirements_deprecated_finder"
 pronouncing = "*"
 "discordlists.py" = "*"
 aiosqlite = "*"
+asyncpg = "*"
 
 [dev-packages]
 

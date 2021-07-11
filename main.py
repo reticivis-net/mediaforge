@@ -18,6 +18,7 @@ import urllib.parse
 import aiofiles
 import aiohttp
 import aiosqlite
+import asyncpg
 import discord
 import discordlists
 import emoji
@@ -55,6 +56,8 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
     logger.debug("Initializing DB")
     # create table if it doesnt exist
     # this isnt done with aiosqlite because its easier to just not do things asyncly during startup.
+    if "DATABASE_URL" in os.environ:
+        logger.debug("postgresql?")
     db = sqlite3.connect(config.db_filename)
     with db:
         cur = db.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='guild_prefixes'")
