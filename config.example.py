@@ -72,3 +72,6 @@ default_command_prefix = "$"
 heartbeaturl = None
 # how often (in seconds) to request the heartbeat url
 heartbeatfrequency = 60
+# number of shards
+# set to None or remove and "the library will use the Bot Gateway endpoint call to figure out how many shards to use."
+shard_count = None

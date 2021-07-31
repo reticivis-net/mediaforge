@@ -10,6 +10,7 @@ import json
 import logging
 import os
 import sqlite3
+import time
 import traceback
 import typing
 import urllib.parse
@@ -18,7 +19,6 @@ import urllib.parse
 import aiofiles
 import aiohttp
 import aiosqlite
-import asyncpg
 import discord
 import discordlists
 import emoji
@@ -79,12 +79,19 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                     return config.default_command_prefix
 
 
-    bot = commands.AutoShardedBot(command_prefix=prefix_function, help_command=None, case_insensitive=True)
+    if hasattr(config, "shard_count") and config.shard_count is not None:
+        shard_count = config.shard_count
+    else:
+        shard_count = None
+    bot = commands.AutoShardedBot(command_prefix=prefix_function, help_command=None, case_insensitive=True,
+                                  shard_count=shard_count)
 
 
     @bot.event
     async def on_ready():
         logger.log(35, f"Logged in as {bot.user.name}!")
+        logger.debug(f"{len(bot.guilds)} guilds(s)")
+        # bot.shard_count = 10  # len(bot.guilds) // 100
         logger.debug(f"{len(bot.shards)} shard(s)")
 
 
@@ -96,7 +103,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
         def cog_unload(self):
             self.changestatus.cancel()
 
-        @tasks.loop(seconds=5.0)
+        @tasks.loop(seconds=60)
         async def changestatus(self):
             if datetime.datetime.now().month == 6:  # june (pride month)
                 game = discord.Activity(
@@ -1485,6 +1492,22 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             await ctx.reply(embed=embed)
 
         @commands.cooldown(1, config.cooldown, commands.BucketType.user)
+        @commands.command(aliases=["shard", "shardstats", "shardinfo"])
+        async def shards(self, ctx):
+            """
+            Displays info about bot shards
+
+            :Usage=$stats
+            """
+            embed = discord.Embed(color=discord.Color(0xD262BA), title="Shards",
+                                  description="A 'task' is typically processing a single image/frame of a video. Not "
+                                              "all commands will use tasks.")
+            for i, shard in bot.shards.items():
+                shard: discord.ShardInfo
+                embed.add_field(name=f"Shard #{shard.id}", value=f"{round(shard.latency * 1000)}ms latency")
+            await ctx.reply(embed=embed)
+
+        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         @commands.command(aliases=["discord", "invite", "botinfo"])
         async def about(self, ctx):
             """
@@ -1679,11 +1702,13 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
         @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         @commands.command(aliases=["pong"])
         async def ping(self, ctx):
-            """
-            Pong!
-            :Usage=$ping
-            """
-            await ctx.reply(f"🏓 Pong! `{round(bot.latency * 1000, 1)}ms`")
+            start = time.perf_counter()
+            message = await ctx.send("Ping...")
+            end = time.perf_counter()
+            duration = (end - start) * 1000
+            await message.edit(content=f'🏓 Pong!\n'
+                                       f'API Latency: `{round(duration)}ms`\n'
+                                       f'Websocket Latency: `{round(bot.latency * 1000)}ms`')
 
 
     class Debug(commands.Cog, name="Owner Only", command_attrs=dict(hidden=True)):
