@@ -919,20 +919,15 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
 
         @commands.command()
         @commands.cooldown(1, config.cooldown, commands.BucketType.user)
-        async def pitch(self, ctx, pitch: float = 2):
+        async def pitch(self, ctx, numofhalfsteps: float = 2):
             """
             Changes pitch of audio
 
-            :Usage=$vibrato `[frequency]` `[depth]`
-            :Param=frequency - Modulation frequency in Hertz. must be between 0.1 and 20000. defaults to 5.
-            :Param=depth - Depth of modulation as a percentage. must be between 0 and 1. defaults to 1.
+            :Usage=$pitch `[numofhalfsteps]`
+            :Param=numofhalfsteps - the number of half steps to change the pitch by. `12` raises the pitch an octave and `-12` lowers the pitch an octave.
             :Param=media - A video or audio file. (automatically found in channel)
             """
-            raise NotImplementedError
-            if not 0 < pitch <= 100:
-                await ctx.send(f"{config.emojis['warning']} Pitch must be more than 0.")
-                return
-            await improcess(ctx, improcessing.pitch, [["VIDEO", "AUDIO"]], pitch)
+            await improcess(ctx, improcessing.pitch, [["VIDEO", "AUDIO"]], numofhalfsteps)
 
         @commands.command(aliases=["concat", "combinev"])
         @commands.cooldown(1, config.cooldown, commands.BucketType.user)
