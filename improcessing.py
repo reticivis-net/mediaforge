@@ -1053,14 +1053,19 @@ async def vibrato(file, frequency=5, depth=0.5):  # https://ffmpeg.org/ffmpeg-fi
     return out
 
 
-async def pitch(file, pitch=2):
+async def pitch(file, p=12):
     mt = mediatype(file)
     exts = {
         "AUDIO": "mp3",
         "VIDEO": "mp4"
     }
     out = temp_file(exts[mt])
-    await run_command("ffmpeg", "-i", file, "-af", f"vibrato=f={frequency}:d={depth}", "-strict", "-1", "-c:a",
+    # http://www.geekybob.com/post/Adjusting-Pitch-for-MP3-Files-with-FFmpeg
+    asetrate = max(int(48000 * 2 ** (p / 12)), 1)
+    atempo = 2 ** (-p / 12)
+    logger.debug((p, asetrate, atempo))
+    af = f"asetrate=r={asetrate},{expanded_atempo(atempo)},aresample=48000"
+    await run_command("ffmpeg", "-i", file, "-ar", "48000", "-af", af, "-strict", "-1", "-c:a",
                       "aac" if mt == "VIDEO" else "libmp3lame", out)
     return out
 
