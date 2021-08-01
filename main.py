@@ -1500,8 +1500,8 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             :Usage=$stats
             """
             embed = discord.Embed(color=discord.Color(0xD262BA), title="Shards",
-                                  description="A 'task' is typically processing a single image/frame of a video. Not "
-                                              "all commands will use tasks.")
+                                  description="Each shard is a separate connection to Discord that handles a fraction "
+                                              "of all servers MediaForge is in.")
             for i, shard in bot.shards.items():
                 shard: discord.ShardInfo
                 embed.add_field(name=f"Shard #{shard.id}", value=f"{round(shard.latency * 1000)}ms latency")
@@ -1967,23 +1967,22 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             if isinstance(commanderror, discord.ext.commands.errors.CommandInvokeError):
                 commanderror = commanderror.original
             logger.error(commanderror, exc_info=(type(commanderror), commanderror, commanderror.__traceback__))
-            with TempFileSession() as tempfilesession:
-                tr = temp_file("txt")
+            embed = discord.Embed(color=0xed1c24, description="Please report this error with the attached "
+                                                              "traceback file to the GitHub.")
+            embed.add_field(name=f"{config.emojis['2exclamation']} Report Issue to GitHub",
+                            value=f"[Create New Issue](https://github.com/HexCodeFFF/captionbot"
+                                  f"/issues/new?labels=bug&template=bug_report.md&title"
+                                  f"={urllib.parse.quote(str(commanderror)[:128], safe='')})\n[View Issu"
+                                  f"es](https://github.com/HexCodeFFF/captionbot/issues)")
+            with io.BytesIO() as buf:
                 trheader = f"DATETIME:{datetime.datetime.now()}\nCOMMAND:{ctx.message.content}\nTRACEBACK:\n"
-                with open(tr, "w+", encoding="UTF-8") as t:
-                    t.write(trheader + ''.join(
-                        traceback.format_exception(etype=type(commanderror), value=commanderror,
-                                                   tb=commanderror.__traceback__)))
-                embed = discord.Embed(color=0xed1c24, description="Please report this error with the attached "
-                                                                  "traceback file to the GitHub.")
-                embed.add_field(name=f"{config.emojis['2exclamation']} Report Issue to GitHub",
-                                value=f"[Create New Issue](https://github.com/HexCodeFFF/captionbot"
-                                      f"/issues/new?labels=bug&template=bug_report.md&title"
-                                      f"={urllib.parse.quote(str(commanderror)[:128], safe='')})\n[View Issu"
-                                      f"es](https://github.com/HexCodeFFF/captionbot/issues)")
+                buf.write(bytes(trheader + ''.join(
+                    traceback.format_exception(etype=type(commanderror), value=commanderror,
+                                               tb=commanderror.__traceback__)), encoding='utf8'))
+                buf.seek(0)
                 await ctx.reply(f"{config.emojis['2exclamation']} `{get_full_class_name(commanderror)}: "
                                 f"{errorstring[:128]}`",
-                                file=discord.File(tr, filename="traceback.txt"), embed=embed)
+                                file=discord.File(buf, filename="traceback.txt"), embed=embed)
 
 
     class HealthChecksio(commands.Cog):
