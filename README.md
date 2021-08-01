@@ -6,10 +6,10 @@
 [![Discord Bots](https://top.gg/api/widget/upvotes/780570413767983122.svg)](https://top.gg/bot/780570413767983122/vote)
 [![uptime](https://app.statuscake.com/button/index.php?Track=6022597&Design=6)](https://uptime.statuscake.com/?TestID=JyWrfGfIjT)
 
-![Total Lines](https://img.shields.io/tokei/lines/github/HexCodeFFF/captionbot)
-![discord.py](https://img.shields.io/github/pipenv/locked/dependency-version/hexcodefff/captionbot/discord.py)
-![python](https://img.shields.io/github/pipenv/locked/python-version/hexcodefff/captionbot)
-[![stars](https://img.shields.io/github/stars/HexCodeFFF/captionbot?style=social)](https://github.com/HexCodeFFF/captionbot/stargazers)
+![Total Lines](https://img.shields.io/tokei/lines/github/HexCodeFFF/mediaforge)
+![discord.py](https://img.shields.io/github/pipenv/locked/dependency-version/HexCodeFFF/mediaforge/discord.py)
+![python](https://img.shields.io/github/pipenv/locked/python-version/HexCodeFFF/mediaforge)
+[![stars](https://img.shields.io/github/stars/HexCodeFFF/mediaforge?style=social)](https://github.com/HexCodeFFF/mediaforge/stargazers)
 [![built with immense swag](https://img.shields.io/static/v1?label=built+with&message=immense+swag&color=D262BA)](https://knowyourmeme.com/memes/trollface)
 
 <a href="https://www.buymeacoffee.com/reticivis" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-violet.png" alt="Buy Me A Coffee" height=60px></a>

@@ -1532,7 +1532,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             embed.add_field(name="Add MediaForge to your server",
                             value=f"https://discord.com/api/oauth2/authorize?client_id=780570413767983122&permissions=3"
                                   f"79968&scope=bot")
-            embed.add_field(name="MediaForge GitHub", value=f"https://github.com/HexCodeFFF/captionbot")
+            embed.add_field(name="MediaForge GitHub", value=f"https://github.com/HexCodeFFF/mediaforge")
             await ctx.reply(embed=embed)
 
         @commands.cooldown(1, config.cooldown, commands.BucketType.user)
@@ -1555,7 +1555,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                                                              f"storage, but you can join the MediaForge discord "
                                                              f"server (https://discord.gg/QhMyz3n4V7) or raise an "
                                                              f"issue on the GitHub ("
-                                                             f"https://github.com/HexCodeFFF/captionbot).")
+                                                             f"https://github.com/HexCodeFFF/mediaforge).")
             await ctx.reply(embed=embed)
 
         @commands.cooldown(1, config.cooldown, commands.BucketType.user)
@@ -1563,7 +1563,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
         async def version(self, ctx):
             """
             Shows information on how this copy of MediaForge compares to the latest code on github.
-            https://github.com/HexCodeFFF/captionbot
+            https://github.com/HexCodeFFF/mediaforge
             This command returns the output of `git status`.
 
             :Usage=$version
@@ -1682,18 +1682,18 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                                               "links are provided below.",
                                   color=discord.Color(0xD262BA))
             embed.add_field(name="Report a bug",
-                            value="To report a bug, make an issue at\nhttps://github.com/HexCodeFFF/captionbot/issues",
+                            value="To report a bug, make an issue at\nhttps://github.com/HexCodeFFF/mediaforge/issues",
                             inline=False)
             embed.add_field(name="Ask a question", value="Have a question? Use the Q&A Discussion "
-                                                         "page.\nhttps://github.com/HexCodeFFF/captionbot/discussions/c"
+                                                         "page.\nhttps://github.com/HexCodeFFF/mediaforge/discussions/c"
                                                          "ategories/q-a", inline=False)
             embed.add_field(name="Give an idea",
                             value="Have an idea or suggestion? Use the Ideas Discussion page.\nhtt"
-                                  "ps://github.com/HexCodeFFF/captionbot/discussions/categories/id"
+                                  "ps://github.com/HexCodeFFF/mediaforge/discussions/categories/id"
                                   "eas", inline=False)
             embed.add_field(name="Something else?",
                             value="Anything is welcome in the discussion page!\nhttps://github."
-                                  "com/HexCodeFFF/captionbot/discussions", inline=False)
+                                  "com/HexCodeFFF/mediaforge/discussions", inline=False)
             embed.add_field(name="Why GitHub?",
                             value="Using GitHub for feedback makes it much easier to organize any i"
                                   "ssues and to implement them into the bot's code.")
@@ -1980,10 +1980,10 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             embed = discord.Embed(color=0xed1c24, description="Please report this error with the attached "
                                                               "traceback file to the GitHub.")
             embed.add_field(name=f"{config.emojis['2exclamation']} Report Issue to GitHub",
-                            value=f"[Create New Issue](https://github.com/HexCodeFFF/captionbot"
+                            value=f"[Create New Issue](https://github.com/HexCodeFFF/mediaforge"
                                   f"/issues/new?labels=bug&template=bug_report.md&title"
                                   f"={urllib.parse.quote(str(commanderror)[:128], safe='')})\n[View Issu"
-                                  f"es](https://github.com/HexCodeFFF/captionbot/issues)")
+                                  f"es](https://github.com/HexCodeFFF/mediaforge/issues)")
             with io.BytesIO() as buf:
                 trheader = f"DATETIME:{datetime.datetime.now()}\nCOMMAND:{ctx.message.content}\nTRACEBACK:\n"
                 buf.write(bytes(trheader + ''.join(
