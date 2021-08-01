@@ -7,7 +7,6 @@ import glob
 import inspect
 import io
 import json
-import logging
 import os
 import sqlite3
 import time
@@ -130,22 +129,33 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                 return await response.text()
 
 
+    class MyLogger(object):
+        def debug(self, msg: ""):
+            logger.debug(msg.replace("\r", ""))
+
+        def warning(self, msg: ""):
+            logger.warning(msg.replace("\r", ""))
+
+        def error(self, msg: ""):
+            logger.error(msg.replace("\r", ""))
+
+
     def ytdownload(vid, form):
         while True:
             name = f"temp/{get_random_string(12)}"
             if len(glob.glob(name + ".*")) == 0:
                 break
         opts = {
-            "max_filesize": config.file_upload_limit,
+            # "max_filesize": config.file_upload_limit,
             "quiet": True,
             "outtmpl": f"{name}.%(ext)s",
             "default_search": "auto",
-            "logger": logging,
+            "logger": MyLogger(),
             "merge_output_format": "mp4",
-            "format": 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/bestvideo+bestaudio'
+            "format": f'(bestvideo[ext=mp4]+bestaudio)[filesize<{config.file_upload_limit}]',
         }
         if form == "audio":
-            opts['format'] = "bestaudio/best[ext=mp3]"
+            opts['format'] = f"bestaudio[filesize<{config.file_upload_limit}]"
             opts['postprocessors'] = [{
                 'key': 'FFmpegExtractAudio',
                 'preferredcodec': 'mp3',
@@ -1173,7 +1183,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                         r = await improcessing.run_in_exec(ytdownload, url, form)
                         if r:
                             tempfiles.reserve_names([r])
-                            r = await improcessing.assurefilesize(r, ctx)
+                            # r = await improcessing.assurefilesize(r, ctx)
                             await msg.edit(content=f"{config.emojis['working']} Uploading to Discord...")
                             await ctx.reply(file=discord.File(r))
                         else:
