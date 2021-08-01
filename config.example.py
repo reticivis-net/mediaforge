@@ -52,7 +52,7 @@ emojis = {
 tips = {
     "Media Searching": "MediaForge automatically searches for any media in a channel. Reply to a message with the command to search that message first.",
     "File Formats": "MediaForge supports static image formats like PNG, animated image formats like GIF, and video formats like MP4.",
-    "Self-Hosting": "MediaForge is completely open source and anyone can host a clone themself!\nhttps://github.com/HexCodeFFF/captionbot"
+    "Self-Hosting": "MediaForge is completely open source and anyone can host a clone themself!\nhttps://github.com/HexCodeFFF/mediaforge"
 }
 # the directory to store temporary files in. must end with a slash.
 temp_dir = "temp/"
