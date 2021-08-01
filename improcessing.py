@@ -273,7 +273,7 @@ async def compresspng(png):
     return outname
 
 
-async def assurefilesize(media: str, ctx: discord.ext.commands.Context):
+async def assurefilesize(media: str, ctx: discord.ext.commands.Context, re_encode=True):
     """
     downsizes files up to 5 times if they are over discord's upload limit
     :param media: media
@@ -286,7 +286,8 @@ async def assurefilesize(media: str, ctx: discord.ext.commands.Context):
     if mt == "VIDEO":
         # this is in assurefilesize since all output media gets sent through here
         # it removes transparency if its a actual video and not a gif, since like nothing can play transparent videos
-        media = await reencode(media)
+        if re_encode:
+            media = await reencode(media)
     for i in range(5):
         size = os.path.getsize(media)
         logger.info(f"Resulting file is {humanize.naturalsize(size)}")

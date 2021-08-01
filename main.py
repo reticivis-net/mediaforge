@@ -1183,7 +1183,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                         r = await improcessing.run_in_exec(ytdownload, url, form)
                         if r:
                             tempfiles.reserve_names([r])
-                            # r = await improcessing.assurefilesize(r, ctx)
+                            r = await improcessing.assurefilesize(r, ctx, re_encode=False)
                             await msg.edit(content=f"{config.emojis['working']} Uploading to Discord...")
                             await ctx.reply(file=discord.File(r))
                         else:
