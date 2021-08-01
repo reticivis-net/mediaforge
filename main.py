@@ -917,6 +917,23 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                 return
             await improcess(ctx, improcessing.vibrato, [["VIDEO", "AUDIO"]], frequency, depth)
 
+        @commands.command()
+        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
+        async def pitch(self, ctx, pitch: float = 2):
+            """
+            Changes pitch of audio
+
+            :Usage=$vibrato `[frequency]` `[depth]`
+            :Param=frequency - Modulation frequency in Hertz. must be between 0.1 and 20000. defaults to 5.
+            :Param=depth - Depth of modulation as a percentage. must be between 0 and 1. defaults to 1.
+            :Param=media - A video or audio file. (automatically found in channel)
+            """
+            raise NotImplementedError
+            if not 0 < pitch <= 100:
+                await ctx.send(f"{config.emojis['warning']} Pitch must be more than 0.")
+                return
+            await improcess(ctx, improcessing.pitch, [["VIDEO", "AUDIO"]], pitch)
+
         @commands.command(aliases=["concat", "combinev"])
         @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         async def concatv(self, ctx):
@@ -980,12 +997,11 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             This command preserves the original FPS, which means speeding up will drop frames. See $fps.
 
             :Usage=$speed `[speed]`
-            :Param=speed - Multiplies input video speed by this number. must be between 0.5 and 10. defaults to 2.
+            :Param=speed - Multiplies input video speed by this number. must be between 0.25 and 100. defaults to 2.
             :Param=video - A video or gif. (automatically found in channel)
             """
-            # i want this to allow 0.25 but fuckin atempo's minimum is 0.5
-            if not 0.5 <= speed <= 10:
-                await ctx.send(f"{config.emojis['warning']} Speed must be between 0.5 and 10")
+            if not 0.25 <= speed <= 100:
+                await ctx.send(f"{config.emojis['warning']} Speed must be between 0.25 and 100")
                 return
             await improcess(ctx, improcessing.speed, [["VIDEO", "GIF"]], speed)
 
