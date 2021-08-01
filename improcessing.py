@@ -589,7 +589,7 @@ async def speed(file, sp):
     fps = await get_frame_rate(file)
     duration = await get_duration(file)
     await run_command("ffmpeg", "-hide_banner", "-i", await forceaudio(file), "-filter_complex",
-                      f"[0:v]setpts=PTS/{sp},fps={fps}[v];[0:a]atempo={sp}[a]",
+                      f"[0:v]setpts=PTS/{sp},fps={fps}[v];[0:a]{expanded_atempo(sp)}[a]",
                       "-map", "[v]", "-map", "[a]", "-t", str(duration / float(sp)), "-c:v", "png", outname)
     if mt == "GIF":
         outname = await mp4togif(outname)
@@ -1021,7 +1021,39 @@ async def volume(file, vol):
     return out
 
 
+def nthroot(num: float, n: float):
+    return num ** (1 / n)
+
+
+def expanded_atempo(arg: float):
+    """
+    expand atempo's limits from [0.5, 100] to (0, infinity) using daisy chaining
+    """
+    assert arg > 0, "atempo must be greater than 0"
+    if 0.5 <= arg <= 100:  # if number already in normal limits
+        return f"atempo={arg}"  # return with one atempo
+    else:
+        # use log to determine minimum number of atempos needed to achieve desired atempo
+        numofatempos = math.ceil(math.log(arg, 0.5 if arg < 0.5 else 100))
+        # construct one atempo statement
+        atempo = f"atempo={nthroot(arg, numofatempos)}"
+        # daisy chain them
+        return ",".join([atempo for _ in range(numofatempos)])
+
+
 async def vibrato(file, frequency=5, depth=0.5):  # https://ffmpeg.org/ffmpeg-filters.html#tremolo
+    mt = mediatype(file)
+    exts = {
+        "AUDIO": "mp3",
+        "VIDEO": "mp4"
+    }
+    out = temp_file(exts[mt])
+    await run_command("ffmpeg", "-i", file, "-af", f"vibrato=f={frequency}:d={depth}", "-strict", "-1", "-c:a",
+                      "aac" if mt == "VIDEO" else "libmp3lame", out)
+    return out
+
+
+async def pitch(file, pitch=2):
     mt = mediatype(file)
     exts = {
         "AUDIO": "mp3",
