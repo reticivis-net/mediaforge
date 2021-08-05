@@ -152,7 +152,11 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             "default_search": "auto",
             "logger": MyLogger(),
             "merge_output_format": "mp4",
-            "format": f'(bestvideo[ext=mp4]+bestaudio)[filesize<{config.file_upload_limit}]',
+            "format": f'(bestvideo[ext=mp4]+bestaudio/best[ext=mp4]/bestvideo+bestaudio/best)[filesize<?{config.file_upload_limit}]',
+            "max_filesize": config.file_upload_limit
+            # "format": "/".join(f"({i})[filesize<{config.file_upload_limit}]" for i in [
+            #     "bestvideo[ext=mp4]+bestaudio", "best[ext=mp4]", "bestvideo+bestaudio", "best"
+            # ]),
         }
         if form == "audio":
             opts['format'] = f"bestaudio[filesize<{config.file_upload_limit}]"
@@ -161,6 +165,11 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                 'preferredcodec': 'mp3',
             }]
         with youtube_dl.YoutubeDL(opts) as ydl:
+            # manually exclude livestreams, cant find a better way to do this ¯\_(ツ)_/¯
+            nfo = ydl.extract_info(vid, download=False)
+            logger.debug(nfo)
+            if "is_live" in nfo and nfo["is_live"]:
+                raise youtube_dl.DownloadError("Livestreams cannot be downloaded.")
             ydl.download([vid])
         filename = glob.glob(name + ".*")
         if len(filename) > 0:
