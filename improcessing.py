@@ -508,8 +508,10 @@ async def toapng(video):
     fps = await get_frame_rate(video)
     fps = Fraction(1 / fps).limit_denominator()
     outname = temp_file("png")
-    n = glob.glob(name.replace('%09d', '*'))
-    await run_command("apngasm", outname, *n, str(fps.numerator), str(fps.denominator), "-i5")
+    # n = sorted(glob.glob(name.replace('%09d', '*')))[0]
+    # apngasm input is strange
+    await run_command("apngasm", outname, name.replace('%09d', '000000001'), str(fps.numerator), str(fps.denominator),
+                      "-i5")
     return outname
 
 
