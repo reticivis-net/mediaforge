@@ -663,6 +663,25 @@ async def changefps(file, fps):
     return outname
 
 
+async def invert(file):
+    """
+    inverts colors
+    :param file: media
+    :return: processed media
+    """
+    mt = mediatype(file)
+    exts = {
+        "VIDEO": "mp4",
+        "GIF": "mp4",
+        "IMAGE": "png"
+    }
+    outname = temp_file(exts[mt])
+    await run_command("ffmpeg", "-hide_banner", "-i", file, "-vf", f"negate", "-c:v", "png", outname)
+    if mt == "GIF":
+        outname = await mp4togif(outname)
+    return outname
+
+
 async def pad(file):
     """
     pads media into a square shape
@@ -992,7 +1011,6 @@ async def rotate(file, rottype):
     }
     mt = mediatype(file)
     exts = {
-        "AUDIO": "mp3",
         "VIDEO": "mp4",
         "GIF": "mp4",
         "IMAGE": "png"

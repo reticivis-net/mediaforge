@@ -1079,6 +1079,17 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                 return
             await improcess(ctx, improcessing.changefps, [["VIDEO", "GIF"]], fps)
 
+        @commands.command(aliases=["negate", "opposite"])
+        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
+        async def invert(self, ctx):
+            """
+            Inverts colors of media
+
+            :Usage=$invert
+            :Param=video - A video or gif. (automatically found in channel)
+            """
+            await improcess(ctx, improcessing.invert, [["VIDEO", "GIF", "IMAGE"]])
+
         @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         @commands.command()
         async def trim(self, ctx, length: float, start: float = 0):
