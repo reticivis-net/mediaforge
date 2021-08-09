@@ -110,17 +110,6 @@ def initializerenderpool():
     return renderpool
 
 
-def filetostring(f):
-    """
-    reads a file to a string
-    :param f: file path of file
-    :return: contents of file
-    """
-    with open(f, 'r', encoding="UTF-8") as file:
-        data = file.read()
-    return data
-
-
 # https://fredrikaverpil.github.io/2017/06/20/async-and-await-with-subprocesses/
 async def run_command(*args):
     """
@@ -418,7 +407,8 @@ async def ensureduration(media, ctx: typing.Union[commands.Context, None]):
 #     return out
 
 
-async def handleanimated(media: str, capfunction: callable, ctx, *caption):
+async def handleanimated(media: typing.Union[str, typing.List[str]], capfunction: callable, ctx: commands.Context,
+                         *caption):
     """
     handles processing functions that only work in singular frames and applies to videos/gifs
     :param media: image, video, or gif
@@ -427,6 +417,10 @@ async def handleanimated(media: str, capfunction: callable, ctx, *caption):
     :param caption: other params (usually caption)
     :return: processed media
     """
+    mediaargs = []
+    if isinstance(media, list):
+        mediaargs = media[1:]
+        media = media[0]
     imty = mediatype(media)
     logger.info(f"Detected type {imty}.")
     if imty is None:
@@ -434,7 +428,7 @@ async def handleanimated(media: str, capfunction: callable, ctx, *caption):
     elif imty == "IMAGE":
         logger.info(f"Processing frame...")
         # media = minimagesize(media, 200)
-        result = await renderpool.submit(capfunction, media, caption)
+        result = await renderpool.submit(capfunction, [media] + mediaargs if mediaargs else media, caption)
         # capped = await run_in_exec(result.get)
         return await compresspng(result)
     elif imty == "VIDEO" or imty == "GIF":
@@ -450,8 +444,8 @@ async def handleanimated(media: str, capfunction: callable, ctx, *caption):
 
         ses = tempfiles.get_session_list()
         for i, frame in enumerate(frames):
-            framefuncs.append(renderpool.submit(capfunction, frame, caption, frame.replace('.png', '_rendered.png'),
-                                                ses=ses))
+            framefuncs.append(renderpool.submit(capfunction, [frame] + mediaargs if mediaargs else frame, caption,
+                                                frame.replace('.png', '_rendered.png'), ses=ses))
         await asyncio.wait(framefuncs)
         tempfiles.reserve_names(glob.glob(name.replace('.png', '_rendered.png').replace('%09d', '*')))
         # result = renderpool.starmap_async(capfunction, capargs)

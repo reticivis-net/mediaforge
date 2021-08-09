@@ -1404,10 +1404,36 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             """
             Eminem says something.
 
-            :Usage=$eminem `text`
+            :Usage=$eminemsay `text`
             :Param=text - The text to put next to eminem.
             """
             await improcess(ctx, captionfunctions.eminem, [], [text])
+
+        @commands.command(aliases=["customsay"])
+        async def imagesay(self, ctx, *, text):
+            """
+            An image of your choice says something.
+            Like `$eminemsay` but for a custom image.
+
+            :Usage=$imagesay `text`
+            :Param=media - An image, video, or gif (automatically found in channel)
+            :Param=text - The text to put next to your image.
+            """
+            await improcess(ctx, captionfunctions.imagesay, [["IMAGE", "VIDEO", "GIF"]], text, handleanimated=True)
+
+        @commands.command(aliases=["customcap", "imagesaycap", "imagesaycaption", "imagecap", "customsaycap"])
+        async def imagecaption(self, ctx, *, text):
+            """
+            An image of your choice says something below another image.
+            Like `$stuff`, `$eminem` or `$petergriffin` but for a custom image.
+
+            :Usage=$imagecaption `text`
+            :Param=media - An image, video, or gif to caption (automatically found in channel)
+            :Param=image - An image to sit next to the caption text (automatically found in channel)
+            :Param=text - The text to put next to your image.
+            """
+            await improcess(ctx, captionfunctions.imagesaycap, [["IMAGE", "VIDEO", "GIF"], ["IMAGE"]], text,
+                            handleanimated=True)
 
         @commands.command(aliases=["handitover", "takeit", "giveme"])
         async def givemeyourphone(self, ctx):

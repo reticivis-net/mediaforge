@@ -26,6 +26,7 @@
         body {
             font-size: 0;
             word-break: break-word;
+            min-width: 1000px;
         }
 
         .caption {
@@ -67,7 +68,7 @@
 
 
         .stuff {
-            width: 30%;
+            width: 50%;
         }
 
         /* https://stackoverflow.com/a/68708084/9044183 */
@@ -83,7 +84,7 @@
             position: relative;
             min-height: inherit;
             padding: 0;
-            min-width: 70%;
+            min-width: 50%;
         }
 
         .box-flex {
@@ -104,10 +105,8 @@
 </head>
 <body>
 
-<img alt="An error has occurred loading your image." class="bigimg" src="rendering/demoimage.png">
-
 <div class="box box-flex caption clearfix">
-    <img alt="stuff" class="stuff img" src="rendering/eminem.png"/>
+    <img alt="stuff" class="stuff img" src="rendering/demoimage.png"/>
     <div class="txt">CaptionText</div>
 </div>
 
