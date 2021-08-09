@@ -36,16 +36,17 @@
 
         .caption {
             -webkit-font-smoothing: antialiased;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            /*display: flex;*/
+            /*justify-content: center;*/
+            /*align-items: center;*/
             font-family: caption, /*twemoji,*/ sans-serif;
             text-align: center;
             word-wrap: break-word;
-            font-size: 9vw;
-            padding: 2vw 1vw;
-            width: 70%;
+            font-size: 6vw;
+            padding: 2vw 1vw 0;
+            width: 100%;
             min-height: 100%;
+            background: white;
         }
 
         .img {
@@ -60,32 +61,35 @@
             vertical-align: -0.1em;
         }
 
-        /*.caption span {
-            vertical-align: middle;
-        }*/
         * {
             box-sizing: border-box;
         }
 
         .column {
             float: left;
+
             /*padding: 10px;*/
         }
 
-        .row:after {
-            content: "";
-            display: table;
+        body:after, .clearfix:after {
+            visibility: hidden;
+            display: block;
+            font-size: 0;
+            content: " ";
             clear: both;
+            height: 0;
         }
 
-        .row {
-            background: white;
-            display: flex;
-            flex: 1;
+        .clearfix::before,
+        .clearfix::after {
+            flex-basis: 0;
+            order: 1;
         }
+
 
         .stuff {
             width: 30%;
+            float: right;
         }
 
         .stuff img {
@@ -97,20 +101,25 @@
 
 
 <img class="img" src="rendering/demoimage.png" alt="An error has occurred loading your image.">
-<div class="row">
 
-    <div class="caption column"><span class="t">CaptionText</span></div>
-    '
-    <div class="column stuff">
-        <img class="stuff" src="rendering/eminem.png" alt="stuff"/>
-    </div>
-
+<div class="caption clearfix" id="cap">
+    <img alt="stuff" class="stuff" src="rendering/eminem.png"/>
+    <span>CaptionText</span>
 </div>
 
 </body>
 <script>twemoji.parse(document.body);</script>
 <script>
 
+    // window.onresize = onresize
+    // document.addEventListener("DOMContentLoaded", onresize);
+    //
+    // function onresize() {
+    //     let elem = document.querySelector("#cap")
+    //     elem.style.lineHeight = window.getComputedStyle(elem).height
+    // }
+    //
+    // onresize();
 
     function outerHeight(element) {
         const height = element.offsetHeight,
