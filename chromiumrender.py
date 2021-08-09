@@ -10,6 +10,7 @@ import urllib3
 from selenium import webdriver
 
 import config
+from clogs import logger
 from tempfiles import temp_file
 
 
@@ -132,6 +133,7 @@ def html2png(html, png):
     # driver.execute_script("return window.getComputedStyle(document.documentElement).getPropertyValue('--1vw');")
     for _ in range(4):
         size = driver.execute_script(f"return [document.documentElement.scrollWidth, outerHeight(document.body)];")
+        logger.debug(size)
         driver.set_window_size(size[0], size[1])
     driver.execute_script("if (typeof beforerender === \"function\") {beforerender()}")
     send(driver, "Emulation.setDefaultBackgroundColorOverride", {'color': {'r': 0, 'g': 0, 'b': 0, 'a': 0}})

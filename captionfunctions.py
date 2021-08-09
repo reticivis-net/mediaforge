@@ -112,6 +112,10 @@ def eminemcap(image, caption, tosavename=None):
     return htmlcap("captionhtml/eminemcap.html", image, caption, tosavename)
 
 
+def petergriffincap(image, caption, tosavename=None):
+    return htmlcap("captionhtml/petergriffincap.html", image, caption, tosavename)
+
+
 def givemeyourphone(image, _, tosavename=None):
     return htmlcap("captionhtml/givemeyourphone.html", image, None, tosavename)
 

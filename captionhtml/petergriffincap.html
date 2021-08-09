@@ -32,7 +32,7 @@
         body {
             font-size: 0;
             word-break: break-word;
-            min-width: 1000px;
+
         }
 
         .caption {
@@ -46,7 +46,7 @@
             font-size: 6vw;
             padding: 2vw 1vw 0;
             width: 100%;
-            min-height: 100%;
+            /*min-height: 100%;*/
             background: white;
         }
 
@@ -81,16 +81,10 @@
             height: 0;
         }
 
-        .clearfix::before,
-        .clearfix::after {
-            flex-basis: 0;
-            order: 1;
-        }
-
 
         .stuff {
-            width: 50%;
-            float: right;
+            width: 30%;
+            float: left;
         }
 
         .stuff img {
@@ -99,12 +93,11 @@
     </style>
 </head>
 <body>
-
+<img alt="An error has occurred loading your image." class="img" src="rendering/demoimage.png">
 <div class="caption clearfix" id="cap">
-    <img alt="stuff" class="stuff" src="rendering/eminem.png"/>
+    <img alt="stuff" class="stuff" src="rendering/Peter_Griffin.png"/>
     <span>CaptionText</span>
 </div>
-
 </body>
 <script>twemoji.parse(document.body);</script>
 <script>
