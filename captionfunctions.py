@@ -7,13 +7,24 @@ import numpy as np
 from PIL import Image, ImageEnhance, UnidentifiedImageError
 
 import chromiumrender
-from improcessing import filetostring, mediatype
+# from improcessing import filetostring, mediatype
 from tempfiles import temp_file
 
 """
 This file contains all media processing functions that only work on one image/frame of video and must be run through 
 improcessing.handleanimated()
 """
+
+
+def filetostring(f):
+    """
+    reads a file to a string
+    :param f: file path of file
+    :return: contents of file
+    """
+    with open(f, 'r', encoding="UTF-8") as file:
+        data = file.read()
+    return data
 
 
 # stolen code https://stackoverflow.com/questions/6116978/how-to-replace-multiple-substrings-of-a-string
@@ -53,8 +64,13 @@ def htmlcap(file, image, caption, tosavename=None):
         tosavename = temp_file("png")
     replacedict = {}
     if image:
-        replacedict["rendering/demoimage.png"] = image
+        if isinstance(image, list):
+            for i, c in enumerate(image):
+                replacedict[f"rendering/demoimage{i + 1 if i != 0 else ''}.png"] = c
+        else:
+            replacedict["rendering/demoimage.png"] = image
     if caption:
+        # print(caption)
         caption = sanitizehtml(caption)
         if len(caption) == 1:
             replacedict["CaptionText"] = caption[0]
@@ -122,6 +138,14 @@ def givemeyourphone(image, _, tosavename=None):
 
 def eminem(caption, tosavename=None):
     return htmlcap("captionhtml/eminem.html", None, caption, tosavename)
+
+
+def imagesay(image, caption, tosavename=None):
+    return htmlcap("captionhtml/imagesay.html", image, caption, tosavename)
+
+
+def imagesaycap(image, caption, tosavename=None):
+    return htmlcap("captionhtml/imagesaycap.html", image, caption, tosavename)
 
 
 def slashscript(caption, tosavename=None):
@@ -221,7 +245,6 @@ def jpegcorrupt(image, randomchance, tosavename=None):
 
 
 def magick(file, strength, tosavename=None):
-    assert mediatype(file) == "IMAGE"
     if tosavename is None:
         tosavename = temp_file("png")
     subprocess.check_call(["magick", file, "-liquid-rescale", f"{strength[0]}%x{strength[0]}%", tosavename],
