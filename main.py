@@ -66,7 +66,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
     db.close()
 
 
-    async def prefix_function(dbot: commands.Bot, message: discord.Message):
+    async def prefix_function(dbot: typing.Union[commands.Bot, commands.AutoShardedBot], message: discord.Message):
         if not message.guild:
             return config.default_command_prefix
         async with aiosqlite.connect(config.db_filename) as db:
@@ -1228,8 +1228,18 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                         if r:
                             tempfiles.reserve_names([r])
                             r = await improcessing.assurefilesize(r, ctx, re_encode=False)
+                            codec = await improcessing.get_codec(r)
+                            # sometimes returns av1 codec
+                            if codec["codec_name"] != "h264":
+                                txt = f"The returned video is in the `{codec['codec_name']}` " \
+                                      f"({codec['codec_long_name']}) codec. Discord cannot embed this format but the " \
+                                      f"video data is valid. You can use " \
+                                      f"`{await prefix_function(bot, ctx.message)}reencode` to change the codec, " \
+                                      f"though this may increase the filesize or decrease the quality."
+                            else:
+                                txt = ""
                             await msg.edit(content=f"{config.emojis['working']} Uploading to Discord...")
-                            await ctx.reply(file=discord.File(r))
+                            await ctx.reply(txt, file=discord.File(r))
                         else:
                             await ctx.reply(f"{config.emojis['warning']} No available downloads found within Discord's "
                                             f"file upload limit.")

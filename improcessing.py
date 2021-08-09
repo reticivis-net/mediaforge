@@ -213,6 +213,19 @@ async def get_resolution(filename):
     return [out["streams"][0]["width"], out["streams"][0]["height"]]
 
 
+async def get_codec(filename):
+    """
+    gets the codec of a video
+    :param filename: filename
+    :return: dict containing "codec_name" and "codec_long_name"
+    """
+    out = await run_command("ffprobe", "-v", "panic", "-select_streams", "v:0", "-show_entries",
+                            "stream=codec_name,codec_long_name",
+                            "-print_format", "json", filename)
+    out = json.loads(out)
+    return out["streams"][0]
+
+
 async def ffmpegsplit(media):
     """
     splits the input file into frames
