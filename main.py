@@ -542,6 +542,19 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             await improcess(ctx, captionfunctions.eminemcap, [["VIDEO", "GIF", "IMAGE"]], caption, handleanimated=True)
 
         @commands.cooldown(1, config.cooldown, commands.BucketType.user)
+        @commands.command(aliases=["peter", "peterexplain", "petersay", "petergriffinexplain", "petergriffinsay"])
+        async def petergriffin(self, ctx, *, caption):
+            """
+            Peter Griffin says something below your media.
+
+            :Usage=$eminem `text`
+            :Param=caption - The caption text.
+            :Param=media - A video, gif, or image. (automatically found in channel)
+            """
+            await improcess(ctx, captionfunctions.petergriffincap, [["VIDEO", "GIF", "IMAGE"]], caption,
+                            handleanimated=True)
+
+        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         @commands.command(aliases=["stretchstuff"])
         async def stuffstretch(self, ctx, *, caption):
             """
