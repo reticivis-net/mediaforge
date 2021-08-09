@@ -1988,7 +1988,9 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             err = f"{config.emojis['exclamation_question']} Command `{cmd}` does not exist. " \
                   f"Did you mean **{prefix}{match}**?"
             logger.warning(err)
-            await ctx.reply(err)
+            if not (cmd.startswith("$") and all([i.isdecimal() or i in ".," for i in cmd.replace("$", "")])):
+                # exclude just numbers/decimals, it annoys people
+                await ctx.reply(err)
         elif isinstance(commanderror, discord.ext.commands.errors.NotOwner):
             err = f"{config.emojis['x']} You are not authorized to use this command."
             logger.warning(err)
