@@ -10,14 +10,7 @@
         @font-face {
             font-family: caption;
             src: url(rendering/fonts/Lato-Bold.ttf);
-            /*    caption.otf is futura extra condensed bold but this file is just taken from esmbot's repo lol*/
         }
-
-        /*@font-face {
-            font-family: twemoji;
-            src: url(rendering/fonts/twemoji.ttf);
-        }*/
-
 
         * {
             margin: 0;
@@ -27,30 +20,26 @@
             font-size: 100%;
             vertical-align: baseline;
             background: transparent;
+            box-sizing: border-box;
         }
 
         body {
             font-size: 0;
             word-break: break-word;
-
         }
 
         .caption {
             -webkit-font-smoothing: antialiased;
-            /*display: flex;*/
-            /*justify-content: center;*/
-            /*align-items: center;*/
             font-family: caption, /*twemoji,*/ sans-serif;
             text-align: center;
             word-wrap: break-word;
             font-size: 6vw;
             padding: 2vw 1vw 0;
             width: 100%;
-            /*min-height: 100%;*/
             background: white;
         }
 
-        .img {
+        .bigimg {
             min-width: 100%;
             margin: 0;
         }
@@ -62,16 +51,6 @@
             vertical-align: -0.1em;
         }
 
-        * {
-            box-sizing: border-box;
-        }
-
-        .column {
-            float: left;
-
-            /*padding: 10px;*/
-        }
-
         body:after, .clearfix:after {
             visibility: hidden;
             display: block;
@@ -81,36 +60,80 @@
             height: 0;
         }
 
+        .clearfix::before,
+        .clearfix::after {
+            flex-basis: 0;
+            order: 1;
+        }
+
 
         .stuff {
             width: 30%;
+        }
+
+        /* https://stackoverflow.com/a/68708084/9044183 */
+        .box {
+            width: 100%;
+        }
+
+        .img {
             float: left;
         }
 
-        .stuff img {
-            width: 100%;
+        .txt {
+            position: relative;
+            min-height: inherit;
+            padding: 0;
+            min-width: 70%;
+        }
+
+        .box-flex {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .box-flex .img {
+            order: 0;
+        }
+
+        .box-flex .txt {
+            padding: 0;
+            align-self: center;
+            min-height: auto;
         }
     </style>
 </head>
 <body>
-<img alt="An error has occurred loading your image." class="img" src="rendering/demoimage.png">
-<div class="caption clearfix" id="cap">
-    <img alt="stuff" class="stuff" src="rendering/Peter_Griffin.png"/>
-    <span>CaptionText</span>
+
+<img alt="An error has occurred loading your image." class="bigimg" src="rendering/demoimage.png">
+
+<div class="box box-flex caption clearfix">
+    <img alt="stuff" class="stuff img" src="rendering/Peter_Griffin.png"/>
+    <div class="txt">CaptionText</div>
 </div>
+
 </body>
 <script>twemoji.parse(document.body);</script>
 <script>
+    function beforerender() {
+        document.querySelectorAll(".box").forEach((elem) => {
+            let img = elem.querySelector(".img");
+            let txt = elem.querySelector(".txt");
+            if (img.offsetHeight > txt.offsetHeight) {
+                elem.classList.add("box-flex")
+            } else {
+                elem.classList.remove("box-flex")
+            }
+        })
+    }
 
-    // window.onresize = onresize
-    // document.addEventListener("DOMContentLoaded", onresize);
-    //
-    // function onresize() {
-    //     let elem = document.querySelector("#cap")
-    //     elem.style.lineHeight = window.getComputedStyle(elem).height
-    // }
-    //
-    // onresize();
+    window.onresize = beforerender;
+    document.addEventListener('DOMContentLoaded', beforerender);
+    // https://stackoverflow.com/a/60949881/9044183
+    Promise.all(Array.from(document.images).filter(img => !img.complete).map(img => new Promise(resolve => {
+        img.onload = img.onerror = resolve;
+    }))).then(beforerender);
+
 
     function outerHeight(element) {
         const height = element.offsetHeight,
