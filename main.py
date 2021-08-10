@@ -1421,7 +1421,8 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             """
             await improcess(ctx, captionfunctions.imagesay, [["IMAGE", "VIDEO", "GIF"]], text, handleanimated=True)
 
-        @commands.command(aliases=["customcap", "imagesaycap", "imagesaycaption", "imagecap", "customsaycap"])
+        @commands.command(aliases=["customcap", "imagesaycap", "imagesaycaption", "imagecap", "customsaycap",
+                                   "imagecaptionright"])
         async def imagecaption(self, ctx, *, text):
             """
             An image of your choice says something below another image.
@@ -1433,6 +1434,20 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             :Param=text - The text to put next to your image.
             """
             await improcess(ctx, captionfunctions.imagesaycap, [["IMAGE", "VIDEO", "GIF"], ["IMAGE"]], text,
+                            handleanimated=True)
+
+        @commands.command(aliases=["customcapleft", "imagesaycapleft", "imagesaycaptionleft", "imagecapleft",
+                                   "customsaycapleft"])
+        async def imagecaptionleft(self, ctx, *, text):
+            """
+            like $imagecaption but the image is on the left.
+
+            :Usage=imagecaptionleft `text`
+            :Param=media - An image, video, or gif to caption (automatically found in channel)
+            :Param=image - An image to sit next to the caption text (automatically found in channel)
+            :Param=text - The text to put next to your image.
+            """
+            await improcess(ctx, captionfunctions.imagesaycapleft, [["IMAGE", "VIDEO", "GIF"], ["IMAGE"]], text,
                             handleanimated=True)
 
         @commands.command(aliases=["handitover", "takeit", "giveme"])

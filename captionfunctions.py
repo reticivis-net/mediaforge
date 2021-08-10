@@ -96,10 +96,6 @@ def bottomcaption(image, caption, tosavename=None):
     return htmlcap("captionhtml/mycaptionbottom.html", image, caption, tosavename)
 
 
-def stuff(image, caption, tosavename=None):
-    return htmlcap("captionhtml/stuff.html", image, caption, tosavename)
-
-
 def stuffstretch(image, caption, tosavename=None):
     return htmlcap("captionhtml/stuffstretch.html", image, caption, tosavename)
 
@@ -124,20 +120,24 @@ def twittercapdark(image, caption, tosavename=None):
     return htmlcap("captionhtml/twittercaptiondark.html", image, caption, tosavename)
 
 
+def stuff(image, caption, tosavename=None):
+    return htmlcap("captionhtml/imagesaycap.html", [image, "rendering/Stuff.PNG"], caption, tosavename)
+    # return htmlcap("captionhtml/stuff.html", image, caption, tosavename)
+
+
 def eminemcap(image, caption, tosavename=None):
-    return htmlcap("captionhtml/eminemcap.html", image, caption, tosavename)
+    return htmlcap("captionhtml/imagesaycap.html", [image, "rendering/eminem.png"], caption, tosavename)
+    # return htmlcap("captionhtml/eminemcap.html", image, caption, tosavename)
 
 
 def petergriffincap(image, caption, tosavename=None):
-    return htmlcap("captionhtml/petergriffincap.html", image, caption, tosavename)
-
-
-def givemeyourphone(image, _, tosavename=None):
-    return htmlcap("captionhtml/givemeyourphone.html", image, None, tosavename)
+    return htmlcap("captionhtml/imagesaycapleft.html", [image, "rendering/Peter_Griffin.png"], caption, tosavename)
+    # return htmlcap("captionhtml/petergriffincap.html", image, caption, tosavename)
 
 
 def eminem(caption, tosavename=None):
-    return htmlcap("captionhtml/eminem.html", None, caption, tosavename)
+    return htmlcap("captionhtml/imagesay.html", "rendering/eminem.png", caption, tosavename)
+    # return htmlcap("captionhtml/eminem.html", None, caption, tosavename)
 
 
 def imagesay(image, caption, tosavename=None):
@@ -148,8 +148,16 @@ def imagesaycap(image, caption, tosavename=None):
     return htmlcap("captionhtml/imagesaycap.html", image, caption, tosavename)
 
 
+def imagesaycapleft(image, caption, tosavename=None):
+    return htmlcap("captionhtml/imagesaycapleft.html", image, caption, tosavename)
+
+
 def slashscript(caption, tosavename=None):
     return htmlcap("captionhtml/slashscript.html", None, caption, tosavename)
+
+
+def givemeyourphone(image, _, tosavename=None):
+    return htmlcap("captionhtml/givemeyourphone.html", image, None, tosavename)
 
 
 def dontweet(caption, tosavename=None):
