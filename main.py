@@ -1970,12 +1970,13 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
     async def on_command(ctx):
         if isinstance(ctx.channel, discord.DMChannel):
             logger.log(25,
-                       f"@{ctx.message.author.name}#{ctx.message.author.discriminator} ran "
+                       f"@{ctx.message.author.name}#{ctx.message.author.discriminator} ({ctx.message.author.id}) ran "
                        f"'{logcommand(ctx.message.content)}' in DMs")
         else:
             logger.log(25,
                        f"@{ctx.message.author.name}#{ctx.message.author.discriminator}"
-                       f" ({ctx.message.author.display_name}) ran '{logcommand(ctx.message.content)}' in channel "
+                       f" ({ctx.message.author.display_name}) ({ctx.message.author.id}) "
+                       f"ran '{logcommand(ctx.message.content)}' in channel "
                        f"#{ctx.channel.name} in server {ctx.guild}")
 
 
@@ -1989,7 +1990,8 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
     @bot.listen()
     async def on_command_completion(ctx):
         logger.log(35,
-                   f"Command '{logcommand(ctx.message.content)}' by @{ctx.message.author.name}#{ctx.message.author.discriminator} "
+                   f"Command '{logcommand(ctx.message.content)}' by "
+                   f"@{ctx.message.author.name}#{ctx.message.author.discriminator} ({ctx.message.author.id})"
                    f"is complete!")
 
 
