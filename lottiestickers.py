@@ -9,7 +9,7 @@ from tempfiles import temp_file
 
 
 def stickerurl(sticker: discord.Sticker):
-    return f"https://discord.com/stickers/{sticker.id}/{sticker.image}.json"
+    return f"https://discord.com/stickers/{sticker.id}.json"
 
 
 def lottiestickertogif(sticker):  # passed the lottie json file
@@ -23,4 +23,5 @@ def lottiestickertogif(sticker):  # passed the lottie json file
 
 
 if __name__ == "__main__":
+    print(lottie.__version__)
     lottiestickertogif("rendering/lottietest.json")

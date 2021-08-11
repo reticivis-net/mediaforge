@@ -46,16 +46,16 @@ the bot uses many CLI programs for media processing.
 - ExifTool - windows executable is included. installable on linux
   with `sudo apt-get install exiftool` https://exiftool.org/
 - apngasm - windows executable is included. installable on linux with `sudo apt-get install apngasm`
-- cairo - install on linux with `sudo apt-get install libcairo2-dev`. installable on windows by downloading
-  GTK+. https://www.cairographics.org/download/
-    - this library is not yet used. it is needed to render lottie stickers but the library for rendering them is bugged
-      so it isnt used yet.
+- glaxnimate - [downloadable on its website](https://glaxnimate.mattbas.org/download)
+    - this library is not yet used. it is needed to render lottie stickers, but
+      [I am currently having issues installing the python bindings on windows.](https://gitlab.com/mattbas/glaxnimate/-/issues/398)
 
 ### pip libraries
 
 - This project uses [`pipenv`](https://github.com/pypa/pipenv), run `pipenv install` to install required dependencies.
 - check [pipenv's repo](https://github.com/pypa/pipenv) for more info on pipenv usage.
-- for now, a [`requirements.txt`](requirements.txt) file is also maintained, this may change.
+
+[comment]: <> (- for now, a [`requirements.txt`]&#40;requirements.txt&#41; file is also maintained, this may change.)
 
 ### config
 
