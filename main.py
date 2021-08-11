@@ -2004,6 +2004,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
 
     @bot.check
     def block_filter(ctx: commands.Context):
+        # TODO: implement advanced regex-based filter to prevent filter bypass
         # this command is exempt because it only works on URLs and there have been issues with r/okbr
         if ctx.command.name == "videodl":
             return True
