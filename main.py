@@ -1230,7 +1230,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                             r = await improcessing.assurefilesize(r, ctx, re_encode=False)
                             codec = await improcessing.get_codec(r)
                             # sometimes returns av1 codec
-                            if codec["codec_name"] != "h264":
+                            if codec and codec["codec_name"] != "h264":
                                 txt = f"The returned video is in the `{codec['codec_name']}` " \
                                       f"({codec['codec_long_name']}) codec. Discord cannot embed this format but the " \
                                       f"video data is valid. You can use " \
