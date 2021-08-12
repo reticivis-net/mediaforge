@@ -459,7 +459,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             self.bot = bot
 
         @commands.cooldown(1, config.cooldown, commands.BucketType.user)
-        @commands.command(aliases=["demotivate", "motivational", "demotivational"])
+        @commands.command(aliases=["demotivate", "motivational", "demotivational", "inspire", "uninspire"])
         async def motivate(self, ctx, *, caption):
             """
             Captions media in the style of demotivational posters.
@@ -1051,13 +1051,13 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             await improcess(ctx, improcessing.reverse, [["VIDEO", "GIF"]])
 
         @commands.cooldown(1, config.cooldown, commands.BucketType.user)
-        @commands.command()
+        @commands.command(aliases=["compress", "quality", "lowerquality", "crf", "qa"])
         async def compressv(self, ctx, crf: float = 51, qa: float = 20):
             """
             Makes videos terrible quality.
             The strange ranges on the numbers are because they are quality settings in FFmpeg's encoding.
             CRF info is found at https://trac.ffmpeg.org/wiki/Encode/H.264#crf
-            audio quality info is found under https://trac.ffmpeg.org/wiki/Encode/AAC (see `-b:a`)
+            audio quality info is found under https://trac.ffmpeg.org/wiki/Encode/AAC#fdk_cbr
 
             :Usage=$compressv `[crf]` `[qa]`
             :Param=crf - Controls video quality. Higher is worse quality. must be between 28 and 51. defaults to 51.
