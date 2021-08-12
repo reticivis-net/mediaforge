@@ -212,7 +212,11 @@ async def get_codec(filename):
                             "stream=codec_name,codec_long_name",
                             "-print_format", "json", filename)
     out = json.loads(out)
-    return out["streams"][0]
+    if out["streams"]:
+        return out["streams"][0]
+    else:
+        # only checks for video codec, audio files return Nothinng
+        return None
 
 
 async def ffmpegsplit(media):
