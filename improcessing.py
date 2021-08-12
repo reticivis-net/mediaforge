@@ -523,10 +523,11 @@ async def toapng(video):
 
 
 async def reencode(mp4):  # reencodes mp4 as libx264 since the png format used cant be played by like literally anything
+    assert (mt := mediatype(mp4)) in ["VIDEO", "GIF"], f"file {mp4} with type {mt} passed to reencode()"
     outname = temp_file("mp4")
     await run_command("ffmpeg", "-hide_banner", "-i", mp4, "-c:v", "libx264", "-c:a", "copy", "-pix_fmt", "yuv420p",
                       "-max_muxing_queue_size", "9999",
-                      "-vf", "scale=trunc(iw/2)*2:trunc(ih/2)*2", outname)
+                      "-vf", "scale=ceil(iw/2)*2:ceil(ih/2)*2", outname)
     return outname
 
 
@@ -805,6 +806,8 @@ async def concatv(files):
     outname = temp_file("mp4")
     await run_command("ffmpeg", "-hide_banner", "-f", "concat", "-i", concatdemuxer, "-c:v", "png", "-c:a", "aac",
                       outname)
+    if mediatype(files[0]) == "GIF" and mediatype(files[1]) == "GIF":
+        outname = await mp4togif(outname)
     # for file in [video0, video1, fixedvideo1, fixedvideo0, fixedfixedvideo1, concatdemuxer]:
     #     os.remove(file)
     return outname
