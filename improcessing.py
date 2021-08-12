@@ -601,6 +601,8 @@ async def speed(file, sp):
     await run_command("ffmpeg", "-hide_banner", "-i", await forceaudio(file), "-filter_complex",
                       f"[0:v]setpts=PTS/{sp},fps={fps}[v];[0:a]{expanded_atempo(sp)}[a]",
                       "-map", "[v]", "-map", "[a]", "-t", str(duration / float(sp)), "-c:v", "png", outname)
+    if await count_frames(outname) < 2:
+        raise NonBugError("Output file has less than 2 frames. Try reducing the speed.")
     if mt == "GIF":
         outname = await mp4togif(outname)
     return outname
@@ -921,6 +923,12 @@ async def imagestack(files, style):
     return outname
 
 
+async def count_frames(video):
+    # https://stackoverflow.com/a/28376817/9044183
+    return int(await run_command("ffprobe", "-v", "error", "-select_streams", "v:0", "-count_packets", "-show_entries",
+                                 "stream=nb_read_packets", "-of", "csv=p=0", video))
+
+
 async def freezemotivate(files, *caption):
     """
     ends video with motivate caption
@@ -934,9 +942,7 @@ async def freezemotivate(files, *caption):
     else:  # just default to song lol!
         video = files
         audio = "rendering/what.mp3"
-    framecount = await run_command('ffprobe', '-v', 'panic', '-count_frames', '-select_streams', 'v:0', '-show_entries',
-                                   'stream=nb_read_frames', '-of', 'default=nokey=1:noprint_wrappers=1', video)
-    framecount = int(framecount)
+    framecount = await count_frames(video)
     lastframe = temp_file("png")
     await run_command("ffmpeg", "-hide_banner", "-i", video, "-vf", f"select='eq(n,{framecount - 1})'", "-vframes", "1",
                       lastframe)

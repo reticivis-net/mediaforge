@@ -1959,24 +1959,17 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             await improcess(ctx, captionfunctions.slashscript, [], [out])
 
 
-    def logcommand(cmd):
-        cmd = cmd.replace("\n", "\\n")
-        if len(cmd) > 100:
-            cmd = cmd[:100] + "..."
-        return cmd
-
-
     @bot.listen()
     async def on_command(ctx):
         if isinstance(ctx.channel, discord.DMChannel):
             logger.log(25,
                        f"@{ctx.message.author.name}#{ctx.message.author.discriminator} ({ctx.message.author.id}) ran "
-                       f"'{logcommand(ctx.message.content)}' in DMs")
+                       f"'{ctx.message.content}' in DMs")
         else:
             logger.log(25,
                        f"@{ctx.message.author.name}#{ctx.message.author.discriminator}"
                        f" ({ctx.message.author.display_name}) ({ctx.message.author.id}) "
-                       f"ran '{logcommand(ctx.message.content)}' in channel "
+                       f"ran '{ctx.message.content}' in channel "
                        f"#{ctx.channel.name} in server {ctx.guild}")
 
 
@@ -1990,7 +1983,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
     @bot.listen()
     async def on_command_completion(ctx):
         logger.log(35,
-                   f"Command '{logcommand(ctx.message.content)}' by "
+                   f"Command '{ctx.message.content}' by "
                    f"@{ctx.message.author.name}#{ctx.message.author.discriminator} ({ctx.message.author.id}) "
                    f"is complete!")
 
@@ -2082,7 +2075,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             embed.add_field(name=f"{config.emojis['2exclamation']} Report Issue to GitHub",
                             value=f"[Create New Issue](https://github.com/HexCodeFFF/mediaforge"
                                   f"/issues/new?labels=bug&template=bug_report.md&title"
-                                  f"={urllib.parse.quote(str(commanderror)[:128], safe='')})\n[View Issu"
+                                  f"={urllib.parse.quote(str(commanderror)[:1000], safe='')})\n[View Issu"
                                   f"es](https://github.com/HexCodeFFF/mediaforge/issues)")
             with io.BytesIO() as buf:
                 trheader = f"DATETIME:{datetime.datetime.now()}\nCOMMAND:{ctx.message.content}\nTRACEBACK:\n"
