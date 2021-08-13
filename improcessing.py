@@ -24,6 +24,7 @@ else:
     import magic
 
 # project files
+import autotune
 import captionfunctions
 import chromiumrender
 import config
@@ -1259,3 +1260,24 @@ async def iconfromsnowflakeid(snowflake: int, bot, ctx):
     except (discord.NotFound, discord.Forbidden):
         pass
     return None
+
+
+async def handleautotune(media: str, *params):
+    audio = await splitaudio(media)
+    assert audio, "Video file must have audio."
+    wav = temp_file("wav")
+    await run_command("ffmpeg", "-i", audio, "-ac", "1", wav)
+    outwav = temp_file("wav")
+    await run_in_exec(autotune.autotune, wav, outwav, *params)
+    mt = mediatype(media)
+    if mt == "AUDIO":
+        outname = temp_file("mp3")
+        await run_command("ffmpeg", "-i", outwav, "-c:a", "libmp3lame", outname)
+        return outname
+    elif mt == "VIDEO":
+        outname = temp_file("mp4")
+        # https://superuser.com/a/1137613/1001487
+        # combine video of original file with new audio
+        await run_command("ffmpeg", "-i", media, "-i", outwav, "-c:v", "copy", "-c:a", "aac", "-map", "0:v:0", "-map",
+                          "1:a:0", outname)
+        return outname

@@ -14,16 +14,16 @@ selenium = "~=3.141.0"
 Pillow = "~=8.2.0"
 youtube-dl = "*"
 dblpy = "*"
-lottie = "*"
 numpy = "*"
 emoji = "*"
 regex = "*"
-isort = {extras = ["pipfile_deprecated_finder", "requirements_deprecated_finder"], version = "*"}
+isort = { extras = ["pipfile_deprecated_finder", "requirements_deprecated_finder"], version = "*" }
 pronouncing = "*"
 "discordlists.py" = "*"
 aiosqlite = "*"
 asyncpg = "*"
-glaxnimate = "*"
+setuptools = "*"
+pyautotune = { git = "https://github.com/ederwander/PyAutoTune.git" }
 
 [dev-packages]
 
