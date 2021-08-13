@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "1a8634c01e77e6a917868ca205ff30b25f5dd04575856d5cc69c87f92b25bcc6"
+            "sha256": "80a3b91f42c63b74587cd9abe37fda6c85fd7892f1f0e6b436e9ee8815080039"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -332,14 +332,6 @@
             "index": "pypi",
             "version": "==1.4.2"
         },
-        "glaxnimate": {
-            "hashes": [
-                "sha256:2ef9d8d8ac07ecce1ec5a32cccf6a4eebcef0c6a29b1ebeb8577419a6687b2fd",
-                "sha256:4d210ba8096c66f85c2c971255cea8b4dd24cf8dccf135d58640288553f0f18e"
-            ],
-            "index": "pypi",
-            "version": "==0.4.3"
-        },
         "humanfriendly": {
             "hashes": [
                 "sha256:332da98c24cc150efcc91b5508b19115209272bfdf4b0764a56795932f854271",
@@ -375,13 +367,6 @@
             ],
             "index": "pypi",
             "version": "==5.9.3"
-        },
-        "lottie": {
-            "hashes": [
-                "sha256:a4836e03de8b20d1bc78e144936b236f53240751c34dab10d043fd108fe6830f"
-            ],
-            "index": "pypi",
-            "version": "==0.6.9"
         },
         "multidict": {
             "hashes": [
@@ -541,6 +526,10 @@
             ],
             "index": "pypi",
             "version": "==0.2.0"
+        },
+        "pyautotune": {
+            "git": "https://github.com/ederwander/PyAutoTune.git",
+            "ref": "5438fe25bf2d8458c5e2a3dfcce5f3eb1ee7340e"
         },
         "pycares": {
             "hashes": [
@@ -733,7 +722,7 @@
                 "sha256:39fb8672126159acb139a7718dd10806104dec1e2f0f6c88aab05d17df10c8d4",
                 "sha256:f57b4c16c62fa2760b7e3d97c35b255512fb6b59a259730f36ba32ce9f8e342f"
             ],
-            "markers": "python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4' and python_version < '4.0'",
+            "markers": "python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4' and python_version < '4'",
             "version": "==1.26.6"
         },
         "vistir": {

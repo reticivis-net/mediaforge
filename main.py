@@ -31,7 +31,7 @@ from discord.ext import commands, tasks
 import captionfunctions
 import config
 import improcessing
-import lottiestickers
+# import lottiestickers
 import sus
 import tempfiles
 from clogs import logger
@@ -1121,6 +1121,36 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                 await ctx.send(f"{config.emojis['warning']} Start must be equal to or more than 0.")
                 return
             await improcess(ctx, improcessing.trim, [["VIDEO", "GIF", "AUDIO"]], length, start)
+
+        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
+        @commands.command()
+        async def autotune(self, ctx, CONCERT_A: float = 440, FIXED_PITCH: float = 0.0,
+                           FIXED_PULL: float = 0.1, KEY: str = "c", CORR_STR: float = 1.0, CORR_SMOOTH: float = 0.0,
+                           PITCH_SHIFT: float = 0.0, SCALE_ROTATE: int = 0, LFO_DEPTH: float = 0.0,
+                           LFO_RATE: float = 1.0, LFO_SHAPE: float = 0.0, LFO_SYMM: float = 0.0, LFO_QUANT: int = 0,
+                           FORM_CORR: int = 0, FORM_WARP: float = 0.0, MIX: float = 1.0):
+            """
+            Autotunes media.
+            :Param=CONCERT_A - CONCERT A: Value in Hz of middle A, used to tune the entire algorithm. defaults to 440.
+            :Param=FIXED_PITCH - FIXED PITCH: Pitch (semitones) toward which pitch is pulled when PULL TO FIXED PITCH is engaged. FIXED PITCH = O: middle A. FIXED PITCH = MIDI pitch - 69. defaults to 0.
+            :Param=FIXED_PULL - PULL TO FIXED PITCH: Degree to which pitch Is pulled toward FIXED PITCH. O: use original pitch. 1: use FIXED PITCH. defaults to 0.1.
+            :Param=KEY - the key it is tuned to. can be any letter a-g, A-G, or X (chromatic scale). defaults to "c"
+            :Param=CORR_STR - CORRECTION STRENGTH: Strength of pitch correction. O: no correction. 1: full correction. defaults to 1.
+            :Param=CORR_SMOOTH - CORRECTION SMOOTHNESS: Smoothness of transitions between notes when pitch correction is used. O: abrupt transitions. 1: smooth transitions. defaults to 0.
+            :Param=PITCH_SHIFT - PITCH SHIFT: Number of notes in scale by which output pitch Is shifted. defaults to 0.
+            :Param=SCALE_ROTATE - OUTPUT SCALE ROTATE: Number of notes by which the output scale Is rotated In the conversion back to semitones from scale notes. Can be used to change the scale between major and minor or to change the musical mode. defaults to 0.
+            :Param=LFO_DEPTH - LFO DEPTH: Degree to which low frequency oscillator (LFO) Is applied. defaults to 0.
+            :Param=LFO_RATE - LFO RATE: Rate (In Hz) of LFO. defaults to 1.
+            :Param=LFO_SHAPE - LFO SHAPE: Shape of LFO waveform. -1: square. 0: sine. 1: triangle. defaults to 0.
+            :Param=LFO_SYMM - LFO SYMMETRY: Adjusts the rise/fall characteristic of the LFO waveform. defaults to 0.
+            :Param=LFO_QUANT - LFO QUANTIZATION: Quantizes the LFO waveform, resulting in chiptune-like effects. defaults to 0.
+            :Param=FORM_CORR - FORMANT CORRECTION: Enables formant correction, reducing the "chipmunk effect" In pitch shifting. defaults to 0.
+            :Param=FORM_WARP - FORMANT WARP: Warps the formant frequencies. Can be used to change gender/age. defaults to 0.
+            :Param=MIX - Blends between the modified signal and the delay-compensated Input signal. 1: wet. O: dry. defaults to 1.
+            """
+            await improcess(ctx, improcessing.handleautotune, [["VIDEO", "AUDIO"]],
+                            CONCERT_A, FIXED_PITCH, FIXED_PULL, KEY, CORR_STR, CORR_SMOOTH, PITCH_SHIFT, SCALE_ROTATE,
+                            LFO_DEPTH, LFO_RATE, LFO_SHAPE, LFO_SYMM, LFO_QUANT, FORM_CORR, FORM_WARP, MIX)
 
 
     def emojis_in(text):

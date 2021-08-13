@@ -49,6 +49,7 @@ def get_session_list():
 def temp_file(extension="png", temp_name=None):
     """
     generates and reserves the name of a file in temp/
+
     :param extension: the extension of the file
     :param temp_name: optionally reserve a specific name for deletion
     :return: the reserved name (no file is created)
