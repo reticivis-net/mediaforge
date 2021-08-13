@@ -530,7 +530,7 @@ async def toapng(video):
 async def reencode(mp4):  # reencodes mp4 as libx264 since the png format used cant be played by like literally anything
     assert (mt := mediatype(mp4)) in ["VIDEO", "GIF"], f"file {mp4} with type {mt} passed to reencode()"
     outname = temp_file("mp4")
-    await run_command("ffmpeg", "-hide_banner", "-i", mp4, "-c:v", "libx264", "-c:a", "copy", "-pix_fmt", "yuv420p",
+    await run_command("ffmpeg", "-hide_banner", "-i", mp4, "-c:v", "libx264", "-c:a", "aac", "-pix_fmt", "yuv420p",
                       "-max_muxing_queue_size", "9999",
                       "-vf", "scale=ceil(iw/2)*2:ceil(ih/2)*2", outname)
     return outname

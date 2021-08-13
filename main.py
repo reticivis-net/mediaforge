@@ -152,7 +152,8 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             "default_search": "auto",
             "logger": MyLogger(),
             "merge_output_format": "mp4",
-            "format": f'(bestvideo[ext=mp4]+bestaudio/best[ext=mp4]/bestvideo+bestaudio/best)[filesize<?{config.file_upload_limit}]',
+            "format": f'(bestvideo[ext=mp4]+bestaudio/best[ext=mp4]/bestvideo+bestaudio/best)'
+                      f'[filesize<?{config.file_upload_limit}]',
             "max_filesize": config.file_upload_limit
             # "format": "/".join(f"({i})[filesize<{config.file_upload_limit}]" for i in [
             #     "bestvideo[ext=mp4]+bestaudio", "best[ext=mp4]", "bestvideo+bestaudio", "best"
