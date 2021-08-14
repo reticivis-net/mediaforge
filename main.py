@@ -152,7 +152,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             "default_search": "auto",
             "logger": MyLogger(),
             "merge_output_format": "mp4",
-            "format": f'(bestvideo[ext=mp4]+bestaudio/best[ext=mp4]/bestvideo+bestaudio/best)'
+            "format": f'(bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/bestvideo+bestaudio/best)'
                       f'[filesize<?{config.file_upload_limit}]',
             "max_filesize": config.file_upload_limit
             # "format": "/".join(f"({i})[filesize<{config.file_upload_limit}]" for i in [
@@ -1259,16 +1259,22 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                         if r:
                             tempfiles.reserve_names([r])
                             r = await improcessing.assurefilesize(r, ctx, re_encode=False)
-                            codec = await improcessing.get_codec(r)
+                            txt = ""
+                            vcodec = await improcessing.get_vcodec(r)
+                            acodec = await improcessing.get_acodec(r)
                             # sometimes returns av1 codec
-                            if codec and codec["codec_name"] != "h264":
-                                txt = f"The returned video is in the `{codec['codec_name']}` " \
-                                      f"({codec['codec_long_name']}) codec. Discord cannot embed this format but the " \
-                                      f"video data is valid. You can use " \
-                                      f"`{await prefix_function(bot, ctx.message)}reencode` to change the codec, " \
-                                      f"though this may increase the filesize or decrease the quality."
-                            else:
-                                txt = ""
+                            if vcodec and vcodec["codec_name"] != "h264":
+                                txt += f"The returned video is in the `{vcodec['codec_name']}` " \
+                                       f"({vcodec['codec_long_name']}) codec. Discord cannot embed this format but " \
+                                       f"the video data is valid. You can use " \
+                                       f"`{await prefix_function(bot, ctx.message)}reencode` to change the codec, " \
+                                       f"though this may increase the filesize or decrease the quality."
+                            if acodec and acodec["codec_name"] not in ["aac", "mp3"]:
+                                txt += f"The returned video's audio is in the `{vcodec['codec_name']}` " \
+                                       f"({vcodec['codec_long_name']}) codec. Some devices cannot play this, but the " \
+                                       f"audio data is valid. You can use " \
+                                       f"`{await prefix_function(bot, ctx.message)}reencode` to change the codec, " \
+                                       f"though this may increase the filesize or decrease the quality."
                             await msg.edit(content=f"{config.emojis['working']} Uploading to Discord...")
                             await ctx.reply(txt, file=discord.File(r))
                         else:
@@ -1533,7 +1539,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             :Usage=prefix `prefix`
             :Param=prefix - The new prefix for the bot to use.
             """
-            if prefix is None:
+            if prefix is None or prefix == config.default_command_prefix:
                 async with aiosqlite.connect(config.db_filename) as db:
                     await db.execute("DELETE FROM guild_prefixes WHERE guild=?", (ctx.guild.id,))
                     await db.commit()
@@ -1701,6 +1707,21 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                 buf.seek(0)
                 await ctx.reply("Output of `git status` (the differences between this copy of MediaForge and the latest"
                                 " code on GitHub)", file=discord.File(buf, filename="gitstatus.txt"))
+
+        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
+        @commands.command(aliases=["ffmpeginfo"])
+        async def ffmpegversion(self, ctx):
+            """
+            Shows version information of FFmpeg running on this copy.
+            This command returns the output of `ffmpeg -version`.
+
+            :Usage=ffmpegversion
+            """
+            status = await improcessing.run_command("ffmpeg", "-version")
+            with io.StringIO() as buf:
+                buf.write(status)
+                buf.seek(0)
+                await ctx.reply("Output of `ffmpeg -version`", file=discord.File(buf, filename="ffmpegversion.txt"))
 
         @commands.command()
         async def help(self, ctx, *, arg=None):
