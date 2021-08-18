@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<!--based on https://breakyourownnews.com/ -->
+<head>
+    <base href="../">
+    <meta charset="UTF-8">
+    <title>breakingnews</title>
+    <script src="rendering/twemoji/twemoji.js"></script>
+    <style>
+        @font-face {
+            font-family: Signika;
+            src: url(rendering/fonts/Signika.woff2);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            border: 0;
+            outline: 0;
+            font-size: 100%;
+            vertical-align: baseline;
+            background: transparent;
+        }
+
+        html, body, #img {
+            width: 1280px;
+            height: 720px;
+            background: #222;
+        }
+
+        #live {
+            position: absolute;
+            left: 80px;
+            top: 40px;
+            width: 104px;
+            height: 60px;
+            background: rgba(194, 21, 15, 1.000);
+
+        }
+
+        #livetext {
+            color: #fff;
+            font: 700 36px Signika;
+            position: absolute;
+            left: 96px;
+            top: calc(84px - 36px);
+        }
+
+        #box {
+            position: absolute;
+            left: 80px;
+            top: 510px;
+            width: 1200px;
+            height: 110px;
+            background: rgba(255, 255, 255, 0.85);
+        }
+
+        #boxtext {
+            color: #000;
+            font: 700 72px Signika;
+            position: absolute;
+            left: 100px;
+            top: calc(590px - 69px);
+            text-transform: uppercase;
+        }
+
+        #clock {
+            position: absolute;
+            left: 80px;
+            top: 620px;
+            width: 100px;
+            height: 60px;
+            background: #000;
+        }
+
+        #clocktext {
+            color: #fff;
+            font: 700 28px Signika;
+            position: absolute;
+            left: 96px;
+            top: calc(660px - 28px + 2px);
+        }
+
+        #breakingnewsstrap {
+            position: absolute;
+            left: 80px;
+            top: 430px;
+            width: 420px;
+            height: 80px;
+            background: rgb(109, 36, 39);
+            background: linear-gradient(180deg, rgba(109, 36, 39, 1) 0%, rgba(224, 54, 44, 1) 1.5%, rgba(194, 21, 15, 1) 45.5%, rgba(165, 10, 1, 1) 48.8%, rgba(109, 36, 39, 1) 100%);
+        }
+
+        #breakingnewstext {
+            color: #fff;
+            font: 700 48px Signika;
+            position: absolute;
+            left: 100px;
+            top: calc(488px - 48px);
+        }
+
+        #ticker {
+            /*idk why its called that im just adapting this*/
+            position: absolute;
+            left: 180px;
+            top: 620px;
+            width: 1100px;
+            height: 60px;
+            background: #feeb1a;
+        }
+
+        #tickertext {
+            color: #000;
+            font: 700 28px Signika;
+            position: absolute;
+            left: 200px;
+            top: calc(660px - 28px + 2px);
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+<body>
+<!--adapted from https://breakyourownnews.com/script.js?v=2.15 -->
+<img alt="An error has occurred loading your image." id="img" src="rendering/demoimage.png">
+<div id="live"></div>
+<div id="livetext">LIVE</div>
+<div id="box"></div>
+<div id="boxtext">CaptionText1</div>
+<div id="clock"></div>
+<div id="clocktext">CaptionText3</div>
+<div id="breakingnewsstrap"></div>
+<div id="breakingnewstext">BREAKING NEWS</div>
+<div id="ticker"></div>
+<div id="tickertext">CaptionText2</div>
+
+</body>
+<!--<script>
+    today = new Date();
+    let m = today.getMinutes().toString().padStart(2, "0");
+    let h = today.getHours().toString().padStart(2, "0");
+    document.querySelector("#clocktext").innerHTML = `${h}:${m}`;
+</script>-->
+<script>twemoji.parse(document.body);</script>
+<script>
+
+
+    function outerHeight(element) {
+        const height = element.offsetHeight,
+            style = window.getComputedStyle(element)
+
+        return ['top', 'bottom']
+            .map(side => parseInt(style[`margin-${side}`]))
+            .reduce((total, side) => total + side, height)
+    }
+</script>
+</html>

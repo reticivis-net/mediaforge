@@ -2,6 +2,7 @@ import io
 import random
 import re
 import subprocess
+from datetime import datetime
 
 import numpy as np
 from PIL import Image, ImageEnhance, UnidentifiedImageError
@@ -106,6 +107,13 @@ def motivate(image, caption, tosavename=None):
 
 def meme(image, caption, tosavename=None):
     return htmlcap("captionhtml/meme.html", image, caption, tosavename)
+
+
+def breakingnews(image, caption, tosavename=None):
+    now = datetime.now()
+    time = f"{str(now.hour).zfill(2)}:{str(now.minute).zfill(2)}"
+    caption = caption + (time,)
+    return htmlcap("captionhtml/breakingnews.html", image, caption, tosavename)
 
 
 def tenorcap(image, caption, tosavename=None):

@@ -475,7 +475,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                             handleanimated=True)
 
         @commands.cooldown(1, config.cooldown, commands.BucketType.user)
-        @commands.command()
+        @commands.command(aliases=["toptextbottomtext", "impact", "adviceanimal"])
         async def meme(self, ctx, *, caption):
             """
             Captions media in the style of top text + bottom text memes.
@@ -488,6 +488,26 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             if len(caption) == 1:
                 caption.append("")
             await improcess(ctx, captionfunctions.meme, [["VIDEO", "GIF", "IMAGE"]], *caption,
+                            handleanimated=True)
+
+        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
+        @commands.command(aliases=["news"])
+        async def breakingnews(self, ctx, *, caption):
+            """
+            Create a fake "Breaking News" screencap.
+            This command is a clone of https://breakyourownnews.com/
+            To quote them: This app is intended for fun, humour and parody - be careful what you make and how it may be
+            shared. You should avoid making things which are unlawful, defamatory or likely to cause distress. Have fun
+            and be kind!
+
+            :Usage=breakingnews `headline`|`ticker`
+            :Param=caption - The headline text. Optionally add a bottom "ticker" text with a `|` character.
+            :Param=media - A video, gif, or image. (automatically found in channel)
+            """
+            caption = caption.split("|")
+            if len(caption) == 1:
+                caption.append("")
+            await improcess(ctx, captionfunctions.breakingnews, [["VIDEO", "GIF", "IMAGE"]], *caption,
                             handleanimated=True)
 
         @commands.cooldown(1, config.cooldown, commands.BucketType.user)
