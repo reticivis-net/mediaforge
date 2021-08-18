@@ -110,6 +110,8 @@ def meme(image, caption, tosavename=None):
 
 
 def breakingnews(image, caption, tosavename=None):
+    # this has to be done in python because the frames arent all rendered at once and if two are rendered at different
+    # times they can have different times which might look weird
     now = datetime.now()
     time = f"{str(now.hour).zfill(2)}:{str(now.minute).zfill(2)}"
     caption = caption + (time,)

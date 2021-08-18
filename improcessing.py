@@ -1297,3 +1297,17 @@ async def handleautotune(media: str, *params):
         await run_command("ffmpeg", "-i", media, "-i", outwav, "-c:v", "copy", "-c:a", "aac", "-map", "0:v:0", "-map",
                           "1:a:0", outname)
         return outname
+
+
+async def hue(file, h: float):
+    exts = {
+        "VIDEO": "mp4",
+        "GIF": "mp4",
+        "IMAGE": "png"
+    }
+    mt = mediatype(file)
+    out = temp_file(exts[mt])
+    await run_command("ffmpeg", "-i", file, "-vf", f"hue=h={h},format=yuva420p", "-c:v", "png", out)
+    if mt == "GIF":
+        out = await mp4togif(out)
+    return out

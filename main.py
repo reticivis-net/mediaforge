@@ -924,6 +924,19 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
 
         @commands.command()
         @commands.cooldown(1, config.cooldown, commands.BucketType.user)
+        async def hue(self, ctx, h: float):
+            """
+            Change the hue of media.
+            see https://ffmpeg.org/ffmpeg-filters.html#hue
+
+            :Usage=$hue `hue`
+            :Param=hue - The hue angle as a number of degrees.
+            :Param=media - A video, gif, or image. (automatically found in channel)
+            """
+            await improcess(ctx, improcessing.hue, [["GIF", "IMAGE", "VIDEO"]], h)
+
+        @commands.command()
+        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         async def volume(self, ctx, volume: float):
             """
             Changes the volume of media.
