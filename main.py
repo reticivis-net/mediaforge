@@ -949,6 +949,23 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             """
             await improcess(ctx, improcessing.tint, [["GIF", "IMAGE", "VIDEO"]], color)
 
+        @commands.command(aliases=["round", "circlecrop", "roundcrop", "circle", "roundedcorners"])
+        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
+        async def roundcorners(self, ctx, radiuspercent: float = 50.0):
+            """
+            Round corners of media
+            see https://developer.mozilla.org/en-US/docs/Web/CSS/border-radius
+
+            :Usage=roundcorners `radiuspercent`
+            :Param=radiuspercent - How rounded the corners will be. 0 is rectangle, 50 is ellipse. defaults to 50.
+            :Param=media - A video, gif, or image. (automatically found in channel)
+            """
+            if not 0 <= radiuspercent <= 50:
+                await ctx.send(f"{config.emojis['warning']} Border radius percent must be between 0 and 50.")
+                return
+            await improcess(ctx, captionfunctions.roundcorners, [["GIF", "IMAGE", "VIDEO"]], str(radiuspercent),
+                            handleanimated=True)
+
         @commands.command()
         @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         async def volume(self, ctx, volume: float):
