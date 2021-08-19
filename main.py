@@ -969,6 +969,17 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
 
         @commands.command()
         @commands.cooldown(1, config.cooldown, commands.BucketType.user)
+        async def mute(self, ctx):
+            """
+            alias for $volume 0
+
+            :Usage=mute
+            :Param=media - A video or audio file. (automatically found in channel)
+            """
+            await improcess(ctx, improcessing.volume, [["VIDEO", "AUDIO"]], 0)
+
+        @commands.command()
+        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         async def vibrato(self, ctx, frequency: float = 5, depth: float = 1):
             """
             Applies a "wavy pitch"/vibrato effect to audio.
