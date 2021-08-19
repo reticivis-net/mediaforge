@@ -2007,8 +2007,8 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             await ctx.send(f"{config.emojis['check']} Shutting Down...")
             logger.log(25, "Shutting Down...")
             await renderpool.shutdown()
-            if heartbeat_active:
-                heartbeatprocess.terminate()
+            if heartbeat.heartbeat_active:
+                heartbeat.heartbeatprocess.terminate()
             await bot.close()
 
         @commands.command()
@@ -2026,7 +2026,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                 buf.seek(0)
                 await ctx.reply(file=discord.File(buf, filename="commands.md"))
 
-        @commands.command()
+        @commands.command(aliases=["beat"])
         @commands.is_owner()
         async def heartbeat(self, ctx):
             if hasattr(config, "heartbeaturl"):
