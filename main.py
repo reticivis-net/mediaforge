@@ -1631,6 +1631,10 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                                          (ctx.guild.id, prefix))
                         await db.commit()
                     await ctx.reply(f"{config.emojis['check']} Set guild prefix to `{prefix}`")
+                    if prefix.isalpha():  # only alphabetic characters
+                        await ctx.reply(f"{config.emojis['warning']} Your prefix only contains alphabetic characters. "
+                                        f"This could cause normal sentences/words to be interpreted as commands. "
+                                        f"This could annoy users.")
 
         @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         @commands.guild_only()
