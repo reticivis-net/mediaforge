@@ -935,6 +935,20 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             """
             await improcess(ctx, improcessing.hue, [["GIF", "IMAGE", "VIDEO"]], h)
 
+        @commands.command(aliases=["color", "recolor"])
+        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
+        async def tint(self, ctx, color: discord.Color):
+            """
+            Tint media to a color.
+            This command first makes the image grayscale, then replaces white with your color.
+            The resulting image should be nothing but shades of your color.
+
+            :Usage=$tint `color`
+            :Param=color - The hex or RGB color to tint to.
+            :Param=media - A video, gif, or image. (automatically found in channel)
+            """
+            await improcess(ctx, improcessing.tint, [["GIF", "IMAGE", "VIDEO"]], color)
+
         @commands.command()
         @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         async def volume(self, ctx, volume: float):

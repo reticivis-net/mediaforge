@@ -1146,9 +1146,9 @@ async def resize(image, width, height):
     out = temp_file(exts[mt])
     if mt in ["VIDEO", "GIF"]:
         image = await ensureduration(image, None)
-    await run_command("ffmpeg", "-i", image, "-pix_fmt", "yuva444p", "-max_muxing_queue_size", "9999", "-sws_flags",
+    await run_command("ffmpeg", "-i", image, "-pix_fmt", "yuva420p", "-max_muxing_queue_size", "9999", "-sws_flags",
                       "spline+accurate_rnd+full_chroma_int+full_chroma_inp+bitexact",
-                      "-vf", f"scale='{width}:{height}',setsar=1:1", "-c:v", "png", "-pix_fmt", "yuva444p", out)
+                      "-vf", f"scale='{width}:{height}',setsar=1:1", "-c:v", "png", "-pix_fmt", "yuva420p", out)
 
     if mt == "GIF":
         out = await mp4togif(out)
@@ -1308,6 +1308,24 @@ async def hue(file, h: float):
     mt = mediatype(file)
     out = temp_file(exts[mt])
     await run_command("ffmpeg", "-i", file, "-vf", f"hue=h={h},format=yuva420p", "-c:v", "png", out)
+    if mt == "GIF":
+        out = await mp4togif(out)
+    return out
+
+
+async def tint(file, col: discord.Color):
+    exts = {
+        "VIDEO": "mp4",
+        "GIF": "mp4",
+        "IMAGE": "png"
+    }
+    mt = mediatype(file)
+    out = temp_file(exts[mt])
+    # https://stackoverflow.com/a/3380739/9044183
+    r, g, b = map(lambda x: x / 255, col.to_rgb())
+    await run_command("ffmpeg", "-i", file, "-vf", f"hue=s=0,"  # make grayscale
+                                                   f"lutrgb=r=val*{r}:g=val*{g}:b=val*{b},"  # basically set white to our color
+                                                   f"format=yuv420p", "-c:v", "png", out)
     if mt == "GIF":
         out = await mp4togif(out)
     return out
