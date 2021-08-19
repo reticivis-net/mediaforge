@@ -1329,3 +1329,11 @@ async def tint(file, col: discord.Color):
     if mt == "GIF":
         out = await mp4togif(out)
     return out
+
+
+async def fetch(url):
+    async with aiohttp.ClientSession(headers={'Connection': 'keep-alive'}) as session:
+        async with session.get(url) as response:
+            if response.status != 200:
+                response.raise_for_status()
+            return await response.text()

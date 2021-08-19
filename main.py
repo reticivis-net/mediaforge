@@ -14,7 +14,6 @@ import traceback
 import typing
 import urllib.parse
 
-# pip libs
 import aiofiles
 import aiohttp
 import aiosqlite
@@ -30,12 +29,16 @@ from discord.ext import commands, tasks
 # project files
 import captionfunctions
 import config
+import heartbeat
 import improcessing
 # import lottiestickers
 import sus
 import tempfiles
 from clogs import logger
+from improcessing import fetch
 from tempfiles import TempFileSession, get_random_string, temp_file
+
+# pip libs
 
 """
 This file contains the discord.py functions, which call other files to do the actual processing.
@@ -119,14 +122,6 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
         @changestatus.before_loop
         async def before_printer(self):
             await self.bot.wait_until_ready()
-
-
-    async def fetch(url):
-        async with aiohttp.ClientSession(headers={'Connection': 'keep-alive'}) as session:
-            async with session.get(url) as response:
-                if response.status != 200:
-                    response.raise_for_status()
-                return await response.text()
 
 
     class MyLogger(object):
@@ -2012,6 +2007,8 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             await ctx.send(f"{config.emojis['check']} Shutting Down...")
             logger.log(25, "Shutting Down...")
             await renderpool.shutdown()
+            if heartbeat_active:
+                heartbeatprocess.terminate()
             await bot.close()
 
         @commands.command()
@@ -2215,30 +2212,6 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                                 file=discord.File(buf, filename="traceback.txt"), embed=embed)
 
 
-    class HealthChecksio(commands.Cog):
-        def __init__(self, bot):
-            self.bot = bot
-            self.heartbeat_active = hasattr(config, "heartbeaturl") and config.heartbeaturl
-            if self.heartbeat_active:
-                logger.debug(f"Heartbeat URL is {config.heartbeaturl}")
-                self.send_heartbeat.start()
-            else:
-                logger.debug("No heartbeat url set.")
-
-        def cog_unload(self):
-            if self.heartbeat_active:
-                self.send_heartbeat.cancel()
-                logger.warning("heartbeat cog unloaded")
-
-        @tasks.loop(seconds=config.heartbeatfrequency)
-        async def send_heartbeat(self):
-            try:
-                await fetch(config.heartbeaturl)
-                logger.debug("Succesfully sent heartbeat.")
-            except aiohttp.ClientResponseError as e:
-                logger.error(e, exc_info=(type(e), e, e.__traceback__))
-
-
     class DiscordListsPost(commands.Cog):
         def __init__(self, bot):
             self.bot = bot
@@ -2267,7 +2240,8 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                                                                                  len(result["failure"].keys())))
 
 
-    # bot.remove_command('help')
+    heartbeat.init()
+
     logger.debug(f"initializing cogs")
     if config.bot_list_data:
         logger.info("initializing BotBlock")
@@ -2279,7 +2253,6 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
     bot.add_cog(Other(bot))
     bot.add_cog(Debug(bot))
     bot.add_cog(Slashscript(bot))
-    bot.add_cog(HealthChecksio(bot))
     bot.add_cog(StatusCog(bot))
 
     logger.debug("running bot")
