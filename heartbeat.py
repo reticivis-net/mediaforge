@@ -12,16 +12,19 @@ async def send_heartbeat():
     try:
         resp = await fetch(config.heartbeaturl)
         logger.debug(f"Successfully sent heartbeat. {resp}")
-    except aiohttp.ClientResponseError as e:
+    except aiohttp.ClientError as e:
         logger.error(e, exc_info=(type(e), e, e.__traceback__))
 
 
 async def heartbeat():
     while True:
-        await asyncio.gather(
-            send_heartbeat(),
-            asyncio.sleep(config.heartbeatfrequency)
-        )
+        try:
+            await asyncio.gather(
+                send_heartbeat(),
+                asyncio.sleep(config.heartbeatfrequency)
+            )
+        except Exception as e:
+            logger.error(e, exc_info=(type(e), e, e.__traceback__))
 
 
 def start_heartbeat():
