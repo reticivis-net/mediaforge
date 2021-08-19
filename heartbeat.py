@@ -34,7 +34,13 @@ def start_heartbeat():
         task.cancel()
 
 
+heartbeat_active: bool
+heartbeatprocess: Process
+
+
 def init():
+    global heartbeat_active
+    global heartbeatprocess
     heartbeat_active = hasattr(config, "heartbeaturl") and config.heartbeaturl
     if heartbeat_active:
         logger.debug(f"Heartbeat URL is {config.heartbeaturl}")
