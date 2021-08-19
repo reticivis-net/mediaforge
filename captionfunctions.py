@@ -174,6 +174,10 @@ def dontweet(caption, tosavename=None):
     return htmlcap("captionhtml/dontweet.html", None, caption, tosavename)
 
 
+def roundcorners(image, radius, tosavename=None):
+    return htmlcap("captionhtml/roundcorners.html", image, radius, tosavename)
+
+
 def resize(image, size, tosavename=None):
     """
     resizes image
