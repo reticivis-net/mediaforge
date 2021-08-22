@@ -486,6 +486,18 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                             handleanimated=True)
 
         @commands.cooldown(1, config.cooldown, commands.BucketType.user)
+        @commands.command(aliases=["snap", "classiccaption"])
+        async def snapchat(self, ctx, *, caption):
+            """
+            Captions media in the style of the classic Snapchat caption.
+
+            :Usage=snapchat `text`
+            :Param=caption - The caption text.
+            :Param=media - A video, gif, or image. (automatically found in channel)
+            """
+            await improcess(ctx, captionfunctions.snapchat, [["VIDEO", "GIF", "IMAGE"]], caption, handleanimated=True)
+
+        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         @commands.command(aliases=["news"])
         async def breakingnews(self, ctx, *, caption):
             """

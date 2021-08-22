@@ -290,9 +290,9 @@ async def compresspng(png):
     :param png: file
     :return: filename of compressed png
     """
-
+    # return png
     outname = temp_file("png")
-    await run_command("pngquant", "--quality=0-80", "--output", outname, png)
+    await run_command("pngquant", "--output", outname, png)  # "--quality=0-80",
     return outname
 
 
