@@ -109,6 +109,10 @@ def meme(image, caption, tosavename=None):
     return htmlcap("captionhtml/meme.html", image, caption, tosavename)
 
 
+def snapchat(image, caption, tosavename=None):
+    return htmlcap("captionhtml/snapchat.html", image, caption, tosavename)
+
+
 def breakingnews(image, caption, tosavename=None):
     # this has to be done in python because the frames arent all rendered at once and if two are rendered at different
     # times they can have different times which might look weird
