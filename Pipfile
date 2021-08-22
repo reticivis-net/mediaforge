@@ -24,6 +24,7 @@ aiosqlite = "*"
 asyncpg = "*"
 setuptools = "*"
 pyautotune = { git = "https://github.com/ederwander/PyAutoTune.git" }
+psutil = "*"
 
 [dev-packages]
 

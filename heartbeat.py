@@ -1,7 +1,9 @@
 import asyncio
+import os
+import sys
 from multiprocessing import Process
 
-import aiohttp
+import psutil
 
 import config
 from clogs import logger
@@ -17,11 +19,23 @@ async def send_heartbeat():
         logger.error(e, exc_info=(type(e), e, e.__traceback__))
 
 
+async def parent_status():
+    # last case scenario, terminate status program if parent terminates. this can happen due to segfaults.
+    ppid = os.getppid()
+    logger.debug(f"Parent process id: {ppid}")
+    if psutil.pid_exists(ppid):
+        logger.debug("Parent process is alive.")
+    else:
+        logger.error("Parent process has terminated")
+        sys.exit(11)
+
+
 async def heartbeat():
     while True:
         await asyncio.gather(
             send_heartbeat(),
-            asyncio.sleep(config.heartbeatfrequency)
+            asyncio.sleep(config.heartbeatfrequency),
+            parent_status()
         )
 
 

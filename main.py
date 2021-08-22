@@ -1958,6 +1958,23 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
         def __init__(self, bot):
             self.bot = bot
 
+        @commands.command(aliases=["segfault", "segmentationfault"])
+        @commands.is_owner()
+        async def sigsegv(self, ctx, ftype: str = "oskill"):
+            """
+            cause the main process to segfault. used for debugging purposes. seems it wont kill child processes.
+            """
+            if ftype == "overflow":
+                # https://codegolf.stackexchange.com/a/62613
+                exec('()' * 7 ** 6)
+            elif ftype == "oskill":
+                os.kill(os.getpid(), 11)
+            elif ftype == "ctypes":
+                import ctypes
+                ctypes.string_at(0)
+            else:
+                await ctx.reply("unknown segfault causer.")
+
         @commands.command()
         @commands.is_owner()
         async def say(self, ctx, channel: typing.Optional[typing.Union[discord.TextChannel, discord.User]], *, msg):
