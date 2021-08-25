@@ -454,7 +454,6 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
         def __init__(self, bot):
             self.bot = bot
 
-        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         @commands.command(aliases=["demotivate", "motivational", "demotivational", "inspire", "uninspire"])
         async def motivate(self, ctx, *, caption):
             """
@@ -469,7 +468,6 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             await improcess(ctx, captionfunctions.motivate, [["VIDEO", "GIF", "IMAGE"]], *caption,
                             handleanimated=True)
 
-        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         @commands.command(aliases=["toptextbottomtext", "impact", "adviceanimal"])
         async def meme(self, ctx, *, caption):
             """
@@ -485,7 +483,6 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             await improcess(ctx, captionfunctions.meme, [["VIDEO", "GIF", "IMAGE"]], *caption,
                             handleanimated=True)
 
-        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         @commands.command(aliases=["snap", "classiccaption"])
         async def snapchat(self, ctx, *, caption):
             """
@@ -497,7 +494,6 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             """
             await improcess(ctx, captionfunctions.snapchat, [["VIDEO", "GIF", "IMAGE"]], caption, handleanimated=True)
 
-        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         @commands.command(aliases=["news"])
         async def breakingnews(self, ctx, *, caption):
             """
@@ -517,7 +513,6 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             await improcess(ctx, captionfunctions.breakingnews, [["VIDEO", "GIF", "IMAGE"]], *caption,
                             handleanimated=True)
 
-        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         @commands.command(aliases=["tenor"])
         async def tenorcap(self, ctx, *, caption):
             """
@@ -534,7 +529,6 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                             handleanimated=True)
 
         @commands.command(name="caption", aliases=["cap"])
-        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         async def captioncommand(self, ctx, *, caption):
             """
             Captions media.
@@ -545,7 +539,6 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             """
             await improcess(ctx, captionfunctions.caption, [["VIDEO", "GIF", "IMAGE"]], caption, handleanimated=True)
 
-        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         @commands.command(aliases=["imstuff"])
         async def stuff(self, ctx, *, caption):
             """
@@ -557,7 +550,6 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             """
             await improcess(ctx, captionfunctions.stuff, [["VIDEO", "GIF", "IMAGE"]], caption, handleanimated=True)
 
-        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         @commands.command(aliases=["eminemcaption", "eminemcap"])
         async def eminem(self, ctx, *, caption):
             """
@@ -569,7 +561,6 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             """
             await improcess(ctx, captionfunctions.eminemcap, [["VIDEO", "GIF", "IMAGE"]], caption, handleanimated=True)
 
-        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         @commands.command(aliases=["peter", "peterexplain", "petersay", "petergriffinexplain", "petergriffinsay"])
         async def petergriffin(self, ctx, *, caption):
             """
@@ -582,7 +573,6 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             await improcess(ctx, captionfunctions.petergriffincap, [["VIDEO", "GIF", "IMAGE"]], caption,
                             handleanimated=True)
 
-        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         @commands.command(aliases=["stretchstuff"])
         async def stuffstretch(self, ctx, *, caption):
             """
@@ -599,7 +589,6 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                             handleanimated=True)
 
         @commands.command(aliases=["bottomcap", "botcap"])
-        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         async def bottomcaption(self, ctx, *, caption):
             """
             Captions underneath media.
@@ -611,7 +600,6 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             await improcess(ctx, captionfunctions.bottomcaption, [["VIDEO", "GIF", "IMAGE"]], caption,
                             handleanimated=True)
 
-        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         @commands.command(aliases=["esm", "&caption", "essemcaption", "esmbotcaption", "esmcap"])
         async def esmcaption(self, ctx, *, caption):
             """
@@ -623,7 +611,6 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             """
             await improcess(ctx, captionfunctions.esmcaption, [["VIDEO", "GIF", "IMAGE"]], caption, handleanimated=True)
 
-        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         @commands.command(aliases=["twitter", "twitcap", "twittercap"])
         async def twittercaption(self, ctx, *, caption):
             """
@@ -635,7 +622,6 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             """
             await improcess(ctx, captionfunctions.twittercap, [["VIDEO", "GIF", "IMAGE"]], caption, handleanimated=True)
 
-        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         @commands.command(aliases=["twitterdark", "twitcapdark", "twittercapdark"])
         async def twittercaptiondark(self, ctx, *, caption):
             """
@@ -648,7 +634,6 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             await improcess(ctx, captionfunctions.twittercapdark, [["VIDEO", "GIF", "IMAGE"]], caption,
                             handleanimated=True)
 
-        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         @commands.command()
         async def freezemotivate(self, ctx, *, caption):
             """
@@ -663,7 +648,6 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                 caption.append("")
             await improcess(ctx, improcessing.freezemotivate, [["VIDEO", "GIF"]], *caption)
 
-        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         @commands.command()
         async def freezemotivateaudio(self, ctx, *, caption):
             # TODO: merge this into freezemotivate
@@ -689,7 +673,6 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
         def __init__(self, bot):
             self.bot = bot
 
-        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         @commands.command(aliases=["copy", "nothing", "noop"])
         async def repost(self, ctx):
             """
@@ -699,7 +682,6 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             """
             await improcess(ctx, lambda x: x, [["VIDEO", "GIF", "IMAGE", "AUDIO"]])
 
-        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         @commands.command(aliases=["clean", "remake"])
         async def reencode(self, ctx):
             """
@@ -710,7 +692,6 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             """
             await improcess(ctx, improcessing.allreencode, [["VIDEO", "IMAGE", "AUDIO"]])
 
-        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         @commands.command(aliases=["audioadd", "dub"])
         async def addaudio(self, ctx):
             """
@@ -722,7 +703,6 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             """
             await improcess(ctx, improcessing.addaudio, [["IMAGE", "GIF", "VIDEO", "AUDIO"], ["AUDIO"]])
 
-        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         @commands.command()
         async def jpeg(self, ctx, strength: int = 30, stretch: int = 20, quality: int = 10):
             """
@@ -746,7 +726,6 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             await improcess(ctx, captionfunctions.jpeg, [["VIDEO", "GIF", "IMAGE"]], strength, stretch, quality,
                             handleanimated=True)
 
-        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         @commands.command()
         async def deepfry(self, ctx, brightness: float = 1.5, contrast: float = 1.5, sharpness: float = 1.5,
                           saturation: float = 1.5, noise: int = 40, jpegstrength: int = 20):
@@ -784,7 +763,6 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             await improcess(ctx, captionfunctions.deepfry, [["VIDEO", "GIF", "IMAGE"]], brightness, contrast, sharpness,
                             saturation, noise, jpegstrength, handleanimated=True)
 
-        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         @commands.command()
         async def corrupt(self, ctx, strength: float = 0.05):
             """
@@ -802,7 +780,6 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                             handleanimated=True)
 
         @commands.command(aliases=["pad"])
-        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         async def square(self, ctx):
             """
             Pads media into a square shape.
@@ -813,7 +790,6 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             await improcess(ctx, improcessing.pad, [["VIDEO", "GIF", "IMAGE"]])
 
         @commands.command(aliases=["size"])
-        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         async def resize(self, ctx, width: int, height: int):
             """
             Resizes an image.
@@ -834,7 +810,6 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             await improcess(ctx, improcessing.resize, [["VIDEO", "GIF", "IMAGE"]], width, height, resize=False)
 
         @commands.command(aliases=["short", "kyle"])
-        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         async def wide(self, ctx):
             """
             makes media twice as wide
@@ -844,7 +819,6 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             await improcess(ctx, improcessing.resize, [["VIDEO", "GIF", "IMAGE"]], "iw*2", "ih")
 
         @commands.command(aliases=["tall", "long", "antikyle"])
-        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         async def squish(self, ctx):
             """
             makes media twice as tall
@@ -854,7 +828,6 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             await improcess(ctx, improcessing.resize, [["VIDEO", "GIF", "IMAGE"]], "iw", "ih*2")
 
         @commands.command(aliases=["magic", "magik", "contentawarescale", "liquidrescale"])
-        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         async def magick(self, ctx, strength: int = 50):
             """
             Apply imagemagick's liquid/content aware scale to an image.
@@ -879,7 +852,6 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                             .replace("$", await prefix_function(bot, ctx.message)))
 
         @commands.command(aliases=["gloop"])
-        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         async def gifloop(self, ctx, loop: int = 0):
             """
             Changes the amount of times a gif loops
@@ -895,7 +867,6 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             await improcess(ctx, improcessing.gifloop, [["GIF"]], loop)
 
         @commands.command(aliases=["vloop"])
-        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         async def videoloop(self, ctx, loop: int = 1):
             """
             Loops a video
@@ -913,7 +884,6 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             await improcess(ctx, improcessing.videoloop, [["VIDEO", "GIF"]], loop)
 
         @commands.command(aliases=["flip", "rot"])
-        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         async def rotate(self, ctx, rot):
             """
             Rotates and/or flips media
@@ -930,7 +900,6 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             await improcess(ctx, improcessing.rotate, [["GIF", "IMAGE", "VIDEO"]], rot)
 
         @commands.command()
-        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         async def hue(self, ctx, h: float):
             """
             Change the hue of media.
@@ -943,7 +912,6 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             await improcess(ctx, improcessing.hue, [["GIF", "IMAGE", "VIDEO"]], h)
 
         @commands.command(aliases=["color", "recolor"])
-        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         async def tint(self, ctx, color: discord.Color):
             """
             Tint media to a color.
@@ -957,7 +925,6 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             await improcess(ctx, improcessing.tint, [["GIF", "IMAGE", "VIDEO"]], color)
 
         @commands.command(aliases=["round", "circlecrop", "roundcrop", "circle", "roundedcorners"])
-        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         async def roundcorners(self, ctx, radiuspercent: float = 50.0):
             """
             Round corners of media
@@ -974,7 +941,6 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                             handleanimated=True)
 
         @commands.command()
-        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         async def volume(self, ctx, volume: float):
             """
             Changes the volume of media.
@@ -992,7 +958,6 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             await improcess(ctx, improcessing.volume, [["VIDEO", "AUDIO"]], volume)
 
         @commands.command()
-        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         async def mute(self, ctx):
             """
             alias for $volume 0
@@ -1003,7 +968,6 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             await improcess(ctx, improcessing.volume, [["VIDEO", "AUDIO"]], 0)
 
         @commands.command()
-        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         async def vibrato(self, ctx, frequency: float = 5, depth: float = 1):
             """
             Applies a "wavy pitch"/vibrato effect to audio.
@@ -1023,7 +987,6 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             await improcess(ctx, improcessing.vibrato, [["VIDEO", "AUDIO"]], frequency, depth)
 
         @commands.command()
-        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         async def pitch(self, ctx, numofhalfsteps: float = 2):
             """
             Changes pitch of audio
@@ -1035,7 +998,6 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             await improcess(ctx, improcessing.pitch, [["VIDEO", "AUDIO"]], numofhalfsteps)
 
         @commands.command(aliases=["concat", "combinev"])
-        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         async def concatv(self, ctx):
             """
             Makes one video file play right after another.
@@ -1047,7 +1009,6 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             """
             await improcess(ctx, improcessing.concatv, [["VIDEO", "GIF"], ["VIDEO", "GIF"]])
 
-        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         @commands.command()
         async def hstack(self, ctx):
             """
@@ -1060,7 +1021,6 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             await improcess(ctx, improcessing.stack, [["VIDEO", "GIF", "IMAGE"], ["VIDEO", "GIF", "IMAGE"]],
                             "hstack")
 
-        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         @commands.command()
         async def vstack(self, ctx):
             """
@@ -1073,7 +1033,6 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             await improcess(ctx, improcessing.stack, [["VIDEO", "GIF", "IMAGE"], ["VIDEO", "GIF", "IMAGE"]],
                             "vstack")
 
-        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         @commands.command(aliases=["blend"])
         async def overlay(self, ctx, alpha: float = 0.5):
             """
@@ -1090,7 +1049,6 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             await improcess(ctx, improcessing.overlay, [["VIDEO", "GIF", "IMAGE"], ["VIDEO", "GIF", "IMAGE"]], alpha,
                             "overlay")
 
-        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         @commands.command(aliases=["overlayadd", "addition"])
         async def add(self, ctx):
             """
@@ -1104,7 +1062,6 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                             "add")
 
         @commands.command(name="speed")
-        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         async def spcommand(self, ctx, speed: float = 2):
             """
             Changes the speed of media.
@@ -1120,7 +1077,6 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             await improcess(ctx, improcessing.speed, [["VIDEO", "GIF"]], speed)
 
         @commands.command(aliases=["shuffle", "stutter", "nervous"])
-        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         async def random(self, ctx, frames: int = 30):
             """
             Shuffles the frames of a video around.
@@ -1136,7 +1092,6 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                 return
             await improcess(ctx, improcessing.random, [["VIDEO", "GIF"]], frames)
 
-        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         @commands.command()
         async def reverse(self, ctx):
             """
@@ -1147,7 +1102,6 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             """
             await improcess(ctx, improcessing.reverse, [["VIDEO", "GIF"]])
 
-        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         @commands.command(aliases=["compress", "quality", "lowerquality", "crf", "qa"])
         async def compressv(self, ctx, crf: float = 51, qa: float = 20):
             """
@@ -1171,7 +1125,6 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             await improcess(ctx, improcessing.quality, [["VIDEO", "GIF"]], crf, qa)
 
         @commands.command(name="fps")
-        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         async def fpschange(self, ctx, fps: float):
             """
             Changes the FPS of media.
@@ -1190,7 +1143,6 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             await improcess(ctx, improcessing.changefps, [["VIDEO", "GIF"]], fps)
 
         @commands.command(aliases=["negate", "opposite"])
-        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         async def invert(self, ctx):
             """
             Inverts colors of media
@@ -1200,7 +1152,6 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             """
             await improcess(ctx, improcessing.invert, [["VIDEO", "GIF", "IMAGE"]])
 
-        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         @commands.command()
         async def trim(self, ctx, length: float, start: float = 0):
             """
@@ -1219,7 +1170,6 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                 return
             await improcess(ctx, improcessing.trim, [["VIDEO", "GIF", "AUDIO"]], length, start)
 
-        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         @commands.command()
         async def autotune(self, ctx, CONCERT_A: float = 440, FIXED_PITCH: float = 0.0,
                            FIXED_PULL: float = 0.1, KEY: str = "c", CORR_STR: float = 1.0, CORR_SMOOTH: float = 0.0,
@@ -1269,7 +1219,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             self.bot = bot
 
         # superceded by $addaudio
-        # @commands.cooldown(1, config.cooldown, commands.BucketType.user)
+        # 
         # @commands.command()
         # async def imageaudio(self, ctx):
         #     """
@@ -1281,7 +1231,6 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
         #     """
         #     await improcess(ctx, improcessing.imageaudio, [["IMAGE"], ["AUDIO"]])
         @commands.command(aliases=["filename", "name", "setname"])
-        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         async def rename(self, ctx, filename: str):
             """
             Renames media.
@@ -1293,7 +1242,6 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             await improcess(ctx, lambda x: x, [["VIDEO", "GIF", "IMAGE", "AUDIO"]], filename=filename)
 
         @commands.command(aliases=["spoil", "censor", "cw", "tw"])
-        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         async def spoiler(self, ctx):
             """
             Spoilers media.
@@ -1303,7 +1251,6 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             """
             await improcess(ctx, lambda x: x, [["VIDEO", "GIF", "IMAGE", "AUDIO"]], spoiler=True)
 
-        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         @commands.command(aliases=["avatar", "pfp", "profilepicture", "profilepic", "ayowhothismf", "av"])
         async def icon(self, ctx, *, userorserver=None):
             """
@@ -1329,7 +1276,6 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             else:
                 await ctx.send(f"{config.emojis['warning']} No valid user, guild, or message ID found.")
 
-        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         @commands.command(aliases=["youtube", "youtubedownload", "youtubedl", "ytdownload", "download", "dl", "ytdl"])
         async def videodl(self, ctx, url, form="video"):
             """
@@ -1381,7 +1327,6 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                     except youtube_dl.DownloadError as e:
                         await ctx.reply(f"{config.emojis['2exclamation']} {e}")
 
-        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         @commands.command(aliases=["gif", "videotogif"])
         async def togif(self, ctx):
             """
@@ -1392,7 +1337,6 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             """
             await improcess(ctx, improcessing.mp4togif, [["VIDEO"]])
 
-        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         @commands.command(aliases=["apng", "videotoapng", "giftoapng"])
         async def toapng(self, ctx):
             """
@@ -1403,7 +1347,6 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             """
             await improcess(ctx, improcessing.toapng, [["VIDEO", "GIF"]])
 
-        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         @commands.command(aliases=["audio", "mp3", "tomp3", "aac", "toaac"])
         async def toaudio(self, ctx):
             """
@@ -1414,7 +1357,6 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             """
             await improcess(ctx, improcessing.toaudio, [["VIDEO", "AUDIO"]])
 
-        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         @commands.command()
         async def tenorgif(self, ctx):
             """
@@ -1434,7 +1376,6 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             else:
                 await ctx.send(f"{config.emojis['x']} No tenor gif found.")
 
-        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         @commands.command(aliases=["video", "giftovideo", "tomp4"])
         async def tovideo(self, ctx):
             """
@@ -1445,7 +1386,6 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             """
             await improcess(ctx, improcessing.giftomp4, [["GIF"]])
 
-        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         @commands.command(aliases=["png", "mediatopng"])
         async def topng(self, ctx):
             """
@@ -1456,7 +1396,6 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             """
             await improcess(ctx, improcessing.mediatopng, [["VIDEO", "GIF", "IMAGE"]])
 
-        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         @commands.command(aliases=["emoji", "emojiimage", "emote", "emoteurl"])
         async def emojiurl(self, ctx, *emojis: discord.PartialEmoji):
             """
@@ -1474,7 +1413,6 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             else:
                 await ctx.reply(f"{config.emojis['warning']} Your message doesn't contain any custom emojis!")
 
-        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         @commands.command()
         async def twemoji(self, ctx, *, msg):
             """
@@ -1510,7 +1448,6 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             self.bot = bot
 
         @commands.command(aliases=["troll"])
-        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         async def trollface(self, ctx):
             """
             Colors a trollface with an image.
@@ -1662,7 +1599,6 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                                         f"This could cause normal sentences/words to be interpreted as commands. "
                                         f"This could annoy users.")
 
-        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         @commands.guild_only()
         @commands.has_guild_permissions(manage_emojis=True)
         @commands.bot_has_guild_permissions(manage_emojis=True)
@@ -1678,7 +1614,6 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             await improcess(ctx, improcessing.add_emoji, [["GIF", "IMAGE"]], ctx.guild, name, expectresult=False,
                             resize=False)
 
-        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         @commands.guild_only()
         @commands.has_guild_permissions(manage_guild=True)
         @commands.bot_has_guild_permissions(manage_guild=True)
@@ -1697,7 +1632,6 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             await improcess(ctx, improcessing.set_banner, [["IMAGE"]], ctx.guild, expectresult=False,
                             resize=False)
 
-        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         @commands.guild_only()
         @commands.has_guild_permissions(manage_guild=True)
         @commands.bot_has_guild_permissions(manage_guild=True)
@@ -1713,7 +1647,6 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             await improcess(ctx, improcessing.set_icon, [["IMAGE", "GIF"]], ctx.guild, expectresult=False,
                             resize=False)
 
-        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         @commands.command(aliases=["statistics"])
         async def stats(self, ctx):
             """
@@ -1733,7 +1666,6 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                 embed.add_field(name="Total Bot Shards", value=f"{len(bot.shards)}")
             await ctx.reply(embed=embed)
 
-        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         @commands.command(aliases=["shard", "shardstats", "shardinfo"])
         async def shards(self, ctx):
             """
@@ -1749,7 +1681,6 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                 embed.add_field(name=f"Shard #{shard.id}", value=f"{round(shard.latency * 1000)}ms latency")
             await ctx.reply(embed=embed)
 
-        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         @commands.command(aliases=["discord", "invite", "botinfo"])
         async def about(self, ctx):
             """
@@ -1767,7 +1698,6 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             embed.add_field(name="MediaForge GitHub", value=f"https://github.com/HexCodeFFF/mediaforge")
             await ctx.reply(embed=embed)
 
-        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         @commands.command(aliases=["privacypolicy"])
         async def privacy(self, ctx):
             """
@@ -1790,7 +1720,6 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                                                              f"https://github.com/HexCodeFFF/mediaforge).")
             await ctx.reply(embed=embed)
 
-        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         @commands.command(aliases=["github", "git"])
         async def version(self, ctx):
             """
@@ -1808,7 +1737,6 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                 await ctx.reply("Output of `git status` (the differences between this copy of MediaForge and the latest"
                                 " code on GitHub)", file=discord.File(buf, filename="gitstatus.txt"))
 
-        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         @commands.command(aliases=["ffmpeginfo"])
         async def ffmpegversion(self, ctx):
             """
@@ -1895,7 +1823,6 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                 await ctx.reply(embed=embed)
 
         @commands.command(aliases=["ffprobe"])
-        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         async def info(self, ctx):
             """
             Provides info on a media file.
@@ -1916,7 +1843,6 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                         await ctx.send(f"{config.emojis['x']} No file found.")
 
         @commands.command()
-        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         async def feedback(self, ctx):
             """
             Give feedback for the bot.
@@ -1946,7 +1872,6 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                                   "ssues and to implement them into the bot's code.")
             await ctx.reply(embed=embed)
 
-        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         @commands.command()
         async def attributions(self, ctx):
             """
@@ -1956,7 +1881,6 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             with open("media/attributions.txt", "r") as f:
                 await ctx.send(f.read())
 
-        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
         @commands.command(aliases=["pong"])
         async def ping(self, ctx):
             start = time.perf_counter()
@@ -2288,6 +2212,21 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
 
 
     heartbeat.init()
+
+    # from ?tag cooldown mapping
+    _cd = commands.CooldownMapping.from_cooldown(1.0, config.cooldown, commands.BucketType.member)
+
+
+    @bot.check
+    async def cooldown_check(ctx):
+        # Then apply a bot check that will run before every command
+        # Very similar to ?tag cooldown mapping but in Bot scope instead of Cog scope
+        bucket = _cd.get_bucket(ctx.message)
+        retry_after = bucket.update_rate_limit()
+        if retry_after:
+            raise commands.CommandOnCooldown(bucket, retry_after)
+        return True
+
 
     logger.debug(f"initializing cogs")
     if config.bot_list_data:
