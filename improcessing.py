@@ -13,8 +13,10 @@ from fractions import Fraction
 
 # pip libs
 import aiohttp
+import aubio
 import discord.ext
 import humanize
+import numpy
 from discord.ext import commands
 from PIL import Image, UnidentifiedImageError
 
@@ -316,7 +318,7 @@ async def assurefilesize(media: str, ctx: discord.ext.commands.Context, re_encod
         logger.info(f"Resulting file is {humanize.naturalsize(size)}")
         if size > config.way_too_big_size:
             await ctx.send(f"{config.emojis['warning']} Resulting file is {humanize.naturalsize(size)}. "
-                           f"File is way too big.")
+                           f"File is way too big, aborting upload.")
             return
         # https://www.reddit.com/r/discordapp/comments/aflp3p/the_truth_about_discord_file_upload_limits/
         if size >= config.file_upload_limit:
@@ -1291,7 +1293,9 @@ async def handleautotune(media: str, *params):
     wav = temp_file("wav")
     await run_command("ffmpeg", "-i", audio, "-ac", "1", wav)
     outwav = temp_file("wav")
-    await run_in_exec(autotune.autotune, wav, outwav, *params)
+    # run in separate process to avoid possible segfault crashes and cause its totally blocking
+    with concurrent.futures.ProcessPoolExecutor(1) as executor:
+        await asyncio.get_event_loop().run_in_executor(executor, autotune.autotune, wav, outwav, *params)
     mt = mediatype(media)
     if mt == "AUDIO":
         outname = temp_file("mp3")
@@ -1344,3 +1348,52 @@ async def fetch(url):
             if response.status != 200:
                 response.raise_for_status()
             return await response.text()
+
+
+async def tempofunc(media: str) -> typing.Optional[float]:
+    """
+    detects BPM of media using aubio
+    :param media: path to media
+    :return: BPM if detected or None
+    """
+    # https://github.com/aubio/aubio/blob/master/python/demos/demo_bpm_extract.py
+    audio = await splitaudio(media)
+    assert audio, "Video file must have audio."
+    wav = temp_file("wav")
+    await run_command("ffmpeg", "-i", audio, "-ac", "1", wav)
+    with aubio.source(wav) as src:
+        win_s = 1024  # fft size
+        hop_s = 512  # hop size
+        samplerate = src.samplerate
+        aubiotempo = aubio.tempo("default", win_s, hop_s, samplerate)
+
+        # list of beats, in samples
+        beats = []
+
+        # total number of frames read
+        total_frames = 0
+        while True:
+            samples, read = src()
+            is_beat = aubiotempo(samples)
+            if is_beat:
+                this_beat = aubiotempo.get_last_s()
+                # logger.debug(f"{this_beat / float(samplerate):f}")
+                beats.append(this_beat)
+            total_frames += read
+            if read < hop_s:
+                break
+        logger.debug(beats)
+        if len(beats) > 1:
+            bpms = 60. / numpy.diff(beats)
+            return float(numpy.median(bpms))
+        else:
+            return None
+
+
+async def tempo(media: str):
+    res = await tempofunc(media)
+    if res:
+        return f"Detected BPM of **~{round(res, 1)}**"
+    else:
+        return f"{config.emojis['warning']} Not enough beats found to detect BPM."
+        # print len(beats)
