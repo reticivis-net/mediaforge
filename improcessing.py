@@ -874,14 +874,16 @@ async def stack(files, style):
     return outname
 
 
-async def overlay(files, opacity: float):
+async def overlay(files, alpha: float, mode: str = 'overlay'):
     """
     stacks media
     :param files: [media, media]
-    :param opacity: opacity of top media, 0-1
+    :param alpha: opacity of top media, 0-1
+    :param mode: blend mode
     :return: processed media
     """
-    assert 0 <= opacity <= 1
+    assert mode in ['overlay', 'add']
+    assert 0 <= alpha <= 1
     mts = [mediatype(files[0]), mediatype(files[1])]
     video0 = await forceaudio(files[0])
     fixedvideo0 = temp_file("mp4")
@@ -897,9 +899,14 @@ async def overlay(files, opacity: float):
                       "png", "-c:a", "aac", "-ar", "48000", fixedvideo1)
     fixedfixedvideo1 = await changefps(fixedvideo1, fps)
     outname = temp_file("mp4")
+    blendlogic = ""
+    if mode == "overlay":
+        blendlogic = f"[0v][1v]overlay"
+    elif mode == "add":
+        blendlogic = f"[1v][0v]blend=all_mode='addition':eof_action=repeat:shortest=0:repeatlast=1"
     await run_command("ffmpeg", "-hide_banner", "-i", fixedvideo0, "-i", fixedfixedvideo1, "-filter_complex",
-                      f"[1:v]geq=r='r(X,Y)':a='{1 - opacity}*alpha(X,Y)'[1v];"
-                      f"[0:v][1v]overlay;amix=inputs=2:dropout_transition=0", "-c:v",
+                      f"[0:v]setpts=PTS-STARTPTS[0v];[1:v]setpts=PTS-STARTPTS,colorchannelmixer=aa={alpha}[1v];"
+                      f"{blendlogic};amix=inputs=2:dropout_transition=0", "-c:v",
                       "png", "-c:a",
                       "aac", outname)
     # for file in [video0, video1, fixedvideo1, fixedvideo0, fixedfixedvideo1]:
