@@ -17,8 +17,7 @@ level_styles = coloredlogs.DEFAULT_LEVEL_STYLES
 level_styles['COMMAND'] = {'color': 4}
 logging.addLevelName(25, "NOTICE")
 logging.addLevelName(35, "SUCCESS")
-logging.addLevelName(21, "COMMAND")
+logging.addLevelName(6, "COMMAND")
 coloredlogs.install(level=config.log_level, fmt='[%(asctime)s] [%(filename)s:%(funcName)s:%(lineno)d] '
                                                 '%(levelname)s %(message)s',
                     datefmt='%m/%d/%Y %I:%M:%S %p', field_styles=field_styles, level_styles=level_styles, logger=logger)
-
