@@ -52,10 +52,14 @@ the bot uses many CLI programs for media processing.
 
 ### pip libraries
 
-- This project uses [`pipenv`](https://github.com/pypa/pipenv), run `pipenv install` to install required dependencies.
-- check [pipenv's repo](https://github.com/pypa/pipenv) for more info on pipenv usage.
-
-[comment]: <> (- for now, a [`requirements.txt`]&#40;requirements.txt&#41; file is also maintained, this may change.)
+- This project uses [`pipenv`](https://github.com/pypa/pipenv), run `pipenv install` to install the required
+  dependencies.
+    - check [pipenv's repo](https://github.com/pypa/pipenv) for more info on pipenv usage.
+    - [`aubio`](https://pypi.org/project/aubio/) and [`PyAutoTune`](https://github.com/ederwander/PyAutoTune) are built
+      from source on installation.
+        - on Windows this will require
+          the [MSVC compiler](https://visualstudio.microsoft.com/downloads/#build-tools-for-visual-studio-2019)
+        - on Linux this will require [`gcc`](https://packages.ubuntu.com/bionic/gcc)
 
 ### config
 

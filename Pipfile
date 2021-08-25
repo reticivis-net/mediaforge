@@ -25,6 +25,7 @@ asyncpg = "*"
 setuptools = "*"
 pyautotune = { git = "https://github.com/ederwander/PyAutoTune.git" }
 psutil = "*"
+aubio = "*"
 
 [dev-packages]
 
