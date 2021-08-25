@@ -366,19 +366,25 @@ def mediatype(image):
         return "AUDIO"  # idfk
     mime = magic.from_file(image, mime=True)
     if mime.startswith("video"):
+        logger.debug(f"identified type {mime} as VIDEO")
         return "VIDEO"
     elif mime.startswith("audio"):
+        logger.debug(f"identified type {mime} as AUDIO")
         return "AUDIO"
     elif mime.startswith("image"):
         try:
             with Image.open(image) as im:
                 anim = getattr(im, "is_animated", False)
             if anim:
+                logger.debug(f"identified type {mime} with animated frames as GIF")
                 return "GIF"  # gifs dont have to be animated but if they aren't its easier to treat them like pngs
             else:
+                logger.debug(f"identified type {mime} with no animated frames as IMAGE")
                 return "IMAGE"
         except UnidentifiedImageError:
+            logger.debug(f"mediatype None due to UnidentifiedImageError")
             return None
+    logger.debug(f"mediatype None due to unclassified type {mime}")
     return None
 
 
@@ -1360,11 +1366,11 @@ async def tempofunc(media: str) -> typing.Optional[float]:
     audio = await splitaudio(media)
     assert audio, "Video file must have audio."
     wav = temp_file("wav")
-    await run_command("ffmpeg", "-i", audio, "-ac", "1", wav)
+    await run_command("ffmpeg", "-i", audio, "-ac", "1", "-ar", "44100", wav)
     with aubio.source(wav) as src:
         win_s = 1024  # fft size
         hop_s = 512  # hop size
-        samplerate = src.samplerate
+        samplerate = 44100  # hardcoded just in case
         aubiotempo = aubio.tempo("default", win_s, hop_s, samplerate)
 
         # list of beats, in samples
