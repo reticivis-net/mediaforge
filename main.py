@@ -273,8 +273,10 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                             raise Exception("Cannot determine filesize!")
                         size = int(resp.headers["Content-Length"])
                         logger.info(f"Url is {humanize.naturalsize(size)}")
-                        if config.max_file_size < size:  # file size to download must be under ~50MB
-                            raise improcessing.NonBugError(f"File is too big ({humanize.naturalsize(size)})!")
+                        if config.max_file_size < size:  # file size to download must be under max configured size.
+                            raise improcessing.NonBugError(f"Your file is too big ({humanize.naturalsize(size)}). "
+                                                           f"I'm configured to only download files up to "
+                                                           f"{humanize.naturalsize(config.max_size)}.")
                     logger.info(f"Saving url {url} as {name}")
                     f = await aiofiles.open(name, mode='wb')
                     await f.write(await resp.read())
@@ -285,8 +287,8 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                     raise Exception(f"aiohttp status {resp.status} {await resp.read()}")
         if tenorgif:
             name = await improcessing.mp4togif(name)
-        if lottie:
-            name = await renderpool.submit(lottiestickers.lottiestickertogif, name)
+        # if lottie:
+        #     name = await renderpool.submit(lottiestickers.lottiestickertogif, name)
         return name
 
 
@@ -1613,6 +1615,16 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             """
             await improcess(ctx, improcessing.add_emoji, [["GIF", "IMAGE"]], ctx.guild, name, expectresult=False,
                             resize=False)
+
+        @commands.command()
+        async def bpm(self, ctx):
+            """
+            Detects bpm of media.
+
+            :Usage=$bpm
+            :Param=media - Video or audio. (automatically found in channel)
+            """
+            await improcess(ctx, improcessing.tempo, [["VIDEO", "AUDIO"]], expectresult=False, resize=False)
 
         @commands.guild_only()
         @commands.has_guild_permissions(manage_guild=True)
