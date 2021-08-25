@@ -37,8 +37,8 @@ the bot uses many CLI programs for media processing.
     - **If installing on ubuntu, ensure that ffmpeg version >= 4**
 - gifski - windows executable is included. linux version [downloadable from the website](https://gif.ski/)
 - pngquant - windows executable is included. installable on linux with `sudo apt-get install pngquant`
-- ChromeDriver - ChromeDriver 87.0.4280.88 for both windows and linux are included. They have functioned as intended in
-  my testing, but [here's the website anyways.](https://chromedriver.chromium.org/)
+- ChromeDriver - ChromeDriver 91 for both windows and linux are included. They have functioned as intended in my
+  testing, but [here's the website anyways.](https://chromedriver.chromium.org/)
     - ChromeDriver requires there to be an installation of chrome on your system accessible via path or similair. Your
       chrome version doesn't have to be the exact same as your chromedriver version, but it should be similar
     - you may need to run `sudo chmod +x ./chromedriver87` on linux to make it a working executable.
