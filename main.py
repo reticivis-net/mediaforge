@@ -1074,20 +1074,34 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                             "vstack")
 
         @commands.cooldown(1, config.cooldown, commands.BucketType.user)
-        @commands.command()
-        async def overlay(self, ctx, opacity: float = 0.5):
+        @commands.command(aliases=["blend"])
+        async def overlay(self, ctx, alpha: float = 0.5):
             """
             Overlays the second input over the first
 
-            :Usage=$vstack
-            :Param=opacity - the opacity of the top video. must be between 0 and 1. defaults to 0.5.
+            :Usage=$overlay
+            :Param=alpha - the alpha (transparency) of the top video. must be between 0 and 1. defaults to 0.5.
             :Param=video1 - A video or gif. (automatically found in channel)
             :Param=video2 - A video or gif. (automatically found in channel)
             """
-            if not 0 <= opacity <= 1:
-                await ctx.send(f"{config.emojis['warning']} Opacity must be between 0 and 1.")
+            if not 0 <= alpha <= 1:
+                await ctx.send(f"{config.emojis['warning']} Alpha must be between 0 and 1.")
                 return
-            await improcess(ctx, improcessing.overlay, [["VIDEO", "GIF", "IMAGE"], ["VIDEO", "GIF", "IMAGE"]], opacity)
+            await improcess(ctx, improcessing.overlay, [["VIDEO", "GIF", "IMAGE"], ["VIDEO", "GIF", "IMAGE"]], alpha,
+                            "overlay")
+
+        @commands.cooldown(1, config.cooldown, commands.BucketType.user)
+        @commands.command(aliases=["overlayadd", "addition"])
+        async def add(self, ctx):
+            """
+            Adds the pixel values of the second video to the first.
+
+            :Usage=$add
+            :Param=video1 - A video or gif. (automatically found in channel)
+            :Param=video2 - A video or gif. (automatically found in channel)
+            """
+            await improcess(ctx, improcessing.overlay, [["VIDEO", "GIF", "IMAGE"], ["VIDEO", "GIF", "IMAGE"]], 1,
+                            "add")
 
         @commands.command(name="speed")
         @commands.cooldown(1, config.cooldown, commands.BucketType.user)
