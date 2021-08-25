@@ -125,7 +125,7 @@ async def run_command(*args):
 
     # Status
     logger.info(f"'{args[0]}' started with PID {process.pid}")
-    logger.log(6, f"PID {process.pid}: {args}")
+    logger.log(11, f"PID {process.pid}: {args}")
 
     # Wait for the subprocess to finish
     stdout, stderr = await process.communicate()
@@ -279,9 +279,8 @@ async def forceaudio(video):
         return video
     else:
         outname = temp_file("mp4")
-        await run_command("ffmpeg", "-hide_banner", "-f", "lavfi", "-i", "anullsrc", "-i", video, "-c:v", "png",
-                          "-c:a", "aac",
-                          "-map", "0:a", "-map", "1:v", "-shortest", outname)
+        await run_command("ffmpeg", "-hide_banner", "-i", video, "-f", "lavfi", "-i", "anullsrc", "-c:v", "png",
+                          "-c:a", "aac", "-map", "0:v", "-map", "1:a", "-shortest", outname)
         return outname
 
 
@@ -689,7 +688,7 @@ async def changefps(file, fps):
     """
     mt = mediatype(file)
     outname = temp_file("mp4")
-    await run_command("ffmpeg", "-hide_banner", "-i", file, "-filter:v", f"fps=fps={fps}", "-c:v", "png", outname)
+    await run_command("ffmpeg", "-hide_banner", "-i", file, "-r", str(fps), "-c", "copy", "-c:v", "png", outname)
     if mt == "GIF":
         outname = await mp4togif(outname)
     return outname
