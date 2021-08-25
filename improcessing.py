@@ -124,7 +124,8 @@ async def run_command(*args):
     )
 
     # Status
-    logger.log(21, f"PID {process.pid} Started: {args}")
+    logger.info(f"'{args[0]}' started with PID {process.pid}")
+    logger.log(6, f"PID {process.pid}: {args}")
 
     # Wait for the subprocess to finish
     stdout, stderr = await process.communicate()
