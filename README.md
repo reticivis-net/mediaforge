@@ -26,7 +26,7 @@
 
 ## to self-host
 
-verified working on windows 10 and ubuntu 18.04. will _probably_ work on macos and other linux distros if the below
+verified working on windows 10/11 and ubuntu 18/20. will _probably_ work on macos and other linux distros if the below
 libraries are available but theyre untested and unsupported.
 
 ### external libraries
