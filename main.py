@@ -2219,6 +2219,8 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
 
     @bot.check
     async def cooldown_check(ctx):
+        if ctx.command.name == "help":
+            return True
         # Then apply a bot check that will run before every command
         # Very similar to ?tag cooldown mapping but in Bot scope instead of Cog scope
         bucket = _cd.get_bucket(ctx.message)
