@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>motivate</title>
     <script src="rendering/twemoji/twemoji.js"></script>
+    <base href="../">
     <style>
         @font-face {
             font-family: impact;
@@ -36,16 +37,8 @@
             font-size: 10vw;
             text-transform: uppercase;
             letter-spacing: 1px;
-            /* https://codepen.io/MetalEscape/pen/WrYxVM */
-            text-shadow: 0.6vw 0.6vw 0 #000,
-            -0.6vw -0.6vw 0 #000,
-            0.6vw -0.6vw 0 #000,
-            -0.6vw 0.6vw 0 #000,
-            0 0.6vw 0 #000,
-            0.6vw 0 0 #000,
-            0 -0.6vw 0 #000,
-            -0.6vw 0 0 #000,
-            0.6vw 0.6vw 1vw #000;
+            --stroke-width: 0.6vw;
+            --stroke-color: #000;
             left: 0;
             right: 0;
             position: absolute;
@@ -74,20 +67,18 @@
 <body>
 <div class="wrap">
     <img src="rendering/demoimage.png" alt="An error has occurred loading your image.">
-    <div class="top container caption" id="fitin1">
-        <span class="caption top">CaptionText1</span>
+    <div class="top container" id="fitin1">
+        <span class="caption top stroke">CaptionText1</span>
     </div>
     <div class="bottom container" id="fitin2">
-        <span class="caption bottom">CaptionText2</span>
+        <span class="caption bottom stroke">CaptionText2</span>
     </div>
 
 </div>
 </body>
 <script>
-    /**
-     * @param {string} elemid
-     */
     function fit(elemid) {
+        // rewrite of https://stackoverflow.com/a/6112914/9044183
         let elem = document.getElementById(elemid)
         let elemc = elem.children[0]
         while (outerHeight(elem) < outerHeight(elemc)) {
@@ -99,7 +90,6 @@
     }
 
     function beforerender() {
-        // rewrite of https://stackoverflow.com/a/6112914/9044183
         // resizes text to fit
         fit("fitin1")
         fit("fitin2")
@@ -114,7 +104,28 @@
             .reduce((total, side) => total + side, height)
     }
 
-    // fitty(".caption");
+    function roundToPlace(num, place) {
+        let m = Number((Math.abs(num) * 10 ** place).toPrecision(15));
+        return Math.round(m) / 10 ** place * Math.sign(num);
+    }
+
+    function calculateStrokeTextCSS(steps) {
+        // http://www.coding-dude.com/wp/css/css-stroke-text/
+        // places an arbitrarily high amount of shadows around elem to simulate border.
+        let css = [];
+        for (let i = 0; i < steps; i++) {
+            let angle = (i * 2 * Math.PI) / steps;
+            let cos = roundToPlace(Math.cos(angle), 4)
+            let sin = roundToPlace(Math.sin(angle), 4)
+            css.push(`calc(var(--stroke-width) * ${cos}) calc(var(--stroke-width) * ${sin}) 0 var(--stroke-color)`)
+        }
+
+        return css.join(",\n");
+    }
+
+    const style = document.createElement('style');
+    style.innerHTML = `.caption {\ntext-shadow:\n${calculateStrokeTextCSS(32)}\n}`;
+    document.head.appendChild(style);
 </script>
 <script>twemoji.parse(document.body);</script>
 </html>

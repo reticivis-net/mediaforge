@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <title>motivate</title>
     <script src="rendering/twemoji/twemoji.js"></script>
-<!--    <base href="../rendering">-->
+    <base href="../">
     <style>
         @font-face {
             font-family: tenor;
@@ -36,20 +36,13 @@
             color: white;
             font-size: 10vw;
             letter-spacing: 1px;
-            /* https://codepen.io/MetalEscape/pen/WrYxVM */
-            text-shadow: /* Outline */ -1px -1px 0 #000000,
-            1px -1px 0 #000000,
-            -1px 1px 0 #000000,
-            1px 1px 0 #000000,
-            -2px 0 0 #000000,
-            2px 0 0 #000000,
-            0 2px 0 #000000,
-            0 -2px 0 #000000;
             left: 0;
             right: 0;
             position: absolute;
             /*max-height: 100%;*/
             width: 100%;
+            --stroke-width: 0.4vw;
+            --stroke-color: #000;
         }
 
         .container {
@@ -83,9 +76,6 @@
 </div>
 </body>
 <script>
-    /**
-     * @param {string} elemid
-     */
     function fit(elemid) {
         let elem = document.getElementById(elemid)
         let elemc = elem.children[0]
@@ -113,7 +103,28 @@
             .reduce((total, side) => total + side, height)
     }
 
-    // fitty(".caption");
+    function roundToPlace(num, place) {
+        let m = Number((Math.abs(num) * 10 ** place).toPrecision(15));
+        return Math.round(m) / 10 ** place * Math.sign(num);
+    }
+
+    function calculateStrokeTextCSS(steps) {
+        // http://www.coding-dude.com/wp/css/css-stroke-text/
+        // places an arbitrarily high amount of shadows around elem to simulate border.
+        let css = [];
+        for (let i = 0; i < steps; i++) {
+            let angle = (i * 2 * Math.PI) / steps;
+            let cos = roundToPlace(Math.cos(angle), 4)
+            let sin = roundToPlace(Math.sin(angle), 4)
+            css.push(`calc(var(--stroke-width) * ${cos}) calc(var(--stroke-width) * ${sin}) 0 var(--stroke-color)`)
+        }
+
+        return css.join(",\n");
+    }
+
+    const style = document.createElement('style');
+    style.innerHTML = `.caption {\ntext-shadow:\n${calculateStrokeTextCSS(32)}\n}`;
+    document.head.appendChild(style);
 </script>
 <script>twemoji.parse(document.body);</script>
 </html>
