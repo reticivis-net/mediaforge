@@ -485,16 +485,27 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             await improcess(ctx, captionfunctions.meme, [["VIDEO", "GIF", "IMAGE"]], *caption,
                             handleanimated=True)
 
-        @commands.command(aliases=["snap", "classiccaption"])
-        async def snapchat(self, ctx, *, caption):
+        @commands.command(aliases=["snapchat", "snap", "snapcap", "snapcaption", "snapchatcap", "classiccaption"])
+        async def snapchatcaption(self, ctx, *, caption):
             """
             Captions media in the style of the classic Snapchat caption.
 
-            :Usage=snapchat `text`
+            :Usage=$snapchat `text`
             :Param=caption - The caption text.
             :Param=media - A video, gif, or image. (automatically found in channel)
             """
             await improcess(ctx, captionfunctions.snapchat, [["VIDEO", "GIF", "IMAGE"]], caption, handleanimated=True)
+
+        @commands.command(aliases=["whisper", "wcap", "wcaption"])
+        async def whispercaption(self, ctx, *, caption):
+            """
+            Captions media in the style of the confession website Whisper.
+
+            :Usage=$whispercaption `text`
+            :Param=caption - The caption text.
+            :Param=media - A video, gif, or image. (automatically found in channel)
+            """
+            await improcess(ctx, captionfunctions.whisper, [["VIDEO", "GIF", "IMAGE"]], caption, handleanimated=True)
 
         @commands.command(aliases=["news"])
         async def breakingnews(self, ctx, *, caption):
