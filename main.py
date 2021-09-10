@@ -46,6 +46,24 @@ This file contains the discord.py functions, which call other files to do the ac
 
 # TODO: reddit moment caption
 
+# make copy of .reply() function
+discord.Message.orig_reply = discord.Message.reply
+
+
+async def safe_reply(self: discord.Message, *args, **kwargs) -> discord.Message:
+    # replies to original message if it exists, just sends in channel if it doesnt
+    try:
+        # reference copy of .reply() since this func will override .reply()
+        return await self.orig_reply(*args, **kwargs)
+    # for some reason doesnt throw specific error. if its unrelated httpexception itll just throw again and fall to the
+    # error handler hopefully
+    except discord.errors.HTTPException:
+        return await self.channel.send(*args, **kwargs)
+
+
+# override .reply()
+discord.Message.reply = safe_reply
+
 ready = False
 if __name__ == "__main__":  # prevents multiprocessing workers from running bot code
     logger.log(25, "Hello World!")
@@ -202,8 +220,10 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                     detectedfiles.append(att.url)
         if len(m.stickers):
             for sticker in m.stickers:
-                if sticker.image_url:
-                    detectedfiles.append(str(sticker.image_url))
+                if sticker.format != discord.StickerFormatType.lottie:
+                    detectedfiles.append(str(sticker.url))
+                else:
+                    logger.warning("lottie sticker ignored.")
                 # this is commented out due to the lottie render code being buggy
                 # if sticker.format == discord.StickerType.lottie:
                 #     detectedfiles.append("LOTTIE|" + lottiestickers.stickerurl(sticker))
@@ -1318,17 +1338,17 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                             vcodec = await improcessing.get_vcodec(r)
                             acodec = await improcessing.get_acodec(r)
                             # sometimes returns av1 codec
-                            if vcodec and vcodec["codec_name"] != "h264":
+                            if vcodec and vcodec["codec_name"] not in ["h264", "gif", "webp", "png", "jpeg"]:
                                 txt += f"The returned video is in the `{vcodec['codec_name']}` " \
-                                       f"({vcodec['codec_long_name']}) codec. Discord cannot embed this format but " \
-                                       f"the video data is valid. You can use " \
+                                       f"({vcodec['codec_long_name']}) codec. Discord might not be able embed this " \
+                                       f"format. You can use " \
                                        f"`{await prefix_function(bot, ctx.message)}reencode` to change the codec, " \
-                                       f"though this may increase the filesize or decrease the quality."
+                                       f"though this may increase the filesize or decrease the quality.\n"
                             if acodec and acodec["codec_name"] not in ["aac", "mp3"]:
                                 txt += f"The returned video's audio is in the `{vcodec['codec_name']}` " \
-                                       f"({vcodec['codec_long_name']}) codec. Some devices cannot play this, but the " \
-                                       f"audio data is valid. You can use " \
-                                       f"`{await prefix_function(bot, ctx.message)}reencode` to change the codec, " \
+                                       f"({vcodec['codec_long_name']}) codec. Some devices cannot play this. " \
+                                       f"You can use `{await prefix_function(bot, ctx.message)}reencode` " \
+                                       f"to change the codec, " \
                                        f"though this may increase the filesize or decrease the quality."
                             await msg.edit(content=f"{config.emojis['working']} Uploading to Discord...")
                             await ctx.reply(txt, file=discord.File(r))
@@ -1421,7 +1441,8 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             if emojis:
                 out = []
                 for emoji in emojis:
-                    out.append(str(emoji.url))
+                    if emoji.is_custom_emoji():
+                        out.append(str(emoji.url))
                 await ctx.send("\n".join(out))
             else:
                 await ctx.reply(f"{config.emojis['warning']} Your message doesn't contain any custom emojis!")
@@ -1620,12 +1641,30 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             """
             Adds a file as an emoji to a server. Both MediaForge and the command caller must have the Manage Emojis permission.
 
-            :Usage=$addemoji `caption`
+            :Usage=$addemoji `name`
             :Param=name - The emoji name. Must be at least 2 characters.
             :Param=media - A gif or image. (automatically found in channel)
             """
             await improcess(ctx, improcessing.add_emoji, [["GIF", "IMAGE"]], ctx.guild, name, expectresult=False,
                             resize=False)
+
+        # TODO: fix?
+        # @commands.guild_only()
+        # @commands.has_guild_permissions(manage_emojis=True)
+        # @commands.bot_has_guild_permissions(manage_emojis=True)
+        # @commands.command(aliases=["createsticker"])
+        # async def addsticker(self, ctx, stickeremoji: str, *, name: str):
+        #     """
+        #     Adds a file as a sticker to a server. Both MediaForge and the command caller must have the Manage Emojis
+        #     and Stickers permission.
+        #
+        #     :Usage=$addsticker `emoji` `name`
+        #     :Param=stickeremoji - The related emoji. Must be a single default emoji.
+        #     :Param=name - The sticker name. Must be at least 2 characters.
+        #     :Param=media - A gif or image. (automatically found in channel)
+        #     """
+        #     await improcess(ctx, improcessing.add_sticker, [["GIF", "IMAGE"]], ctx.guild, stickeremoji, name,
+        #                     expectresult=False, resize=False)
 
         @commands.command()
         async def bpm(self, ctx):
@@ -1938,10 +1977,21 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
 
         @commands.command()
         @commands.is_owner()
+        async def replytonothing(self, ctx):
+            await ctx.message.delete()
+            await ctx.reply("test")
+
+        @commands.command()
+        @commands.is_owner()
+        async def reply(self, ctx):
+            await ctx.reply("test")
+
+        @commands.command()
+        @commands.is_owner()
         async def say(self, ctx, channel: typing.Optional[typing.Union[discord.TextChannel, discord.User]], *, msg):
             if not channel:
                 channel = ctx.channel
-            if ctx.me.permissions_in(ctx.channel).manage_messages:
+            if ctx.channel.permissions_for(ctx.me).manage_messages:
                 asyncio.create_task(ctx.message.delete())
             asyncio.create_task(channel.send(msg))
 
@@ -2126,14 +2176,16 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
 
 
     @bot.listen()
-    async def on_command_error(ctx: commands.Context, commanderror: Exception):
+    async def on_command_error(ctx: commands.Context, commanderror: commands.CommandError):
         global renderpool
         if isinstance(commanderror, concurrent.futures.process.BrokenProcessPool):
             renderpool = improcessing.initializerenderpool()
         errorstring = discord.utils.escape_mentions(discord.utils.escape_markdown(str(commanderror)))
         if isinstance(commanderror, discord.Forbidden):
-            if not ctx.me.permissions_in(ctx.channel).send_messages:
-                if ctx.me.permissions_in(ctx.author).send_messages:
+            # if not ctx.me.permissions_in(ctx.channel).send_messages:
+            #     if ctx.me.permissions_in(ctx.author).send_messages:
+            if not ctx.channel.permissions_for(ctx.me).send_messages:
+                if ctx.author.permissions_for(ctx.me).send_messages:
                     err = f"{config.emojis['x']} I don't have permissions to send messages in that channel."
                     await ctx.author.send(err)
                     logger.warning(err)

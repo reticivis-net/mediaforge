@@ -1200,7 +1200,7 @@ async def add_emoji(file, guild: discord.Guild, name):
     :param file: emoji to add
     :param guild: guild to add it to
     :param name: emoji name
-    :return:
+    :return: result text
     """
     with open(file, "rb") as f:
         data = f.read()
@@ -1210,6 +1210,7 @@ async def add_emoji(file, guild: discord.Guild, name):
         return f"{config.emojis['x']} I don't have permission to create an emoji. Make sure I have the Manage Emojis " \
                f"permission. "
     except discord.HTTPException as e:
+        logger.error(e, exc_info=(type(e), e, e.__traceback__))
         return f"{config.emojis['2exclamation']} Something went wrong trying to add your emoji! ```{e}```"
     else:
         count = await count_emoji(guild)
@@ -1219,6 +1220,29 @@ async def add_emoji(file, guild: discord.Guild, name):
         else:
             return f"{config.emojis['check']} Emoji successfully added: " \
                    f"{emoji}\n{guild.emoji_limit - count['static']} slots are left."
+
+
+async def add_sticker(file, guild: discord.Guild, sticker_emoji, name):
+    """
+    adds sticker to guild
+    :param file: sticker to add
+    :param guild: guild to add it to
+    :param sticker_emoji "related" emoji of the sticker
+    :param name: sticker name
+    :return: result text
+    """
+    file = discord.File(file)
+    try:
+        sticker = await guild.create_sticker(name=name, emoji=sticker_emoji, file=file, reason="$addsticker command")
+    except discord.Forbidden:
+        return f"{config.emojis['x']} I don't have permission to create a sticker. Make sure I have the Manage " \
+               f"Emojis and Stickers permission. "
+    except discord.HTTPException as e:
+        logger.error(e, exc_info=(type(e), e, e.__traceback__))
+        return f"{config.emojis['2exclamation']} Something went wrong trying to add your sticker! ```{e}```"
+    else:
+        return f"{config.emojis['check']} Sticker successfully added.\n" \
+               f"\n{guild.sticker_limit - len(guild.stickers)} slots are left."
 
 
 async def set_banner(file, guild: discord.Guild):
@@ -1277,17 +1301,17 @@ async def contentlength(url):
 async def iconfromsnowflakeid(snowflake: int, bot, ctx):
     try:
         user = await bot.fetch_user(snowflake)
-        return str(user.avatar_url)
+        return str(user.avatar.url)
     except (discord.NotFound, discord.Forbidden):
         pass
     try:
         guild = await bot.fetch_guild(snowflake)
-        return str(guild.icon_url)
+        return str(guild.icon.url)
     except (discord.NotFound, discord.Forbidden):
         pass
     try:  # get the icon through a message author to support webhook/pk icons
         msg = await ctx.channel.fetch_message(snowflake)
-        return str(msg.author.avatar_url)
+        return str(msg.author.avatar.url)
     except (discord.NotFound, discord.Forbidden):
         pass
     return None
