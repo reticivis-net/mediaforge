@@ -14,10 +14,10 @@ from fractions import Fraction
 # pip libs
 import aiohttp
 import aubio
-import discord.ext
 import humanize
+import nextcord as discord
 import numpy
-from discord.ext import commands
+from nextcord.ext import commands
 from PIL import Image, UnidentifiedImageError
 
 if sys.platform == "win32":  # this hopefully wont cause any problems :>
@@ -298,7 +298,7 @@ async def compresspng(png):
     return outname
 
 
-async def assurefilesize(media: str, ctx: discord.ext.commands.Context, re_encode=True):
+async def assurefilesize(media: str, ctx: commands.Context, re_encode=True):
     """
     downsizes files up to 5 times if they are over discord's upload limit
     :param media: media
@@ -1233,7 +1233,9 @@ async def add_sticker(file, guild: discord.Guild, sticker_emoji, name):
     """
     file = discord.File(file)
     try:
-        sticker = await guild.create_sticker(name=name, emoji=sticker_emoji, file=file, reason="$addsticker command")
+        await guild.create_sticker(name=name, emoji=sticker_emoji, file=file, reason="$addsticker command",
+                                   description=" ")
+        # description MUST NOT be empty. see https://github.com/nextcord/nextcord/issues/165
     except discord.Forbidden:
         return f"{config.emojis['x']} I don't have permission to create a sticker. Make sure I have the Manage " \
                f"Emojis and Stickers permission. "

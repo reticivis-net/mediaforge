@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "c9347f9aad074780586bce04c4bc4fc9163ff6e71fcfa4827a141e789c1c1eea"
+            "sha256": "37b480fe8813ac99757e8342b9603c56180b3b6943f39a940b94a53faac72641"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -312,12 +312,13 @@
             "index": "pypi",
             "version": "==0.4.0"
         },
-        "discord-py": {
-            "git": "https://github.com/Rapptz/discord.py.git",
-            "ref": "45d498c1b76deaf3b394d17ccf56112fa691d160"
-        },
         "discord.py": {
-            "git": "https://github.com/Rapptz/discord.py.git"
+            "hashes": [
+                "sha256:462cd0fe307aef8b29cbfa8dd613e548ae4b2cb581d46da9ac0d46fb6ea19408",
+                "sha256:c6f64db136de0e18e090f6752ea68bdd4ab0a61b82dfe7acecefa22d6477bb0c"
+            ],
+            "markers": "python_full_version >= '3.5.3'",
+            "version": "==1.7.3"
         },
         "discordlists.py": {
             "hashes": [
@@ -406,6 +407,13 @@
             ],
             "markers": "python_version >= '3.5'",
             "version": "==4.7.6"
+        },
+        "nextcord": {
+            "hashes": [
+                "sha256:fcae92330105d817ac35f0de35da0bf6b1ad880d63515f12c812a621c4c76fe8"
+            ],
+            "index": "pypi",
+            "version": "==2.0.0a2"
         },
         "numpy": {
             "hashes": [
@@ -631,11 +639,11 @@
         },
         "pyparsing": {
             "hashes": [
-                "sha256:c203ec8783bf771a155b207279b9bccb8dea02d8f0c9e5f8ead507bc3246ecc1",
-                "sha256:ef9d7589ef3c200abe66653d3f1ab1033c3c419ae9b9bdb1240a85b024efc88b"
+                "sha256:14e99e14e11a14cadf4d99effd4c5c30a9f46b116551ee69b4e5f8f6004f62d5",
+                "sha256:61b247121581f50c7988eece6ebb2d87ccc3be46c5552daf910d56e20cf6da75"
             ],
-            "markers": "python_version >= '2.6' and python_version not in '3.0, 3.1, 3.2, 3.3'",
-            "version": "==2.4.7"
+            "markers": "python_version >= '3.5'",
+            "version": "==3.0.0rc1"
         },
         "pyreadline": {
             "hashes": [
@@ -782,7 +790,7 @@
                 "sha256:39fb8672126159acb139a7718dd10806104dec1e2f0f6c88aab05d17df10c8d4",
                 "sha256:f57b4c16c62fa2760b7e3d97c35b255512fb6b59a259730f36ba32ce9f8e342f"
             ],
-            "markers": "python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4' and python_version < '4'",
+            "markers": "python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4' and python_version < '4.0'",
             "version": "==1.26.6"
         },
         "vistir": {
