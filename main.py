@@ -2301,7 +2301,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
         bucket = _cd.get_bucket(ctx.message)
         retry_after = bucket.update_rate_limit()
         if retry_after:
-            raise commands.CommandOnCooldown(bucket, retry_after)
+            raise commands.CommandOnCooldown(bucket, retry_after, commands.BucketType.user)
         return True
 
 
