@@ -17,14 +17,14 @@ import urllib.parse
 import aiofiles
 import aiohttp
 import aiosqlite
-import discord
 import discordlists
 import emoji
 import humanize
+import nextcord as discord
 import pronouncing
 import regex as re
 import youtube_dl
-from discord.ext import commands, tasks
+from nextcord.ext import commands, tasks
 
 # project files
 import captionfunctions
@@ -1649,22 +1649,22 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                             resize=False)
 
         # TODO: fix?
-        # @commands.guild_only()
-        # @commands.has_guild_permissions(manage_emojis=True)
-        # @commands.bot_has_guild_permissions(manage_emojis=True)
-        # @commands.command(aliases=["createsticker"])
-        # async def addsticker(self, ctx, stickeremoji: str, *, name: str):
-        #     """
-        #     Adds a file as a sticker to a server. Both MediaForge and the command caller must have the Manage Emojis
-        #     and Stickers permission.
-        #
-        #     :Usage=$addsticker `emoji` `name`
-        #     :Param=stickeremoji - The related emoji. Must be a single default emoji.
-        #     :Param=name - The sticker name. Must be at least 2 characters.
-        #     :Param=media - A gif or image. (automatically found in channel)
-        #     """
-        #     await improcess(ctx, improcessing.add_sticker, [["GIF", "IMAGE"]], ctx.guild, stickeremoji, name,
-        #                     expectresult=False, resize=False)
+        @commands.guild_only()
+        @commands.has_guild_permissions(manage_emojis=True)
+        @commands.bot_has_guild_permissions(manage_emojis=True)
+        @commands.command(aliases=["createsticker"])
+        async def addsticker(self, ctx, stickeremoji: str, *, name: str):
+            """
+            Adds a file as a sticker to a server. Both MediaForge and the command caller must have the Manage Emojis
+            and Stickers permission.
+
+            :Usage=$addsticker `emoji` `name`
+            :Param=sticker - The related emoji. Must be a single default emoji.
+            :Param=name - The sticker name. Must be at least 2 characters.
+            :Param=media - A gif or image. (automatically found in channel)
+            """
+            await improcess(ctx, improcessing.add_sticker, [["GIF", "IMAGE"]], ctx.guild, stickeremoji, name,
+                            expectresult=False, resize=False)
 
         @commands.command()
         async def bpm(self, ctx):

@@ -1,7 +1,7 @@
 import os
 
-import discord
 import lottie
+import nextcord as discord
 from lottie.exporters import exporters
 from lottie.importers import importers
 
