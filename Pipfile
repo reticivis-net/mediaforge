@@ -26,9 +26,15 @@ setuptools = "*"
 pyautotune = { git = "https://github.com/ederwander/PyAutoTune.git" }
 psutil = "*"
 aubio = "*"
-
+aiodns = "*"
+brotli = "*"
+cchardet = "*"
+orjson = "*"
 
 [dev-packages]
 
 [requires]
 python_version = "3.8"
+
+[pipenv]
+allow_prereleases = true
