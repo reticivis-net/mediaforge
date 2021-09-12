@@ -29,8 +29,8 @@
         .caption {
             font-family: cap, sans-serif;
             color: white;
-            font-size: 10vw;
-            --stroke-width: 0.4vw;
+            font-size: 12vw;
+            --stroke-width: 0.5vw;
             --stroke-color: #000;
         }
 
@@ -49,13 +49,32 @@
             height: 100%;
         }
 
+        .box-flex {
+            display: flex;
+            justify-content: center;
+            height: 100%;
+        }
+
+        .box-flex .img {
+            order: 1;
+        }
+
+        .box-flex .txt {
+            padding: 0;
+            align-self: center;
+            min-height: auto;
+        }
+
     </style>
 </head>
 <body>
 <img alt="An error has occurred loading your image." src="rendering/demoimage.png">
 <div class="top container">
     <div id="fitin1">
-        <span class="caption top">CaptionText</span>
+        <div class="box-flex">
+            <span class="caption top txt">CaptionText</span>
+        </div>
+
     </div>
 
 </div>
