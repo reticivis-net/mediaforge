@@ -44,7 +44,15 @@ from tempfiles import TempFileSession, get_random_string, temp_file
 This file contains the discord.py functions, which call other files to do the actual processing.
 """
 
+
 # TODO: reddit moment caption
+
+def get_full_class_name(obj):
+    module = obj.__class__.__module__
+    if module is None or module == str.__class__.__module__:
+        return obj.__class__.__name__
+    return module + '.' + obj.__class__.__name__
+
 
 # make copy of .reply() function
 discord.Message.orig_reply = discord.Message.reply
@@ -53,11 +61,16 @@ discord.Message.orig_reply = discord.Message.reply
 async def safe_reply(self: discord.Message, *args, **kwargs) -> discord.Message:
     # replies to original message if it exists, just sends in channel if it doesnt
     try:
+        # retrieve this message, will throw NotFound if its not found and go to the fallback option.
+        # turns out trying to send a message will close any file objects which causes problems
+        await self.channel.fetch_message(self.id)
         # reference copy of .reply() since this func will override .reply()
         return await self.orig_reply(*args, **kwargs)
     # for some reason doesnt throw specific error. if its unrelated httpexception itll just throw again and fall to the
     # error handler hopefully
-    except discord.errors.HTTPException:
+    except (discord.errors.NotFound, discord.errors.HTTPException) as e:
+        logger.debug(f"abandoning reply to {self.id} due to {get_full_class_name(e)}, "
+                     f"sending message in {self.channel.id}.")
         return await self.channel.send(*args, **kwargs)
 
 
@@ -1595,7 +1608,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
         def __init__(self, bot):
             self.bot = bot
 
-        @commands.cooldown(1, config.cooldown, commands.BucketType.guild)
+        @commands.cooldown(60, config.cooldown, commands.BucketType.guild)
         @commands.guild_only()
         @commands.has_guild_permissions(manage_guild=True)
         @commands.command(aliases=["pfx", "setprefix", "changeprefix", "botprefix", "commandprefix"])
@@ -2156,13 +2169,6 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                    f"is complete!")
 
 
-    def get_full_class_name(obj):
-        module = obj.__class__.__module__
-        if module is None or module == str.__class__.__module__:
-            return obj.__class__.__name__
-        return module + '.' + obj.__class__.__name__
-
-
     @bot.check
     def block_filter(ctx: commands.Context):
         # TODO: implement advanced regex-based filter to prevent filter bypass
@@ -2294,7 +2300,12 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
 
     @bot.check
     async def cooldown_check(ctx):
+        # no cooldown for help
         if ctx.command.name == "help":
+            return True
+        # owner(s) are exempt from cooldown
+        if await bot.is_owner(ctx.message.author):
+            logger.debug("Owner ran command, exempt from cooldown.")
             return True
         # Then apply a bot check that will run before every command
         # Very similar to ?tag cooldown mapping but in Bot scope instead of Cog scope
