@@ -211,6 +211,9 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
         :param m: a discord message
         :return: list of file URLs detected in the message
         """
+        # weird half-message thing that starts threads, get the actual parent message
+        if m.type == discord.MessageType.thread_starter_message:
+            m = m.reference.resolved
         detectedfiles = []
         if len(m.embeds):
             for embed in m.embeds:
@@ -268,6 +271,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             if len(outfiles) >= nargs:
                 return outfiles[:nargs]
         async for m in ctx.channel.history(limit=50, before=ctx.message):
+            logger.debug(m.type)
             if m not in messageschecked:
                 messageschecked.append(m)
                 hm = await handlemessagesave(m)
@@ -1993,6 +1997,12 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
         async def replytonothing(self, ctx):
             await ctx.message.delete()
             await ctx.reply("test")
+
+        @commands.command()
+        @commands.is_owner()
+        async def listmesage(self, ctx):
+            async for m in ctx.channel.history(limit=50, before=ctx.message):
+                logger.debug(m.type)
 
         @commands.command()
         @commands.is_owner()
