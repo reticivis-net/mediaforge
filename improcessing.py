@@ -1241,7 +1241,11 @@ async def add_sticker(file, guild: discord.Guild, sticker_emoji, name):
                f"Emojis and Stickers permission. "
     except discord.HTTPException as e:
         logger.error(e, exc_info=(type(e), e, e.__traceback__))
-        return f"{config.emojis['2exclamation']} Something went wrong trying to add your sticker! ```{e}```"
+        toreturn = f"{config.emojis['2exclamation']} Something went wrong trying to add your sticker! ```{e}```"
+        if "Invalid Asset" in str(e):
+            toreturn += "\nNote: `Invalid Asset` means Discord does not accept this file format. Stickers are only " \
+                        "allowed to be png or apng."
+        return toreturn
     else:
         return f"{config.emojis['check']} Sticker successfully added.\n" \
                f"\n{guild.sticker_limit - len(guild.stickers)} slots are left."
