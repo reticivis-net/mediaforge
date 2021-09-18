@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "07c0bd87ee9df67df56f9d1841c014858fbafcacaa022ef351bd31a106603bdd"
+            "sha256": "89f61510f557598ec025370360c7e53ddee76465b403d080c589c192cdf46838"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -329,11 +329,11 @@
         },
         "charset-normalizer": {
             "hashes": [
-                "sha256:0c8911edd15d19223366a194a513099a302055a962bca2cec0f54b8b63175d8b",
-                "sha256:f23667ebe1084be45f6ae0538e4a5a865206544097e4e8bbcacf42cd02a348f3"
+                "sha256:5d209c0a931f215cee683b6445e2d77677e7e75e159f78def0db09d68fafcaa6",
+                "sha256:5ec46d183433dcbd0ab716f2d7f29d8dee50505b3fdb40c6b985c7c4f5a3591f"
             ],
             "markers": "python_version >= '3'",
-            "version": "==2.0.4"
+            "version": "==2.0.6"
         },
         "cmudict": {
             "hashes": [
@@ -397,20 +397,27 @@
             ],
             "version": "==0.6.2"
         },
-        "emoji": {
+        "docstring-parser": {
             "hashes": [
-                "sha256:21257f311e24468031e85685867c00b87249dc7612b82dc763a771ba5fb00c01"
+                "sha256:d75c81533f70e3902c54d0cfe5f896b65905772004c1eb9ee38a2526b077940d"
             ],
             "index": "pypi",
-            "version": "==1.4.2"
+            "version": "==0.10"
+        },
+        "emoji": {
+            "hashes": [
+                "sha256:2eddd062f940924fb25a3108d84d77dc571927d91a419b4c30f37e253c791b19"
+            ],
+            "index": "pypi",
+            "version": "==1.5.0"
         },
         "humanfriendly": {
             "hashes": [
-                "sha256:332da98c24cc150efcc91b5508b19115209272bfdf4b0764a56795932f854271",
-                "sha256:f7dba53ac7935fd0b4a2fc9a29e316ddd9ea135fb3052d3d0279d10c18ff9c48"
+                "sha256:1697e1a8a8f550fd43c2865cd84542fc175a61dcb779b6fee18cf6b6ccba1477",
+                "sha256:6b0b831ce8f15f7300721aa49829fc4e83921a9a301cc7f606be6686a2288ddc"
             ],
             "markers": "python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4'",
-            "version": "==9.2"
+            "version": "==10.0"
         },
         "humanize": {
             "hashes": [
@@ -597,10 +604,10 @@
         },
         "pip-api": {
             "hashes": [
-                "sha256:1da0b47824c0b6c2830f2767e7304820d148475e4d08979add271da32917598e",
-                "sha256:74227da7102523339d7b6e2f6e105821b04415bdb5f096e170b0ababf88d074f"
+                "sha256:0a47c65eeafe5dea419def12eb78ef91f8048b544b3ca98e1cc487e0934781c7",
+                "sha256:bffe91be00855f9d9eae12dcbf2ac1491190e5a92cfa098c6f4867d16317f271"
             ],
-            "version": "==0.0.20"
+            "version": "==0.0.21"
         },
         "pip-shims": {
             "hashes": [
@@ -727,14 +734,13 @@
             "markers": "python_version >= '3.5'",
             "version": "==3.0.0rc1"
         },
-        "pyreadline": {
+        "pyreadline3": {
             "hashes": [
-                "sha256:4530592fc2e85b25b1a9f79664433da09237c1a270e4d78ea5aa3a2c7229e2d1",
-                "sha256:65540c21bfe14405a3a77e4c085ecfce88724743a4ead47c66b84defcf82c32e",
-                "sha256:9ce5fa65b8992dfa373bddc5b6e0864ead8f291c94fbfec05fbd5c836162e67b"
+                "sha256:0003fd0079d152ecbd8111202c5a7dfa6a5569ffd65b235e45f3c2ecbee337b4",
+                "sha256:ff3b5a1ac0010d0967869f723e687d42cabc7dccf33b14934c92aa5168d260b3"
             ],
-            "markers": "sys_platform == 'win32'",
-            "version": "==2.1"
+            "markers": "python_full_version >= '3.8.0' and sys_platform == 'win32'",
+            "version": "==3.3"
         },
         "python-dateutil": {
             "hashes": [
@@ -872,7 +878,7 @@
                 "sha256:39fb8672126159acb139a7718dd10806104dec1e2f0f6c88aab05d17df10c8d4",
                 "sha256:f57b4c16c62fa2760b7e3d97c35b255512fb6b59a259730f36ba32ce9f8e342f"
             ],
-            "markers": "python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4' and python_version < '4'",
+            "markers": "python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4' and python_version < '4.0'",
             "version": "==1.26.6"
         },
         "vistir": {
