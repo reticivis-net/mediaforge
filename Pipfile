@@ -30,6 +30,7 @@ aiodns = "*"
 brotli = "*"
 cchardet = "*"
 orjson = "*"
+docstring-parser = "*"
 
 [dev-packages]
 
