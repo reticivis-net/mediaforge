@@ -401,10 +401,12 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
 
         :param ctx: discord context. media is gathered using imagesearch() with this.
         :param func: function to process input media with
-        :param allowedtypes: list of lists of strings. each inner list is an argument, the strings it contains are the types that arg must be. or just False/[] if no media needed
+        :param allowedtypes: list of lists of strings. each inner list is an argument, the strings it contains are the
+        types that arg must be. or just False/[] if no media needed
         :param args: any non-media arguments, passed into func()
         :param handleanimated: if func() only works on still images, set to True to process each frame individually.
-        :param expectresult: is func() supposed to return a result? if true, it expects an image. if false, can use a string.
+        :param expectresult: is func() supposed to return a result? if true, it expects an image. if false, can use a
+        string.
         :param filename: filename of the uploaded file. if None, not passed.
         :param spoiler: wether to spoil the uploaded file or not.
         :return: nothing, all processing and uploading is done in this function
@@ -420,7 +422,8 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                     for i, file in enumerate(files):
                         if (imtype := improcessing.mediatype(file)) not in allowedtypes[i]:
                             await ctx.reply(
-                                f"{config.emojis['warning']} Media #{i + 1} is {imtype}, it must be: {', '.join(allowedtypes[i])}")
+                                f"{config.emojis['warning']} Media #{i + 1} is {imtype}, it must be: "
+                                f"{', '.join(allowedtypes[i])}")
                             logger.warning(f"Media {i} type {imtype} is not in {allowedtypes[i]}")
                             # for f in files:
                             #     os.remove(f)
@@ -763,9 +766,9 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             Makes media into a low quality jpeg
 
             :param ctx: discord context
-            :param strength: amount of times to jpegify image. must be between 1 and 100. defaults to 30.
-            :param stretch: randomly stretch the image by this number on each jpegification. can cause strange effects on videos. must be between 0 and 40. defaults to 20.
-            :param quality: quality of JPEG compression. must be between 1 and 95. defaults to 10.
+            :param strength: amount of times to jpegify image. must be between 1 and 100.
+            :param stretch: randomly stretch the image by this number on each jpegification. can cause strange effects on videos. must be between 0 and 40.
+            :param quality: quality of JPEG compression. must be between 1 and 95.
             :param media: A video, gif, or image. (automatically found in channel)
             """
             if not 0 < strength <= 100:
@@ -789,12 +792,12 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
 
 
             :param ctx: discord context
-            :param brightness: value of 1 makes no change to the image. must be between 0 and 5. defaults to 1.5.
-            :param contrast: value of 1 makes no change to the image. must be between 0 and 5. defaults to 1.5.
-            :param sharpness: value of 1 makes no change to the image. must be between 0 and 5. defaults to 1.5.
-            :param saturation: value of 1 makes no change to the image. must be between 0 and 5. defaults to 1.5.
-            :param noise: value of 0 makes no change to the image. must be between 0 and 255. defaults to 40.
-            :param jpegstrength: value of 0 makes no change to the image. must be between 0 and 100. defaults to 20.
+            :param brightness: value of 1 makes no change to the image. must be between 0 and 5.
+            :param contrast: value of 1 makes no change to the image. must be between 0 and 5.
+            :param sharpness: value of 1 makes no change to the image. must be between 0 and 5.
+            :param saturation: value of 1 makes no change to the image. must be between 0 and 5.
+            :param noise: value of 0 makes no change to the image. must be between 0 and 255.
+            :param jpegstrength: value of 0 makes no change to the image. must be between 0 and 100.
             :param media: A video, gif, or image. (automatically found in channel)
             """
             if not 0 <= brightness <= 5:
@@ -825,7 +828,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             Effect is achieved through randomly changing a % of bytes in a jpeg image.
 
             :param ctx: discord context
-            :param strength: % chance to randomly change a byte of the input image. defaults to 0.05%
+            :param strength: % chance to randomly change a byte of the input image.
             :param media: A video, gif, or image. (automatically found in channel)
             """
             if not 0 <= strength <= 0.5:
@@ -891,7 +894,8 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             https://legacy.imagemagick.org/Usage/resize/#liquid-rescale
 
             :param ctx: discord context
-            :param strength: how strongly to compress the image. smaller is stronger. output image will be strength% of the original size. must be between 1 and 99. defaults to 50.
+            :param strength: how strongly to compress the image. smaller is stronger. output image will be strength% of
+            the original size. must be between 1 and 99.
             :param media: A video, gif, or image. (automatically found in channel)
             """
             if not 1 <= strength <= 99:
@@ -939,20 +943,21 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             await improcess(ctx, improcessing.videoloop, [["VIDEO", "GIF"]], loop)
 
         @commands.command(aliases=["flip", "rot"])
-        async def rotate(self, ctx, rot):
+        async def rotate(self, ctx, rottype):
             """
             Rotates and/or flips media
 
             :param ctx: discord context
-            :param type: 90: 90° clockwise, 90ccw: 90° counter clockwise, 180: 180°, vflip: vertical flip, hflip: horizontal flip
+            :param rottype: 90: 90° clockwise, 90ccw: 90° counter clockwise, 180: 180°, vflip: vertical flip, hflip:
+            horizontal flip
             :param media: A video, gif, or image. (automatically found in channel)
             """
             types = ["90", "90ccw", "180", "vflip", "hflip"]
-            rot = rot.lower()
-            if rot not in types:
-                await ctx.send(f"{config.emojis['warning']} Rotation type must be: {', '.join(rot)}")
+            rottype = rottype.lower()
+            if rottype not in types:
+                await ctx.send(f"{config.emojis['warning']} Rotation type must be: {', '.join(rottype)}")
                 return
-            await improcess(ctx, improcessing.rotate, [["GIF", "IMAGE", "VIDEO"]], rot)
+            await improcess(ctx, improcessing.rotate, [["GIF", "IMAGE", "VIDEO"]], rottype)
 
         @commands.command()
         async def hue(self, ctx, h: float):
@@ -961,7 +966,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             see https://ffmpeg.org/ffmpeg-filters.html#hue
 
             :param ctx: discord context
-            :param hue: The hue angle as a number of degrees.
+            :param h: The hue angle as a number of degrees.
             :param media: A video, gif, or image. (automatically found in channel)
             """
             await improcess(ctx, improcessing.hue, [["GIF", "IMAGE", "VIDEO"]], h)
@@ -986,7 +991,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             see https://developer.mozilla.org/en-US/docs/Web/CSS/border-radius
 
             :param ctx: discord context
-            :param radiuspercent: How rounded the corners will be. 0 is rectangle, 50 is ellipse. defaults to 50.
+            :param radiuspercent: How rounded the corners will be. 0 is rectangle, 50 is ellipse.
             :param media: A video, gif, or image. (automatically found in channel)
             """
             if not 0 <= radiuspercent <= 50:
@@ -1030,8 +1035,8 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             see https://ffmpeg.org/ffmpeg-filters.html#tremolo
 
             :param ctx: discord context
-            :param frequency: Modulation frequency in Hertz. must be between 0.1 and 20000. defaults to 5.
-            :param depth: Depth of modulation as a percentage. must be between 0 and 1. defaults to 1.
+            :param frequency: Modulation frequency in Hertz. must be between 0.1 and 20000.
+            :param depth: Depth of modulation as a percentage. must be between 0 and 1.
             :param media: A video or audio file. (automatically found in channel)
             """
             if not 0.1 <= frequency <= 20000:
@@ -1048,7 +1053,8 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             Changes pitch of audio
 
             :param ctx: discord context
-            :param numofhalfsteps: the number of half steps to change the pitch by. `12` raises the pitch an octave and `-12` lowers the pitch an octave.
+            :param numofhalfsteps: the number of half steps to change the pitch by. `12` raises the pitch an octave and
+            `-12` lowers the pitch an octave.
             :param media: A video or audio file. (automatically found in channel)
             """
             await improcess(ctx, improcessing.pitch, [["VIDEO", "AUDIO"]], numofhalfsteps)
@@ -1057,7 +1063,8 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
         async def concatv(self, ctx):
             """
             Makes one video file play right after another.
-            The output video will take on all of the settings of the FIRST video. The second video will be scaled to fit.
+            The output video will take on all of the settings of the FIRST video.
+            The second video will be scaled to fit.
 
             :param ctx: discord context
             :Param=video1 - A video or gif. (automatically found in channel)
@@ -1095,7 +1102,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             Overlays the second input over the first
 
             :param ctx: discord context
-            :param alpha: the alpha (transparency) of the top video. must be between 0 and 1. defaults to 0.5.
+            :param alpha: the alpha (transparency) of the top video. must be between 0 and 1.
             :Param=video1 - A video or gif. (automatically found in channel)
             :Param=video2 - A video or gif. (automatically found in channel)
             """
@@ -1124,7 +1131,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             This command preserves the original FPS, which means speeding up will drop frames. See $fps.
 
             :param ctx: discord context
-            :param speed: Multiplies input video speed by this number. must be between 0.25 and 100. defaults to 2.
+            :param speed: Multiplies input video speed by this number. must be between 0.25 and 100.
             :param video: A video or gif. (automatically found in channel)
             """
             if not 0.25 <= speed <= 100:
@@ -1167,8 +1174,8 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             audio quality info is found under https://trac.ffmpeg.org/wiki/Encode/AAC#fdk_cbr
 
             :param ctx: discord context
-            :param crf: Controls video quality. Higher is worse quality. must be between 28 and 51. defaults to 51.
-            :param qa: Audio bitrate in kbps. Lower is worse quality. Must be between 10 and 112. defaults to 20.
+            :param crf: Controls video quality. Higher is worse quality. must be between 28 and 51.
+            :param qa: Audio bitrate in kbps. Lower is worse quality. Must be between 10 and 112.
             :param video: A video or gif. (automatically found in channel)
             """
             if not 28 <= crf <= 51:
@@ -1186,7 +1193,8 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             This command keeps the speed the same.
             BEWARE: Changing the FPS of gifs can create strange results due to the strange way GIFs store FPS data.
             GIFs are only stable at certain FPS values. These include 50, 30, 15, 10, and others.
-            An important reminder that by default tenor "gifs" are interpreted as mp4s, which do not suffer this problem.
+            An important reminder that by default tenor "gifs" are interpreted as mp4s,
+            which do not suffer this problem.
 
             :param ctx: discord context
             :param fps: Frames per second of the output. must be between 1 and 60.
@@ -1234,22 +1242,28 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             """
             Autotunes media.
             :param ctx: discord context
-            :param CONCERT_A: CONCERT A: Value in Hz of middle A, used to tune the entire algorithm. defaults to 440.
-            :param FIXED_PITCH: FIXED PITCH: Pitch (semitones) toward which pitch is pulled when PULL TO FIXED PITCH is engaged. FIXED PITCH = O: middle A. FIXED PITCH = MIDI pitch - 69. defaults to 0.
-            :param FIXED_PULL: PULL TO FIXED PITCH: Degree to which pitch Is pulled toward FIXED PITCH. O: use original pitch. 1: use FIXED PITCH. defaults to 0.1.
-            :param KEY: the key it is tuned to. can be any letter a-g, A-G, or X (chromatic scale). defaults to "c"
-            :param CORR_STR: CORRECTION STRENGTH: Strength of pitch correction. O: no correction. 1: full correction. defaults to 1.
-            :param CORR_SMOOTH: CORRECTION SMOOTHNESS: Smoothness of transitions between notes when pitch correction is used. O: abrupt transitions. 1: smooth transitions. defaults to 0.
-            :param PITCH_SHIFT: PITCH SHIFT: Number of notes in scale by which output pitch Is shifted. defaults to 0.
-            :param SCALE_ROTATE: OUTPUT SCALE ROTATE: Number of notes by which the output scale Is rotated In the conversion back to semitones from scale notes. Can be used to change the scale between major and minor or to change the musical mode. defaults to 0.
-            :param LFO_DEPTH: LFO DEPTH: Degree to which low frequency oscillator (LFO) Is applied. defaults to 0.
-            :param LFO_RATE: LFO RATE: Rate (In Hz) of LFO. defaults to 1.
-            :param LFO_SHAPE: LFO SHAPE: Shape of LFO waveform. -1: square. 0: sine. 1: triangle. defaults to 0.
-            :param LFO_SYMM: LFO SYMMETRY: Adjusts the rise/fall characteristic of the LFO waveform. defaults to 0.
-            :param LFO_QUANT: LFO QUANTIZATION: Quantizes the LFO waveform, resulting in chiptune-like effects. defaults to 0.
-            :param FORM_CORR: FORMANT CORRECTION: Enables formant correction, reducing the "chipmunk effect" In pitch shifting. defaults to 0.
-            :param FORM_WARP: FORMANT WARP: Warps the formant frequencies. Can be used to change gender/age. defaults to 0.
-            :param MIX: Blends between the modified signal and the delay-compensated Input signal. 1: wet. O: dry. defaults to 1.
+            :param CONCERT_A: CONCERT A: Value in Hz of middle A, used to tune the entire algorithm.
+            :param FIXED_PITCH: FIXED PITCH: Pitch (semitones) toward which pitch is pulled when PULL TO FIXED PITCH is
+             engaged. FIXED PITCH = O: middle A. FIXED PITCH = MIDI pitch - 69.
+            :param FIXED_PULL: PULL TO FIXED PITCH: Degree to which pitch Is pulled toward FIXED PITCH. O: use original
+             pitch. 1: use FIXED PITCH.
+            :param KEY: the key it is tuned to. can be any letter a-g, A-G, or X (chromatic scale).
+            :param CORR_STR: CORRECTION STRENGTH: Strength of pitch correction. O: no correction. 1: full correction.
+            :param CORR_SMOOTH: CORRECTION SMOOTHNESS: Smoothness of transitions between notes when pitch correction is
+            used. O: abrupt transitions. 1: smooth transitions.
+            :param PITCH_SHIFT: PITCH SHIFT: Number of notes in scale by which output pitch Is shifted.
+            :param SCALE_ROTATE: OUTPUT SCALE ROTATE: Number of notes by which the output scale Is rotated In the
+            conversion back to semitones from scale notes. Can be used to change the scale between major and minor or
+            to change the musical mode.
+            :param LFO_DEPTH: LFO DEPTH: Degree to which low frequency oscillator (LFO) Is applied.
+            :param LFO_RATE: LFO RATE: Rate (In Hz) of LFO.
+            :param LFO_SHAPE: LFO SHAPE: Shape of LFO waveform. -1: square. 0: sine. 1: triangle.
+            :param LFO_SYMM: LFO SYMMETRY: Adjusts the rise/fall characteristic of the LFO waveform.
+            :param LFO_QUANT: LFO QUANTIZATION: Quantizes the LFO waveform, resulting in chiptune-like effects.
+            :param FORM_CORR: FORMANT CORRECTION: Enables formant correction, reducing the "chipmunk effect"
+            in pitch shifting.
+            :param FORM_WARP: FORMANT WARP: Warps the formant frequencies. Can be used to change gender/age.
+            :param MIX: Blends between the modified signal and the delay-compensated Input signal. 1: wet. O: dry.
             :param media: A video or audio file. (automatically found in channel)
             """
             await improcess(ctx, improcessing.handleautotune, [["VIDEO", "AUDIO"]],
@@ -1279,7 +1293,8 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
         async def rename(self, ctx, filename: str):
             """
             Renames media.
-            Note: Discord's spoiler feature is dependent on filenames starting with "SPOILER_". renaming files may unspoiler them.
+            Note: Discord's spoiler feature is dependent on filenames starting with "SPOILER_". renaming files may
+            unspoiler them.
 
             :param ctx: discord context
             :param filename: the new name of the file
@@ -1334,7 +1349,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
 
             :param ctx: discord context
             :param videourl: the URL of a video or the title of a youtube video.
-            :param format: download audio or video, defaults to video.
+            :param format: download audio or video.
             """
             types = ["video", "audio"]
             form = form.lower()
@@ -1656,7 +1671,9 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
         @commands.command(aliases=["createemoji"])
         async def addemoji(self, ctx, name):
             """
-            Adds a file as an emoji to a server. Both MediaForge and the command caller must have the Manage Emojis permission.
+            Adds a file as an emoji to a server.
+
+            Both MediaForge and the command caller must have the Manage Emojis permission.
 
             :param ctx: discord context
             :param name: The emoji name. Must be at least 2 characters.
@@ -1898,8 +1915,9 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                     docstring = docstring_parser.parse(cmd.help)
                     # format short/long descriptions or say if there is none.
                     if docstring.short_description or docstring.long_description:
-                        command_information = f"{f'**{docstring.short_description}**' if docstring.short_description else ''}" \
-                                              f"\n{docstring.long_description if docstring.long_description else ''}"
+                        command_information = \
+                            f"{f'**{docstring.short_description}**' if docstring.short_description else ''}" \
+                            f"\n{docstring.long_description if docstring.long_description else ''}"
                     else:
                         command_information = "This command has no information."
                     embed.add_field(name="Command Information", value=command_information, inline=False)
@@ -2128,7 +2146,8 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
         async def generate_command_list(self, ctx):
             out = ""
             for cog in bot.cogs.values():
-                if not showcog(cog): continue
+                if not showcog(cog):
+                    continue
                 out += f"### {cog.qualified_name}\n"
                 for command in sorted(cog.get_commands(), key=lambda x: x.name):
                     if not command.hidden:
