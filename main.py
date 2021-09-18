@@ -767,7 +767,8 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
 
             :param ctx: discord context
             :param strength: amount of times to jpegify image. must be between 1 and 100.
-            :param stretch: randomly stretch the image by this number on each jpegification. can cause strange effects on videos. must be between 0 and 40.
+            :param stretch: randomly stretch the image by this number on each jpegification. can cause strange effects
+            on videos. must be between 0 and 40.
             :param quality: quality of JPEG compression. must be between 1 and 95.
             :param media: A video, gif, or image. (automatically found in channel)
             """
@@ -1067,8 +1068,8 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             The second video will be scaled to fit.
 
             :param ctx: discord context
-            :Param=video1 - A video or gif. (automatically found in channel)
-            :Param=video2 - A video or gif. (automatically found in channel)
+            :param video1: A video or gif. (automatically found in channel)
+            :param video2: A video or gif. (automatically found in channel)
             """
             await improcess(ctx, improcessing.concatv, [["VIDEO", "GIF"], ["VIDEO", "GIF"]])
 
@@ -1078,8 +1079,8 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             Stacks 2 videos horizontally
 
             :param ctx: discord context
-            :Param=video1 - A video, image, or gif. (automatically found in channel)
-            :Param=video2 - A video, image, or gif. (automatically found in channel)
+            :param video1: A video, image, or gif. (automatically found in channel)
+            :param video2: A video, image, or gif. (automatically found in channel)
             """
             await improcess(ctx, improcessing.stack, [["VIDEO", "GIF", "IMAGE"], ["VIDEO", "GIF", "IMAGE"]],
                             "hstack")
@@ -1090,8 +1091,8 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             Stacks 2 videos horizontally
 
             :param ctx: discord context
-            :Param=video1 - A video, image, or gif. (automatically found in channel)
-            :Param=video2 - A video, image, or gif. (automatically found in channel)
+            :param video1: A video, image, or gif. (automatically found in channel)
+            :param video2: A video, image, or gif. (automatically found in channel)
             """
             await improcess(ctx, improcessing.stack, [["VIDEO", "GIF", "IMAGE"], ["VIDEO", "GIF", "IMAGE"]],
                             "vstack")
@@ -1103,8 +1104,8 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
 
             :param ctx: discord context
             :param alpha: the alpha (transparency) of the top video. must be between 0 and 1.
-            :Param=video1 - A video or gif. (automatically found in channel)
-            :Param=video2 - A video or gif. (automatically found in channel)
+            :param video1: A video or gif. (automatically found in channel)
+            :param video2: A video or gif. (automatically found in channel)
             """
             if not 0 <= alpha <= 1:
                 await ctx.send(f"{config.emojis['warning']} Alpha must be between 0 and 1.")
@@ -1118,8 +1119,8 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             Adds the pixel values of the second video to the first.
 
             :param ctx: discord context
-            :Param=video1 - A video or gif. (automatically found in channel)
-            :Param=video2 - A video or gif. (automatically found in channel)
+            :param video1: A video or gif. (automatically found in channel)
+            :param video2: A video or gif. (automatically found in channel)
             """
             await improcess(ctx, improcessing.overlay, [["VIDEO", "GIF", "IMAGE"], ["VIDEO", "GIF", "IMAGE"]], 1,
                             "add")
@@ -1342,18 +1343,18 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                 await ctx.send(f"{config.emojis['warning']} No valid user, guild, or message ID found.")
 
         @commands.command(aliases=["youtube", "youtubedownload", "youtubedl", "ytdownload", "download", "dl", "ytdl"])
-        async def videodl(self, ctx, url, form="video"):
+        async def videodl(self, ctx, videourl, videoformat="video"):
             """
             Downloads a web hosted video from sites like youtube.
             Any site here works: https://ytdl-org.github.io/youtube-dl/supportedsites.html
 
             :param ctx: discord context
             :param videourl: the URL of a video or the title of a youtube video.
-            :param format: download audio or video.
+            :param videoformat: download audio or video.
             """
             types = ["video", "audio"]
-            form = form.lower()
-            if form not in types:
+            videoformat = videoformat.lower()
+            if videoformat not in types:
                 await ctx.reply(f"{config.emojis['warning']} Download format must be `video` or `audio`.")
                 return
             # await improcessing.ytdl(url, form)
@@ -1362,7 +1363,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                     # logger.info(url)
                     msg = await ctx.reply(f"{config.emojis['working']} Downloading from site...", mention_author=False)
                     try:
-                        r = await improcessing.run_in_exec(ytdownload, url, form)
+                        r = await improcessing.run_in_exec(ytdownload, videourl, videoformat)
                         if r:
                             tempfiles.reserve_names([r])
                             r = await improcessing.assurefilesize(r, ctx, re_encode=False)
@@ -1486,7 +1487,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             Twemoji is the open source emoji set that discord desktop and twitter use. https://twemoji.twitter.com/
 
             :param ctx: discord context
-            :param emoji: Up to 5 default emojis.
+            :param msg: Message containing up to 5 default emojis.
             """
             if ctx.message.reference:
                 msg = ctx.message.reference.resolved.content
@@ -1693,7 +1694,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             and Stickers permission.
 
             :param ctx: discord context
-            :param sticker: The related emoji. Must be a single default emoji.
+            :param stickeremoji: The related emoji. Must be a single default emoji.
             :param name: The sticker name. Must be at least 2 characters.
             :param media: A gif or image. (automatically found in channel)
             """
@@ -1924,7 +1925,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
 
                     paramtext = []
                     # for every "clean paramater" (no self or ctx)
-                    for param in cmd.clean_params.values():
+                    for param in list(cmd.clean_params.values()):
                         # get command description from docstring
                         paramhelp = discord.utils.get(docstring.params, arg_name=param.name)
                         # not found in docstring
@@ -1940,6 +1941,12 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                         paramtext.append(f"**{param.name}** - "
                                          f"{paramhelp.description if paramhelp.description else 'No description'}"
                                          f"{pend}")
+                    # TODO: generate media param list automatically?
+                    for p in docstring.params:
+                        if re.match("(media|video|audio|gif|tenorgif)[0-9]*", p.arg_name):
+                            # format and add to paramtext list
+                            paramtext.append(f"**{p.arg_name}** - "
+                                             f"{p.description if p.description else 'No description'}")
                     # if there are params found
                     if len(paramtext):
                         # join list and add to help
@@ -1962,6 +1969,8 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             """
             Provides info on a media file.
             Info provided is from ffprobe and libmagic.
+            .. note:: test
+
 
             :param ctx: discord context
             :param media: Any media file. (automatically found in channel)
