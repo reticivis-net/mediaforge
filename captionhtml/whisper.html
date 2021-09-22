@@ -66,65 +66,20 @@
 <body>
 <img alt="An error has occurred loading your image." src="rendering/demoimage.png">
 <div class="top container">
-    <div id="fitin1">
-        <div class="box-flex">
-            <span class="caption top txt">CaptionText</span>
-        </div>
+    <div class="box-flex" id="fitin1">
+        <span class="caption top txt">CaptionText</span>
     </div>
 </div>
 </body>
+<script src="rendering/common.js"></script>
 <script>
-
-    function outerHeight(element) {
-        const height = element.offsetHeight,
-            style = window.getComputedStyle(element)
-
-        return ['top', 'bottom']
-            .map(side => parseInt(style[`margin-${side}`]))
-            .reduce((total, side) => total + side, height)
-    }
-
-    function fit(elemid) {
-        // rewrite of https://stackoverflow.com/a/6112914/9044183
-        let elem = document.getElementById(elemid)
-        let elemc = elem.children[0]
-        while (outerHeight(elem) < outerHeight(elemc)) {
-            // https://stackoverflow.com/a/15195345/9044183
-            let style = window.getComputedStyle(elemc, null).getPropertyValue('font-size');
-            let fontSize = parseFloat(style);
-            elemc.style.fontSize = (fontSize - 1) + 'px';
-        }
-    }
-
     function beforerender() {
         // resizes text to fit
         fit("fitin1")
     }
 
-    function roundToPlace(num, place) {
-        let m = Number((Math.abs(num) * 10 ** place).toPrecision(15));
-        return Math.round(m) / 10 ** place * Math.sign(num);
-    }
-
-    function calculateStrokeTextCSS(steps) {
-        // http://www.coding-dude.com/wp/css/css-stroke-text/
-        // places an arbitrarily high amount of shadows around elem to simulate border.
-        let css = [];
-        for (let i = 0; i < steps; i++) {
-            let angle = (i * 2 * Math.PI) / steps;
-            let cos = roundToPlace(Math.cos(angle), 4)
-            let sin = roundToPlace(Math.sin(angle), 4)
-            css.push(`calc(var(--stroke-width) * ${cos}) calc(var(--stroke-width) * ${sin}) 0 var(--stroke-color)`)
-        }
-
-        return css.join(",\n");
-    }
-
     const style = document.createElement('style');
     style.innerHTML = `.caption {\ntext-shadow:\n${calculateStrokeTextCSS(32)}\n}`;
     document.head.appendChild(style);
-
-
 </script>
-<script>twemoji.parse(document.body);</script>
 </html>
