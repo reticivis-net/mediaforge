@@ -604,7 +604,8 @@ async def mediatopng(media):
     :return: png
     """
     outname = temp_file("png")
-    await run_command("ffmpeg", "-hide_banner", "-i", media, "-frames:v", "1", outname)
+    await run_command("ffmpeg", "-hide_banner", "-i", media, "-frames:v", "1", "-c:v", "png", "-pix_fmt", "yuva420p",
+                      outname)
 
     return outname
 
