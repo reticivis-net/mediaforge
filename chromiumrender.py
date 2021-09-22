@@ -60,8 +60,9 @@ def initdriver():
     global driver
     opts = webdriver.ChromeOptions()
     opts.headless = True
-    opts.add_experimental_option('excludeSwitches', ['enable-logging'])
-    opts.add_argument("--log-level=3")
+    if config.log_level.lower() != "debug":  # switches that disable logging
+        opts.add_experimental_option('excludeSwitches', ['enable-logging'])
+        opts.add_argument("--log-level=3")
     opts.add_argument('--no-proxy-server')
     opts.add_argument("--window-size=0,0")
     opts.add_argument("--hide-scrollbars")
@@ -83,7 +84,10 @@ def initdriver():
         else:
             driver = webdriver.Chrome(config.chrome_driver_linux, options=opts, service_log_path='/dev/null')
     logger = logging.getLogger('selenium.webdriver.remote.remote_connection')
-    logger.setLevel(logging.WARNING)
+    if config.log_level.lower() == "debug":
+        logger.setLevel(logging.DEBUG)
+    else:
+        logger.setLevel(logging.WARNING)
     driver.implicitly_wait(10)
     driver.get("file:///" + os.path.abspath("rendering/warmup.html").replace("\\", "/"))
     while driver.execute_script('return document.readyState;') != "complete":
@@ -135,7 +139,9 @@ def html2png(html, png):
         size = driver.execute_script(f"return [document.documentElement.scrollWidth, outerHeight(document.body)];")
         logger.debug(size)
         driver.set_window_size(size[0], size[1])
+    logger.debug("running beforerender")
     driver.execute_script("if (typeof beforerender === \"function\") {beforerender()}")
+    logging.debug("beforerender complete")
     send(driver, "Emulation.setDefaultBackgroundColorOverride", {'color': {'r': 0, 'g': 0, 'b': 0, 'a': 0}})
     driver.get_screenshot_as_file(png)
     # os.remove(tempfile)
