@@ -69,17 +69,5 @@
 <div class="caption"><span>CaptionText</span>
 </div>
 </body>
-<script>twemoji.parse(document.body);</script>
-<script>
-
-
-    function outerHeight(element) {
-        const height = element.offsetHeight,
-            style = window.getComputedStyle(element)
-
-        return ['top', 'bottom']
-            .map(side => parseInt(style[`margin-${side}`]))
-            .reduce((total, side) => total + side, height)
-    }
-</script>
+<script src="rendering/common.js"></script>
 </html>

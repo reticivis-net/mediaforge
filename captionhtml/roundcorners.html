@@ -23,16 +23,5 @@
 <body>
 <img alt="An error has occurred loading your image." id="img" src="rendering/demoimage.png">
 </body>
-<script>
-
-
-    function outerHeight(element) {
-        const height = element.offsetHeight,
-            style = window.getComputedStyle(element)
-
-        return ['top', 'bottom']
-            .map(side => parseInt(style[`margin-${side}`]))
-            .reduce((total, side) => total + side, height)
-    }
-</script>
+<script src="rendering/common.js"></script>
 </html>

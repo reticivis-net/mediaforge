@@ -53,20 +53,5 @@
     <img class=img src="rendering/demoimage.png" alt="An error has occurred loading your image.">
 </div>
 </body>
-<script>twemoji.parse(document.body);</script>
-<script>
-    // this doesnt work for some reason
-// function beforerender() {
-//     document.querySelectorAll(".wrap")[0].style.margin = "2vw auto";
-// }
-
-function outerHeight(element) {
-    const height = element.offsetHeight,
-        style = window.getComputedStyle(element)
-
-    return ['top', 'bottom']
-        .map(side => parseInt(style[`margin-${side}`]))
-        .reduce((total, side) => total + side, height)
-}
-</script>
+<script src="rendering/common.js"></script>
 </html>

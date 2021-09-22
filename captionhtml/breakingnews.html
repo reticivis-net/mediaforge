@@ -140,17 +140,5 @@
     let h = today.getHours().toString().padStart(2, "0");
     document.querySelector("#clocktext").innerHTML = `${h}:${m}`;
 </script>-->
-<script>twemoji.parse(document.body);</script>
-<script>
-
-
-    function outerHeight(element) {
-        const height = element.offsetHeight,
-            style = window.getComputedStyle(element)
-
-        return ['top', 'bottom']
-            .map(side => parseInt(style[`margin-${side}`]))
-            .reduce((total, side) => total + side, height)
-    }
-</script>
+<script src="rendering/common.js"></script>
 </html>

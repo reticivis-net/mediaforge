@@ -53,18 +53,5 @@
     <span class="caption top">CaptionText</span>
 </div>
 </body>
-<script>
-
-    function outerHeight(element) {
-        const height = element.offsetHeight,
-            style = window.getComputedStyle(element)
-
-        return ['top', 'bottom']
-            .map(side => parseInt(style[`margin-${side}`]))
-            .reduce((total, side) => total + side, height)
-    }
-
-    // fitty(".caption");
-</script>
-<script>twemoji.parse(document.body);</script>
+<script src="rendering/common.js"></script>
 </html>
