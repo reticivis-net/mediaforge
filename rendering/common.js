@@ -46,5 +46,24 @@ function calculateStrokeTextCSS(steps) {
     return css.join(",\n");
 }
 
+function abbrNumber(str) {
+    // abbreveate number with SI scale (i.e. 1000=1K, 1000000=1M, etc)
+    let n = Number(str);
+    if (n < 1e3) return n;
+    if (n >= 1e3 && n < 1e6) return +(n / 1e3).toFixed(1) + "K";
+    if (n >= 1e6 && n < 1e9) return +(n / 1e6).toFixed(1) + "M";
+    if (n >= 1e9 && n < 1e12) return +(n / 1e9).toFixed(1) + "B";
+}
+
+function randint(min, max) {
+    // get a random int between min and max
+    return Math.floor(Math.random() * (max - min)) + min;
+}
+
+function randfloat(min, max) {
+    // get a random float between min and max
+    return Math.random() * (max - min) + min
+}
+
 // parse emojis to twemoji
 twemoji.parse(document.body);

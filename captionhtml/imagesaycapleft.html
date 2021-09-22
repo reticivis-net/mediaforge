@@ -110,7 +110,7 @@
 </div>
 
 </body>
-<script>twemoji.parse(document.body);</script>
+<script src="rendering/common.js"></script>
 <script>
     function beforerender() {
         document.querySelectorAll(".box").forEach((elem) => {
@@ -130,15 +130,5 @@
     Promise.all(Array.from(document.images).filter(img => !img.complete).map(img => new Promise(resolve => {
         img.onload = img.onerror = resolve;
     }))).then(beforerender);
-
-
-    function outerHeight(element) {
-        const height = element.offsetHeight,
-            style = window.getComputedStyle(element)
-
-        return ['top', 'bottom']
-            .map(side => parseInt(style[`margin-${side}`]))
-            .reduce((total, side) => total + side, height)
-    }
 </script>
 </html>

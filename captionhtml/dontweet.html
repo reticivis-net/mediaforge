@@ -377,32 +377,8 @@
         </div>
     </div>
 </div>
+<script src="rendering/common.js"></script>
 <script>
-    function outerHeight(element) {
-        const height = element.offsetHeight,
-            style = window.getComputedStyle(element)
-
-        return ['top', 'bottom']
-            .map(side => parseInt(style[`margin-${side}`]))
-            .reduce((total, side) => total + side, height)
-    }
-
-    function abbrNumber(str) {
-        let n = Number(str);
-        if (n < 1e3) return n;
-        if (n >= 1e3 && n < 1e6) return +(n / 1e3).toFixed(1) + "K";
-        if (n >= 1e6 && n < 1e9) return +(n / 1e6).toFixed(1) + "M";
-        if (n >= 1e9 && n < 1e12) return +(n / 1e9).toFixed(1) + "B";
-    }
-
-    function randint(min, max) {
-        return Math.floor(Math.random() * (max - min)) + min;
-    }
-
-    function randfloat(min, max) {
-        return Math.random() * (max - min) + min
-    }
-
     function beforerender() {
         document.getElementById("likeOutput").innerText = abbrNumber(randint(100000, 1000000))
         let rt = randint(10000, 100000)
@@ -420,6 +396,5 @@
         document.getElementById("dateOutput").innerText = `${months[now.getMonth()]} ${now.getDate()}, ${now.getFullYear()}`;
     }
 </script>
-<script>twemoji.parse(document.body);</script>
 </body>
 </html>

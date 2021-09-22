@@ -67,28 +67,16 @@
     <div class="captionsmall">CaptionText2</div>
 </div>
 </body>
+<script src="rendering/common.js"></script>
 <script>
     window.onload = function () {
         document.querySelector(':root').style.setProperty('--1vw', `${document.getElementById("img").scrollWidth / 100}px`);
-// window.getComputedStyle(document.documentElement).getPropertyValue('--1vw');
     }
-    // document.querySelector(':root').style.setProperty('--1vw', `${document.getElementById("img").scrollWidth/100}px`);
-    // window.getComputedStyle(document.documentElement).getPropertyValue('--1vw');
-    twemoji.parse(document.body);
 
     function beforerender() {
         // document.querySelector(':root').style.setProperty('--1vw', `${document.getElementById("img").scrollWidth/100}px`);
         document.querySelectorAll(".wrap")[0].style.margin = "calc(5 * var(--1vw)) auto";
         document.querySelectorAll(".caption")[0].style.margin = "0 calc(5 * var(--1vw))";
-    }
-
-    function outerHeight(element) {
-        const height = element.offsetHeight,
-            style = window.getComputedStyle(element)
-
-        return ['top', 'bottom']
-            .map(side => parseInt(style[`margin-${side}`]))
-            .reduce((total, side) => total + side, height)
     }
 </script>
 </html>
