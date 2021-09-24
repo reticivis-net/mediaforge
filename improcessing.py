@@ -11,8 +11,9 @@ import sys
 import typing
 from fractions import Fraction
 
-# pip libs
 import aiohttp
+# pip libs
+import apng
 import aubio
 import humanize
 import nextcord as discord
@@ -149,6 +150,13 @@ async def run_command(*args):
     return result
 
 
+async def is_apng(filename):
+    out = await run_command("ffprobe", filename, "-v", "panic", "-select_streams", "v:0", "-print_format", "json",
+                            "-show_entries", "stream=codec_name")
+    data = json.loads(out)
+    return data["streams"][0]["codec_name"] == "apng"
+
+
 # https://askubuntu.com/questions/110264/how-to-find-frames-per-second-of-any-video-file
 async def get_frame_rate(filename):
     """
@@ -158,13 +166,24 @@ async def get_frame_rate(filename):
     """
     logger.info("Getting FPS...")
     out = await run_command("ffprobe", filename, "-v", "panic", "-select_streams", "v:0", "-print_format", "json",
-                            "-show_entries", "stream=r_frame_rate")
-    rate = json.loads(out)["streams"][0]["r_frame_rate"].split("/")
-    if len(rate) == 1:
-        return float(rate[0])
-    if len(rate) == 2:
-        return float(rate[0]) / float(rate[1])
-    return -1
+                            "-show_entries", "stream=r_frame_rate,codec_name")
+    data = json.loads(out)
+    if data["streams"][0]["codec_name"] == "apng":  # ffmpeg no likey apng
+        parsedapng = apng.APNG.open(filename)
+        apnglen = 0
+        # https://wiki.mozilla.org/APNG_Specification#.60fcTL.60:_The_Frame_Control_Chunk
+        for png, control in parsedapng.frames:
+            if control.delay_den == 0:
+                control.delay_den = 100
+            apnglen += control.delay / control.delay_den
+        return len(parsedapng.frames) / apnglen
+    else:
+        rate = data["streams"][0]["r_frame_rate"].split("/")
+        if len(rate) == 1:
+            return float(rate[0])
+        if len(rate) == 2:
+            return float(rate[0]) / float(rate[1])
+        return -1
 
 
 # https://superuser.com/questions/650291/how-to-get-video-duration-in-seconds
@@ -177,21 +196,17 @@ async def get_duration(filename):
     logger.info("Getting duration...")
     out = await run_command("ffprobe", "-v", "panic", "-show_entries", "format=duration", "-of",
                             "default=noprint_wrappers=1:nokey=1", filename)
-    if out == "N/A":  # happens with APNGs?
-        # https://stackoverflow.com/a/38114903/9044183
-        dur2 = await run_command("ffprobe", filename, "-count_frames", "-show_entries",
-                                 "stream=nb_read_frames,avg_frame_rate,r_frame_rate", "-print_format", "json", "-v",
-                                 "quiet")
-        dur2 = json.loads(dur2)
-        dur2 = dur2["streams"][0]
-        avg_fps = dur2["avg_frame_rate"].split("/")
-        if len(avg_fps) == 1:
-            avg_fps = float(avg_fps[0])
-        elif len(avg_fps) == 2:
-            avg_fps = float(avg_fps[0]) / float(avg_fps[1])
-        return float(dur2["nb_read_frames"]) / avg_fps
-
-    return float(out)
+    if out == "N/A":  # happens with APNGs
+        parsedapng = apng.APNG.open(filename)
+        apnglen = 0
+        # https://wiki.mozilla.org/APNG_Specification#.60fcTL.60:_The_Frame_Control_Chunk
+        for png, control in parsedapng.frames:
+            if control.delay_den == 0:
+                control.delay_den = 100
+            apnglen += control.delay / control.delay_den
+        return apnglen
+    else:
+        return float(out)
 
 
 async def get_resolution(filename):
@@ -544,11 +559,13 @@ async def toapng(video):
     fps = await get_frame_rate(video)
     fps = Fraction(1 / fps).limit_denominator()
     outname = temp_file("png")
-    # n = sorted(glob.glob(name.replace('%09d', '*')))[0]
     # apngasm input is strange
     await run_command("apngasm", outname, name.replace('%09d', '000000001'), str(fps.numerator), str(fps.denominator),
-                      "-i5")
+                      "-i1")
     return outname
+    # ffmpeg method, removes dependence on apngasm but bigger and worse quality
+    # outname = temp_file("png")
+    # await run_command("ffmpeg", "-i", video, "-f", "apng", "-plays", "0", outname)
 
 
 async def reencode(mp4):  # reencodes mp4 as libx264 since the png format used cant be played by like literally anything

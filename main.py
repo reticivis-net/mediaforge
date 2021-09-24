@@ -425,6 +425,10 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                             #     os.remove(f)
                             break
                         else:
+                            if await improcessing.is_apng(file):
+                                asyncio.create_task(ctx.reply(f"{config.emojis['warning']} Media #{i + 1} is an apng, w"
+                                                              f"hich FFmpeg and MediaForge have limited support for. Ex"
+                                                              f"pect errors.", delete_after=10))
                             if resize:
                                 files[i] = await improcessing.ensuresize(ctx, file, config.min_size, config.max_size)
                     else:
