@@ -13,13 +13,11 @@ python-magic-win64 = "~=0.4.13"
 selenium = "~=3.141.0"
 Pillow = "~=8.2.0"
 youtube-dl = "*"
-dblpy = "*"
 numpy = "*"
 emoji = "*"
 regex = "*"
 isort = { extras = ["pipfile_deprecated_finder", "requirements_deprecated_finder"], version = "*" }
 pronouncing = "*"
-"discordlists.py" = "*"
 aiosqlite = "*"
 asyncpg = "*"
 setuptools = "*"
@@ -31,6 +29,7 @@ brotli = "*"
 cchardet = "*"
 orjson = "*"
 apng = "*"
+"discordlists.py" = { git = "https://github.com/HexCodeFFF/discordlists.py"}
 
 [dev-packages]
 
