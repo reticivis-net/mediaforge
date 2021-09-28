@@ -154,7 +154,10 @@ async def is_apng(filename):
     out = await run_command("ffprobe", filename, "-v", "panic", "-select_streams", "v:0", "-print_format", "json",
                             "-show_entries", "stream=codec_name")
     data = json.loads(out)
-    return data["streams"][0]["codec_name"] == "apng"
+    if len(data["streams"]):  # 0 if audio file because it selects v:0, audio cannot be apng
+        return data["streams"][0]["codec_name"] == "apng"
+    else:
+        return False
 
 
 # https://askubuntu.com/questions/110264/how-to-find-frames-per-second-of-any-video-file
@@ -197,6 +200,7 @@ async def get_duration(filename):
     out = await run_command("ffprobe", "-v", "panic", "-show_entries", "format=duration", "-of",
                             "default=noprint_wrappers=1:nokey=1", filename)
     if out == "N/A":  # happens with APNGs
+        # no garuntee that its an APNG here but i dont have any other plans so i want it to raise an exception
         parsedapng = apng.APNG.open(filename)
         apnglen = 0
         # https://wiki.mozilla.org/APNG_Specification#.60fcTL.60:_The_Frame_Control_Chunk
