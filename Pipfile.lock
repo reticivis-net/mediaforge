@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "0f4754e83dcb3e755e452336834152de1faa3fd5ae73b2b1f548417f59d6f92f"
+            "sha256": "cf10c09d8478180771e78bbde25bae9c1e4b8e51d966f1c431a046b9f10fbfcd"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -372,30 +372,12 @@
             "index": "pypi",
             "version": "==15.0.1"
         },
-        "dblpy": {
-            "hashes": [
-                "sha256:2d7d746ee7e7b3a2597f485ebf4089e7baabdcf1717743228991bd988c69e1b5",
-                "sha256:744f5ee9493a945e5907466754b2dce4735715b34daabb9e6264f76ec79818c9"
-            ],
-            "index": "pypi",
-            "version": "==0.4.0"
-        },
-        "discord.py": {
-            "hashes": [
-                "sha256:462cd0fe307aef8b29cbfa8dd613e548ae4b2cb581d46da9ac0d46fb6ea19408",
-                "sha256:c6f64db136de0e18e090f6752ea68bdd4ab0a61b82dfe7acecefa22d6477bb0c"
-            ],
-            "markers": "python_full_version >= '3.5.3'",
-            "version": "==1.7.3"
+        "discordlists-py": {
+            "git": "https://github.com/HexCodeFFF/discordlists.py",
+            "ref": "2df5a2b62144b49774728efa8267d909a8a9787f"
         },
         "discordlists.py": {
-            "hashes": [
-                "sha256:0211aecde3c3b3881239511aadc0c753f3cece423d8374d01fa815e958ca2537",
-                "sha256:3ef38ee36fe469dce267a85633067087bb92c0840f8eb60033df05f5866f3bbe",
-                "sha256:f6d49c93c3eb1d5ffbaeddf663d3bfa80bb3073a4fc43787b832ea55de49113d"
-            ],
-            "index": "pypi",
-            "version": "==1.1.1"
+            "git": "https://github.com/HexCodeFFF/discordlists.py"
         },
         "distlib": {
             "hashes": [
@@ -769,13 +751,6 @@
             ],
             "index": "pypi",
             "version": "==0.4.13"
-        },
-        "ratelimiter": {
-            "hashes": [
-                "sha256:5c395dcabdbbde2e5178ef3f89b568a3066454a6ddc223b76473dac22f89b4f7",
-                "sha256:a52be07bc0bb0b3674b4b304550f10c769bbb00fead3072e035904474259809f"
-            ],
-            "version": "==1.2.0.post0"
         },
         "regex": {
             "hashes": [
