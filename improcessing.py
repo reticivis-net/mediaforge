@@ -226,10 +226,11 @@ async def get_resolution(filename):
     w = out["streams"][0]["width"]
     h = out["streams"][0]["height"]
     # if rotated in metadata, swap width and height
-    if "rotate" in out["streams"][0]["tags"]:
-        rot = float(out["streams"][0]["tags"]["rotate"])
-        if rot % 90 == 0 and not rot % 180 == 0:
-            w, h = h, w
+    if "tags" in out["streams"][0]:
+        if "rotate" in out["streams"][0]["tags"]:
+            rot = float(out["streams"][0]["tags"]["rotate"])
+            if rot % 90 == 0 and not rot % 180 == 0:
+                w, h = h, w
     return [w, h]
 
 
