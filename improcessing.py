@@ -219,10 +219,18 @@ async def get_resolution(filename):
     :param filename: filename
     :return: [width, height]
     """
-    out = await run_command("ffprobe", "-v", "panic", "-select_streams", "v:0", "-show_entries", "stream=width,height",
+    out = await run_command("ffprobe", "-v", "panic", "-select_streams", "v:0", "-show_entries",
+                            "stream=width,height:stream_tags=rotate",
                             "-print_format", "json", filename)
     out = json.loads(out)
-    return [out["streams"][0]["width"], out["streams"][0]["height"]]
+    w = out["streams"][0]["width"]
+    h = out["streams"][0]["height"]
+    # if rotated in metadata, swap width and height
+    if "rotate" in out["streams"][0]["tags"]:
+        rot = float(out["streams"][0]["tags"]["rotate"])
+        if rot % 90 == 0 and not rot % 180 == 0:
+            w, h = h, w
+    return [w, h]
 
 
 async def get_vcodec(filename):
