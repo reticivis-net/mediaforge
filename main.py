@@ -18,6 +18,7 @@ import aiofiles
 import aiohttp
 import aiosqlite
 import discordlists
+import docstring_parser
 import emoji
 import humanize
 import nextcord as discord
@@ -400,10 +401,12 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
 
         :param ctx: discord context. media is gathered using imagesearch() with this.
         :param func: function to process input media with
-        :param allowedtypes: list of lists of strings. each inner list is an argument, the strings it contains are the types that arg must be. or just False/[] if no media needed
+        :param allowedtypes: list of lists of strings. each inner list is an argument, the strings it contains are the
+        types that arg must be. or just False/[] if no media needed
         :param args: any non-media arguments, passed into func()
         :param handleanimated: if func() only works on still images, set to True to process each frame individually.
-        :param expectresult: is func() supposed to return a result? if true, it expects an image. if false, can use a string.
+        :param expectresult: is func() supposed to return a result? if true, it expects an image. if false, can use a
+        string.
         :param filename: filename of the uploaded file. if None, not passed.
         :param spoiler: wether to spoil the uploaded file or not.
         :return: nothing, all processing and uploading is done in this function
@@ -419,7 +422,8 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                     for i, file in enumerate(files):
                         if (imtype := improcessing.mediatype(file)) not in allowedtypes[i]:
                             await ctx.reply(
-                                f"{config.emojis['warning']} Media #{i + 1} is {imtype}, it must be: {', '.join(allowedtypes[i])}")
+                                f"{config.emojis['warning']} Media #{i + 1} is {imtype}, it must be: "
+                                f"{', '.join(allowedtypes[i])}")
                             logger.warning(f"Media {i} type {imtype} is not in {allowedtypes[i]}")
                             # for f in files:
                             #     os.remove(f)
@@ -501,9 +505,10 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
         async def motivate(self, ctx, *, caption):
             """
             Captions media in the style of demotivational posters.
-            :Usage=$motivate `toptext`|`bottomtext`
-            :Param=caption - The caption text. Optionally add a bottom text with a `|` character.
-            :Param=media - A video, gif, or image. (automatically found in channel)
+
+            :param ctx: discord context
+            :param caption: The caption text. Optionally add a bottom text with a `|` character.
+            :mediaparam media: A video, gif, or image.
             """
             caption = caption.split("|")
             if len(caption) == 1:
@@ -516,9 +521,9 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             """
             Captions media in the style of top text + bottom text memes.
 
-            :Usage=$meme `toptext`|`bottomtext`
-            :Param=caption - The caption text. Optionally add a bottom text with a `|` character.
-            :Param=media - A video, gif, or image. (automatically found in channel)
+            :param ctx: discord context
+            :param caption: The caption text. Optionally add a bottom text with a `|` character.
+            :mediaparam media: A video, gif, or image.
             """
             caption = caption.split("|")
             if len(caption) == 1:
@@ -531,9 +536,9 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             """
             Captions media in the style of the classic Snapchat caption.
 
-            :Usage=$snapchat `text`
-            :Param=caption - The caption text.
-            :Param=media - A video, gif, or image. (automatically found in channel)
+            :param ctx: discord context
+            :param caption: The caption text.
+            :mediaparam media: A video, gif, or image.
             """
             await improcess(ctx, captionfunctions.snapchat, [["VIDEO", "GIF", "IMAGE"]], caption, handleanimated=True)
 
@@ -542,9 +547,9 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             """
             Captions media in the style of the confession website Whisper.
 
-            :Usage=$whispercaption `text`
-            :Param=caption - The caption text.
-            :Param=media - A video, gif, or image. (automatically found in channel)
+            :param ctx: discord context
+            :param caption: The caption text.
+            :mediaparam media: A video, gif, or image.
             """
             await improcess(ctx, captionfunctions.whisper, [["VIDEO", "GIF", "IMAGE"]], caption, handleanimated=True)
 
@@ -557,9 +562,9 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             shared. You should avoid making things which are unlawful, defamatory or likely to cause distress. Have fun
             and be kind!
 
-            :Usage=breakingnews `headline`|`ticker`
-            :Param=caption - The headline text. Optionally add a bottom "ticker" text with a `|` character.
-            :Param=media - A video, gif, or image. (automatically found in channel)
+            :param ctx: discord context
+            :param caption: The headline text. Optionally add a bottom "ticker" text with a `|` character.
+            :mediaparam media: A video, gif, or image.
             """
             caption = caption.split("|")
             if len(caption) == 1:
@@ -572,9 +577,9 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             """
             Captions media in the style of tenor.
 
-            :Usage=$tenorcap `toptext`|`bottomtext`
-            :Param=caption - The caption text. Optionally add a bottom text with a `|` character.
-            :Param=media - A video, gif, or image. (automatically found in channel)
+            :param ctx: discord context
+            :param caption: The caption text. Optionally add a bottom text with a `|` character.
+            :mediaparam media: A video, gif, or image.
             """
             caption = caption.split("|")
             if len(caption) == 1:
@@ -587,9 +592,9 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             """
             Captions media.
 
-            :Usage=$caption `text`
-            :Param=caption - The caption text.
-            :Param=media - A video, gif, or image. (automatically found in channel)
+            :param ctx: discord context
+            :param caption: The caption text.
+            :mediaparam media: A video, gif, or image.
             """
             await improcess(ctx, captionfunctions.caption, [["VIDEO", "GIF", "IMAGE"]], caption, handleanimated=True)
 
@@ -598,9 +603,9 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             """
             Captions media in the style of the "i'm stuff" meme
 
-            :Usage=$stuff `text`
-            :Param=caption - The caption text.
-            :Param=media - A video, gif, or image. (automatically found in channel)
+            :param ctx: discord context
+            :param caption: The caption text.
+            :mediaparam media: A video, gif, or image.
             """
             await improcess(ctx, captionfunctions.stuff, [["VIDEO", "GIF", "IMAGE"]], caption, handleanimated=True)
 
@@ -609,9 +614,9 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             """
             Eminem says something below your media.
 
-            :Usage=$eminem `text`
-            :Param=caption - The caption text.
-            :Param=media - A video, gif, or image. (automatically found in channel)
+            :param ctx: discord context
+            :param caption: The caption text.
+            :mediaparam media: A video, gif, or image.
             """
             await improcess(ctx, captionfunctions.eminemcap, [["VIDEO", "GIF", "IMAGE"]], caption, handleanimated=True)
 
@@ -620,9 +625,9 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             """
             Peter Griffin says something below your media.
 
-            :Usage=$eminem `text`
-            :Param=caption - The caption text.
-            :Param=media - A video, gif, or image. (automatically found in channel)
+            :param ctx: discord context
+            :param caption: The caption text.
+            :mediaparam media: A video, gif, or image.
             """
             await improcess(ctx, captionfunctions.petergriffincap, [["VIDEO", "GIF", "IMAGE"]], caption,
                             handleanimated=True)
@@ -635,9 +640,9 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             it's not a bug... its a feature™! (this command exists due to a former bug in $stuff)
 
 
-            :Usage=$stuffstretch `text`
-            :Param=caption - The caption text.
-            :Param=media - A video, gif, or image. (automatically found in channel)
+            :param ctx: discord context
+            :param caption: The caption text.
+            :mediaparam media: A video, gif, or image.
             """
             await improcess(ctx, captionfunctions.stuffstretch, [["VIDEO", "GIF", "IMAGE"]], caption,
                             handleanimated=True)
@@ -647,9 +652,9 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             """
             Captions underneath media.
 
-            :Usage=$bottomcaption `text`
-            :Param=caption - The caption text.
-            :Param=media - A video, gif, or image. (automatically found in channel)
+            :param ctx: discord context
+            :param caption: The caption text.
+            :mediaparam media: A video, gif, or image.
             """
             await improcess(ctx, captionfunctions.bottomcaption, [["VIDEO", "GIF", "IMAGE"]], caption,
                             handleanimated=True)
@@ -659,9 +664,9 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             """
             Captions media in the style of Essem's esmBot.
 
-            :Usage=$esmcaption `text`
-            :Param=caption - The caption text.
-            :Param=media - A video, gif, or image. (automatically found in channel)
+            :param ctx: discord context
+            :param caption: The caption text.
+            :mediaparam media: A video, gif, or image.
             """
             await improcess(ctx, captionfunctions.esmcaption, [["VIDEO", "GIF", "IMAGE"]], caption, handleanimated=True)
 
@@ -670,9 +675,9 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             """
             Captions media in the style of a Twitter screenshot.
 
-            :Usage=$twittercaption `text`
-            :Param=caption - The caption text.
-            :Param=media - A video, gif, or image. (automatically found in channel)
+            :param ctx: discord context
+            :param caption: The caption text.
+            :mediaparam media: A video, gif, or image.
             """
             await improcess(ctx, captionfunctions.twittercap, [["VIDEO", "GIF", "IMAGE"]], caption, handleanimated=True)
 
@@ -681,9 +686,9 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             """
             Captions media in the style of a dark mode Twitter screenshot.
 
-            :Usage=$twittercaption `text`
-            :Param=caption - The caption text.
-            :Param=media - A video, gif, or image. (automatically found in channel)
+            :param ctx: discord context
+            :param caption: The caption text.
+            :mediaparam media: A video, gif, or image.
             """
             await improcess(ctx, captionfunctions.twittercapdark, [["VIDEO", "GIF", "IMAGE"]], caption,
                             handleanimated=True)
@@ -693,9 +698,9 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             """
             Ends video with a freeze frame from $motivate.
 
-            :Usage=$freezemotivate `text`
-            :Param=caption - The caption text.
-            :Param=video - A video or gif. (automatically found in channel)
+            :param ctx: discord context
+            :param caption: The caption text.
+            :mediaparam video: A video or gif.
             """
             caption = caption.split("|")
             if len(caption) == 1:
@@ -708,10 +713,10 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             """
             Ends video with a freeze frame from $motivate with custom audio.
 
-            :Usage=$freezemotivateaudio `text`
-            :Param=caption - The caption text.
-            :Param=video - A video or gif. (automatically found in channel)
-            :Param=audio - An audio file. (automatically found in channel)
+            :param ctx: discord context
+            :param caption: The caption text.
+            :mediaparam video: A video or gif.
+            :mediaparam audio: An audio file.
             """
             caption = caption.split("|")
             if len(caption) == 1:
@@ -731,8 +736,9 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
         async def repost(self, ctx):
             """
             Reposts media as-is.
-            :Usage=$repost
-            :Param=media - Any valid media. (automatically found in channel)
+
+            :param ctx: discord context
+            :mediaparam media: Any valid media.
             """
             await improcess(ctx, lambda x: x, [["VIDEO", "GIF", "IMAGE", "AUDIO"]])
 
@@ -741,8 +747,9 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             """
             Re-encodes media.
             Videos become libx264 mp4s, audio files become libmp3lame mp3s, images become pngs.
-            :Usage=reencode
-            :Param=media - A video, image, or audio file. (automatically found in channel)
+
+            :param ctx: discord context
+            :mediaparam media: A video, image, or audio file.
             """
             await improcess(ctx, improcessing.allreencode, [["VIDEO", "IMAGE", "AUDIO"]])
 
@@ -751,9 +758,9 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             """
             Adds audio to media.
 
-            :Usage=$addaudio
-            :Param=media - Any valid media file. (automatically found in channel)
-            :Param=audio - An audio file. (automatically found in channel)
+            :param ctx: discord context
+            :mediaparam media: Any valid media file.
+            :mediaparam audio: An audio file.
             """
             await improcess(ctx, improcessing.addaudio, [["IMAGE", "GIF", "VIDEO", "AUDIO"], ["AUDIO"]])
 
@@ -762,11 +769,12 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             """
             Makes media into a low quality jpeg
 
-            :Usage=$jpeg `[strength]` `[stretch]` `[quality]`
-            :Param=strength - amount of times to jpegify image. must be between 1 and 100. defaults to 30.
-            :Param=stretch - randomly stretch the image by this number on each jpegification. can cause strange effects on videos. must be between 0 and 40. defaults to 20.
-            :Param=quality - quality of JPEG compression. must be between 1 and 95. defaults to 10.
-            :Param=media - A video, gif, or image. (automatically found in channel)
+            :param ctx: discord context
+            :param strength: amount of times to jpegify image. must be between 1 and 100.
+            :param stretch: randomly stretch the image by this number on each jpegification. can cause strange effects
+            on videos. must be between 0 and 40.
+            :param quality: quality of JPEG compression. must be between 1 and 95.
+            :mediaparam media: A video, gif, or image.
             """
             if not 0 < strength <= 100:
                 await ctx.send(f"{config.emojis['warning']} Strength must be between 0 and 100.")
@@ -787,14 +795,15 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             Applies several filters to the input media to make it appear "deep fried" in the style of deep fried memes.
             See https://pillow.readthedocs.io/en/3.0.x/reference/ImageEnhance.html
 
-            :Usage=$deepfry
-            :Param=brightness - value of 1 makes no change to the image. must be between 0 and 5. defaults to 1.5.
-            :Param=contrast - value of 1 makes no change to the image. must be between 0 and 5. defaults to 1.5.
-            :Param=sharpness - value of 1 makes no change to the image. must be between 0 and 5. defaults to 1.5.
-            :Param=saturation - value of 1 makes no change to the image. must be between 0 and 5. defaults to 1.5.
-            :Param=noise - value of 0 makes no change to the image. must be between 0 and 255. defaults to 40.
-            :Param=jpegstrength - value of 0 makes no change to the image. must be between 0 and 100. defaults to 20.
-            :Param=media - A video, gif, or image. (automatically found in channel)
+
+            :param ctx: discord context
+            :param brightness: value of 1 makes no change to the image. must be between 0 and 5.
+            :param contrast: value of 1 makes no change to the image. must be between 0 and 5.
+            :param sharpness: value of 1 makes no change to the image. must be between 0 and 5.
+            :param saturation: value of 1 makes no change to the image. must be between 0 and 5.
+            :param noise: value of 0 makes no change to the image. must be between 0 and 255.
+            :param jpegstrength: value of 0 makes no change to the image. must be between 0 and 100.
+            :mediaparam media: A video, gif, or image.
             """
             if not 0 <= brightness <= 5:
                 await ctx.send(f"{config.emojis['warning']} Brightness must be between 0 and 5.")
@@ -823,9 +832,9 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             Intentionally glitches media
             Effect is achieved through randomly changing a % of bytes in a jpeg image.
 
-            :Usage=$corrupt `strength`
-            :Param=strength - % chance to randomly change a byte of the input image. defaults to 0.05%
-            :Param=media - A video, gif, or image. (automatically found in channel)
+            :param ctx: discord context
+            :param strength: % chance to randomly change a byte of the input image.
+            :mediaparam media: A video, gif, or image.
             """
             if not 0 <= strength <= 0.5:
                 await ctx.send(f"{config.emojis['warning']} Strength must be between 0% and 0.5%.")
@@ -838,8 +847,8 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             """
             Pads media into a square shape.
 
-            :Usage=$square
-            :Param=media - A video, gif, or image. (automatically found in channel)
+            :param ctx: discord context
+            :mediaparam media: A video, gif, or image.
             """
             await improcess(ctx, improcessing.pad, [["VIDEO", "GIF", "IMAGE"]])
 
@@ -848,10 +857,10 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             """
             Resizes an image.
 
-            :Usage=$resize `width` `height`
-            :Param=width - width of output image. set to -1 to determine automatically based on height and aspect ratio.
-            :Param=height - height of output image. also can be set to -1.
-            :Param=media - A video, gif, or image. (automatically found in channel)
+            :param ctx: discord context
+            :param width: width of output image. set to -1 to determine automatically based on height and aspect ratio.
+            :param height: height of output image. also can be set to -1.
+            :mediaparam media: A video, gif, or image.
             """
             if not (1 <= width <= config.max_size or width == -1):
                 await ctx.send(f"{config.emojis['warning']} Width must be between 1 and "
@@ -868,7 +877,8 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             """
             makes media twice as wide
 
-            :Usage=$wide
+            :param ctx: discord context
+            :mediaparam media: A video, gif, or image.
             """
             await improcess(ctx, improcessing.resize, [["VIDEO", "GIF", "IMAGE"]], "iw*2", "ih")
 
@@ -877,7 +887,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             """
             makes media twice as tall
 
-            :Usage=$wide
+            
             """
             await improcess(ctx, improcessing.resize, [["VIDEO", "GIF", "IMAGE"]], "iw", "ih*2")
 
@@ -888,10 +898,10 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             This command is a bit slow.
             https://legacy.imagemagick.org/Usage/resize/#liquid-rescale
 
-            :Usage=$magick `[strength]`
-            :Param=strength - how strongly to compress the image. smaller is stronger. output image will be strength% of the original size. must be between 1 and 99. defaults to 50.
-            :Param=media - A video, gif, or image. (automatically found in channel)
-
+            :param ctx: discord context
+            :param strength: how strongly to compress the image. smaller is stronger. output image will be strength% of
+            the original size. must be between 1 and 99.
+            :mediaparam media: A video, gif, or image.
             """
             if not 1 <= strength <= 99:
                 await ctx.send(f"{config.emojis['warning']} Strength must be between 1 and 99.")
@@ -911,9 +921,9 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             Changes the amount of times a gif loops
             See $videoloop for videos.
 
-            :Usage=$gifloop `[loop]`
-            :Param=loop - number of times to loop. -1 for no loop, 0 for infinite loop.
-            :Param=media - A gif. (automatically found in channel)
+            :param ctx: discord context
+            :param loop: number of times to loop. -1 for no loop, 0 for infinite loop.
+            :mediaparam media: A gif.
             """
             if not -1 <= loop:
                 await ctx.send(f"{config.emojis['warning']} Loop must be -1 or more.")
@@ -928,9 +938,9 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             loop metadata.
             See $gifloop for gifs.
 
-            :Usage=$loop `[loop]`
-            :Param=loop - number of times to loop.
-            :Param=media - A video or GIF. (automatically found in channel)
+            :param ctx: discord context
+            :param loop: number of times to loop.
+            :mediaparam media: A video or GIF.
             """
             if not 1 <= loop <= 15:
                 await ctx.send(f"{config.emojis['warning']} Loop must be between 1 and 15.")
@@ -938,20 +948,21 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             await improcess(ctx, improcessing.videoloop, [["VIDEO", "GIF"]], loop)
 
         @commands.command(aliases=["flip", "rot"])
-        async def rotate(self, ctx, rot):
+        async def rotate(self, ctx, rottype):
             """
             Rotates and/or flips media
 
-            :Usage=$rotate `type`
-            :Param=type - 90: 90° clockwise, 90ccw: 90° counter clockwise, 180: 180°, vflip: vertical flip, hflip: horizontal flip
-            :Param=media - A video, gif, or image. (automatically found in channel)
+            :param ctx: discord context
+            :param rottype: 90: 90° clockwise, 90ccw: 90° counter clockwise, 180: 180°, vflip: vertical flip, hflip:
+            horizontal flip
+            :mediaparam media: A video, gif, or image.
             """
             types = ["90", "90ccw", "180", "vflip", "hflip"]
-            rot = rot.lower()
-            if rot not in types:
-                await ctx.send(f"{config.emojis['warning']} Rotation type must be: {', '.join(rot)}")
+            rottype = rottype.lower()
+            if rottype not in types:
+                await ctx.send(f"{config.emojis['warning']} Rotation type must be: {', '.join(rottype)}")
                 return
-            await improcess(ctx, improcessing.rotate, [["GIF", "IMAGE", "VIDEO"]], rot)
+            await improcess(ctx, improcessing.rotate, [["GIF", "IMAGE", "VIDEO"]], rottype)
 
         @commands.command()
         async def hue(self, ctx, h: float):
@@ -959,9 +970,9 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             Change the hue of media.
             see https://ffmpeg.org/ffmpeg-filters.html#hue
 
-            :Usage=$hue `hue`
-            :Param=hue - The hue angle as a number of degrees.
-            :Param=media - A video, gif, or image. (automatically found in channel)
+            :param ctx: discord context
+            :param h: The hue angle as a number of degrees.
+            :mediaparam media: A video, gif, or image.
             """
             await improcess(ctx, improcessing.hue, [["GIF", "IMAGE", "VIDEO"]], h)
 
@@ -972,9 +983,9 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             This command first makes the image grayscale, then replaces white with your color.
             The resulting image should be nothing but shades of your color.
 
-            :Usage=$tint `color`
-            :Param=color - The hex or RGB color to tint to.
-            :Param=media - A video, gif, or image. (automatically found in channel)
+            :param ctx: discord context
+            :param color: The hex or RGB color to tint to.
+            :mediaparam media: A video, gif, or image.
             """
             await improcess(ctx, improcessing.tint, [["GIF", "IMAGE", "VIDEO"]], color)
 
@@ -984,9 +995,9 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             Round corners of media
             see https://developer.mozilla.org/en-US/docs/Web/CSS/border-radius
 
-            :Usage=roundcorners `radiuspercent`
-            :Param=radiuspercent - How rounded the corners will be. 0 is rectangle, 50 is ellipse. defaults to 50.
-            :Param=media - A video, gif, or image. (automatically found in channel)
+            :param ctx: discord context
+            :param radiuspercent: How rounded the corners will be. 0 is rectangle, 50 is ellipse.
+            :mediaparam media: A video, gif, or image.
             """
             if not 0 <= radiuspercent <= 50:
                 await ctx.send(f"{config.emojis['warning']} Border radius percent must be between 0 and 50.")
@@ -1002,9 +1013,9 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             This command changes *perceived loudness*, not the raw audio level.
             WARNING: ***VERY*** LOUD AUDIO CAN BE CREATED
 
-            :Usage=$volume `volume`
-            :Param=volume - number to multiply the percieved audio level by. Must be between 0 and 32.
-            :Param=media - A video or audio file. (automatically found in channel)
+            :param ctx: discord context
+            :param volume: number to multiply the percieved audio level by. Must be between 0 and 32.
+            :mediaparam media: A video or audio file.
             """
             if not 0 <= volume <= 32:
                 await ctx.send(f"{config.emojis['warning']} Volume must be between 0 and 32.")
@@ -1016,8 +1027,8 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             """
             alias for $volume 0
 
-            :Usage=mute
-            :Param=media - A video or audio file. (automatically found in channel)
+            :param ctx: discord context
+            :mediaparam media: A video or audio file.
             """
             await improcess(ctx, improcessing.volume, [["VIDEO", "AUDIO"]], 0)
 
@@ -1027,10 +1038,11 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             Applies a "wavy pitch"/vibrato effect to audio.
             officially described as "Sinusoidal phase modulation"
             see https://ffmpeg.org/ffmpeg-filters.html#tremolo
-            :Usage=$vibrato `[frequency]` `[depth]`
-            :Param=frequency - Modulation frequency in Hertz. must be between 0.1 and 20000. defaults to 5.
-            :Param=depth - Depth of modulation as a percentage. must be between 0 and 1. defaults to 1.
-            :Param=media - A video or audio file. (automatically found in channel)
+
+            :param ctx: discord context
+            :param frequency: Modulation frequency in Hertz. must be between 0.1 and 20000.
+            :param depth: Depth of modulation as a percentage. must be between 0 and 1.
+            :mediaparam media: A video or audio file.
             """
             if not 0.1 <= frequency <= 20000:
                 await ctx.send(f"{config.emojis['warning']} Frequency must be between 0.1 and 20000.")
@@ -1045,9 +1057,10 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             """
             Changes pitch of audio
 
-            :Usage=$pitch `[numofhalfsteps]`
-            :Param=numofhalfsteps - the number of half steps to change the pitch by. `12` raises the pitch an octave and `-12` lowers the pitch an octave.
-            :Param=media - A video or audio file. (automatically found in channel)
+            :param ctx: discord context
+            :param numofhalfsteps: the number of half steps to change the pitch by. `12` raises the pitch an octave and
+            `-12` lowers the pitch an octave.
+            :mediaparam media: A video or audio file.
             """
             await improcess(ctx, improcessing.pitch, [["VIDEO", "AUDIO"]], numofhalfsteps)
 
@@ -1055,11 +1068,12 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
         async def concatv(self, ctx):
             """
             Makes one video file play right after another.
-            The output video will take on all of the settings of the FIRST video. The second video will be scaled to fit.
+            The output video will take on all of the settings of the FIRST video.
+            The second video will be scaled to fit.
 
-            :Usage=$concatv
-            :Param=video1 - A video or gif. (automatically found in channel)
-            :Param=video2 - A video or gif. (automatically found in channel)
+            :param ctx: discord context
+            :mediaparam video1: A video or gif.
+            :mediaparam video2: A video or gif.
             """
             await improcess(ctx, improcessing.concatv, [["VIDEO", "GIF"], ["VIDEO", "GIF"]])
 
@@ -1068,9 +1082,9 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             """
             Stacks 2 videos horizontally
 
-            :Usage=$hstack
-            :Param=video1 - A video, image, or gif. (automatically found in channel)
-            :Param=video2 - A video, image, or gif. (automatically found in channel)
+            :param ctx: discord context
+            :mediaparam video1: A video, image, or gif.
+            :mediaparam video2: A video, image, or gif.
             """
             await improcess(ctx, improcessing.stack, [["VIDEO", "GIF", "IMAGE"], ["VIDEO", "GIF", "IMAGE"]],
                             "hstack")
@@ -1080,9 +1094,9 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             """
             Stacks 2 videos horizontally
 
-            :Usage=$vstack
-            :Param=video1 - A video, image, or gif. (automatically found in channel)
-            :Param=video2 - A video, image, or gif. (automatically found in channel)
+            :param ctx: discord context
+            :mediaparam video1: A video, image, or gif.
+            :mediaparam video2: A video, image, or gif.
             """
             await improcess(ctx, improcessing.stack, [["VIDEO", "GIF", "IMAGE"], ["VIDEO", "GIF", "IMAGE"]],
                             "vstack")
@@ -1092,10 +1106,10 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             """
             Overlays the second input over the first
 
-            :Usage=$overlay
-            :Param=alpha - the alpha (transparency) of the top video. must be between 0 and 1. defaults to 0.5.
-            :Param=video1 - A video or gif. (automatically found in channel)
-            :Param=video2 - A video or gif. (automatically found in channel)
+            :param ctx: discord context
+            :param alpha: the alpha (transparency) of the top video. must be between 0 and 1.
+            :mediaparam video1: A video or gif.
+            :mediaparam video2: A video or gif.
             """
             if not 0 <= alpha <= 1:
                 await ctx.send(f"{config.emojis['warning']} Alpha must be between 0 and 1.")
@@ -1108,9 +1122,9 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             """
             Adds the pixel values of the second video to the first.
 
-            :Usage=$add
-            :Param=video1 - A video or gif. (automatically found in channel)
-            :Param=video2 - A video or gif. (automatically found in channel)
+            :param ctx: discord context
+            :mediaparam video1: A video or gif.
+            :mediaparam video2: A video or gif.
             """
             await improcess(ctx, improcessing.overlay, [["VIDEO", "GIF", "IMAGE"], ["VIDEO", "GIF", "IMAGE"]], 1,
                             "add")
@@ -1121,9 +1135,9 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             Changes the speed of media.
             This command preserves the original FPS, which means speeding up will drop frames. See $fps.
 
-            :Usage=$speed `[speed]`
-            :Param=speed - Multiplies input video speed by this number. must be between 0.25 and 100. defaults to 2.
-            :Param=video - A video or gif. (automatically found in channel)
+            :param ctx: discord context
+            :param speed: Multiplies input video speed by this number. must be between 0.25 and 100.
+            :mediaparam video: A video or gif.
             """
             if not 0.25 <= speed <= 100:
                 await ctx.send(f"{config.emojis['warning']} Speed must be between 0.25 and 100")
@@ -1137,9 +1151,9 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             Currently this command does NOT apply to audio. This is an FFmpeg limitation.
             see https://ffmpeg.org/ffmpeg-filters.html#random
 
-            :Usage=random `[frames]`
-            :Param=frames - Set size in number of frames of internal cache. must be between 2 and 512. default is 30.
-            :Param=video - A video or gif. (automatically found in channel)
+            :param ctx: discord context
+            :param frames: Set size in number of frames of internal cache. must be between 2 and 512. default is 30.
+            :mediaparam video: A video or gif.
             """
             if not 2 <= frames <= 512:
                 await ctx.send(f"{config.emojis['warning']} Frames must be between 2 and 512")
@@ -1151,8 +1165,8 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             """
             Reverses media.
 
-            :Usage=$reverse
-            :Param=video - A video or gif. (automatically found in channel)
+            :param ctx: discord context
+            :mediaparam video: A video or gif.
             """
             await improcess(ctx, improcessing.reverse, [["VIDEO", "GIF"]])
 
@@ -1164,11 +1178,10 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             CRF info is found at https://trac.ffmpeg.org/wiki/Encode/H.264#crf
             audio quality info is found under https://trac.ffmpeg.org/wiki/Encode/AAC#fdk_cbr
 
-            :Usage=$compressv `[crf]` `[qa]`
-            :Param=crf - Controls video quality. Higher is worse quality. must be between 28 and 51. defaults to 51.
-            :Param=qa - Audio bitrate in kbps. Lower is worse quality. Must be between 10 and 112. defaults to 20.
-            :Param=video - A video or gif. (automatically found in channel)
-
+            :param ctx: discord context
+            :param crf: Controls video quality. Higher is worse quality. must be between 28 and 51.
+            :param qa: Audio bitrate in kbps. Lower is worse quality. Must be between 10 and 112.
+            :mediaparam video: A video or gif.
             """
             if not 28 <= crf <= 51:
                 await ctx.send(f"{config.emojis['warning']} CRF must be between 28 and 51.")
@@ -1185,11 +1198,12 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             This command keeps the speed the same.
             BEWARE: Changing the FPS of gifs can create strange results due to the strange way GIFs store FPS data.
             GIFs are only stable at certain FPS values. These include 50, 30, 15, 10, and others.
-            An important reminder that by default tenor "gifs" are interpreted as mp4s, which do not suffer this problem.
+            An important reminder that by default tenor "gifs" are interpreted as mp4s,
+            which do not suffer this problem.
 
-            :Usage=$fps `[fps]`
-            :Param=fps - Frames per second of the output. must be between 1 and 60.
-            :Param=video - A video or gif. (automatically found in channel)
+            :param ctx: discord context
+            :param fps: Frames per second of the output. must be between 1 and 60.
+            :mediaparam video: A video or gif.
             """
             if not 1 <= fps <= 60:
                 await ctx.send(f"{config.emojis['warning']} FPS must be between 1 and 60.")
@@ -1201,8 +1215,8 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             """
             Inverts colors of media
 
-            :Usage=$invert
-            :Param=video - A video or gif. (automatically found in channel)
+            :param ctx: discord context
+            :mediaparam video: A video or gif.
             """
             await improcess(ctx, improcessing.invert, [["VIDEO", "GIF", "IMAGE"]])
 
@@ -1211,10 +1225,10 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             """
             Trims media.
 
-            :Usage=$trim `[length]` `start`
-            :Param=length - Length in seconds to trim the media to.
-            :Param=start - Time in seconds to start the trimmed media at.
-            :Param=media - A video, gif, or audio file. (automatically found in channel)
+            :param ctx: discord context
+            :param length: Length in seconds to trim the media to.
+            :param start: Time in seconds to start the trimmed media at.
+            :mediaparam media: A video, gif, or audio file.
             """
             if not 0 < length:
                 await ctx.send(f"{config.emojis['warning']} Length must be more than 0.")
@@ -1232,22 +1246,30 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                            FORM_CORR: int = 0, FORM_WARP: float = 0.0, MIX: float = 1.0):
             """
             Autotunes media.
-            :Param=CONCERT_A - CONCERT A: Value in Hz of middle A, used to tune the entire algorithm. defaults to 440.
-            :Param=FIXED_PITCH - FIXED PITCH: Pitch (semitones) toward which pitch is pulled when PULL TO FIXED PITCH is engaged. FIXED PITCH = O: middle A. FIXED PITCH = MIDI pitch - 69. defaults to 0.
-            :Param=FIXED_PULL - PULL TO FIXED PITCH: Degree to which pitch Is pulled toward FIXED PITCH. O: use original pitch. 1: use FIXED PITCH. defaults to 0.1.
-            :Param=KEY - the key it is tuned to. can be any letter a-g, A-G, or X (chromatic scale). defaults to "c"
-            :Param=CORR_STR - CORRECTION STRENGTH: Strength of pitch correction. O: no correction. 1: full correction. defaults to 1.
-            :Param=CORR_SMOOTH - CORRECTION SMOOTHNESS: Smoothness of transitions between notes when pitch correction is used. O: abrupt transitions. 1: smooth transitions. defaults to 0.
-            :Param=PITCH_SHIFT - PITCH SHIFT: Number of notes in scale by which output pitch Is shifted. defaults to 0.
-            :Param=SCALE_ROTATE - OUTPUT SCALE ROTATE: Number of notes by which the output scale Is rotated In the conversion back to semitones from scale notes. Can be used to change the scale between major and minor or to change the musical mode. defaults to 0.
-            :Param=LFO_DEPTH - LFO DEPTH: Degree to which low frequency oscillator (LFO) Is applied. defaults to 0.
-            :Param=LFO_RATE - LFO RATE: Rate (In Hz) of LFO. defaults to 1.
-            :Param=LFO_SHAPE - LFO SHAPE: Shape of LFO waveform. -1: square. 0: sine. 1: triangle. defaults to 0.
-            :Param=LFO_SYMM - LFO SYMMETRY: Adjusts the rise/fall characteristic of the LFO waveform. defaults to 0.
-            :Param=LFO_QUANT - LFO QUANTIZATION: Quantizes the LFO waveform, resulting in chiptune-like effects. defaults to 0.
-            :Param=FORM_CORR - FORMANT CORRECTION: Enables formant correction, reducing the "chipmunk effect" In pitch shifting. defaults to 0.
-            :Param=FORM_WARP - FORMANT WARP: Warps the formant frequencies. Can be used to change gender/age. defaults to 0.
-            :Param=MIX - Blends between the modified signal and the delay-compensated Input signal. 1: wet. O: dry. defaults to 1.
+            :param ctx: discord context
+            :param CONCERT_A: CONCERT A: Value in Hz of middle A, used to tune the entire algorithm.
+            :param FIXED_PITCH: FIXED PITCH: Pitch (semitones) toward which pitch is pulled when PULL TO FIXED PITCH is
+             engaged. FIXED PITCH = O: middle A. FIXED PITCH = MIDI pitch - 69.
+            :param FIXED_PULL: PULL TO FIXED PITCH: Degree to which pitch Is pulled toward FIXED PITCH. O: use original
+             pitch. 1: use FIXED PITCH.
+            :param KEY: the key it is tuned to. can be any letter a-g, A-G, or X (chromatic scale).
+            :param CORR_STR: CORRECTION STRENGTH: Strength of pitch correction. O: no correction. 1: full correction.
+            :param CORR_SMOOTH: CORRECTION SMOOTHNESS: Smoothness of transitions between notes when pitch correction is
+            used. O: abrupt transitions. 1: smooth transitions.
+            :param PITCH_SHIFT: PITCH SHIFT: Number of notes in scale by which output pitch Is shifted.
+            :param SCALE_ROTATE: OUTPUT SCALE ROTATE: Number of notes by which the output scale Is rotated In the
+            conversion back to semitones from scale notes. Can be used to change the scale between major and minor or
+            to change the musical mode.
+            :param LFO_DEPTH: LFO DEPTH: Degree to which low frequency oscillator (LFO) Is applied.
+            :param LFO_RATE: LFO RATE: Rate (In Hz) of LFO.
+            :param LFO_SHAPE: LFO SHAPE: Shape of LFO waveform. -1: square. 0: sine. 1: triangle.
+            :param LFO_SYMM: LFO SYMMETRY: Adjusts the rise/fall characteristic of the LFO waveform.
+            :param LFO_QUANT: LFO QUANTIZATION: Quantizes the LFO waveform, resulting in chiptune-like effects.
+            :param FORM_CORR: FORMANT CORRECTION: Enables formant correction, reducing the "chipmunk effect"
+            in pitch shifting.
+            :param FORM_WARP: FORMANT WARP: Warps the formant frequencies. Can be used to change gender/age.
+            :param MIX: Blends between the modified signal and the delay-compensated Input signal. 1: wet. O: dry.
+            :mediaparam media: A video or audio file.
             """
             await improcess(ctx, improcessing.handleautotune, [["VIDEO", "AUDIO"]],
                             CONCERT_A, FIXED_PITCH, FIXED_PULL, KEY, CORR_STR, CORR_SMOOTH, PITCH_SHIFT, SCALE_ROTATE,
@@ -1272,26 +1294,16 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
         def __init__(self, bot):
             self.bot = bot
 
-        # superceded by $addaudio
-        # 
-        # @commands.command()
-        # async def imageaudio(self, ctx):
-        #     """
-        #     Combines an image and audio into a video.
-        #
-        #     :Usage=$imageaudio
-        #     :Param=image - An image. (automatically found in channel)
-        #     :Param=audio - An audio file. (automatically found in channel)
-        #     """
-        #     await improcess(ctx, improcessing.imageaudio, [["IMAGE"], ["AUDIO"]])
         @commands.command(aliases=["filename", "name", "setname"])
         async def rename(self, ctx, filename: str):
             """
             Renames media.
-            Note: Discord's spoiler feature is dependent on filenames starting with "SPOILER_". renaming files may unspoiler them.
+            Note: Discord's spoiler feature is dependent on filenames starting with "SPOILER_". renaming files may
+            unspoiler them.
 
-            :Usage=$rename `name`
-            :Param=media - Any valid media. (automatically found in channel)
+            :param ctx: discord context
+            :param filename: the new name of the file
+            :mediaparam media: Any valid media.
             """
             await improcess(ctx, lambda x: x, [["VIDEO", "GIF", "IMAGE", "AUDIO"]], filename=filename)
 
@@ -1300,28 +1312,32 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             """
             Spoilers media.
 
-            :Usage=$spoiler
-            :Param=media - Any valid media. (automatically found in channel)
+            :param ctx: discord context
+            :mediaparam media: Any valid media.
             """
             await improcess(ctx, lambda x: x, [["VIDEO", "GIF", "IMAGE", "AUDIO"]], spoiler=True)
 
         @commands.command(aliases=["avatar", "pfp", "profilepicture", "profilepic", "ayowhothismf", "av"])
-        async def icon(self, ctx, *, userorserver=None):
+        async def icon(self, ctx, *, body=None):
             """
             Grabs the icon url of a Discord user or server.
-            This command works off IDs. user mentions contain the ID internally so mentioning a user will work.
-            To get the icon of a guild, copy the guild id and use that as the parameter.
-            To get the icon of a webhook message, copy the message ID and ***in the same channel as the message*** use the message ID as the parameter. This will also work for normal users though i have no idea why you'd do it that way.
 
-            :Usage=$icon `body`
-            :Param=body - must contain a user, guild, or message ID. if left blank, the author's avatar will be sent.
+            This command works off IDs. user mentions contain the ID
+            internally so mentioning a user will work. To get the icon of a guild, copy the guild id and use that as
+            the parameter. To get the icon of a webhook message, copy the message ID and ***in the same channel as
+            the message*** use the message ID as the parameter. This will also work for normal users though i have no
+            idea why you'd do it that way.
+
+
+            :param ctx: discord context
+            :param body: must contain a user, guild, or message ID. if left blank, the author's avatar will be sent.
             """
-            if userorserver is None:
+            if body is None:
                 result = [await improcessing.iconfromsnowflakeid(ctx.author.id, bot, ctx)]
             else:
                 id_regex = re.compile(r'([0-9]{15,20})')
                 tasks = []
-                for m in re.finditer(id_regex, userorserver):
+                for m in re.finditer(id_regex, body):
                     tasks.append(improcessing.iconfromsnowflakeid(int(m.group(0)), bot, ctx))
                 result = await asyncio.gather(*tasks)
                 result = list(filter(None, result))  # remove Nones
@@ -1331,18 +1347,18 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                 await ctx.send(f"{config.emojis['warning']} No valid user, guild, or message ID found.")
 
         @commands.command(aliases=["youtube", "youtubedownload", "youtubedl", "ytdownload", "download", "dl", "ytdl"])
-        async def videodl(self, ctx, url, form="video"):
+        async def videodl(self, ctx, videourl, videoformat="video"):
             """
             Downloads a web hosted video from sites like youtube.
             Any site here works: https://ytdl-org.github.io/youtube-dl/supportedsites.html
 
-            :Usage=$ytdl `videourl` `format`
-            :Param=videourl - the URL of a video or the title of a youtube video.
-            :Param=format - download audio or video, defaults to video.
+            :param ctx: discord context
+            :param videourl: the URL of a video or the title of a youtube video.
+            :param videoformat: download audio or video.
             """
             types = ["video", "audio"]
-            form = form.lower()
-            if form not in types:
+            videoformat = videoformat.lower()
+            if videoformat not in types:
                 await ctx.reply(f"{config.emojis['warning']} Download format must be `video` or `audio`.")
                 return
             # await improcessing.ytdl(url, form)
@@ -1351,7 +1367,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                     # logger.info(url)
                     msg = await ctx.reply(f"{config.emojis['working']} Downloading from site...", mention_author=False)
                     try:
-                        r = await improcessing.run_in_exec(ytdownload, url, form)
+                        r = await improcessing.run_in_exec(ytdownload, videourl, videoformat)
                         if r:
                             tempfiles.reserve_names([r])
                             r = await improcessing.assurefilesize(r, ctx, re_encode=False)
@@ -1386,8 +1402,8 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             """
             Converts a video to a GIF.
 
-            :Usage=$togif
-            :Param=video - A video. (automatically found in channel)
+            :param ctx: discord context
+            :mediaparam video: A video.
             """
             await improcess(ctx, improcessing.mp4togif, [["VIDEO"]])
 
@@ -1396,8 +1412,8 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             """
             Converts a video or gif to an animated png.
 
-            :Usage=$toapng
-            :Param=video - A video or gif. (automatically found in channel)
+            :param ctx: discord context
+            :mediaparam video: A video or gif.
             """
             await improcess(ctx, improcessing.toapng, [["VIDEO", "GIF"]])
 
@@ -1406,8 +1422,8 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             """
             Converts a video to only audio.
 
-            :Usage=$toaudio
-            :Param=video - A video. (automatically found in channel)
+            :param ctx: discord context
+            :mediaparam video: A video.
             """
             await improcess(ctx, improcessing.toaudio, [["VIDEO", "AUDIO"]])
 
@@ -1419,8 +1435,8 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             This command gets the gif straight from tenor, making it faster than $videotogif,
             however, some tenor gifs can be lower fps/quality than the converted video.
 
-            :Usage=$tenorgif
-            :Param=gif - any gif sent from tenor. (automatically found in channel)
+            :param ctx: discord context
+            :mediaparam gif: any gif sent from tenor.
             """
             logger.info("Getting tenor gif...")
             file = await tenorsearch(ctx, True)
@@ -1435,8 +1451,8 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             """
             Converts a GIF to a video.
 
-            :Usage=$tovideo
-            :Param=gif - A gif. (automatically found in channel)
+            :param ctx: discord context
+            :mediaparam gif: A gif.
             """
             await improcess(ctx, improcessing.giftomp4, [["GIF"]])
 
@@ -1445,8 +1461,8 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             """
             Converts media to PNG
 
-            :Usage=$topng
-            :Param=media - A video, gif, or image. (automatically found in channel)
+            :param ctx: discord context
+            :mediaparam media: A video, gif, or image.
             """
             await improcess(ctx, improcessing.mediatopng, [["VIDEO", "GIF", "IMAGE"]])
 
@@ -1456,8 +1472,8 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             Sends the raw image for a custom Discord emoji.
             Each emoji is sent as a separate message intentionally to allow replying with a media command.
 
-            :Usage=$emojiurl `emojis`
-            :Param=emojis - Custom emojis to send the URL of. Be sure to put a space between them.
+            :param ctx: discord context
+            :param emojis: Custom emojis to send the URL of. Be sure to put a space between them.
             """
             if emojis:
                 out = []
@@ -1474,8 +1490,8 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             Sends the twemoji image for an emoji.
             Twemoji is the open source emoji set that discord desktop and twitter use. https://twemoji.twitter.com/
 
-            :Usage=$twemoji `emoji`
-            :Param=emoji - Up to 5 default emojis.
+            :param ctx: discord context
+            :param msg: Message containing up to 5 default emojis.
             """
             if ctx.message.reference:
                 msg = ctx.message.reference.resolved.content
@@ -1507,8 +1523,8 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             """
             Colors a trollface with an image.
 
-            :Usage=$trollface
-            :Param=media - A video, gif, or image. (automatically found in channel)
+            :param ctx: discord context
+            :mediaparam media: A video, gif, or image.
             """
             await improcess(ctx, captionfunctions.trollface, [["VIDEO", "GIF", "IMAGE"]], handleanimated=True)
 
@@ -1519,8 +1535,8 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             For any letter not in the original meme, a random slice of the face is selected.
             Based on https://github.com/aechaechaech/Jerma-Imposter-Message-Generator
 
-            :Usage=$sus `text`
-            :Param=text - The text to cut and splice.
+            :param ctx: discord context
+            :param text: The text to cut and splice.
             """
             await improcess(ctx, sus.sus, [], text)
 
@@ -1529,8 +1545,8 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             """
             Eminem says something.
 
-            :Usage=$eminemsay `text`
-            :Param=text - The text to put next to eminem.
+            :param ctx: discord context
+            :param text: The text to put next to eminem.
             """
             await improcess(ctx, captionfunctions.eminem, [], [text])
 
@@ -1540,9 +1556,9 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             An image of your choice says something.
             Like `$eminemsay` but for a custom image.
 
-            :Usage=$imagesay `text`
-            :Param=media - An image, video, or gif (automatically found in channel)
-            :Param=text - The text to put next to your image.
+            :param ctx: discord context
+            :param text: The text to put next to your image.
+            :mediaparam media: An image, video, or gif
             """
             await improcess(ctx, captionfunctions.imagesay, [["IMAGE", "VIDEO", "GIF"]], text, handleanimated=True)
 
@@ -1553,10 +1569,10 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             An image of your choice says something below another image.
             Like `$stuff`, `$eminem` or `$petergriffin` but for a custom image.
 
-            :Usage=$imagecaption `text`
-            :Param=media - An image, video, or gif to caption (automatically found in channel)
-            :Param=image - An image to sit next to the caption text (automatically found in channel)
-            :Param=text - The text to put next to your image.
+            :param ctx: discord context
+            :param text: The text to put next to your image.
+            :mediaparam media: An image, video, or gif to caption
+            :mediaparam image: An image to sit next to the caption text
             """
             await improcess(ctx, captionfunctions.imagesaycap, [["IMAGE", "VIDEO", "GIF"], ["IMAGE"]], text,
                             handleanimated=True)
@@ -1567,10 +1583,10 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             """
             like $imagecaption but the image is on the left.
 
-            :Usage=imagecaptionleft `text`
-            :Param=media - An image, video, or gif to caption (automatically found in channel)
-            :Param=image - An image to sit next to the caption text (automatically found in channel)
-            :Param=text - The text to put next to your image.
+            :param ctx: discord context
+            :param text: The text to put next to your image.
+            :mediaparam media: An image, video, or gif to caption
+            :mediaparam image: An image to sit next to the caption text
             """
             await improcess(ctx, captionfunctions.imagesaycapleft, [["IMAGE", "VIDEO", "GIF"], ["IMAGE"]], text,
                             handleanimated=True)
@@ -1581,8 +1597,8 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             Overlays an image over the hand of the boy in the "give me your phone" meme.
             https://knowyourmeme.com/memes/give-me-your-phone
 
-            :Usage=$givemeyourphone
-            :Param=media - The media to be overlayed over his hand. (automatically found in channel)
+            :param ctx: discord context
+            :mediaparam media: The media to be overlayed over his hand.
             """
             await improcess(ctx, captionfunctions.givemeyourphone, [["IMAGE", "VIDEO", "GIF"]], handleanimated=True)
 
@@ -1592,8 +1608,8 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             """
             Makes a fake Donald Trump tweet.
 
-            :Usage=donaldtweet `text`
-            :Param=text - The text to put in the fake tweet.
+            :param ctx: discord context
+            :param text: The text to put in the fake tweet.
             """
             await improcess(ctx, captionfunctions.dontweet, [], [text])
 
@@ -1624,8 +1640,8 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             """
             Changes the bot's prefix for this guild.
 
-            :Usage=prefix `prefix`
-            :Param=prefix - The new prefix for the bot to use.
+            :param ctx: discord context
+            :param prefix: The new prefix for the bot to use.
             """
             if prefix is None or prefix == config.default_command_prefix:
                 async with aiosqlite.connect(config.db_filename) as db:
@@ -1660,11 +1676,13 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
         @commands.command(aliases=["createemoji"])
         async def addemoji(self, ctx, name):
             """
-            Adds a file as an emoji to a server. Both MediaForge and the command caller must have the Manage Emojis permission.
+            Adds a file as an emoji to a server.
 
-            :Usage=$addemoji `name`
-            :Param=name - The emoji name. Must be at least 2 characters.
-            :Param=media - A gif or image. (automatically found in channel)
+            Both MediaForge and the command caller must have the Manage Emojis permission.
+
+            :param ctx: discord context
+            :param name: The emoji name. Must be at least 2 characters.
+            :mediaparam media: A gif or image.
             """
             await improcess(ctx, improcessing.add_emoji, [["GIF", "IMAGE"]], ctx.guild, name, expectresult=False,
                             resize=False)
@@ -1679,10 +1697,10 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             Adds a file as a sticker to a server. Both MediaForge and the command caller must have the Manage Emojis
             and Stickers permission.
 
-            :Usage=$addsticker `emoji` `name`
-            :Param=sticker - The related emoji. Must be a single default emoji.
-            :Param=name - The sticker name. Must be at least 2 characters.
-            :Param=media - A gif or image. (automatically found in channel)
+            :param ctx: discord context
+            :param stickeremoji: The related emoji. Must be a single default emoji.
+            :param name: The sticker name. Must be at least 2 characters.
+            :mediaparam media: A gif or image.
             """
             await improcess(ctx, improcessing.add_sticker, [["GIF", "IMAGE"]], ctx.guild, stickeremoji, name,
                             expectresult=False, resize=False)
@@ -1692,8 +1710,8 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             """
             Detects bpm of media.
 
-            :Usage=$bpm
-            :Param=media - Video or audio. (automatically found in channel)
+            :param ctx: discord context
+            :mediaparam media: Video or audio.
             """
             await improcess(ctx, improcessing.tempo, [["VIDEO", "AUDIO"]], expectresult=False, resize=False)
 
@@ -1706,8 +1724,8 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             Sets a file as the server banner.
             Server must support banners.
 
-            :Usage=$setbanner
-            :Param=media - An image. (automatically found in channel)
+            :param ctx: discord context
+            :mediaparam media: An image.
             """
             if "BANNER" not in ctx.guild.features:
                 await ctx.reply(f"{config.emojis['x']} This guild does not support banners.")
@@ -1724,8 +1742,8 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             Sets a file as the server icon.
             If setting a gif, server must support animated icons.
 
-            :Usage=$seticon
-            :Param=media - An image or gif. (automatically found in channel)
+            :param ctx: discord context
+            :mediaparam media: An image or gif.
             """
             await improcess(ctx, improcessing.set_icon, [["IMAGE", "GIF"]], ctx.guild, expectresult=False,
                             resize=False)
@@ -1735,7 +1753,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             """
             Displays some stats about what the bot is currently doing.
 
-            :Usage=$stats
+            :param ctx: discord context
             """
             stats = renderpool.stats()
             embed = discord.Embed(color=discord.Color(0xD262BA), title="Statistics",
@@ -1754,7 +1772,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             """
             Displays info about bot shards
 
-            :Usage=$stats
+            :param ctx: discord context
             """
             embed = discord.Embed(color=discord.Color(0xD262BA), title="Shards",
                                   description="Each shard is a separate connection to Discord that handles a fraction "
@@ -1769,7 +1787,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             """
             Lists important links related to MediaForge such as the official server.
 
-            :Usage=$stats
+            :param ctx: discord context
             """
             embed = discord.Embed(color=discord.Color(0xD262BA), title="MediaForge")
             embed.add_field(name="Official MediaForge Discord Server", value=f"https://discord.gg/xwWjgyVqBz")
@@ -1786,7 +1804,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             """
             Shows MediaForge's privacy policy
 
-            :Usage=$privacy
+            :param ctx: discord context
             """
             embed = discord.Embed(color=discord.Color(0xD262BA), title="Privacy Policy")
             embed.add_field(name="What MediaForge Collects",
@@ -1810,7 +1828,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             https://github.com/HexCodeFFF/mediaforge
             This command returns the output of `git status`.
 
-            :Usage=$version
+            :param ctx: discord context
             """
             await improcessing.run_command("git", "fetch")
             status = await improcessing.run_command("git", "status")
@@ -1826,7 +1844,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             Shows version information of FFmpeg running on this copy.
             This command returns the output of `ffmpeg -version`.
 
-            :Usage=ffmpegversion
+            :param ctx: discord context
             """
             status = await improcessing.run_command("ffmpeg", "-version")
             with io.StringIO() as buf:
@@ -1834,75 +1852,123 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                 buf.seek(0)
                 await ctx.reply("Output of `ffmpeg -version`", file=discord.File(buf, filename="ffmpegversion.txt"))
 
-        @commands.command()
-        async def help(self, ctx, *, arg=None):
-            """
-            Shows the help message.
+        def showcog(self, cog):
+            showcog = False
+            # check if there are any non-hidden commands in the cog, if not, dont show it in the help menu.
+            for com in cog.get_commands():
+                if not com.hidden:
+                    showcog = True
+                    break
+            return showcog
 
-            :Usage=$help `[inquiry]`
-            :Param=inquiry - the name of a command or command category. If none is provided, all categories are shown.
+        @commands.command()
+        async def help(self, ctx, *, inquiry: typing.Optional[str] = None):
+            """
+            Shows help on bot commands.
+
+            :param ctx: discord context
+            :param inquiry: the name of a command or command category. If none is provided, all categories are shown.
+            :return: the help text if found
             """
             prefix = await prefix_function(bot, ctx.message)
-            if arg is None:
+            # unspecified inquiry
+            if inquiry is None:
                 embed = discord.Embed(title="Help", color=discord.Color(0xB565D9),
                                       description=f"Run `{prefix}help category` to list commands from "
                                                   f"that category.")
-                for c in bot.cogs.values():
-                    if showcog(c):
+                # for every cog
+                for c in self.bot.cogs.values():
+                    # if there is 1 or more non-hidden command
+                    if self.showcog(c):
+                        # add field for every cog
                         if not c.description:
                             c.description = "No Description."
                         embed.add_field(name=c.qualified_name, value=c.description)
-                embed.add_field(name="Tips", value="A list of tips for using the bot.")
-                await ctx.reply(embed=embed)
-            elif arg.lower() in ["tips", "tip"]:
-                embed = discord.Embed(title="Tips", color=discord.Color(0xD262BA))
-                for tip, tipv in config.tips.items():
-                    embed.add_field(name=tip, value=tipv, inline=False)
                 await ctx.reply(embed=embed)
             # if the command argument matches the name of any of the cogs that contain any not hidden commands
-            elif arg.lower() in [c.lower() for c, v in self.bot.cogs.items() if showcog(v)]:
-                cogs_lower = {k.lower(): v for k, v in bot.cogs.items()}
-                cog = cogs_lower[arg.lower()]
+            elif inquiry.lower() in (coglist := {k.lower(): v for k, v in self.bot.cogs.items() if self.showcog(v)}):
+                # get the cog found
+                cog = coglist[inquiry.lower()]
                 embed = discord.Embed(title=cog.qualified_name,
                                       description=cog.description + f"\nRun `{prefix}help command` for "
                                                                     f"more information on a command.",
                                       color=discord.Color(0xD262BA))
+                # add field with description for every command in the cog
                 for cmd in sorted(cog.get_commands(), key=lambda x: x.name):
                     if not cmd.hidden:
                         desc = cmd.short_doc if cmd.short_doc else "No Description."
                         embed.add_field(name=f"{prefix}{cmd.name}", value=desc)
                 await ctx.reply(embed=embed)
-            # elif arg.lower() in [c.name for c in bot.commands]:
             else:
-                for all_cmd in bot.commands:
-                    if (all_cmd.name == arg.lower() or arg.lower() in all_cmd.aliases) and not all_cmd.hidden:
-                        cmd: discord.ext.commands.Command = all_cmd
+                # for every bot command
+                for bot_cmd in self.bot.commands:
+                    # if the name matches inquiry or alias and is not hidden
+                    if (bot_cmd.name == inquiry.lower() or inquiry.lower() in bot_cmd.aliases) and not bot_cmd.hidden:
+                        # set cmd and continue
+                        cmd: discord.ext.commands.Command = bot_cmd
                         break
                 else:
+                    # inquiry doesnt match cog or command, not found
                     await ctx.reply(
-                        f"{config.emojis['warning']} `{arg}` is not the name of a command or a command category!")
-                    return
+                        f"{config.emojis['warning']} `{inquiry}` is not the name of a command or a command category!")
+                    return  # past this assume cmd is defined
                 embed = discord.Embed(title=prefix + cmd.name, description=cmd.cog_name,
                                       color=discord.Color(0xEE609C))
-                fields = {}
-                fhelp = []
-                for line in cmd.help.split("\n"):
-                    if line.startswith(":"):
-                        if line.split("=")[0].strip(":") in fields:
-                            fields[line.split("=")[0].strip(":")] += "\n" + "=".join(line.split("=")[1:])
-                        else:
-                            fields[line.split("=")[0].strip(":")] = "=".join(line.split("=")[1:])
+                # if command func has docstring
+                if cmd.help:
+                    # parse it
+                    docstring = docstring_parser.parse(cmd.help)
+                    # format short/long descriptions or say if there is none.
+                    if docstring.short_description or docstring.long_description:
+                        command_information = \
+                            f"{f'**{docstring.short_description}**' if docstring.short_description else ''}" \
+                            f"\n{docstring.long_description if docstring.long_description else ''}"
                     else:
-                        fhelp.append(line)
-                fhelp = "\n".join(fhelp)
-                embed.add_field(name="Command Information", value=fhelp.replace("$", prefix),
-                                inline=False)
-                for k, v in fields.items():
-                    if k == "Param":
-                        k = "Parameters"
-                    embed.add_field(name=k, value=v.replace("$", prefix), inline=False)
+                        command_information = "This command has no information."
+                    embed.add_field(name="Command Information", value=command_information, inline=False)
+
+                    paramtext = []
+                    # for every "clean paramater" (no self or ctx)
+                    for param in list(cmd.clean_params.values()):
+                        # get command description from docstring
+                        paramhelp = discord.utils.get(docstring.params, arg_name=param.name)
+                        # not found in docstring
+                        if paramhelp is None:
+                            paramtext.append(f"**{param.name}** - No description")
+                            continue
+                        # optional argument (param has a default value)
+                        if param.default != param.empty:  # param.empty != None
+                            pend = f" (optional, defaults to `{param.default}`)"
+                        else:
+                            pend = ""
+                        # format and add to paramtext list
+                        paramtext.append(f"**{param.name}** - "
+                                         f"{paramhelp.description if paramhelp.description else 'No description'}"
+                                         f"{pend}")
+                    mediaparamtext = []
+                    for mediaparam in re.finditer(re.compile(":mediaparam ([^ :]+): ([^\n]+)"), cmd.help):
+                        argname = mediaparam[1]
+                        argdesc = mediaparam[2]
+                        mediaparamtext.append(f"**{argname}** - {argdesc}")
+                    # if there are params found
+                    if len(paramtext):
+                        # join list and add to help
+                        embed.add_field(name="Parameters", value="\n".join(paramtext), inline=False)
+                    if len(mediaparamtext):
+                        mval = "*Media parameters are automatically collected from the channel.*\n" + \
+                               "\n".join(mediaparamtext)
+                        embed.add_field(name="Media Parameters", value=mval, inline=False)
+                    if docstring.returns:
+                        embed.add_field(name="Returns", value=docstring.returns.description, inline=False)
+                else:
+                    # if no docstring
+                    embed.add_field(name="Command Information", value="This command has no information.", inline=False)
+                # cmd.signature is a human readable list of args formatted like the manual usage
+                embed.add_field(name="Usage", value=prefix + cmd.name + " " + cmd.signature)
+                # if aliases, add
                 if cmd.aliases:
                     embed.add_field(name="Aliases", value=", ".join([prefix + a for a in cmd.aliases]))
+
                 await ctx.reply(embed=embed)
 
         @commands.command(aliases=["ffprobe"])
@@ -1911,8 +1977,8 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             Provides info on a media file.
             Info provided is from ffprobe and libmagic.
 
-            :Usage=$info
-            :Param=media - Any media file. (automatically found in channel)
+            :param ctx: discord context
+            :mediaparam media: Any media file.
             """
             with TempFileSession() as tempfilesession:
                 async with ctx.channel.typing():
@@ -1931,7 +1997,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             Give feedback for the bot.
             This sends various links from the github repo for reporting issues or asking questions.
 
-            :Usage=$feedback
+            :param ctx: discord context
             """
             embed = discord.Embed(title="Feedback",
                                   description="Feedback is best given via the GitHub repo, various "
@@ -1959,13 +2025,20 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
         async def attributions(self, ctx):
             """
             Lists most libraries and programs this bot uses.
-            :Usage=$attributions
+
+            :param ctx: discord context
             """
             with open("media/attributions.txt", "r") as f:
                 await ctx.send(f.read())
 
         @commands.command(aliases=["pong"])
         async def ping(self, ctx):
+            """
+            Pong!
+
+            :param ctx: discord context
+            :return: API and websocket latency
+            """
             start = time.perf_counter()
             message = await ctx.send("Ping...")
             end = time.perf_counter()
@@ -2087,7 +2160,8 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
         async def generate_command_list(self, ctx):
             out = ""
             for cog in bot.cogs.values():
-                if not showcog(cog): continue
+                if not showcog(cog):
+                    continue
                 out += f"### {cog.qualified_name}\n"
                 for command in sorted(cog.get_commands(), key=lambda x: x.name):
                     if not command.hidden:
@@ -2125,8 +2199,8 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
         #     """
         #     Eminem says something.
         #
-        #     :Usage=$eminem `text`
-        #     :Param=text - The text to put next to eminem.
+        #     
+        #     :param text: The text to put next to eminem.
         #     """
         #     await improcess(ctx, captionfunctions.slashscript, [], [text])
 
