@@ -29,7 +29,8 @@ brotli = "*"
 cchardet = "*"
 orjson = "*"
 apng = "*"
-"discordlists.py" = { git = "https://github.com/HexCodeFFF/discordlists.py"}
+"discordlists.py" = { git = "https://github.com/HexCodeFFF/discordlists.py" }
+docstring-parser = "*"
 
 [dev-packages]
 
