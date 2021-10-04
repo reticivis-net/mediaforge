@@ -31,6 +31,7 @@ orjson = "*"
 apng = "*"
 "discordlists.py" = { git = "https://github.com/HexCodeFFF/discordlists.py" }
 docstring-parser = "*"
+pipenv = "*"
 
 [dev-packages]
 
