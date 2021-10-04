@@ -7,7 +7,7 @@
 [![uptime](https://app.statuscake.com/button/index.php?Track=6022597&Design=6)](https://uptime.statuscake.com/?TestID=JyWrfGfIjT)
 
 ![Total Lines](https://img.shields.io/tokei/lines/github/HexCodeFFF/mediaforge)
-![discord.py](https://img.shields.io/github/pipenv/locked/dependency-version/HexCodeFFF/mediaforge/discord.py)
+![discord.py](https://img.shields.io/github/pipenv/locked/dependency-version/HexCodeFFF/mediaforge/nextcord)
 ![python](https://img.shields.io/github/pipenv/locked/python-version/HexCodeFFF/mediaforge)
 [![stars](https://img.shields.io/github/stars/HexCodeFFF/mediaforge?style=social)](https://github.com/HexCodeFFF/mediaforge/stargazers)
 [![built with immense swag](https://img.shields.io/static/v1?label=built+with&message=immense+swag&color=D262BA)](https://knowyourmeme.com/memes/trollface)
