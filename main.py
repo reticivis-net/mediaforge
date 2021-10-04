@@ -2339,7 +2339,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             embed.add_field(name=f"{config.emojis['2exclamation']} Report Issue to GitHub",
                             value=f"[Create New Issue](https://github.com/HexCodeFFF/mediaforge"
                                   f"/issues/new?labels=bug&template=bug_report.md&title"
-                                  f"={urllib.parse.quote(str(commanderror)[:1000], safe='')})\n[View Issu"
+                                  f"={urllib.parse.quote(str(commanderror)[:848], safe='')})\n[View Issu"
                                   f"es](https://github.com/HexCodeFFF/mediaforge/issues)")
             with io.BytesIO() as buf:
                 trheader = f"DATETIME:{datetime.datetime.now()}\nCOMMAND:{ctx.message.content}\nTRACEBACK:\n"
