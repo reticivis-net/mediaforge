@@ -109,6 +109,10 @@ def meme(image, caption, tosavename=None):
     return htmlcap("captionhtml/meme.html", image, caption, tosavename)
 
 
+def f1984(caption, tosavename=None):
+    return htmlcap("captionhtml/1984.html", None, caption, tosavename)
+
+
 def snapchat(image, caption, tosavename=None):
     return htmlcap("captionhtml/snapchat.html", image, caption, tosavename)
 

@@ -17,7 +17,7 @@ function fit(elemid) {
         // https://stackoverflow.com/a/15195345/9044183
         let style = window.getComputedStyle(elemc, null).getPropertyValue('font-size');
         let fontSize = parseFloat(style);
-        console.log(fontSize)
+        console.debug(fontSize)
         if (fontSize === 0) { // last resort to prevent infinite loops
             break;
         }
