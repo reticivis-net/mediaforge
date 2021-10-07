@@ -1638,6 +1638,24 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
         return show_cog
 
 
+    def add_long_field(embed: discord.Embed, name: str, value: str) -> discord.Embed:
+        """
+        add fields every 1024 characters to a discord embed
+        :param embed: embed
+        :param name: title of embed
+        :param value: long value
+        :return: updated embed
+        """
+        if len(value) <= 1024:
+            return embed.add_field(name=name, value=value, inline=False)
+        else:
+            for i, section in enumerate(re.finditer('.{1,1024}', value, flags=re.S)):
+                embed.add_field(name=name + f" {i + 1}", value=section[0], inline=False)
+        if len(embed) > 6000:
+            raise Exception(f"Generated embed exceeds maximum size. ({len(embed)} > 6000)")
+        return embed
+
+
     class Other(commands.Cog, name="Other"):
         """
         Commands that don't fit in the other categories.
@@ -1939,7 +1957,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                             f"\n{docstring.long_description if docstring.long_description else ''}"
                     else:
                         command_information = "This command has no information."
-                    embed.add_field(name="Command Information", value=command_information, inline=False)
+                    embed = add_long_field(embed, "Command Information", command_information)
 
                     paramtext = []
                     # for every "clean paramater" (no self or ctx)
@@ -1967,11 +1985,11 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                     # if there are params found
                     if len(paramtext):
                         # join list and add to help
-                        embed.add_field(name="Parameters", value="\n".join(paramtext), inline=False)
+                        embed = add_long_field(embed, "Parameters", "\n".join(paramtext))
                     if len(mediaparamtext):
                         mval = "*Media parameters are automatically collected from the channel.*\n" + \
                                "\n".join(mediaparamtext)
-                        embed.add_field(name="Media Parameters", value=mval, inline=False)
+                        embed = add_long_field(embed, "Media Parameters", mval)
                     if docstring.returns:
                         embed.add_field(name="Returns", value=docstring.returns.description, inline=False)
                 else:
