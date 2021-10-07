@@ -5,6 +5,7 @@ import sys
 import time
 from concurrent.futures.process import BrokenProcessPool
 
+import psutil
 import selenium.common
 import urllib3
 from selenium import webdriver
@@ -100,6 +101,11 @@ def closedriver():
     close driver
     """
     global driver
+    # force kill all processes
+    p = psutil.Process(driver.service.process.pid)
+    for proc in p.children(recursive=True) + [p]:
+        logger.debug(proc)
+        p.kill()
     driver.quit()
 
 
@@ -112,14 +118,15 @@ def html2png(html, png):
     while True:
         try:
             driver.set_window_size(1, 1)
-        # sometimes the drivers/chromes can just be killed by the OS so this restarts it if necessary
+        # sometimes the drivers/chromes can just be killed by the OS or lost or something
+        # so this restarts it if necessary
         except (selenium.common.exceptions.InvalidSessionIdException, ConnectionRefusedError,
                 urllib3.exceptions.MaxRetryError, selenium.common.exceptions.WebDriverException,
                 BrokenProcessPool):
             try:
-                driver.quit()
-            except:
-                pass
+                closedriver()
+            except Exception as e:
+                logger.debug(e)
             initdriver()
         else:
             break
