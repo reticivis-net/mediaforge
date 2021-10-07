@@ -1518,6 +1518,20 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
         def __init__(self, bot):
             self.bot = bot
 
+        @commands.command(name="1984", aliases=["nineteeneightyfour", "georgeorwhell"])
+        async def f1984(self, ctx, *, caption):
+            """
+            Creates a custom meme based off of the "living in 1984" comic.
+
+            :param ctx: discord context
+            :param caption: The text that the lady checking her phone is saying. Optionally change what is on the
+                calendar by writing something after a `|` character.
+            """
+            caption = caption.split("|")
+            if len(caption) == 1:
+                caption.append("1984")
+            await improcess(ctx, captionfunctions.f1984, [], caption)
+
         @commands.command(aliases=["troll"])
         async def trollface(self, ctx):
             """
