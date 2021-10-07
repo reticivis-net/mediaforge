@@ -81,8 +81,14 @@
 <script src="rendering/common.js"></script>
 <script>
     function beforerender() {
+        var tbox = document.getElementById("text");
+        if (tbox.innerText === "JANUARY 1984") {
+            tbox.innerHTML = "";
+            document.getElementById("top").src = "rendering/1984originaldate.png";
+        } else {
+            fit("text")
+        }
         fit("textbox")
-        fit("text")
     }
 </script>
 </html>

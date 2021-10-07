@@ -106,6 +106,8 @@ def closedriver():
     for proc in p.children(recursive=True) + [p]:
         logger.debug(proc)
         p.kill()
+    # if this doesn't work and george still accumulates chromes, keep a global list of all created processeses and
+    # periodically compare it with a list generated from each chrome instance and kill any extraneous processes.
     driver.quit()
 
 
