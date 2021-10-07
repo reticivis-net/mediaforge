@@ -1529,7 +1529,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             """
             caption = caption.split("|")
             if len(caption) == 1:
-                caption.append("1984")
+                caption.append("JANUARY 1984")
             await improcess(ctx, captionfunctions.f1984, [], caption)
 
         @commands.command(aliases=["troll"])
