@@ -83,8 +83,10 @@ the bot uses many CLI programs for media processing.
 ## !!experimental!! heroku-based hosting
 
 1. [install heroku cli and log in](https://devcenter.heroku.com/articles/getting-started-with-python#set-up)
-2. run `heroku create` in the mediaforge directory to create a heroku app
-3. add buildpacks
+2. clone mediaforge onto your computer (`git clone https://github.com/HexCodeFFF/mediaforge`)
+    - this will create a folder in the current directory
+4. run `heroku create` in the newly created mediaforge directory to create a heroku app
+5. add heroku buildpacks
     ```shell
     heroku buildpacks:add https://github.com/jonathanong/heroku-buildpack-ffmpeg-latest.git
     heroku buildpacks:add https://github.com/heroku/heroku-buildpack-google-chrome.git
