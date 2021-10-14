@@ -314,7 +314,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                         if config.max_file_size < size:  # file size to download must be under max configured size.
                             raise improcessing.NonBugError(f"Your file is too big ({humanize.naturalsize(size)}). "
                                                            f"I'm configured to only download files up to "
-                                                           f"{humanize.naturalsize(config.max_size)}.")
+                                                           f"{humanize.naturalsize(config.max_file_size)}.")
                     logger.info(f"Saving url {url} as {name}")
                     f = await aiofiles.open(name, mode='wb')
                     await f.write(await resp.read())
