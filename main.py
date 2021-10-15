@@ -1370,7 +1370,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                         r = await improcessing.run_in_exec(ytdownload, videourl, videoformat)
                         if r:
                             tempfiles.reserve_names([r])
-                            r = await improcessing.assurefilesize(r, ctx, re_encode=False)
+                            r = await improcessing.assurefilesize(r, ctx, re_encode=False, trim=False)
                             txt = ""
                             vcodec = await improcessing.get_vcodec(r)
                             acodec = await improcessing.get_acodec(r)
