@@ -12,9 +12,9 @@ bot_list_data = None
 # }
 
 # windows executable for chromedriver https://chromedriver.chromium.org/
-chrome_driver_windows = "chromedriver91.exe"
+chrome_driver_windows = "chromedriver94.exe"
 # linux binary for chromedriver https://chromedriver.chromium.org/
-chrome_driver_linux = "./chromedriver91"
+chrome_driver_linux = "./chromedriver94"
 # the number of instances of chromedriver to run for caption processing.
 # more means faster processing of videos and better under heavy load but also uses more PC resources!
 chrome_driver_instances = 20
