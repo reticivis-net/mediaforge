@@ -326,9 +326,11 @@ async def compresspng(png):
     return outname
 
 
-async def assurefilesize(media: str, ctx: commands.Context, re_encode=True):
+async def assurefilesize(media: str, ctx: commands.Context, re_encode=True, trim=True):
     """
     downsizes files up to 5 times if they are over discord's upload limit
+    :param trim: try to trim to under max frames
+    :param re_encode: try to reencode media?
     :param media: media
     :param ctx: discord context
     :return: filename of fixed media if it works, False if it still is too big.
@@ -346,7 +348,8 @@ async def assurefilesize(media: str, ctx: commands.Context, re_encode=True):
         logger.info(f"Resulting file is {humanize.naturalsize(size)}")
         if size > config.way_too_big_size:
             await ctx.send(f"{config.emojis['warning']} Resulting file is {humanize.naturalsize(size)}. "
-                           f"File is way too big, aborting upload.")
+                           f"Aborting upload since resulting file is over "
+                           f"{humanize.naturalsize(config.way_too_big_size)}")
             return
         # https://www.reddit.com/r/discordapp/comments/aflp3p/the_truth_about_discord_file_upload_limits/
         if size >= config.file_upload_limit:
@@ -355,7 +358,7 @@ async def assurefilesize(media: str, ctx: commands.Context, re_encode=True):
                 msg = await ctx.reply(
                     f"{config.emojis['warning']} Resulting file too big! ({humanize.naturalsize(size)}) "
                     f"Downsizing result...")
-                imagenew = await resize(media, "iw/2", "ih/2")
+                imagenew = await resize(media, "iw/2", "ih/2", trim)
                 # imagenew = await handleanimated(media, captionfunctions.halfsize, ctx)
                 media = imagenew
                 await msg.delete()
@@ -435,7 +438,7 @@ async def ensureduration(media, ctx: typing.Union[commands.Context, None]):
     fps = await get_frame_rate(media)
     dur = await get_duration(media)
     frames = int(fps * dur)
-    if frames < config.max_frames:
+    if frames <= config.max_frames:
         return media
     else:
         newdur = config.max_frames / fps
@@ -1173,10 +1176,11 @@ async def pitch(file, p=12):
     return out
 
 
-async def resize(image, width, height):
+async def resize(image, width, height, ensure_duration=True):
     """
     resizes image
 
+    :param ensure_duration: trim video/gif file if too long
     :param image: file
     :param width: new width, thrown directly into ffmpeg so it can be things like -1 or iw/2
     :param height: new height, same as width
@@ -1190,7 +1194,7 @@ async def resize(image, width, height):
         "IMAGE": "png"
     }
     out = temp_file(exts[mt])
-    if mt in ["VIDEO", "GIF"]:
+    if ensure_duration and mt in ["VIDEO", "GIF"]:
         image = await ensureduration(image, None)
     await run_command("ffmpeg", "-i", image, "-pix_fmt", "yuva420p", "-max_muxing_queue_size", "9999", "-sws_flags",
                       "spline+accurate_rnd+full_chroma_int+full_chroma_inp+bitexact",
