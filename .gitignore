@@ -7,3 +7,6 @@ __pycache__
 # linux chmod being wacky :/
 chromedriver87
 .idea
+# its now autodownloaded and updated, no need to keep on git/github
+chromedriver
+chromedriver.exe

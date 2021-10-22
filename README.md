@@ -37,11 +37,10 @@ the bot uses many CLI programs for media processing.
     - **If installing on ubuntu, ensure that ffmpeg version >= 4**
 - gifski - windows executable is included. linux version [downloadable from the website](https://gif.ski/)
 - pngquant - windows executable is included. installable on linux with `sudo apt-get install pngquant`
-- ChromeDriver - ChromeDriver 91 for both windows and linux are included. They have functioned as intended in my
-  testing, but [here's the website anyways.](https://chromedriver.chromium.org/)
-    - ChromeDriver requires there to be an installation of chrome on your system accessible via path or similair. Your
-      chrome version doesn't have to be the exact same as your chromedriver version, but it should be similar
-    - you may need to run `sudo chmod +x ./chromedriver87` on linux to make it a working executable.
+- ChromeDriver - ChromeDriver is automatically downloaded to match the chrome installation on your system when the bot
+  starts.
+    - ChromeDriver requires your installation of chrome to be in one of the default paths for your system. MediaForge
+      also expects this to check if it needs to download a new driver version.
 - ImageMagick - not included but [downloadable here](https://imagemagick.org/script/download.php)
 - ExifTool - windows executable is included. installable on linux
   with `sudo apt-get install exiftool` https://exiftool.org/
