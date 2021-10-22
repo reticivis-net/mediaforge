@@ -95,7 +95,7 @@ def getchromeversion():
 
 
 def getdriverversion():
-    cdfile = "chromedriver.exe" if sys.platform == "win32" else "chromedriver"
+    cdfile = "chromedriver.exe" if sys.platform == "win32" else "./chromedriver"
     if os.path.isfile(cdfile):
         outs, errs = popen([cdfile, "--version"])
         if outs and not errs:
