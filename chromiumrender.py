@@ -1,18 +1,154 @@
+import io
 import json
 import logging
 import os
+import subprocess
 import sys
 import time
+import typing
+import zipfile
 from concurrent.futures.process import BrokenProcessPool
+from io import SEEK_END, SEEK_SET, BytesIO
 
 import psutil
+import requests
 import selenium.common
-import urllib3
 from selenium import webdriver
 
 import config
 from clogs import logger
 from tempfiles import temp_file
+
+
+class ResponseStream(typing.IO):
+    """
+    stream a requests response as a file-like object.
+    https://gist.github.com/obskyr/b9d4b4223e7eaf4eedcd9defabb34f13
+    """
+
+    def __init__(self, request_iterator):
+        self._bytes = BytesIO()
+        self._iterator = request_iterator
+
+    def _load_all(self):
+        self._bytes.seek(0, SEEK_END)
+        for chunk in self._iterator:
+            self._bytes.write(chunk)
+
+    def _load_until(self, goal_position):
+        current_position = self._bytes.seek(0, SEEK_END)
+        while current_position < goal_position:
+            try:
+                current_position += self._bytes.write(next(self._iterator))
+            except StopIteration:
+                break
+
+    def tell(self):
+        return self._bytes.tell()
+
+    def read(self, size=None):
+        left_off_at = self._bytes.tell()
+        if size is None:
+            self._load_all()
+        else:
+            goal_position = left_off_at + size
+            self._load_until(goal_position)
+
+        self._bytes.seek(left_off_at)
+        return self._bytes.read(size)
+
+    def seek(self, position, whence=SEEK_SET):
+        if whence == SEEK_END:
+            self._load_all()
+        else:
+            self._bytes.seek(position, whence)
+
+
+def popen(cmd, timeout=15):
+    proc = subprocess.Popen(cmd, stdout=subprocess.PIPE,
+                            stderr=subprocess.PIPE)
+    try:
+        outs, errs = proc.communicate(timeout=15)
+    except subprocess.TimeoutExpired:
+        proc.kill()
+        outs, errs = proc.communicate()
+    return outs, errs
+
+
+def getchromeversion():
+    if sys.platform == "win32":
+        chromedirs = [r"%ProgramFiles%\Google\Chrome\Application\chrome.exe",
+                      r"%ProgramFiles(x86)%\Google\Chrome\Application\chrome.exe",
+                      r"%LocalAppData%\Google\Chrome\Application\chrome.exe"]
+        for chromedir in chromedirs:
+            outs, errs = popen(["powershell", "-Command", f"(Get-Item \"{os.path.expandvars(chromedir)}\")"
+                                                          f".VersionInfo.FileVersion"])
+            logger.debug(outs)
+            logger.debug(errs)
+            if outs and not errs:
+                return outs.decode("utf-8").strip()
+    else:
+        outs, errs = popen(["google-chrome", "-product-version"])
+        if outs and not errs:
+            return outs.decode("utf-8").strip()
+    raise Exception("Failed to detect chrome installation. Do you have it installed at the default paths?")
+
+
+def getdriverversion():
+    cdfile = "chromedriver.exe" if sys.platform == "win32" else "chromedriver"
+    if os.path.isfile(cdfile):
+        outs, errs = popen([cdfile, "--version"])
+        if outs and not errs:
+            return outs.decode("utf-8").strip().split(" ")[1]
+    else:
+        return None
+
+
+def updatechromedriver():
+    logger.info("checking chrome and ChromeDriver...")
+    ver = getchromeversion()
+    logger.info(f"chrome {ver}")
+    cdver = getdriverversion()
+    logger.info(f"chromedriver {cdver}")
+    if cdver is None:
+        logger.log(25, "ChromeDriver not detected, downloading.")
+    else:
+        if cdver.split(".")[0] == ver.split(".")[0]:
+            logger.info(f"ChromeDriver {cdver} shares major version with chrome {ver}, no need to update.")
+            return
+        else:
+            logger.log(25, f"ChromeDriver {cdver} does not share major version with Chrome {ver}, downloading new "
+                           f"driver.")
+            if sys.platform == 'win32':
+                os.remove("chromedriver.exe")
+            else:
+                os.remove("chromedriver")
+    # find vernum of latest compatible release, thanks google!
+    for cdurl in [
+        f"https://chromedriver.storage.googleapis.com/LATEST_RELEASE_{ver}",
+        f"https://chromedriver.storage.googleapis.com/LATEST_RELEASE_{ver.split('.')[0]}",
+        f"https://chromedriver.storage.googleapis.com/LATEST_RELEASE"
+    ]:
+        cdreq = requests.get(cdurl)
+        if cdreq.ok:
+            logger.debug(f"{cdurl} is ok")
+            bestcdver = cdreq.text
+            break
+        else:
+            logger.debug(f"{cdurl} failed with {cdreq.status_code}")
+    else:
+        raise Exception("Could not find chromedriver version. is google down?")
+    logger.info(f"downloading chromedriver {bestcdver}")
+    cdzip = requests.get(f"https://chromedriver.storage.googleapis.com/{bestcdver}/"
+                         f"chromedriver_{'win32' if sys.platform == 'win32' else 'linux64'}.zip", stream=True)
+    with zipfile.ZipFile(ResponseStream(cdzip.iter_content(64))) as zf:
+        if sys.platform == 'win32':
+            zf.extract("chromedriver.exe")
+        else:
+            zf.extract("chromedriver")
+            # chmod +x / mark executable
+            os.chmod('chromedriver', os.stat('chromedriver').st_mode | 0o111)
+    logger.log(35, "Downloaded and extracted new chromedriver!")
 
 
 def send(driver, cmd, params=None):
@@ -75,20 +211,19 @@ def initdriver():
     opts.add_argument("--disable-extensions")
     opts.add_argument("--disable-dev-shm-usage")
     opts.add_argument("--no-sandbox")
-    # https://chromedriver.storage.googleapis.com/index.html?path=87.0.4280.88/
     if sys.platform == "win32":
-        driver = webdriver.Chrome(config.chrome_driver_windows, options=opts, service_log_path='NUL')
+        driver = webdriver.Chrome("chromedriver.exe", options=opts, service_log_path='NUL')
     else:
         if "GOOGLE_CHROME_SHIM" in os.environ:  # if on heroku
             driver = webdriver.Chrome(executable_path=os.environ["GOOGLE_CHROME_SHIM"], options=opts,
                                       service_log_path='/dev/null')
         else:
-            driver = webdriver.Chrome(config.chrome_driver_linux, options=opts, service_log_path='/dev/null')
-    logger = logging.getLogger('selenium.webdriver.remote.remote_connection')
+            driver = webdriver.Chrome("chromedriver", options=opts, service_log_path='/dev/null')
+    driverlogger = logging.getLogger('selenium.webdriver.remote.remote_connection')
     if config.log_level.lower() == "debug":
-        logger.setLevel(logging.DEBUG)
+        driverlogger.setLevel(logging.DEBUG)
     else:
-        logger.setLevel(logging.WARNING)
+        driverlogger.setLevel(logging.WARNING)
     driver.implicitly_wait(10)
     driver.get("file:///" + os.path.abspath("rendering/warmup.html").replace("\\", "/"))
     while driver.execute_script('return document.readyState;') != "complete":

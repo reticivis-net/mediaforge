@@ -29,6 +29,7 @@ from nextcord.ext import commands, tasks
 
 # project files
 import captionfunctions
+import chromiumrender
 import config
 import heartbeat
 import improcessing
@@ -82,6 +83,7 @@ ready = False
 if __name__ == "__main__":  # prevents multiprocessing workers from running bot code
     logger.log(25, "Hello World!")
     logger.info(f"discord.py {discord.__version__}")
+    chromiumrender.updatechromedriver()
     renderpool = improcessing.initializerenderpool()
     if not os.path.exists(config.temp_dir.rstrip("/")):
         os.mkdir(config.temp_dir.rstrip("/"))

@@ -102,6 +102,10 @@ class Pool:
         return queued, executing
 
 
+def updatechromedriver():
+    pass
+
+
 def initializerenderpool():
     """
     Start the worker pool
