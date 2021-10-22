@@ -81,6 +81,7 @@ def getchromeversion():
                       r"%ProgramFiles(x86)%\Google\Chrome\Application\chrome.exe",
                       r"%LocalAppData%\Google\Chrome\Application\chrome.exe"]
         for chromedir in chromedirs:
+            logger.debug(f"trying {chromedir}")
             outs, errs = popen(["powershell", "-Command", f"(Get-Item \"{os.path.expandvars(chromedir)}\")"
                                                           f".VersionInfo.FileVersion"])
             logger.debug(outs)
