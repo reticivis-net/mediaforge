@@ -14,6 +14,7 @@ import psutil
 import requests
 import selenium.common
 from selenium import webdriver
+from urllib3.exceptions import MaxRetryError
 
 import config
 from clogs import logger
@@ -259,7 +260,7 @@ def html2png(html, png):
         # sometimes the drivers/chromes can just be killed by the OS or lost or something
         # so this restarts it if necessary
         except (selenium.common.exceptions.InvalidSessionIdException, ConnectionRefusedError,
-                urllib3.exceptions.MaxRetryError, selenium.common.exceptions.WebDriverException,
+                MaxRetryError, selenium.common.exceptions.WebDriverException,
                 BrokenProcessPool):
             try:
                 closedriver()
