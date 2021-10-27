@@ -1139,12 +1139,12 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
 
             :param ctx: discord context
             :param speed: Multiplies input video speed by this number. must be between 0.25 and 100.
-            :mediaparam video: A video or gif.
+            :mediaparam media: A video, gif, or audio.
             """
             if not 0.25 <= speed <= 100:
                 await ctx.send(f"{config.emojis['warning']} Speed must be between 0.25 and 100")
                 return
-            await improcess(ctx, improcessing.speed, [["VIDEO", "GIF"]], speed)
+            await improcess(ctx, improcessing.speed, [["VIDEO", "GIF", "AUDIO"]], speed)
 
         @commands.command(aliases=["shuffle", "stutter", "nervous"])
         async def random(self, ctx, frames: int = 30):
