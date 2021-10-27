@@ -661,17 +661,24 @@ async def speed(file, sp):
     :return: processed media
     """
     # TODO: some weird bug here caused by 100fps gifski gifs that slows down gifs?
-    outname = temp_file("mp4")
+
     mt = mediatype(file)
-    fps = await get_frame_rate(file)
-    duration = await get_duration(file)
-    await run_command("ffmpeg", "-hide_banner", "-i", await forceaudio(file), "-filter_complex",
-                      f"[0:v]setpts=PTS/{sp},fps={fps}[v];[0:a]{expanded_atempo(sp)}[a]",
-                      "-map", "[v]", "-map", "[a]", "-t", str(duration / float(sp)), "-c:v", "png", outname)
-    if await count_frames(outname) < 2:
-        raise NonBugError("Output file has less than 2 frames. Try reducing the speed.")
-    if mt == "GIF":
-        outname = await mp4togif(outname)
+    if mt == "AUDIO":
+        outname = temp_file("mp3")
+        duration = await get_duration(file)
+        await run_command("ffmpeg", "-hide_banner", "-i", file, "-filter_complex",
+                          f"{expanded_atempo(sp)}", "-t", str(duration / float(sp)), "-c:a", "libmp3lame", outname)
+    else:
+        outname = temp_file("mp4")
+        fps = await get_frame_rate(file)
+        duration = await get_duration(file)
+        await run_command("ffmpeg", "-hide_banner", "-i", await forceaudio(file), "-filter_complex",
+                          f"[0:v]setpts=PTS/{sp},fps={fps}[v];[0:a]{expanded_atempo(sp)}[a]",
+                          "-map", "[v]", "-map", "[a]", "-t", str(duration / float(sp)), "-c:v", "png", outname)
+        if await count_frames(outname) < 2:
+            raise NonBugError("Output file has less than 2 frames. Try reducing the speed.")
+        if mt == "GIF":
+            outname = await mp4togif(outname)
     return outname
 
 
