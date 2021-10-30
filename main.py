@@ -95,11 +95,17 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
     if "DATABASE_URL" in os.environ:
         logger.debug("postgresql?")
     db = sqlite3.connect(config.db_filename)
+    # setup db tables
     with db:
         cur = db.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='guild_prefixes'")
         if not cur.fetchall():
-            db.execute("create table guild_prefixes("
-                       "guild int not null constraint table_name_pk primary key,prefix text not null)")
+            db.execute(
+                "create table guild_prefixes ( guild int not null constraint table_name_pk primary key, "
+                "prefix text not null ); "
+            )
+        cur = db.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='bans'")
+        if not cur.fetchall():
+            db.execute("create table bans ( user int not null constraint bans_pk primary key, banreason text );  ")
     db.close()
 
 
@@ -2214,6 +2220,30 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             else:
                 await ctx.reply("No heartbeat URL set in config.")
 
+        @commands.command()
+        @commands.is_owner()
+        async def ban(self, ctx, user: discord.User, *, reason: typing.Optional[str]):
+            async with aiosqlite.connect(config.db_filename) as db:
+                async with db.execute("SELECT count(*) from bans WHERE user=?", (user.id,)) as cur:
+                    if (await cur.fetchone())[0] > 0:  # check if ban exists
+                        await ctx.reply(f"{config.emojis['x']} {user.mention} is already banned.")
+                    else:
+                        await db.execute("INSERT INTO bans(user,banreason) values (?, ?)", (user.id, reason))
+                        await db.commit()
+                        await ctx.reply(f"{config.emojis['check']} Banned {user.mention}.")
+
+        @commands.command()
+        @commands.is_owner()
+        async def unban(self, ctx, user: discord.User):
+            async with aiosqlite.connect(config.db_filename) as db:
+                cur = await db.execute("DELETE FROM bans WHERE user=?",
+                                       (user.id,))
+                await db.commit()
+            if cur.rowcount > 0:
+                await ctx.reply(f"{config.emojis['check']} Unbanned {user.mention}.")
+            else:
+                await ctx.reply(f"{config.emojis['x']} {user.mention} is not banned.")
+
 
     class Slashscript(commands.Cog, name="Slashscript"):
         """
@@ -2289,6 +2319,29 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                    f"Command '{ctx.message.content}' by "
                    f"@{ctx.message.author.name}#{ctx.message.author.discriminator} ({ctx.message.author.id}) "
                    f"is complete!")
+
+
+    @bot.check
+    async def banned_users(ctx: commands.Context):
+        if await bot.is_owner(ctx.author):
+            return True
+        async with aiosqlite.connect(config.db_filename) as db:
+            async with db.execute("SELECT banreason from bans WHERE user=?", (ctx.author.id,)) as cur:
+                ban = await cur.fetchone()
+                if ban:
+                    outtext = "You are banned from this bot"
+                    if ban[0]:
+                        outtext += f" for the following reason: \n\n{ban[0]}\n\n"
+                    else:
+                        outtext += f".\n"
+                    outtext += f"To appeal this, "
+                    if bot.owner_id == 214511018204725248:  # my ID
+                        outtext += "raise an issue at https://github.com/HexCodeFFF/mediaforge/issues"
+                    else:
+                        outtext += "contact the bot owner."
+                    raise commands.CheckFailure(outtext)
+                else:
+                    return True
 
 
     @bot.check
