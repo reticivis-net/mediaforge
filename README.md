@@ -12,7 +12,7 @@
 [![stars](https://img.shields.io/github/stars/HexCodeFFF/mediaforge?style=social)](https://github.com/HexCodeFFF/mediaforge/stargazers)
 [![built with immense swag](https://img.shields.io/static/v1?label=built+with&message=immense+swag&color=D262BA)](https://knowyourmeme.com/memes/trollface)
 
-<a href="https://www.buymeacoffee.com/reticivis" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-violet.png" alt="Buy Me A Coffee" height=60px></a>
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/Q5Q75US4A)
 
 ### A Discord bot for editing and creating videos, images, GIFs, and more!
 
