@@ -1061,15 +1061,18 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             await improcess(ctx, improcessing.vibrato, [["VIDEO", "AUDIO"]], frequency, depth)
 
         @commands.command()
-        async def pitch(self, ctx, numofhalfsteps: float = 2):
+        async def pitch(self, ctx, numofhalfsteps: float = 12):
             """
             Changes pitch of audio
 
             :param ctx: discord context
             :param numofhalfsteps: the number of half steps to change the pitch by. `12` raises the pitch an octave and
-            `-12` lowers the pitch an octave.
+            `-12` lowers the pitch an octave. must be between -12 and 12.
             :mediaparam media: A video or audio file.
             """
+            if not -12 <= numofhalfsteps <= 12:
+                await ctx.send(f"{config.emojis['warning']} numofhalfsteps must be between -12 and 12.")
+                return
             await improcess(ctx, improcessing.pitch, [["VIDEO", "AUDIO"]], numofhalfsteps)
 
         @commands.command(aliases=["concat", "combinev"])
