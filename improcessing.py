@@ -1376,7 +1376,8 @@ async def handleautotune(media: str, *params):
     await run_command("ffmpeg", "-i", audio, "-ac", "1", wav)  # "-acodec", "",
     outwav = temp_file("wav")
     # run in separate process to avoid possible segfault crashes and cause its totally blocking
-    await renderpool.submit(autotune.autotune, wav, outwav, *params)
+    with concurrent.futures.ProcessPoolExecutor(1) as executor:
+        await asyncio.get_event_loop().run_in_executor(executor, autotune.autotune, wav, outwav, *params)
     mt = mediatype(media)
     if mt == "AUDIO":
         outname = temp_file("mp3")
