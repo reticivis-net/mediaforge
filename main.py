@@ -1382,6 +1382,8 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                         if r:
                             tempfiles.reserve_names([r])
                             r = await improcessing.assurefilesize(r, ctx, re_encode=False, trim=False)
+                            if not r:
+                                return
                             txt = ""
                             vcodec = await improcessing.get_vcodec(r)
                             acodec = await improcessing.get_acodec(r)

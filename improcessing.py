@@ -1417,7 +1417,8 @@ async def tint(file, col: discord.Color):
     # https://stackoverflow.com/a/3380739/9044183
     r, g, b = map(lambda x: x / 255, col.to_rgb())
     await run_command("ffmpeg", "-i", file, "-vf", f"hue=s=0,"  # make grayscale
-                                                   f"lutrgb=r=val*{r}:g=val*{g}:b=val*{b}:a=val,"  # basically set white to our color
+                                                   f"lutrgb=r=val*{r}:g=val*{g}:b=val*{b}:a=val,"  # basically set 
+    # white to our color 
                                                    f"format=yuva420p", "-c:v", "png", out)
     if mt == "GIF":
         out = await mp4togif(out)
