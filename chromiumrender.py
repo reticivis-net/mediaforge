@@ -226,7 +226,7 @@ def initdriver():
         driverlogger.setLevel(logging.DEBUG)
     else:
         driverlogger.setLevel(logging.WARNING)
-    driver.implicitly_wait(10)
+    # driver.implicitly_wait(10)
     driver.get("file:///" + os.path.abspath("rendering/warmup.html").replace("\\", "/"))
     while driver.execute_script('return document.readyState;') != "complete":
         time.sleep(0.25)
