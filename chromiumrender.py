@@ -1,4 +1,3 @@
-import io
 import json
 import logging
 import os
@@ -163,8 +162,10 @@ def send(driver, cmd, params=None):
     resource = "/session/%s/chromium/send_command_and_get_result" % driver.session_id
     url = driver.command_executor._url + resource
     body = json.dumps({'cmd': cmd, 'params': params})
+    logger.debug(f"Posting to {url} with content {body}")
     response = driver.command_executor._request('POST', url, body)
     # if response['status']: raise Exception(response.get('value'))
+    logger.debug(response)
     return response.get('value')
 
 
@@ -213,6 +214,7 @@ def initdriver():
     opts.add_argument("--disable-extensions")
     opts.add_argument("--disable-dev-shm-usage")
     opts.add_argument("--no-sandbox")
+    opts.add_argument("--incognito")
     if sys.platform == "win32":
         driver = webdriver.Chrome("chromedriver.exe", options=opts, service_log_path='NUL')
     else:
@@ -227,9 +229,12 @@ def initdriver():
     else:
         driverlogger.setLevel(logging.WARNING)
     # driver.implicitly_wait(10)
-    driver.get("file:///" + os.path.abspath("rendering/warmup.html").replace("\\", "/"))
-    while driver.execute_script('return document.readyState;') != "complete":
-        time.sleep(0.25)
+    send(driver, "Network.setCacheDisabled", {"cacheDisabled": True})
+    # driver.get("file:///" + os.path.abspath("rendering/warmup.html").replace("\\", "/"))
+    # while driver.execute_script('return document.readyState;') != "complete":
+    #     time.sleep(0.25)
+    driver.set_window_size(1, 1)
+    driver.get("about:blank")
     return driver
 
 
@@ -290,6 +295,8 @@ def html2png(html, png):
     logging.debug("beforerender complete")
     send(driver, "Emulation.setDefaultBackgroundColorOverride", {'color': {'r': 0, 'g': 0, 'b': 0, 'a': 0}})
     driver.get_screenshot_as_file(png)
+    driver.set_window_size(1, 1)
+    driver.get("about:blank")
     # os.remove(tempfile)
 
 # initdriver()
