@@ -154,8 +154,8 @@ def updatechromedriver():
 
 def send(driver, cmd, params=None):
     """
-    i dont know what this does but it communicates with chrome i think
-    its copy/pasted code lol!
+    directly interfaces with devtools protocol
+    https://chromedevtools.github.io/devtools-protocol/
     """
     if params is None:
         params = {}
