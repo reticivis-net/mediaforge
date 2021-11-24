@@ -328,9 +328,10 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                     await f.write(await resp.read())
                     await f.close()
                 else:
+
                     logger.error(f"aiohttp status {resp.status}")
                     logger.error(f"aiohttp status {await resp.read()}")
-                    raise Exception(f"aiohttp status {resp.status} {await resp.read()}")
+                    resp.raise_for_status()
         if tenorgif:
             name = await improcessing.mp4togif(name)
         # if lottie:
