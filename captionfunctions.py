@@ -74,10 +74,10 @@ def htmlcap(file, image, caption, tosavename=None):
         # print(caption)
         caption = sanitizehtml(caption)
         if len(caption) == 1:
-            replacedict["CaptionText"] = caption[0]
+            replacedict["CaptionText"] = caption[0].replace("\n", "<br>")
         else:
             for i, c in enumerate(caption):
-                replacedict[f"CaptionText{i + 1}"] = c
+                replacedict[f"CaptionText{i + 1}"] = c.replace("\n", "<br>")
     torender = replaceall(filetostring(file), replacedict)
     chromiumrender.html2png(torender, tosavename)
     return tosavename
@@ -184,6 +184,10 @@ def givemeyourphone(image, _, tosavename=None):
 
 def dontweet(caption, tosavename=None):
     return htmlcap("captionhtml/dontweet.html", None, caption, tosavename)
+
+
+def yskysn(caption, tosavename=None):
+    return htmlcap("captionhtml/yskysn.html", None, caption, tosavename)
 
 
 def roundcorners(image, radius, tosavename=None):

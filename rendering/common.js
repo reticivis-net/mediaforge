@@ -13,16 +13,21 @@ function fit(elemid) {
     // rewrite of https://stackoverflow.com/a/6112914/9044183
     let elem = document.getElementById(elemid)
     let elemc = elem.children[0]
+    let iterations = 0;
     while (outerHeight(elem) < outerHeight(elemc)) {
+
         // https://stackoverflow.com/a/15195345/9044183
         let style = window.getComputedStyle(elemc, null).getPropertyValue('font-size');
         let fontSize = parseFloat(style);
-        console.debug(fontSize)
+        // console.debug(fontSize);
         if (fontSize === 0) { // last resort to prevent infinite loops
             break;
         }
         elemc.style.fontSize = (fontSize - 1) + 'px';
+        iterations++;
     }
+    return iterations ? parseFloat(window.getComputedStyle(elemc, null).getPropertyValue('font-size')) : null;
+
 }
 
 

@@ -2,13 +2,13 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>whisper</title>
+    <title>yskysn</title>
     <script src="rendering/twemoji/twemoji.js"></script>
     <base href="../">
     <style>
         @font-face {
             font-family: cap;
-            src: url(rendering/fonts/whisper.otf);
+            src: url(rendering/fonts/TAHOMABD.TTF);
         }
 
         body, html {
@@ -17,6 +17,13 @@
             margin: 0;
             word-break: break-word;
             min-height: 100%;
+        }
+
+        img {
+            display: block;
+            position: relative;
+            top: 0;
+            left: 0;
         }
 
         img.emoji {
@@ -29,24 +36,28 @@
         .caption {
             font-family: cap, sans-serif;
             color: white;
-            font-size: 12vw;
-            --stroke-width: 0.5vw;
-            --stroke-color: #000;
+            font-size: 36px;
         }
 
         .container {
-            margin: auto;
+            /*margin: auto;*/
             position: absolute;
-            left: 0;
-            right: 0;
-            top: 0;
-            bottom: 0;
-            padding: 10vw;
+            left: 15px;
+            top: 18px;
+            width: 336px;
+            height: 391px;
         }
 
         #fitin1 {
             width: 100%;
             height: 100%;
+            text-transform: uppercase;
+            text-shadow: white 0 0 3px;
+
+        }
+
+        #fitin1 * {
+            letter-spacing: 0.025em;
         }
 
         .box-flex {
@@ -64,10 +75,17 @@
     </style>
 </head>
 <body>
-<img alt="An error has occurred loading your image." src="rendering/demoimage.png">
+<img alt="An error has occurred loading your image." src="rendering/yskysn.png">
 <div class="top container">
     <div class="box-flex" id="fitin1">
-        <span class="caption top txt">CaptionText</span>
+        <span class="caption top txt">CaptionText1<br><span style="font-size: 1.5277em;">CaptionText2</span></span>
+        <!--
+        ok so the 1.5277 thing looks weird but i promise it makes sense
+        1.5277 is the ratio of 36px (smaller font) to 55px (bigger font)
+        the reason its not set at 55px is so the fit() function can work with it
+        itll slowly downsize the outer span and the bigger but inner span will downsize with it without modifying fit()
+        its a neat solution imo
+        -->
     </div>
 </div>
 </body>
@@ -77,9 +95,5 @@
         // resizes text to fit
         fit("fitin1")
     }
-
-    const style = document.createElement('style');
-    style.innerHTML = `.caption {\ntext-shadow:\n${calculateStrokeTextCSS(32)}\n}`;
-    document.head.appendChild(style);
 </script>
 </html>
