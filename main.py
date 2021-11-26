@@ -1552,7 +1552,8 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             Creates a custom meme based off of the popular Low Tier God "You Should... NOW!" edit.
 
             :param ctx: discord context
-            :param caption: The text that will be placed next to LTG.
+            :param caption: The text that will be placed next to LTG. Optionally change the "NOW!" text by writing
+                something after a `|` character (or remove it by typing a `|` followed by nothing else).
             """
             caption = caption.split("|")
             if len(caption) == 1:

@@ -19,7 +19,7 @@
             min-height: 100%;
         }
 
-        img {
+        #img {
             display: block;
             position: relative;
             top: 0;
@@ -75,10 +75,12 @@
     </style>
 </head>
 <body>
-<img alt="An error has occurred loading your image." src="rendering/yskysn.png">
+<img alt="An error has occurred loading your image." id=img src="rendering/yskysn.png">
 <div class="top container">
     <div class="box-flex" id="fitin1">
-        <span class="caption top txt">CaptionText1<br><span style="font-size: 1.5277em;">CaptionText2</span></span>
+        <span class="caption top txt"><span id="ct1">CaptionText1</span>
+            <span id="brcontainer"></span>
+            <span id="ct2" style="font-size: 1.5277em;">CaptionText2</span></span>
         <!--
         ok so the 1.5277 thing looks weird but i promise it makes sense
         1.5277 is the ratio of 36px (smaller font) to 55px (bigger font)
@@ -92,6 +94,9 @@
 <script src="rendering/common.js"></script>
 <script>
     function beforerender() {
+        if (document.getElementById("ct1").innerHTML.length > 0 && document.getElementById("ct1").innerHTML.length > 0) {
+            document.getElementById("brcontainer").innerHTML = "<br>"
+        }
         // resizes text to fit
         fit("fitin1")
     }
