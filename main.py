@@ -1546,6 +1546,19 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                 caption.append("JANUARY 1984")
             await improcess(ctx, captionfunctions.f1984, [], caption)
 
+        @commands.command(aliases=["ltg", "now", "lowtiergod", "youshould"])
+        async def yskysn(self, ctx, *, caption):
+            """
+            Creates a custom meme based off of the popular Low Tier God "You Should... NOW!" edit.
+
+            :param ctx: discord context
+            :param caption: The text that will be placed next to LTG.
+            """
+            caption = caption.split("|")
+            if len(caption) == 1:
+                caption.append("NOW!")
+            await improcess(ctx, captionfunctions.yskysn, [], caption)
+
         @commands.command(aliases=["troll"])
         async def trollface(self, ctx):
             """
