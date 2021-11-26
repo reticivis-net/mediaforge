@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <base href="../">
+    <style>
+        @font-face {
+            font-family: caption;
+            src: url(rendering/fonts/Lato-Bold.ttf);
+        }
+
+        body {
+            margin: 0;
+        }
+
+        #base, #top {
+            position: relative;
+            top: 0;
+            left: 0;
+        }
+
+        #top {
+            position: absolute;
+            z-index: 10;
+        }
+
+
+        #textbox {
+            position: absolute;
+            left: 63px;
+            top: 27px;
+            width: 259px;
+            height: 72px;
+            font-family: caption, /*twemoji,*/ sans-serif;
+            font-size: 22px;
+        }
+
+        @font-face {
+            font-family: impact;
+            src: url(rendering/fonts/ImpactMix.ttf);
+        }
+
+        #text {
+            position: absolute;
+            left: 433px;
+            top: 141px;
+            width: 120px;
+            height: 36px;
+            transform: skewY(9deg);
+            font-size: 28px;
+            font-family: Impact, sans-serif;
+
+        }
+
+        .fitboxes {
+            overflow: hidden;
+            -webkit-font-smoothing: antialiased;
+            word-wrap: break-word;
+            color: black;
+            margin: 0;
+        }
+
+        .fitboxes p {
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+<img id="base" src="rendering/1984.png">
+<img id="top" src="rendering/1984cover.png">
+<div class="fitboxes" id="textbox">
+    <p>CaptionText1</p>
+</div>
+<div class="fitboxes" id="text">
+    <p>CaptionText2</p>
+</div>
+<!--
+speech bubble: 57 553 261 101 355deg
+text: 415 118 414 589
+-->
+
+</body>
+<script src="rendering/common.js"></script>
+<script>
+    function beforerender() {
+        var tbox = document.getElementById("text");
+        if (tbox.innerText === "JANUARY 1984") {
+            tbox.innerHTML = "";
+            document.getElementById("top").src = "rendering/1984originaldate.png";
+        } else {
+            fit("text")
+        }
+        fit("textbox")
+    }
+</script>
+</html>
