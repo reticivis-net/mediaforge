@@ -1560,6 +1560,21 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                 caption.append("NOW!")
             await improcess(ctx, captionfunctions.yskysn, [], caption)
 
+        @commands.command(aliases=["shes12"])
+        async def zamn(self, ctx, *, caption):
+            """
+            Creates a custom meme based off of the popular "ZAMN😍 SHE'S 12?" meme.
+
+            :param ctx: discord context
+            :param caption: The text above your custom image. Optionally change the "ZAMN😍" text by writing
+                something after a `|` character (or remove it by typing a `|` followed by nothing else).
+            :mediaparam media: An image, video, or gif that Damien will "ZAMN" at
+            """
+            caption = caption.split("|")
+            if len(caption) == 1:
+                caption.append("ZAMN😍")
+            await improcess(ctx, captionfunctions.zamn, [["IMAGE", "VIDEO", "GIF"]], *caption, handleanimated=True)
+
         @commands.command(aliases=["troll"])
         async def trollface(self, ctx):
             """

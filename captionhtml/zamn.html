@@ -4,14 +4,18 @@
     <meta charset="UTF-8">
     <title>Title</title>
     <base href="../">
+    <script src="rendering/twemoji/twemoji.js"></script>
     <style>
         @font-face {
             font-family: caption;
             src: url(rendering/fonts/Lato-Bold.ttf);
         }
 
-        body {
+        body, html {
+            font-size: 0;
             margin: 0;
+            word-break: break-word;
+            min-height: 100%;
         }
 
         #base, #top {
@@ -25,33 +29,42 @@
             z-index: 10;
         }
 
-
-        #textbox {
-            position: absolute;
-            left: 63px;
-            top: 27px;
-            width: 259px;
-            height: 72px;
-            font-family: caption, /*twemoji,*/ sans-serif;
-            font-size: 22px;
+        @font-face {
+            font-family: burbank;
+            src: url(rendering/fonts/Burbank.otf);
         }
 
         @font-face {
-            font-family: impact;
-            src: url(rendering/fonts/ImpactMix.ttf);
+            font-family: silkscreen;
+            src: url(rendering/fonts/slkscr.ttf);
         }
 
-        #text {
+        #speech {
             position: absolute;
-            left: 433px;
-            top: 141px;
-            width: 120px;
-            height: 36px;
-            transform: skewY(9deg);
-            font-size: 28px;
-            font-family: Impact, sans-serif;
-
+            left: 57px;
+            top: 553px;
+            width: 261px;
+            height: 101px;
+            transform: rotate(355deg);
+            font-family: silkscreen, caption, /*twemoji,*/ sans-serif;
+            font-size: 60px;
+            /*letter-spacing: -0.125em;*/
         }
+
+
+        #text, #text2 {
+            position: absolute;
+            left: 411px;
+            top: 7px;
+            width: 426px;
+            height: 100px;
+            font-size: 100px;
+            font-family: burbank, caption, sans-serif;
+            color: white;
+            text-transform: uppercase;
+            text-align: center;
+        }
+
 
         .fitboxes {
             overflow: hidden;
@@ -64,34 +77,81 @@
         .fitboxes p {
             margin: 0;
         }
+
+        #overlay {
+            position: absolute;
+            top: 118px;
+            left: 415px;
+            width: 414px;
+            height: 589px;
+            line-height: 589px;
+        }
+
+        #overlayimg {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .box-flex {
+            display: flex;
+            justify-content: center;
+            height: 100%;
+        }
+
+        .box-flex .txt {
+            padding: 0;
+            align-self: center;
+            min-height: auto;
+        }
+
+        #textstyleover {
+            color: transparent;
+            -webkit-text-stroke: 3px black;
+            text-stroke: 3px black;
+        }
+
+
+        #textstyleunder {
+            text-shadow: 0 4px 0 #2ea9e4, 0 12px 0 black;
+            /*text-shadow: 0 ;*/
+        }
+
     </style>
 </head>
 <body>
-<img id="base" src="rendering/1984.png">
-<img id="top" src="rendering/1984cover.png">
-<div class="fitboxes" id="textbox">
-    <p>CaptionText1</p>
+<img id="base" src="rendering/zamn.png">
+<div class="fitboxes box-flex" id="speech">
+    <p class="txt">CaptionText2</p>
 </div>
-<div class="fitboxes" id="text">
-    <p>CaptionText2</p>
+<div class="fitboxes box-flex" id="text">
+    <p class="txt">
+        <span id="textstyleunder">
+            CaptionText1
+        </span>
+    </p>
+</div>
+<div class="fitboxes box-flex" id="text2">
+    <p class="txt">
+        <span id="textstyleover">CaptionText1</span>
+    </p>
+</div>
+<div id="overlay">
+    <img id="overlayimg" src="rendering/demoimage.png">
 </div>
 <!--
 speech bubble: 57 553 261 101 355deg
-text: 415 118 414 589
+img: 415 118 414 589
+top text: 411 7 426 100
 -->
 
 </body>
 <script src="rendering/common.js"></script>
 <script>
     function beforerender() {
-        var tbox = document.getElementById("text");
-        if (tbox.innerText === "JANUARY 1984") {
-            tbox.innerHTML = "";
-            document.getElementById("top").src = "rendering/1984originaldate.png";
-        } else {
-            fit("text")
-        }
-        fit("textbox")
+        fit("text");
+        fit("text2");
+        fit("speech")
     }
 </script>
 </html>

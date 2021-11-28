@@ -166,6 +166,10 @@ def imagesay(image, caption, tosavename=None):
     return htmlcap("captionhtml/imagesay.html", image, caption, tosavename)
 
 
+def zamn(image, caption, tosavename=None):
+    return htmlcap("captionhtml/zamn.html", image, caption, tosavename)
+
+
 def imagesaycap(image, caption, tosavename=None):
     return htmlcap("captionhtml/imagesaycap.html", image, caption, tosavename)
 

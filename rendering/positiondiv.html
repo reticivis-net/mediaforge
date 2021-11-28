@@ -13,7 +13,7 @@
             margin: 0;
         }
 
-        #textbox {
+        #speech {
             position: absolute;
             left: 0;
             top: 0;
@@ -32,7 +32,7 @@
             pointer-events: none;
         }
 
-        #textbox p {
+        #speech p {
             align-self: center;
             text-align: center;
         }
@@ -62,7 +62,7 @@
 <div id="textbox">
     <p>Lorem ipsum dolor sit amet consectetur adipisicing elit.</p>
 </div>
-<img id="base" src="zamn.png">
+<img id="base" src="1984.png">
 <div id="sliders">
     <div>
         fitmode <input id="fitmode" type="checkbox">
@@ -114,26 +114,26 @@
         onchange()
     };
     document.getElementById("text").oninput = () => {
-        document.getElementById("textbox").children[0].innerHTML = document.getElementById("text").value;
+        document.getElementById("speech").children[0].innerHTML = document.getElementById("text").value;
         onchange()
     };
 
     ["left", "top", "width", "height"].forEach((id) => {
         document.getElementById(id).oninput = (event) => {
-            document.getElementById("textbox").style[id] = `${event.target.value}px`;
+            document.getElementById("speech").style[id] = `${event.target.value}px`;
             document.getElementById(id + "v").innerHTML = `${event.target.value}px`;
             onchange()
         }
     });
 
     document.getElementById("font-size").oninput = (event) => {
-        document.getElementById("textbox").children[0].style["font-size"] = `${event.target.value}px`;
+        document.getElementById("speech").children[0].style["font-size"] = `${event.target.value}px`;
         document.getElementById("font-sizev").innerHTML = `${event.target.value}px`;
         onchange()
     }
 
     function updatetransforms() {
-        document.getElementById("textbox").style["transform"] =
+        document.getElementById("speech").style["transform"] =
             (["rotate", "skewx", "skewy"].map((id) => {
                 let val = `${document.getElementById(id).value}deg`;
                 document.getElementById(id + "v").innerHTML = val;
