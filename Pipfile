@@ -12,7 +12,6 @@ coloredlogs = "~=15.0"
 python-magic-win64 = "~=0.4.13"
 selenium = "~=3.141.0"
 Pillow = "~=8.2.0"
-youtube-dl = "*"
 numpy = "*"
 emoji = "*"
 regex = "*"
@@ -32,6 +31,7 @@ apng = "*"
 "discordlists.py" = { git = "https://github.com/HexCodeFFF/discordlists.py" }
 docstring-parser = "*"
 pipenv = "*"
+yt-dlp = "*"
 
 [dev-packages]
 
