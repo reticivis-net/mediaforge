@@ -126,15 +126,31 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
     else:
         shard_count = None
     bot = commands.AutoShardedBot(command_prefix=prefix_function, help_command=None, case_insensitive=True,
-                                  shard_count=shard_count)
+                                  shard_count=shard_count, guild_ready_timeout=10)
 
+
+    # if on_ready is firing before guild count is collected, increase guild_ready_timeout
 
     @bot.event
     async def on_ready():
         logger.log(35, f"Logged in as {bot.user.name}!")
-        logger.debug(f"{len(bot.guilds)} guilds(s)")
-        # bot.shard_count = 10  # len(bot.guilds) // 100
-        logger.debug(f"{len(bot.shards)} shard(s)")
+        logger.log(25, f"{len(bot.guilds)} guild(s)")
+        logger.log(25, f"{len(bot.shards)} shard(s)")
+
+
+    @bot.event
+    async def on_shard_ready(shardid):
+        logger.info(f"Shard {shardid} ready")
+
+
+    @bot.event
+    async def on_disconnect():
+        logger.error("on_disconnect")
+
+
+    @bot.event
+    async def on_shard_disconnect():
+        logger.error("on_shard_disconnect")
 
 
     class StatusCog(commands.Cog):
