@@ -24,7 +24,7 @@ import humanize
 import nextcord as discord
 import pronouncing
 import regex as re
-import youtube_dl
+import yt_dlp as youtube_dl
 from nextcord.ext import commands, tasks
 
 # project files
