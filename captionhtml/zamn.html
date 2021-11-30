@@ -24,6 +24,13 @@
             left: 0;
         }
 
+        img.emoji {
+            height: 1em;
+            width: 1em;
+            margin: 0 .05em 0 .1em;
+            vertical-align: -0.1em;
+        }
+
         #top {
             position: absolute;
             z-index: 10;
@@ -61,8 +68,7 @@
             font-size: 100px;
             font-family: burbank, caption, sans-serif;
             color: white;
-            text-transform: uppercase;
-            text-align: center;
+
         }
 
 
@@ -107,14 +113,19 @@
 
         #textstyleover {
             color: transparent;
-            -webkit-text-stroke: 3px black;
-            text-stroke: 3px black;
+            -webkit-text-stroke: 0.03em black;
+            text-stroke: 0.03em black;
         }
 
 
         #textstyleunder {
-            text-shadow: 0 4px 0 #2ea9e4, 0 12px 0 black;
+            text-shadow: 0 0.04em 0 #2ea9e4, 0 0.12em 0 black;
             /*text-shadow: 0 ;*/
+        }
+
+        p {
+            text-transform: uppercase;
+            text-align: center;
         }
 
     </style>
