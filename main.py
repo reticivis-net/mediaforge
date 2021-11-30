@@ -2424,7 +2424,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                     logger.warning("No permissions to send in command channel or to DM author.")
         if isinstance(commanderror, discord.ext.commands.errors.CommandNotFound):
             msg = ctx.message.content
-            cmd = discord.utils.escape_mentions(msg.split(' ')[0])
+            cmd = (msg.split(' ')[0])
             allcmds = []
             for botcom in bot.commands:
                 if not botcom.hidden:
@@ -2437,7 +2437,8 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             logger.warning(err)
             if not (cmd.startswith("$") and all([i.isdecimal() or i in ".," for i in cmd.replace("$", "")])):
                 # exclude just numbers/decimals, it annoys people
-                await ctx.reply(err)
+                await ctx.reply(err, allowed_mentions=discord.AllowedMentions(everyone=False, users=False, roles=False,
+                                                                              replied_user=True))
         elif isinstance(commanderror, discord.ext.commands.errors.NotOwner):
             err = f"{config.emojis['x']} You are not authorized to use this command."
             logger.warning(err)
