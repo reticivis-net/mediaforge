@@ -126,9 +126,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
     else:
         shard_count = None
     bot = commands.AutoShardedBot(command_prefix=prefix_function, help_command=None, case_insensitive=True,
-                                  shard_count=shard_count, guild_ready_timeout=10)
-
-
+                                  shard_count=shard_count, guild_ready_timeout=30)
     # if on_ready is firing before guild count is collected, increase guild_ready_timeout
 
     @bot.event
