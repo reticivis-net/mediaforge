@@ -2542,7 +2542,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
 
     logger.debug(f"initializing cogs")
     if config.bot_list_data:
-        logger.info("initializing BotBlock")
+        logger.info("bot list data found. botblock will start when bot is ready.")
         bot.add_cog(DiscordListsPost(bot))
     bot.add_cog(Caption(bot))
     bot.add_cog(Media(bot))
