@@ -162,7 +162,15 @@ top text: 411 7 426 100
     function beforerender() {
         fit("text");
         fit("text2");
-        fit("speech")
+        var tbox = document.getElementById("speech");
+        if (tbox.innerText === "ZAMN😍") {
+            tbox.innerHTML = "";
+            document.getElementById("base")
+                .insertAdjacentHTML("afterend", "<img id=\"top\" src=\"rendering/zamnoriginaltext.png\">");
+        } else {
+            fit("speech")
+        }
+
     }
 </script>
 </html>
