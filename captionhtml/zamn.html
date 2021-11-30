@@ -163,14 +163,16 @@ top text: 411 7 426 100
         fit("text");
         fit("text2");
         var tbox = document.getElementById("speech");
-        if (tbox.innerText === "ZAMN😍") {
+        console.log(tbox.innerHTML);
+        if (tbox.innerText === "ZAMN😍" || tbox.innerHTML.trim() === // twemoji goin off zadly
+            '<p class="txt">ZAMN<img draggable="false" class="emoji" ' +
+            'alt="😍" src="rendering/twemoji/72x72/1f60d.png"></p>') {
             tbox.innerHTML = "";
             document.getElementById("base")
                 .insertAdjacentHTML("afterend", "<img id=\"top\" src=\"rendering/zamnoriginaltext.png\">");
         } else {
             fit("speech")
         }
-
     }
 </script>
 </html>
