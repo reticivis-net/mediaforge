@@ -56,6 +56,10 @@ def get_full_class_name(obj):
     return module + '.' + obj.__class__.__name__
 
 
+# make copy of .reply() function
+discord.Message.orig_reply = discord.Message.reply
+
+
 async def safe_reply(self: discord.Message, *args, **kwargs) -> discord.Message:
     # replies to original message if it exists, just sends in channel if it doesnt
     try:
@@ -126,6 +130,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                                   shard_count=shard_count, guild_ready_timeout=30,
                                   allowed_mentions=discord.AllowedMentions(everyone=False, users=False, roles=False,
                                                                            replied_user=True))
+
 
     @bot.event
     async def on_ready():
