@@ -3,6 +3,7 @@ import asyncio
 import concurrent.futures
 import datetime
 import difflib
+import functools
 import glob
 import inspect
 import io
@@ -55,6 +56,13 @@ def get_full_class_name(obj):
         return obj.__class__.__name__
     return module + '.' + obj.__class__.__name__
 
+
+# override default send allowed_mentions to only be replied user. should forcibly remove ALL @everyone exploits.
+discord.abc.Messageable.orig_send = discord.abc.Messageable.send
+
+discord.abc.Messageable.send = functools.partialmethod(
+    discord.abc.Messageable.orig_send, allowed_mentions=
+    discord.AllowedMentions(everyone=False, users=False, roles=False, replied_user=True))
 
 # make copy of .reply() function
 discord.Message.orig_reply = discord.Message.reply
@@ -127,6 +135,8 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
         shard_count = None
     bot = commands.AutoShardedBot(command_prefix=prefix_function, help_command=None, case_insensitive=True,
                                   shard_count=shard_count, guild_ready_timeout=30)
+
+
     # if on_ready is firing before guild count is collected, increase guild_ready_timeout
 
     @bot.event
@@ -2333,7 +2343,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                     out.append(word.replace(">", ""))
                 else:
                     await ctx.reply(f"No pronunciation found for `{word}`. To render literal slashnemes, begin the "
-                                    f"word with `>`.", allowed_mentions=discord.AllowedMentions.none())
+                                    f"word with `>`.")
                     return
             out = " ".join(out)
             # clear out any whitespace touching punctuation
@@ -2410,7 +2420,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
         global renderpool
         if isinstance(commanderror, concurrent.futures.process.BrokenProcessPool):
             renderpool = improcessing.initializerenderpool()
-        errorstring = discord.utils.escape_mentions(discord.utils.escape_markdown(str(commanderror)))
+        errorstring = discord.utils.escape_markdown(str(commanderror))
         if isinstance(commanderror, discord.Forbidden):
             # if not ctx.me.permissions_in(ctx.channel).send_messages:
             #     if ctx.me.permissions_in(ctx.author).send_messages:
@@ -2437,8 +2447,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             logger.warning(err)
             if not (cmd.startswith("$") and all([i.isdecimal() or i in ".," for i in cmd.replace("$", "")])):
                 # exclude just numbers/decimals, it annoys people
-                await ctx.reply(err, allowed_mentions=discord.AllowedMentions(everyone=False, users=False, roles=False,
-                                                                              replied_user=True))
+                await ctx.reply(err)
         elif isinstance(commanderror, discord.ext.commands.errors.NotOwner):
             err = f"{config.emojis['x']} You are not authorized to use this command."
             logger.warning(err)
@@ -2465,8 +2474,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             await ctx.reply(err)
         elif isinstance(commanderror, discord.ext.commands.errors.CommandInvokeError) and \
                 isinstance(commanderror.original, improcessing.NonBugError):
-            await ctx.reply(f"{config.emojis['2exclamation']}" +
-                            discord.utils.escape_mentions(str(commanderror.original)[:1000]))
+            await ctx.reply(f"{config.emojis['2exclamation']} {commanderror.original[:1000]}")
         else:
             if isinstance(commanderror, discord.ext.commands.errors.CommandInvokeError):
                 commanderror = commanderror.original
