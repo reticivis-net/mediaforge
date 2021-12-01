@@ -3,7 +3,6 @@ import asyncio
 import concurrent.futures
 import datetime
 import difflib
-import functools
 import glob
 import inspect
 import io
@@ -55,17 +54,6 @@ def get_full_class_name(obj):
     if module is None or module == str.__class__.__module__:
         return obj.__class__.__name__
     return module + '.' + obj.__class__.__name__
-
-
-# override default send allowed_mentions to only be replied user. should forcibly remove ALL @everyone exploits.
-discord.abc.Messageable.orig_send = discord.abc.Messageable.send
-
-discord.abc.Messageable.send = functools.partialmethod(
-    discord.abc.Messageable.orig_send, allowed_mentions=
-    discord.AllowedMentions(everyone=False, users=False, roles=False, replied_user=True))
-
-# make copy of .reply() function
-discord.Message.orig_reply = discord.Message.reply
 
 
 async def safe_reply(self: discord.Message, *args, **kwargs) -> discord.Message:
@@ -133,11 +121,11 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
         shard_count = config.shard_count
     else:
         shard_count = None
-    bot = commands.AutoShardedBot(command_prefix=prefix_function, help_command=None, case_insensitive=True,
-                                  shard_count=shard_count, guild_ready_timeout=30)
-
-
     # if on_ready is firing before guild count is collected, increase guild_ready_timeout
+    bot = commands.AutoShardedBot(command_prefix=prefix_function, help_command=None, case_insensitive=True,
+                                  shard_count=shard_count, guild_ready_timeout=30,
+                                  allowed_mentions=discord.AllowedMentions(everyone=False, users=False, roles=False,
+                                                                           replied_user=True))
 
     @bot.event
     async def on_ready():
