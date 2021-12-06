@@ -150,8 +150,8 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
 
 
     @bot.event
-    async def on_shard_disconnect():
-        logger.error("on_shard_disconnect")
+    async def on_shard_disconnect(shardid):
+        logger.error(f"on_shard_disconnect {shardid}")
 
 
     class StatusCog(commands.Cog):
