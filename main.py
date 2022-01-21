@@ -80,6 +80,7 @@ async def safe_reply(self: discord.Message, *args, **kwargs) -> discord.Message:
 discord.Message.reply = safe_reply
 
 ready = False
+db: aiosqlite.Connection
 if __name__ == "__main__":  # prevents multiprocessing workers from running bot code
     logger.log(25, "Hello World!")
     logger.info(f"discord.py {discord.__version__}")
@@ -94,31 +95,30 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
     # this isnt done with aiosqlite because its easier to just not do things asyncly during startup.
     if "DATABASE_URL" in os.environ:
         logger.debug("postgresql?")
-    db = sqlite3.connect(config.db_filename)
+    syncdb = sqlite3.connect(config.db_filename)
     # setup db tables
-    with db:
-        cur = db.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='guild_prefixes'")
+    with syncdb:
+        cur = syncdb.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='guild_prefixes'")
         if not cur.fetchall():
-            db.execute(
+            syncdb.execute(
                 "create table guild_prefixes ( guild int not null constraint table_name_pk primary key, "
                 "prefix text not null ); "
             )
-        cur = db.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='bans'")
+        cur = syncdb.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='bans'")
         if not cur.fetchall():
-            db.execute("create table bans ( user int not null constraint bans_pk primary key, banreason text );  ")
-    db.close()
+            syncdb.execute("create table bans ( user int not null constraint bans_pk primary key, banreason text );  ")
+    syncdb.close()
 
 
     async def prefix_function(dbot: typing.Union[commands.Bot, commands.AutoShardedBot], message: discord.Message):
         if not message.guild:
             return config.default_command_prefix
-        async with aiosqlite.connect(config.db_filename) as db:
-            async with db.execute("SELECT prefix from guild_prefixes WHERE guild=?", (message.guild.id,)) as cur:
-                pfx = await cur.fetchone()
-                if pfx:
-                    return pfx[0]
-                else:
-                    return config.default_command_prefix
+        async with db.execute("SELECT prefix from guild_prefixes WHERE guild=?", (message.guild.id,)) as cur:
+            pfx = await cur.fetchone()
+            if pfx:
+                return pfx[0]
+            else:
+                return config.default_command_prefix
 
 
     if hasattr(config, "shard_count") and config.shard_count is not None:
@@ -1736,9 +1736,8 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             :param prefix: The new prefix for the bot to use.
             """
             if prefix is None or prefix == config.default_command_prefix:
-                async with aiosqlite.connect(config.db_filename) as db:
-                    await db.execute("DELETE FROM guild_prefixes WHERE guild=?", (ctx.guild.id,))
-                    await db.commit()
+                await db.execute("DELETE FROM guild_prefixes WHERE guild=?", (ctx.guild.id,))
+                await db.commit()
                 await ctx.reply(f"{config.emojis['check']} Set guild prefix back to global default "
                                 f"(`{config.default_command_prefix}`).")
 
@@ -1752,10 +1751,9 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                     await ctx.reply(f"{config.emojis['x']} Found invalid characters: "
                                     f"{', '.join([discord.utils.escape_markdown(i) for i in invalids])}")
                 else:
-                    async with aiosqlite.connect(config.db_filename) as db:
-                        await db.execute("REPLACE INTO guild_prefixes(guild, prefix) VALUES (?,?)",
-                                         (ctx.guild.id, prefix))
-                        await db.commit()
+                    await db.execute("REPLACE INTO guild_prefixes(guild, prefix) VALUES (?,?)",
+                                     (ctx.guild.id, prefix))
+                    await db.commit()
                     await ctx.reply(f"{config.emojis['check']} Set guild prefix to `{prefix}`")
                     if prefix.isalpha():  # only alphabetic characters
                         await ctx.reply(f"{config.emojis['warning']} Your prefix only contains alphabetic characters. "
@@ -2275,22 +2273,20 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
         @commands.command()
         @commands.is_owner()
         async def ban(self, ctx, user: discord.User, *, reason: typing.Optional[str]):
-            async with aiosqlite.connect(config.db_filename) as db:
-                async with db.execute("SELECT count(*) from bans WHERE user=?", (user.id,)) as cur:
-                    if (await cur.fetchone())[0] > 0:  # check if ban exists
-                        await ctx.reply(f"{config.emojis['x']} {user.mention} is already banned.")
-                    else:
-                        await db.execute("INSERT INTO bans(user,banreason) values (?, ?)", (user.id, reason))
-                        await db.commit()
-                        await ctx.reply(f"{config.emojis['check']} Banned {user.mention}.")
+            async with db.execute("SELECT count(*) from bans WHERE user=?", (user.id,)) as cur:
+                if (await cur.fetchone())[0] > 0:  # check if ban exists
+                    await ctx.reply(f"{config.emojis['x']} {user.mention} is already banned.")
+                else:
+                    await db.execute("INSERT INTO bans(user,banreason) values (?, ?)", (user.id, reason))
+                    await db.commit()
+                    await ctx.reply(f"{config.emojis['check']} Banned {user.mention}.")
 
         @commands.command()
         @commands.is_owner()
         async def unban(self, ctx, user: discord.User):
-            async with aiosqlite.connect(config.db_filename) as db:
-                cur = await db.execute("DELETE FROM bans WHERE user=?",
-                                       (user.id,))
-                await db.commit()
+            cur = await db.execute("DELETE FROM bans WHERE user=?",
+                                   (user.id,))
+            await db.commit()
             if cur.rowcount > 0:
                 await ctx.reply(f"{config.emojis['check']} Unbanned {user.mention}.")
             else:
@@ -2377,23 +2373,22 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
     async def banned_users(ctx: commands.Context):
         if await bot.is_owner(ctx.author):
             return True
-        async with aiosqlite.connect(config.db_filename) as db:
             async with db.execute("SELECT banreason from bans WHERE user=?", (ctx.author.id,)) as cur:
                 ban = await cur.fetchone()
-                if ban:
-                    outtext = "You are banned from this bot"
-                    if ban[0]:
-                        outtext += f" for the following reason: \n\n{ban[0]}\n\n"
-                    else:
-                        outtext += f".\n"
-                    outtext += f"To appeal this, "
-                    if bot.owner_id == 214511018204725248:  # my ID
-                        outtext += "raise an issue at https://github.com/HexCodeFFF/mediaforge/issues"
-                    else:
-                        outtext += "contact the bot owner."
-                    raise commands.CheckFailure(outtext)
+            if ban:
+                outtext = "You are banned from this bot"
+                if ban[0]:
+                    outtext += f" for the following reason: \n\n{ban[0]}\n\n"
                 else:
-                    return True
+                    outtext += f".\n"
+                outtext += f"To appeal this, "
+                if bot.owner_id == 214511018204725248:  # my ID
+                    outtext += "raise an issue at https://github.com/HexCodeFFF/mediaforge/issues"
+                else:
+                    outtext += "contact the bot owner."
+                raise commands.CheckFailure(outtext)
+            else:
+                return True
 
 
     @bot.check
@@ -2518,6 +2513,17 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                                                                                  len(result["failure"].keys())))
 
 
+    async def create_db():
+        global db
+        db = await aiosqlite.connect(config.db_filename)
+
+
+    class CreateDB(commands.Cog):
+        def __init__(self, bot):
+            self.bot = bot
+            asyncio.get_event_loop().run_until_complete(create_db())
+
+
     heartbeat.init()
 
     # from ?tag cooldown mapping
@@ -2546,6 +2552,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
     if config.bot_list_data:
         logger.info("bot list data found. botblock will start when bot is ready.")
         bot.add_cog(DiscordListsPost(bot))
+    bot.add_cog(CreateDB(bot))
     bot.add_cog(Caption(bot))
     bot.add_cog(Media(bot))
     bot.add_cog(Conversion(bot))
