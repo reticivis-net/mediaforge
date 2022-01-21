@@ -2373,22 +2373,22 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
     async def banned_users(ctx: commands.Context):
         if await bot.is_owner(ctx.author):
             return True
-            async with db.execute("SELECT banreason from bans WHERE user=?", (ctx.author.id,)) as cur:
-                ban = await cur.fetchone()
-            if ban:
-                outtext = "You are banned from this bot"
-                if ban[0]:
-                    outtext += f" for the following reason: \n\n{ban[0]}\n\n"
-                else:
-                    outtext += f".\n"
-                outtext += f"To appeal this, "
-                if bot.owner_id == 214511018204725248:  # my ID
-                    outtext += "raise an issue at https://github.com/HexCodeFFF/mediaforge/issues"
-                else:
-                    outtext += "contact the bot owner."
-                raise commands.CheckFailure(outtext)
+        async with db.execute("SELECT banreason from bans WHERE user=?", (ctx.author.id,)) as cur:
+            ban = await cur.fetchone()
+        if ban:
+            outtext = "You are banned from this bot"
+            if ban[0]:
+                outtext += f" for the following reason: \n\n{ban[0]}\n\n"
             else:
-                return True
+                outtext += f".\n"
+            outtext += f"To appeal this, "
+            if bot.owner_id == 214511018204725248:  # my ID
+                outtext += "raise an issue at https://github.com/HexCodeFFF/mediaforge/issues"
+            else:
+                outtext += "contact the bot owner."
+            raise commands.CheckFailure(outtext)
+        else:
+            return True
 
 
     @bot.check

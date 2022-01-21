@@ -69,6 +69,7 @@ the bot uses many CLI programs for media processing.
 ### python
 
 - developed and tested on python 3.8. use that or a later compatible version
+- **python 3.10 is NOT compatible** (yet) 3.9 should work
 
 ### to run
 
