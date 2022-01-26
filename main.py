@@ -2405,21 +2405,34 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
 
     @bot.listen()
     async def on_command_error(ctx: commands.Context, commanderror: commands.CommandError):
+        async def dmauthor(*args, **kwargs):
+            try:
+                return await ctx.reply(*args, **kwargs)
+            except discord.Forbidden:
+                logger.debug(f"Reply to {ctx.message.id} and dm to {ctx.author.id} failed. Aborting.")
+
+        async def reply(*args, **kwargs):
+            try:
+                if ctx.guild and not ctx.channel.permissions_for(ctx.me).send_messages:
+                    logger.debug(f"No permissions to reply to {ctx.message.id}, trying to DM author.")
+                    return dmauthor(*args, **kwargs)
+                return await ctx.reply(*args, **kwargs)
+            except discord.Forbidden:
+                logger.debug(f"Forbidden to reply to {ctx.message.id}, trying to DM author")
+                return dmauthor(*args, **kwargs)
+
+        async def logandreply(message):
+            logger.debug(
+                f"Command '{ctx.message.content}' by @{ctx.message.author.name}#{ctx.message.author.discriminator} ({ctx.message.author.id}) failed due to {message}.")
+            await reply(message)
+
         global renderpool
         if isinstance(commanderror, concurrent.futures.process.BrokenProcessPool):
             renderpool = improcessing.initializerenderpool()
         errorstring = discord.utils.escape_markdown(str(commanderror))
         if isinstance(commanderror, discord.Forbidden):
-            # if not ctx.me.permissions_in(ctx.channel).send_messages:
-            #     if ctx.me.permissions_in(ctx.author).send_messages:
-            if not ctx.channel.permissions_for(ctx.me).send_messages:
-                if ctx.author.permissions_for(ctx.me).send_messages:
-                    err = f"{config.emojis['x']} I don't have permissions to send messages in that channel."
-                    await ctx.author.send(err)
-                    logger.warning(err)
-                    return
-                else:
-                    logger.warning("No permissions to send in command channel or to DM author.")
+            await dmauthor(f"{config.emojis['x']} I don't have permissions to send messages in that channel.")
+            logger.warning(commanderror)
         if isinstance(commanderror, discord.ext.commands.errors.CommandNotFound):
             msg = ctx.message.content
             cmd = (msg.split(' ')[0])
@@ -2432,37 +2445,30 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             match = difflib.get_close_matches(cmd.replace(prefix, "", 1), allcmds, n=1, cutoff=0)[0]
             err = f"{config.emojis['exclamation_question']} Command `{cmd}` does not exist. " \
                   f"Did you mean **{prefix}{match}**?"
-            logger.warning(err)
             if not (cmd.startswith("$") and all([i.isdecimal() or i in ".," for i in cmd.replace("$", "")])):
                 # exclude just numbers/decimals, it annoys people
-                await ctx.reply(err)
+                await logandreply(err)
         elif isinstance(commanderror, discord.ext.commands.errors.NotOwner):
             err = f"{config.emojis['x']} You are not authorized to use this command."
-            logger.warning(err)
-            await ctx.reply(err)
+            await logandreply(err)
         elif isinstance(commanderror, discord.ext.commands.errors.CommandOnCooldown):
             err = f"{config.emojis['clock']} {errorstring}"
-            logger.warning(err)
-            await ctx.reply(err)
+            await logandreply(err)
         elif isinstance(commanderror, discord.ext.commands.errors.MissingRequiredArgument):
             err = f"{config.emojis['question']} {errorstring}"
-            logger.warning(err)
-            await ctx.reply(err)
+            await logandreply(err)
         elif isinstance(commanderror, discord.ext.commands.errors.BadArgument):
             err = f"{config.emojis['warning']} Bad Argument! Did you put text where a number should be? `{errorstring}`"
-            logger.warning(err)
-            await ctx.reply(err)
+            await logandreply(err)
         elif isinstance(commanderror, discord.ext.commands.errors.NoPrivateMessage):
             err = f"{config.emojis['warning']} {errorstring}"
-            logger.warning(err)
-            await ctx.reply(err)
+            await logandreply(err)
         elif isinstance(commanderror, discord.ext.commands.errors.CheckFailure):
             err = f"{config.emojis['x']} {errorstring}"
-            logger.warning(err)
-            await ctx.reply(err)
+            await logandreply(err)
         elif isinstance(commanderror, discord.ext.commands.errors.CommandInvokeError) and \
                 isinstance(commanderror.original, improcessing.NonBugError):
-            await ctx.reply(f"{config.emojis['2exclamation']} {commanderror.original[:1000]}")
+            await logandreply(f"{config.emojis['2exclamation']} {commanderror.original[:1000]}")
         else:
             if isinstance(commanderror, discord.ext.commands.errors.CommandInvokeError):
                 commanderror = commanderror.original
@@ -2480,9 +2486,9 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                     traceback.format_exception(etype=type(commanderror), value=commanderror,
                                                tb=commanderror.__traceback__)), encoding='utf8'))
                 buf.seek(0)
-                await ctx.reply((f"{config.emojis['2exclamation']} `{get_full_class_name(commanderror)}: "
-                                 f"{errorstring}`")[:2000],
-                                file=discord.File(buf, filename="traceback.txt"), embed=embed)
+                await reply((f"{config.emojis['2exclamation']} `{get_full_class_name(commanderror)}: "
+                             f"{errorstring}`")[:2000],
+                            file=discord.File(buf, filename="traceback.txt"), embed=embed)
 
 
     class DiscordListsPost(commands.Cog):
