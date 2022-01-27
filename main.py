@@ -2415,11 +2415,11 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             try:
                 if ctx.guild and not ctx.channel.permissions_for(ctx.me).send_messages:
                     logger.debug(f"No permissions to reply to {ctx.message.id}, trying to DM author.")
-                    return dmauthor(*args, **kwargs)
+                    return await dmauthor(*args, **kwargs)
                 return await ctx.reply(*args, **kwargs)
             except discord.Forbidden:
                 logger.debug(f"Forbidden to reply to {ctx.message.id}, trying to DM author")
-                return dmauthor(*args, **kwargs)
+                return await dmauthor(*args, **kwargs)
 
         async def logandreply(message):
             logger.debug(
