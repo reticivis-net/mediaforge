@@ -505,7 +505,11 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                             else:
                                 uploadtask = asyncio.create_task(ctx.reply(file=discord.File(result, spoiler=spoiler)))
                             msg = await msgtask
-                            await msg.edit(content=f"{config.emojis['working']} Uploading...")
+                            uplt = f"{config.emojis['working']} Uploading..."
+                            try:
+                                await msg.edit(content=uplt)
+                            except discord.NotFound:
+                                await ctx.reply(uplt)
                             await uploadtask
                             asyncio.create_task(msg.delete())
                             # for f in files:
