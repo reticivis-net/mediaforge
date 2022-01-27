@@ -2413,7 +2413,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             try:
                 return await ctx.reply(*args, **kwargs)
             except discord.Forbidden:
-                logger.debug(f"Reply to {ctx.message.id} and dm to {ctx.author.id} failed. Aborting.")
+                logger.warning(f"Reply to {ctx.message.id} and dm to {ctx.author.id} failed. Aborting.")
 
         async def reply(*args, **kwargs):
             try:
@@ -2426,8 +2426,9 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                 return await dmauthor(*args, **kwargs)
 
         async def logandreply(message):
-            logger.debug(
-                f"Command '{ctx.message.content}' by @{ctx.message.author.name}#{ctx.message.author.discriminator} ({ctx.message.author.id}) failed due to {message}.")
+            logger.warning(f"Command '{ctx.message.content}' by "
+                           f"@{ctx.message.author.name}#{ctx.message.author.discriminator} ({ctx.message.author.id}) "
+                           f"failed due to {message}.")
             await reply(message)
 
         global renderpool
