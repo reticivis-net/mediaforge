@@ -2355,7 +2355,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                        f"@{ctx.message.author.name}#{ctx.message.author.discriminator}"
                        f" ({ctx.message.author.display_name}) ({ctx.message.author.id}) "
                        f"ran '{ctx.message.content}' in channel "
-                       f"#{ctx.channel.name} in server {ctx.guild}")
+                       f"#{ctx.channel.name} ({ctx.channel.id}) in server {ctx.guild} ({ctx.guild.id})")
 
 
     @bot.listen()
@@ -2428,6 +2428,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
         async def logandreply(message):
             logger.warning(f"Command '{ctx.message.content}' by "
                            f"@{ctx.message.author.name}#{ctx.message.author.discriminator} ({ctx.message.author.id}) "
+                           f"in channel #{ctx.channel.name} ({ctx.channel.id}) in server {ctx.guild} ({ctx.guild.id}) "
                            f"failed due to {message}.")
             await reply(message)
 
