@@ -509,7 +509,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                             try:
                                 await msg.edit(content=uplt)
                             except discord.NotFound:
-                                await ctx.reply(uplt)
+                                msg = await ctx.reply(uplt)
                             await uploadtask
                             asyncio.create_task(msg.delete())
                             # for f in files:
