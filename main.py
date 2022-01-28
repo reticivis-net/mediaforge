@@ -817,14 +817,11 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             :mediaparam media: A video, gif, or image.
             """
             if not 0 < strength <= 100:
-                await ctx.send(f"{config.emojis['warning']} Strength must be between 0 and 100.")
-                return
+                raise commands.BadArgument(f"Strength must be between 0 and 100.")
             if not 0 <= stretch <= 40:
-                await ctx.send(f"{config.emojis['warning']} Stretch must be between 0 and 40.")
-                return
+                raise commands.BadArgument(f"Stretch must be between 0 and 40.")
             if not 1 <= quality <= 95:
-                await ctx.send(f"{config.emojis['warning']} Quality must be between 1 and 95.")
-                return
+                raise commands.BadArgument(f"Quality must be between 1 and 95.")
             await improcess(ctx, captionfunctions.jpeg, [["VIDEO", "GIF", "IMAGE"]], strength, stretch, quality,
                             handleanimated=True)
 
@@ -846,23 +843,17 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             :mediaparam media: A video, gif, or image.
             """
             if not 0 <= brightness <= 5:
-                await ctx.send(f"{config.emojis['warning']} Brightness must be between 0 and 5.")
-                return
+                raise commands.BadArgument(f"Brightness must be between 0 and 5.")
             if not 0 <= contrast <= 5:
-                await ctx.send(f"{config.emojis['warning']} Contrast must be between 0 and 5.")
-                return
+                raise commands.BadArgument(f"Contrast must be between 0 and 5.")
             if not 0 <= sharpness <= 5:
-                await ctx.send(f"{config.emojis['warning']} Sharpness must be between 0 and 5.")
-                return
+                raise commands.BadArgument(f"Sharpness must be between 0 and 5.")
             if not 0 <= saturation <= 5:
-                await ctx.send(f"{config.emojis['warning']} Saturation must be between 0 and 5.")
-                return
+                raise commands.BadArgument(f"Saturation must be between 0 and 5.")
             if not 0 <= noise <= 255:
-                await ctx.send(f"{config.emojis['warning']} Noise must be between 0 and 255.")
-                return
+                raise commands.BadArgument(f"Noise must be between 0 and 255.")
             if not 0 < jpegstrength <= 100:
-                await ctx.send(f"{config.emojis['warning']} JPEG strength must be between 0 and 100.")
-                return
+                raise commands.BadArgument(f"JPEG strength must be between 0 and 100.")
             await improcess(ctx, captionfunctions.deepfry, [["VIDEO", "GIF", "IMAGE"]], brightness, contrast, sharpness,
                             saturation, noise, jpegstrength, handleanimated=True)
 
@@ -877,8 +868,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             :mediaparam media: A video, gif, or image.
             """
             if not 0 <= strength <= 0.5:
-                await ctx.send(f"{config.emojis['warning']} Strength must be between 0% and 0.5%.")
-                return
+                raise commands.BadArgument(f"Strength must be between 0% and 0.5%.")
             await improcess(ctx, captionfunctions.jpegcorrupt, [["VIDEO", "GIF", "IMAGE"]], strength,
                             handleanimated=True)
 
@@ -903,13 +893,11 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             :mediaparam media: A video, gif, or image.
             """
             if not (1 <= width <= config.max_size or width == -1):
-                await ctx.send(f"{config.emojis['warning']} Width must be between 1 and "
-                               f"{config.max_size} or be -1.")
-                return
+                raise commands.BadArgument(f"Width must be between 1 and "
+                                           f"{config.max_size} or be -1.")
             if not (1 <= height <= config.max_size or height == -1):
-                await ctx.send(f"{config.emojis['warning']} Height must be between 1 and "
-                               f"{config.max_size} or be -1.")
-                return
+                raise commands.BadArgument(f"Height must be between 1 and "
+                                           f"{config.max_size} or be -1.")
             await improcess(ctx, improcessing.resize, [["VIDEO", "GIF", "IMAGE"]], width, height, resize=False)
 
         @commands.command(aliases=["short", "kyle"])
@@ -944,8 +932,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             :mediaparam media: A video, gif, or image.
             """
             if not 1 <= strength <= 99:
-                await ctx.send(f"{config.emojis['warning']} Strength must be between 1 and 99.")
-                return
+                raise commands.BadArgument(f"Strength must be between 1 and 99.")
             await improcess(ctx, captionfunctions.magick, [["VIDEO", "GIF", "IMAGE"]], strength, handleanimated=True)
 
         @commands.command(aliases=["repeat"], hidden=True)
@@ -966,8 +953,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             :mediaparam media: A gif.
             """
             if not -1 <= loop:
-                await ctx.send(f"{config.emojis['warning']} Loop must be -1 or more.")
-                return
+                raise commands.BadArgument(f"Loop must be -1 or more.")
             await improcess(ctx, improcessing.gifloop, [["GIF"]], loop)
 
         @commands.command(aliases=["vloop"])
@@ -983,12 +969,11 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             :mediaparam media: A video or GIF.
             """
             if not 1 <= loop <= 15:
-                await ctx.send(f"{config.emojis['warning']} Loop must be between 1 and 15.")
-                return
+                raise commands.BadArgument(f"Loop must be between 1 and 15.")
             await improcess(ctx, improcessing.videoloop, [["VIDEO", "GIF"]], loop)
 
         @commands.command(aliases=["flip", "rot"])
-        async def rotate(self, ctx, rottype):
+        async def rotate(self, ctx, rottype: typing.Literal["90", "90ccw", "180", "vflip", "hflip"]):
             """
             Rotates and/or flips media
 
@@ -997,11 +982,6 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             horizontal flip
             :mediaparam media: A video, gif, or image.
             """
-            types = ["90", "90ccw", "180", "vflip", "hflip"]
-            rottype = rottype.lower()
-            if rottype not in types:
-                await ctx.send(f"{config.emojis['warning']} Rotation type must be: {', '.join(rottype)}")
-                return
             await improcess(ctx, improcessing.rotate, [["GIF", "IMAGE", "VIDEO"]], rottype)
 
         @commands.command()
@@ -1040,8 +1020,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             :mediaparam media: A video, gif, or image.
             """
             if not 0 <= radiuspercent <= 50:
-                await ctx.send(f"{config.emojis['warning']} Border radius percent must be between 0 and 50.")
-                return
+                raise commands.BadArgument(f"Border radius percent must be between 0 and 50.")
             await improcess(ctx, captionfunctions.roundcorners, [["GIF", "IMAGE", "VIDEO"]], str(radiuspercent),
                             handleanimated=True)
 
@@ -1058,8 +1037,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             :mediaparam media: A video or audio file.
             """
             if not 0 <= volume <= 32:
-                await ctx.send(f"{config.emojis['warning']} Volume must be between 0 and 32.")
-                return
+                raise commands.BadArgument(f"{config.emojis['warning']} Volume must be between 0 and 32.")
             await improcess(ctx, improcessing.volume, [["VIDEO", "AUDIO"]], volume)
 
         @commands.command()
@@ -1085,11 +1063,9 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             :mediaparam media: A video or audio file.
             """
             if not 0.1 <= frequency <= 20000:
-                await ctx.send(f"{config.emojis['warning']} Frequency must be between 0.1 and 20000.")
-                return
+                raise commands.BadArgument(f"Frequency must be between 0.1 and 20000.")
             if not 0 <= depth <= 1:
-                await ctx.send(f"{config.emojis['warning']} Depth must be between 0 and 1.")
-                return
+                raise commands.BadArgument(f"Depth must be between 0 and 1.")
             await improcess(ctx, improcessing.vibrato, [["VIDEO", "AUDIO"]], frequency, depth)
 
         @commands.command()
@@ -1103,8 +1079,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             :mediaparam media: A video or audio file.
             """
             if not -12 <= numofhalfsteps <= 12:
-                await ctx.send(f"{config.emojis['warning']} numofhalfsteps must be between -12 and 12.")
-                return
+                raise commands.BadArgument(f"numofhalfsteps must be between -12 and 12.")
             await improcess(ctx, improcessing.pitch, [["VIDEO", "AUDIO"]], numofhalfsteps)
 
         @commands.command(aliases=["concat", "combinev"])
@@ -1155,8 +1130,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             :mediaparam video2: A video or gif.
             """
             if not 0 <= alpha <= 1:
-                await ctx.send(f"{config.emojis['warning']} Alpha must be between 0 and 1.")
-                return
+                raise commands.BadArgument(f"Alpha must be between 0 and 1.")
             await improcess(ctx, improcessing.overlay, [["VIDEO", "GIF", "IMAGE"], ["VIDEO", "GIF", "IMAGE"]], alpha,
                             "overlay")
 
@@ -1183,15 +1157,14 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             :mediaparam media: A video, gif, or audio.
             """
             if not 0.25 <= speed <= 100:
-                await ctx.send(f"{config.emojis['warning']} Speed must be between 0.25 and 100")
-                return
+                raise commands.BadArgument(f"Speed must be between 0.25 and 100")
             await improcess(ctx, improcessing.speed, [["VIDEO", "GIF", "AUDIO"]], speed)
 
         @commands.command(aliases=["shuffle", "stutter", "nervous"])
         async def random(self, ctx, frames: int = 30):
             """
             Shuffles the frames of a video around.
-            Currently this command does NOT apply to audio. This is an FFmpeg limitation.
+            Currently, this command does NOT apply to audio. This is an FFmpeg limitation.
             see https://ffmpeg.org/ffmpeg-filters.html#random
 
             :param ctx: discord context
@@ -1199,8 +1172,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             :mediaparam video: A video or gif.
             """
             if not 2 <= frames <= 512:
-                await ctx.send(f"{config.emojis['warning']} Frames must be between 2 and 512")
-                return
+                raise commands.BadArgument(f"Frames must be between 2 and 512")
             await improcess(ctx, improcessing.random, [["VIDEO", "GIF"]], frames)
 
         @commands.command()
@@ -1227,11 +1199,9 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             :mediaparam video: A video or gif.
             """
             if not 28 <= crf <= 51:
-                await ctx.send(f"{config.emojis['warning']} CRF must be between 28 and 51.")
-                return
+                raise commands.BadArgument(f"CRF must be between 28 and 51.")
             if not 10 <= qa <= 112:
-                await ctx.send(f"{config.emojis['warning']} qa must be between 1 and 112.")
-                return
+                raise commands.BadArgument(f"qa must be between 1 and 112.")
             await improcess(ctx, improcessing.quality, [["VIDEO", "GIF"]], crf, qa)
 
         @commands.command(name="fps")
@@ -1249,8 +1219,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             :mediaparam video: A video or gif.
             """
             if not 1 <= fps <= 60:
-                await ctx.send(f"{config.emojis['warning']} FPS must be between 1 and 60.")
-                return
+                raise commands.BadArgument(f"FPS must be between 1 and 60.")
             await improcess(ctx, improcessing.changefps, [["VIDEO", "GIF"]], fps)
 
         @commands.command(aliases=["negate", "opposite"])
@@ -1274,11 +1243,9 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             :mediaparam media: A video, gif, or audio file.
             """
             if not 0 < length:
-                await ctx.send(f"{config.emojis['warning']} Length must be more than 0.")
-                return
+                raise commands.BadArgument(f"Length must be more than 0.")
             if not 0 <= start:
-                await ctx.send(f"{config.emojis['warning']} Start must be equal to or more than 0.")
-                return
+                raise commands.BadArgument(f"Start must be equal to or more than 0.")
             await improcess(ctx, improcessing.trim, [["VIDEO", "GIF", "AUDIO"]], length, start)
 
         @commands.command()
@@ -1390,7 +1357,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                 await ctx.send(f"{config.emojis['warning']} No valid user, guild, or message ID found.")
 
         @commands.command(aliases=["youtube", "youtubedownload", "youtubedl", "ytdownload", "download", "dl", "ytdl"])
-        async def videodl(self, ctx, videourl, videoformat="video"):
+        async def videodl(self, ctx, videourl, videoformat: typing.Literal["video", "audio"] = "video"):
             """
             Downloads a web hosted video from sites like youtube.
             Any site here works: https://ytdl-org.github.io/youtube-dl/supportedsites.html
@@ -1399,11 +1366,6 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             :param videourl: the URL of a video or the title of a youtube video.
             :param videoformat: download audio or video.
             """
-            types = ["video", "audio"]
-            videoformat = videoformat.lower()
-            if videoformat not in types:
-                await ctx.reply(f"{config.emojis['warning']} Download format must be `video` or `audio`.")
-                return
             # await improcessing.ytdl(url, form)
             with TempFileSession() as tempfilesession:
                 async with ctx.channel.typing():
@@ -1527,7 +1489,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                         out.append(str(emoji.url))
                 await ctx.send("\n".join(out))
             else:
-                await ctx.reply(f"{config.emojis['warning']} Your message doesn't contain any custom emojis!")
+                raise commands.BadArgument(f"Your message doesn't contain any custom emojis!")
 
         @commands.command()
         async def twemoji(self, ctx, *, msg):
@@ -1552,7 +1514,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                     if os.path.exists(fpath):
                         await ctx.reply(file=discord.File(fpath))
             else:
-                await ctx.reply(f"{config.emojis['x']} No default emojis found!")
+                raise commands.BadArgument(f"No default emojis found!")
 
 
     class Image(commands.Cog, name="Creation"):
@@ -1757,13 +1719,12 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
 
             else:
                 if not 50 >= len(prefix) > 0:
-                    await ctx.reply(f"{config.emojis['x']} prefix must be between 1 and 50 characters.")
-                    return
+                    raise commands.BadArgument(f"prefix must be between 1 and 50 characters.")
                 # check for invalid characters by returning all invalid characters
-                invalids = re.findall(r"[^a-zA-Z0-9!$%^&()_\-=+,<.>\/?;:'[{\]}|]", prefix)
+                invalids = re.findall(r"[^a-zA-Z0-9!$%^&()_\-=+,<.>\/?;'[{\]}|]", prefix)
                 if invalids:
-                    await ctx.reply(f"{config.emojis['x']} Found invalid characters: "
-                                    f"{', '.join([discord.utils.escape_markdown(i) for i in invalids])}")
+                    raise commands.BadArgument(f"{config.emojis['x']} Found invalid characters: "
+                                               f"{', '.join([discord.utils.escape_markdown(i) for i in invalids])}")
                 else:
                     await db.execute("REPLACE INTO guild_prefixes(guild, prefix) VALUES (?,?)",
                                      (ctx.guild.id, prefix))
@@ -2158,7 +2119,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
 
         @commands.command(aliases=["segfault", "segmentationfault"])
         @commands.is_owner()
-        async def sigsegv(self, ctx, ftype: str = "oskill"):
+        async def sigsegv(self, ctx, ftype: typing.Literal["overflow", "oskill", "ctypes"] = "oskill"):
             """
             cause the main process to segfault. used for debugging purposes. seems it wont kill child processes.
             """
@@ -2258,6 +2219,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             if heartbeat.heartbeat_active:
                 heartbeat.heartbeatprocess.terminate()
             await bot.close()
+            bot.loop.close()
 
         @commands.command()
         @commands.is_owner()
@@ -2478,7 +2440,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             err = f"{config.emojis['clock']} {errorstring}"
             await logandreply(err)
         elif isinstance(commanderror, discord.ext.commands.errors.UserInputError):
-            err = f"{config.emojis['question']} {errorstring}"
+            err = f"{config.emojis['warning']} {errorstring}"
             if ctx.command:
                 prefix = await prefix_function(bot, ctx.message, True)
                 err += f" Run `{prefix}help {ctx.command}` to see how to use this command."

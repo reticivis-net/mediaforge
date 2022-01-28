@@ -1101,7 +1101,7 @@ async def ensuresize(ctx, file, minsize, maxsize):
 async def rotate(file, rottype):
     types = {  # command input to ffmpeg vf
         "90": "transpose=1",
-        "90ccw": "transpose=2,",
+        "90ccw": "transpose=2",
         "180": "vflip,hflip",
         "vflip": "vflip",
         "hflip": "hflip"
