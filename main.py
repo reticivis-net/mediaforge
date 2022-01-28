@@ -2457,16 +2457,16 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             await dmauthor(f"{config.emojis['x']} I don't have permissions to send messages in that channel.")
             logger.warning(commanderror)
         if isinstance(commanderror, discord.ext.commands.errors.CommandNotFound):
-            msg = ctx.message.content
-            cmd = (msg.split(' ')[0])
+            # remove prefix, remove excess args
+            cmd = ctx.message.content[len(ctx.prefix):].split(' ')[0]
             allcmds = []
             for botcom in bot.commands:
                 if not botcom.hidden:
                     allcmds.append(botcom.name)
                     allcmds += botcom.aliases
             prefix = await prefix_function(bot, ctx.message, True)
-            match = difflib.get_close_matches(cmd.replace(prefix, "", 1), allcmds, n=1, cutoff=0)[0]
-            err = f"{config.emojis['exclamation_question']} Command `{cmd}` does not exist. " \
+            match = difflib.get_close_matches(cmd, allcmds, n=1, cutoff=0)[0]
+            err = f"{config.emojis['exclamation_question']} Command `{prefix}{cmd}` does not exist. " \
                   f"Did you mean **{prefix}{match}**?"
             if not (cmd.startswith("$") and all([i.isdecimal() or i in ".," for i in cmd.replace("$", "")])):
                 # exclude just numbers/decimals, it annoys people
