@@ -2440,10 +2440,13 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                 return await dmauthor(*args, **kwargs)
 
         async def logandreply(message):
+            if ctx.guild:
+                ch = f"channel #{ctx.channel.name} ({ctx.channel.id}) in server {ctx.guild} ({ctx.guild.id})"
+            else:
+                ch = "DMs"
             logger.warning(f"Command '{ctx.message.content}' by "
                            f"@{ctx.message.author.name}#{ctx.message.author.discriminator} ({ctx.message.author.id}) "
-                           f"in channel #{ctx.channel.name} ({ctx.channel.id}) in server {ctx.guild} ({ctx.guild.id}) "
-                           f"failed due to {message}.")
+                           f"in {ch} failed due to {message}.")
             await reply(message)
 
         global renderpool
