@@ -2373,8 +2373,9 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
         if message.author == bot.user:
             return
         if message.content.strip() in [f"<@{bot.user.id}>", f"<@!{bot.user.id}>"]:
-            await message.reply(f"My command prefix is `{await prefix_function(bot, message, True)}`, or you can "
-                                f"mention me!.", delete_after=10,
+            pfx = await prefix_function(bot, message, True)
+            await message.reply(f"My command prefix is `{pfx}`, or you can "
+                                f"mention me! Run `{pfx}help` for bot help.", delete_after=10,
                                 mention_author=False)
 
 
