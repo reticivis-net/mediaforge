@@ -110,15 +110,25 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
     syncdb.close()
 
 
-    async def prefix_function(dbot: typing.Union[commands.Bot, commands.AutoShardedBot], message: discord.Message):
+    async def prefix_function(dbot: typing.Union[commands.Bot, commands.AutoShardedBot], message: discord.Message,
+                              no_mnts=False):
+        mentions = [f'<@{dbot.user.id}> ', f'<@!{dbot.user.id}> ', f'<@{dbot.user.id}>', f'<@!{dbot.user.id}>']
         if not message.guild:
-            return config.default_command_prefix
+            if no_mnts:
+                return config.default_command_prefix
+            else:
+                # mentions or default or nothing for DMs only
+                return mentions + [config.default_command_prefix, ""]
         async with db.execute("SELECT prefix from guild_prefixes WHERE guild=?", (message.guild.id,)) as cur:
             pfx = await cur.fetchone()
             if pfx:
-                return pfx[0]
+                pfx = pfx[0]
             else:
-                return config.default_command_prefix
+                pfx = config.default_command_prefix
+            if no_mnts:
+                return pfx
+            else:
+                return mentions + [pfx]
 
 
     if hasattr(config, "shard_count") and config.shard_count is not None:
@@ -943,7 +953,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             await ctx.reply("MediaForge has 2 loop commands.\nUse `$gifloop` to change/limit the amount of times a GIF "
                             "loops. This ONLY works on GIFs.\nUse `$videoloop` to loop a video. This command "
                             "duplicates the video contents."
-                            .replace("$", await prefix_function(bot, ctx.message)))
+                            .replace("$", await prefix_function(bot, ctx.message, True)))
 
         @commands.command(aliases=["gloop"])
         async def gifloop(self, ctx, loop: int = 0):
@@ -1414,12 +1424,12 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                                 txt += f"The returned video is in the `{vcodec['codec_name']}` " \
                                        f"({vcodec['codec_long_name']}) codec. Discord might not be able embed this " \
                                        f"format. You can use " \
-                                       f"`{await prefix_function(bot, ctx.message)}reencode` to change the codec, " \
+                                       f"`{await prefix_function(bot, ctx.message, True)}reencode` to change the codec, " \
                                        f"though this may increase the filesize or decrease the quality.\n"
                             if acodec and acodec["codec_name"] not in ["aac", "mp3"]:
                                 txt += f"The returned video's audio is in the `{vcodec['codec_name']}` " \
                                        f"({vcodec['codec_long_name']}) codec. Some devices cannot play this. " \
-                                       f"You can use `{await prefix_function(bot, ctx.message)}reencode` " \
+                                       f"You can use `{await prefix_function(bot, ctx.message, True)}reencode` " \
                                        f"to change the codec, " \
                                        f"though this may increase the filesize or decrease the quality."
                             await msg.edit(content=f"{config.emojis['working']} Uploading to Discord...")
@@ -1964,7 +1974,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             :param inquiry: the name of a command or command category. If none is provided, all categories are shown.
             :return: the help text if found
             """
-            prefix = await prefix_function(bot, ctx.message)
+            prefix = await prefix_function(bot, ctx.message, True)
             # unspecified inquiry
             if inquiry is None:
                 embed = discord.Embed(title="Help", color=discord.Color(0xB565D9),
@@ -2360,8 +2370,11 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
 
     @bot.listen()
     async def on_message(message: discord.Message):
-        if f"<@{bot.user.id}>" in message.content or f"<@!{bot.user.id}>" in message.content:
-            await message.reply(f"My command prefix is `{await prefix_function(bot, message)}`.", delete_after=10,
+        if message.author == bot.user:
+            return
+        if message.content.strip() in [f"<@{bot.user.id}>", f"<@!{bot.user.id}>"]:
+            await message.reply(f"My command prefix is `{await prefix_function(bot, message, True)}`, or you can "
+                                f"mention me!.", delete_after=10,
                                 mention_author=False)
 
 
@@ -2447,7 +2460,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                 if not botcom.hidden:
                     allcmds.append(botcom.name)
                     allcmds += botcom.aliases
-            prefix = await prefix_function(bot, ctx.message)
+            prefix = await prefix_function(bot, ctx.message, True)
             match = difflib.get_close_matches(cmd.replace(prefix, "", 1), allcmds, n=1, cutoff=0)[0]
             err = f"{config.emojis['exclamation_question']} Command `{cmd}` does not exist. " \
                   f"Did you mean **{prefix}{match}**?"
