@@ -2473,11 +2473,11 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
         elif isinstance(commanderror, discord.ext.commands.errors.CommandOnCooldown):
             err = f"{config.emojis['clock']} {errorstring}"
             await logandreply(err)
-        elif isinstance(commanderror, discord.ext.commands.errors.MissingRequiredArgument):
+        elif isinstance(commanderror, discord.ext.commands.errors.UserInputError):
             err = f"{config.emojis['question']} {errorstring}"
-            await logandreply(err)
-        elif isinstance(commanderror, discord.ext.commands.errors.BadArgument):
-            err = f"{config.emojis['warning']} Bad Argument! Did you put text where a number should be? `{errorstring}`"
+            if ctx.command:
+                prefix = await prefix_function(bot, ctx.message, True)
+                err += f" Run `{prefix}help {ctx.command}` to see how to use this command."
             await logandreply(err)
         elif isinstance(commanderror, discord.ext.commands.errors.NoPrivateMessage):
             err = f"{config.emojis['warning']} {errorstring}"
