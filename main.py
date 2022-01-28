@@ -19,7 +19,7 @@ import aiohttp
 import aiosqlite
 import discordlists
 import docstring_parser
-import emoji
+import emojis
 import humanize
 import nextcord as discord
 import pronouncing
@@ -533,6 +533,56 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                     asyncio.create_task(ctx.send(f"{config.emojis['x']} No file found."))
 
 
+    number = typing.Union[float, int]
+
+
+    def number_range(lower_bound: typing.Optional[number] = None, upper_bound: typing.Optional[number] = None,
+                     lower_incl: bool = True, upper_incl: bool = True, num_type: typing.Literal['float', 'int'] = 'float') -> object:
+        """
+        type hint a discord.py parameter to be within a specific number range.
+        :param lower_bound: lower bound of arg
+        :param upper_bound: upper bound of arg
+        :param lower_incl: should the lower bound be included
+        :param upper_incl: should the upper bound be included
+        :param num_type: float or int
+        :return: callable that converts string to num within range or raises commands.BadArgument if not
+        """
+        numfunc = float if num_type == "float" else int
+
+        def inner(argument):
+            try:
+                argument = numfunc(argument)
+            except ValueError:
+                raise commands.BadArgument(
+                    f"`{argument}` is not a valid number."
+                    f"{' This argument only accepts whole numbers. ' if numfunc == int else ''}"
+                )
+
+            def error():
+                raise commands.BadArgument(f"`{argument}` is not between `{lower_bound}` "
+                                           f"({'included' if lower_incl else 'excluded'}) "
+                                           f"and `{upper_bound}` "
+                                           f"({'included' if upper_incl else 'excluded'}).")
+
+            if lower_bound is not None:
+                if lower_incl:
+                    if not lower_bound <= argument:
+                        error()
+                else:
+                    if not lower_bound < argument:
+                        error()
+            if upper_bound is not None:
+                if upper_incl:
+                    if not argument <= upper_bound:
+                        error()
+                else:
+                    if not argument < upper_bound:
+                        error()
+            return argument
+
+        return inner
+
+
     class Caption(commands.Cog, name="Captioning"):
         """
         Commands to caption media.
@@ -805,7 +855,9 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             await improcess(ctx, improcessing.addaudio, [["IMAGE", "GIF", "VIDEO", "AUDIO"], ["AUDIO"]])
 
         @commands.command()
-        async def jpeg(self, ctx, strength: int = 30, stretch: int = 20, quality: int = 10):
+        async def jpeg(self, ctx, strength: number_range(0, 100, False, True, 'int') = 30,
+                       stretch: number_range(0, 40, num_type='int') = 20,
+                       quality: number_range(1, 95, num_type='int') = 10):
             """
             Makes media into a low quality jpeg
 
@@ -816,18 +868,16 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             :param quality: quality of JPEG compression. must be between 1 and 95.
             :mediaparam media: A video, gif, or image.
             """
-            if not 0 < strength <= 100:
-                raise commands.BadArgument(f"Strength must be between 0 and 100.")
-            if not 0 <= stretch <= 40:
-                raise commands.BadArgument(f"Stretch must be between 0 and 40.")
-            if not 1 <= quality <= 95:
-                raise commands.BadArgument(f"Quality must be between 1 and 95.")
             await improcess(ctx, captionfunctions.jpeg, [["VIDEO", "GIF", "IMAGE"]], strength, stretch, quality,
                             handleanimated=True)
 
         @commands.command()
-        async def deepfry(self, ctx, brightness: float = 1.5, contrast: float = 1.5, sharpness: float = 1.5,
-                          saturation: float = 1.5, noise: int = 40, jpegstrength: int = 20):
+        async def deepfry(self, ctx, brightness: number_range(0, 5) = 1.5,
+                          contrast: number_range(0, 5) = 1.5,
+                          sharpness: number_range(0, 5) = 1.5,
+                          saturation: number_range(0, 5) = 1.5,
+                          noise: number_range(0, 255) = 40,
+                          jpegstrength: number_range(0, 100, False, True, 'int') = 20):
             """
             Applies several filters to the input media to make it appear "deep fried" in the style of deep fried memes.
             See https://pillow.readthedocs.io/en/3.0.x/reference/ImageEnhance.html
@@ -858,7 +908,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                             saturation, noise, jpegstrength, handleanimated=True)
 
         @commands.command()
-        async def corrupt(self, ctx, strength: float = 0.05):
+        async def corrupt(self, ctx, strength: number_range(0, 0.5) = 0.05):
             """
             Intentionally glitches media
             Effect is achieved through randomly changing a % of bytes in a jpeg image.
@@ -920,7 +970,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             await improcess(ctx, improcessing.resize, [["VIDEO", "GIF", "IMAGE"]], "iw", "ih*2")
 
         @commands.command(aliases=["magic", "magik", "contentawarescale", "liquidrescale"])
-        async def magick(self, ctx, strength: int = 50):
+        async def magick(self, ctx, strength: number_range(1, 99, num_type='int') = 50):
             """
             Apply imagemagick's liquid/content aware scale to an image.
             This command is a bit slow.
@@ -931,8 +981,6 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             the original size. must be between 1 and 99.
             :mediaparam media: A video, gif, or image.
             """
-            if not 1 <= strength <= 99:
-                raise commands.BadArgument(f"Strength must be between 1 and 99.")
             await improcess(ctx, captionfunctions.magick, [["VIDEO", "GIF", "IMAGE"]], strength, handleanimated=True)
 
         @commands.command(aliases=["repeat"], hidden=True)
@@ -943,7 +991,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                             .replace("$", await prefix_function(bot, ctx.message, True)))
 
         @commands.command(aliases=["gloop"])
-        async def gifloop(self, ctx, loop: int = 0):
+        async def gifloop(self, ctx, loop: number_range(-1, lower_incl=True, num_type='int') = 0):
             """
             Changes the amount of times a gif loops
             See $videoloop for videos.
@@ -957,7 +1005,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             await improcess(ctx, improcessing.gifloop, [["GIF"]], loop)
 
         @commands.command(aliases=["vloop"])
-        async def videoloop(self, ctx, loop: int = 1):
+        async def videoloop(self, ctx, loop: number_range(1, 15, num_type='int') = 1):
             """
             Loops a video
             This command technically works on GIFs but its better to use `$gifloop` which takes advantage of GIFs'
@@ -1010,7 +1058,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             await improcess(ctx, improcessing.tint, [["GIF", "IMAGE", "VIDEO"]], color)
 
         @commands.command(aliases=["round", "circlecrop", "roundcrop", "circle", "roundedcorners"])
-        async def roundcorners(self, ctx, radiuspercent: float = 50.0):
+        async def roundcorners(self, ctx, radiuspercent: number_range(0, 50) = 50.0):
             """
             Round corners of media
             see https://developer.mozilla.org/en-US/docs/Web/CSS/border-radius
@@ -1025,7 +1073,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                             handleanimated=True)
 
         @commands.command()
-        async def volume(self, ctx, volume: float):
+        async def volume(self, ctx, volume: number_range(0, 32)):
             """
             Changes the volume of media.
             To make 2x as loud, use `$volume 2`.
@@ -1051,7 +1099,8 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             await improcess(ctx, improcessing.volume, [["VIDEO", "AUDIO"]], 0)
 
         @commands.command()
-        async def vibrato(self, ctx, frequency: float = 5, depth: float = 1):
+        async def vibrato(self, ctx, frequency: number_range(0.1, 20000) = 5,
+                          depth: number_range(0, 1) = 1):
             """
             Applies a "wavy pitch"/vibrato effect to audio.
             officially described as "Sinusoidal phase modulation"
@@ -1062,14 +1111,10 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             :param depth: Depth of modulation as a percentage. must be between 0 and 1.
             :mediaparam media: A video or audio file.
             """
-            if not 0.1 <= frequency <= 20000:
-                raise commands.BadArgument(f"Frequency must be between 0.1 and 20000.")
-            if not 0 <= depth <= 1:
-                raise commands.BadArgument(f"Depth must be between 0 and 1.")
             await improcess(ctx, improcessing.vibrato, [["VIDEO", "AUDIO"]], frequency, depth)
 
         @commands.command()
-        async def pitch(self, ctx, numofhalfsteps: float = 12):
+        async def pitch(self, ctx, numofhalfsteps: number_range(-12, 12) = 12):
             """
             Changes pitch of audio
 
@@ -1120,7 +1165,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                             "vstack")
 
         @commands.command(aliases=["blend"])
-        async def overlay(self, ctx, alpha: float = 0.5):
+        async def overlay(self, ctx, alpha: number_range(0, 1) = 0.5):
             """
             Overlays the second input over the first
 
@@ -1129,8 +1174,6 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             :mediaparam video1: A video or gif.
             :mediaparam video2: A video or gif.
             """
-            if not 0 <= alpha <= 1:
-                raise commands.BadArgument(f"Alpha must be between 0 and 1.")
             await improcess(ctx, improcessing.overlay, [["VIDEO", "GIF", "IMAGE"], ["VIDEO", "GIF", "IMAGE"]], alpha,
                             "overlay")
 
@@ -1147,7 +1190,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                             "add")
 
         @commands.command(name="speed")
-        async def spcommand(self, ctx, speed: float = 2):
+        async def spcommand(self, ctx, speed: number_range(0.25, 100) = 2):
             """
             Changes the speed of media.
             This command preserves the original FPS, which means speeding up will drop frames. See $fps.
@@ -1161,7 +1204,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             await improcess(ctx, improcessing.speed, [["VIDEO", "GIF", "AUDIO"]], speed)
 
         @commands.command(aliases=["shuffle", "stutter", "nervous"])
-        async def random(self, ctx, frames: int = 30):
+        async def random(self, ctx, frames: number_range(2, 512, num_type='int') = 30):
             """
             Shuffles the frames of a video around.
             Currently, this command does NOT apply to audio. This is an FFmpeg limitation.
@@ -1186,7 +1229,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             await improcess(ctx, improcessing.reverse, [["VIDEO", "GIF"]])
 
         @commands.command(aliases=["compress", "quality", "lowerquality", "crf", "qa"])
-        async def compressv(self, ctx, crf: float = 51, qa: float = 20):
+        async def compressv(self, ctx, crf: number_range(28, 51) = 51, qa: number_range(10, 112) = 20):
             """
             Makes videos terrible quality.
             The strange ranges on the numbers are because they are quality settings in FFmpeg's encoding.
@@ -1198,14 +1241,10 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             :param qa: Audio bitrate in kbps. Lower is worse quality. Must be between 10 and 112.
             :mediaparam video: A video or gif.
             """
-            if not 28 <= crf <= 51:
-                raise commands.BadArgument(f"CRF must be between 28 and 51.")
-            if not 10 <= qa <= 112:
-                raise commands.BadArgument(f"qa must be between 1 and 112.")
             await improcess(ctx, improcessing.quality, [["VIDEO", "GIF"]], crf, qa)
 
         @commands.command(name="fps")
-        async def fpschange(self, ctx, fps: float):
+        async def fpschange(self, ctx, fps: number_range(1, 60)):
             """
             Changes the FPS of media.
             This command keeps the speed the same.
@@ -1218,8 +1257,6 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             :param fps: Frames per second of the output. must be between 1 and 60.
             :mediaparam video: A video or gif.
             """
-            if not 1 <= fps <= 60:
-                raise commands.BadArgument(f"FPS must be between 1 and 60.")
             await improcess(ctx, improcessing.changefps, [["VIDEO", "GIF"]], fps)
 
         @commands.command(aliases=["negate", "opposite"])
@@ -1233,7 +1270,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             await improcess(ctx, improcessing.invert, [["VIDEO", "GIF", "IMAGE"]])
 
         @commands.command()
-        async def trim(self, ctx, length: float, start: float = 0):
+        async def trim(self, ctx, length: number_range(0, lower_incl=False), start: number_range(0) = 0):
             """
             Trims media.
 
@@ -1286,14 +1323,18 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                             LFO_DEPTH, LFO_RATE, LFO_SHAPE, LFO_SYMM, LFO_QUANT, FORM_CORR, FORM_WARP, MIX)
 
 
-    def emojis_in(text):
-        emoji_list = []
-        data = re.findall(r'\X', text)
-        flags = re.findall(u'[\U0001F1E6-\U0001F1FF]', text)
-        for word in data:
-            if any(char in emoji.UNICODE_EMOJI['en'] for char in word):
-                emoji_list.append(word)
-        return emoji_list + flags
+    class UnicodeEmojiNotFound(commands.BadArgument):
+        def __init__(self, argument):
+            self.argument = argument
+            super().__init__(f'Unicode emoji `{argument}` not found.')
+
+
+    class UnicodeEmojiConverter(commands.Converter):
+        async def convert(self, ctx, argument):
+            emoji = emojis.get(argument)
+            if not emoji:
+                raise UnicodeEmojiNotFound(argument)
+            return list(emoji)[0]
 
 
     class Conversion(commands.Cog, name="Conversion"):
@@ -1474,17 +1515,17 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             await improcess(ctx, improcessing.mediatopng, [["VIDEO", "GIF", "IMAGE"]])
 
         @commands.command(aliases=["emoji", "emojiimage", "emote", "emoteurl"])
-        async def emojiurl(self, ctx, *emojis: discord.PartialEmoji):
+        async def emojiurl(self, ctx, *custom_emojis: discord.PartialEmoji):
             """
             Sends the raw image for a custom Discord emoji.
             Each emoji is sent as a separate message intentionally to allow replying with a media command.
 
             :param ctx: discord context
-            :param emojis: Custom emojis to send the URL of. Be sure to put a space between them.
+            :param custom_emojis: Custom emojis to send the URL of. Be sure to put a space between them.
             """
             if emojis:
                 out = []
-                for emoji in emojis:
+                for emoji in custom_emojis[:5]:
                     if emoji.is_custom_emoji():
                         out.append(str(emoji.url))
                 await ctx.send("\n".join(out))
@@ -1492,19 +1533,18 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                 raise commands.BadArgument(f"Your message doesn't contain any custom emojis!")
 
         @commands.command()
-        async def twemoji(self, ctx, *, msg):
+        async def twemoji(self, ctx, *twemojis: UnicodeEmojiConverter):
             """
             Sends the twemoji image for an emoji.
             Twemoji is the open source emoji set that discord desktop and twitter use. https://twemoji.twitter.com/
 
             :param ctx: discord context
-            :param msg: Message containing up to 5 default emojis.
+            :param twemojis: Up to 5 default discord/unicode emojis
             """
             if ctx.message.reference:
                 msg = ctx.message.reference.resolved.content
-            emojis = emojis_in(msg)[:5]
-            if emojis:
-                for e in emojis:
+            if twemojis:
+                for e in twemojis[:5]:
                     chars = []
                     for char in e:
                         chars.append(f"{ord(char):x}")  # get hex code of char
@@ -1757,7 +1797,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
         @commands.has_guild_permissions(manage_emojis=True)
         @commands.bot_has_guild_permissions(manage_emojis=True)
         @commands.command(aliases=["createsticker"])
-        async def addsticker(self, ctx, stickeremoji: str, *, name: str):
+        async def addsticker(self, ctx, stickeremoji: UnicodeEmojiConverter, *, name: str):
             """
             Adds a file as a sticker to a server. Both MediaForge and the command caller must have the Manage Emojis
             and Stickers permission.
@@ -2136,6 +2176,11 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
 
         @commands.command()
         @commands.is_owner()
+        async def rangetest(self, ctx, arg: number_range(-1.5, 1.5)):
+            await ctx.reply(arg)
+
+        @commands.command()
+        @commands.is_owner()
         async def replytonothing(self, ctx):
             await ctx.message.delete()
             await ctx.reply("test")
@@ -2207,18 +2252,21 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                     else:
                         await ctx.send(f"{config.emojis['x']} No file found.")
 
-        @commands.command(hidden=True, aliases=["stop", "close", "die", "kill"])
+        @commands.command(hidden=True, aliases=["stop", "close", "die", "kill", "murder", "death"])
         @commands.is_owner()
         async def shutdown(self, ctx):
             """
             Shut down the bot
             """
             await ctx.send(f"{config.emojis['check']} Shutting Down...")
-            logger.log(25, "Shutting Down...")
+            logger.critical("Shutting Down...")
             await renderpool.shutdown()
             if heartbeat.heartbeat_active:
                 heartbeat.heartbeatprocess.terminate()
             await bot.close()
+            await bot.loop.shutdown_asyncgens()
+            await bot.loop.shutdown_default_executor()
+            bot.loop.stop()
             bot.loop.close()
 
         @commands.command()
@@ -2414,7 +2462,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
         global renderpool
         if isinstance(commanderror, concurrent.futures.process.BrokenProcessPool):
             renderpool = improcessing.initializerenderpool()
-        errorstring = discord.utils.escape_markdown(str(commanderror))
+        errorstring = str(commanderror)
         if isinstance(commanderror, discord.Forbidden):
             await dmauthor(f"{config.emojis['x']} I don't have permissions to send messages in that channel.")
             logger.warning(commanderror)
