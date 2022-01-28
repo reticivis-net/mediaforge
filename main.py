@@ -2501,7 +2501,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             await logandreply(err)
         elif isinstance(commanderror, discord.ext.commands.errors.CommandInvokeError) and \
                 isinstance(commanderror.original, improcessing.NonBugError):
-            await logandreply(f"{config.emojis['2exclamation']} {commanderror.original[:1000]}")
+            await logandreply(f"{config.emojis['2exclamation']} {str(commanderror.original)[:1000]}")
         else:
             if isinstance(commanderror, discord.ext.commands.errors.CommandInvokeError):
                 commanderror = commanderror.original
