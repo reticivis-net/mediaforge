@@ -13,7 +13,6 @@ python-magic-win64 = "~=0.4.13"
 selenium = "~=3.141.0"
 Pillow = "*"
 numpy = "*"
-emoji = "*"
 regex = "*"
 isort = { extras = ["pipfile_deprecated_finder", "requirements_deprecated_finder"], version = "*" }
 pronouncing = "*"
@@ -32,6 +31,7 @@ apng = "*"
 docstring-parser = "*"
 pipenv = "*"
 yt-dlp = "*"
+emojis = "*"
 
 [dev-packages]
 
