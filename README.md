@@ -51,9 +51,9 @@ the bot uses many CLI programs for media processing.
 
 ### pip libraries
 
-- This project uses [`pipenv`](https://github.com/pypa/pipenv), run `pipenv install` to install the required
+- This project uses [`poetry`](https://python-poetry.org/), run `poetry install` to install the required
   dependencies.
-    - check [pipenv's repo](https://github.com/pypa/pipenv) for more info on pipenv usage.
+    - install poetry with `pip install poetry`
     - [`aubio`](https://pypi.org/project/aubio/) and [`PyAutoTune`](https://github.com/ederwander/PyAutoTune) are built
       from source on installation.
         - on Windows this will require
