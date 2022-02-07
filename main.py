@@ -2472,8 +2472,8 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             await dmauthor(f"{config.emojis['x']} I don't have permissions to send messages in that channel.")
             logger.warning(commanderror)
         if isinstance(commanderror, discord.ext.commands.errors.CommandNotFound):
-            if ctx.message.content.strip() in ["$w", "$wa", "$waifu", "$h", "$ha", "$husbando", "$wx", "$hx", "$m",
-                                               "$ma", "$marry", "$mx"]:
+            if ctx.message.content.strip().lower() in ["$w", "$wa", "$waifu", "$h", "$ha", "$husbando", "$wx", "$hx",
+                                                       "$m", "$ma", "$marry", "$mx"]:
                 # this command is spammed so much, fuckn ignore it
                 # https://mudae.fandom.com/wiki/List_of_Commands#.24waifu_.28.24w.29
                 logger.debug(f"Ignoring {ctx.message.content}")
