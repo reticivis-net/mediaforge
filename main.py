@@ -241,6 +241,9 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             return None
 
 
+    tenor_url_regex = re.compile(r"https?://tenor\.com/view/([\w\d]+-)*(\d+)/?")
+
+
     async def handlemessagesave(m: discord.Message):
         """
         handles saving of media from discord messages
@@ -255,14 +258,15 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             for embed in m.embeds:
                 if embed.type == "gifv":
                     # https://github.com/esmBot/esmBot/blob/master/utils/imagedetect.js#L34
-                    tenor = await fetch(
-                        f"https://api.tenor.com/v1/gifs?ids={embed.url.split('-').pop()}&key={config.tenor_key}")
-                    tenor = json.loads(tenor)
-                    if 'error' in tenor:
-                        # await ctx.reply(f"{config.emojis['2exclamation']} Tenor Error! `{tenor['error']}`")
-                        logger.error(f"Tenor Error! `{tenor['error']}`")
-                    else:
-                        detectedfiles.append(tenor['results'][0]['media'][0]['mp4']['url'])
+                    if (match := tenor_url_regex.fullmatch(embed.url)) is not None:
+                        gif_id = match.group(2)
+                        tenor = await fetch(f"https://api.tenor.com/v1/gifs?ids={gif_id}&key={config.tenor_key}")
+                        tenor = json.loads(tenor)
+                        if 'error' in tenor:
+                            # await ctx.reply(f"{config.emojis['2exclamation']} Tenor Error! `{tenor['error']}`")
+                            logger.error(f"Tenor Error! `{tenor['error']}`")
+                        else:
+                            detectedfiles.append(tenor['results'][0]['media'][0]['mp4']['url'])
                 elif embed.type in ["image", "video", "audio"]:
                     if await improcessing.contentlength(embed.url):  # prevent adding youtube videos and such
                         detectedfiles.append(embed.url)
@@ -537,7 +541,8 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
 
 
     def number_range(lower_bound: typing.Optional[number] = None, upper_bound: typing.Optional[number] = None,
-                     lower_incl: bool = True, upper_incl: bool = True, num_type: typing.Literal['float', 'int'] = 'float') -> object:
+                     lower_incl: bool = True, upper_incl: bool = True,
+                     num_type: typing.Literal['float', 'int'] = 'float') -> object:
         """
         type hint a discord.py parameter to be within a specific number range.
         :param lower_bound: lower bound of arg
