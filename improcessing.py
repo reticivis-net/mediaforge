@@ -272,6 +272,23 @@ async def get_acodec(filename):
         return None
 
 
+async def va_codecs(filename):
+    out = await run_command('ffprobe', '-v', 'panic', '-show_entries', 'stream=codec_name,codec_type', '-print_format',
+                            'json', filename)
+    out = json.loads(out)
+    acodec = None
+    vcodec = None
+    if out["streams"]:
+        for stream in out["streams"]:
+            if stream["codec_type"] == "video" and vcodec is None:
+                vcodec = stream["codec_name"]
+            elif stream["codec_type"] == "audio" and acodec is None:
+                acodec = stream["codec_name"]
+        return vcodec, acodec
+    else:
+        return None
+
+
 async def ffmpegsplit(media):
     """
     splits the input file into frames
@@ -592,11 +609,14 @@ async def toapng(video):
 
 async def reencode(mp4):  # reencodes mp4 as libx264 since the png format used cant be played by like literally anything
     assert (mt := mediatype(mp4)) in ["VIDEO", "GIF"], f"file {mp4} with type {mt} passed to reencode()"
-
+    # only reencode if need to ;)
+    vcodec, acodec = await va_codecs(mp4)
+    vcode = ["copy"] if vcodec == "h264" else ["libx264", "-pix_fmt", "yuv420p", "-vf",
+                                               "scale=ceil(iw/2)*2:ceil(ih/2)*2"]
+    acode = ["copy"] if acodec == "aac" else ["aac", "-q:a", "2"]
     outname = temp_file("mp4")
-    await run_command("ffmpeg", "-hide_banner", "-i", mp4, "-c:v", "libx264", "-c:a", "aac", "-q:a", "2",
-                      "-pix_fmt", "yuv420p", "-max_muxing_queue_size", "9999",
-                      "-vf", "scale=ceil(iw/2)*2:ceil(ih/2)*2", "-movflags", "+faststart", outname)
+    await run_command("ffmpeg", "-hide_banner", "-i", mp4, "-c:v", *vcode, "-c:a", *acode,
+                      "-max_muxing_queue_size", "9999", "-movflags", "+faststart", outname)
     return outname
 
 
