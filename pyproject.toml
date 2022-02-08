@@ -27,13 +27,11 @@ yt-dlp = "^2022.1.21"
 emojis = "^0.6.0"
 python-magic = { version = "^0.4.13", markers = "sys_platform != 'win32'" }
 python-magic-win64 = { version = "^0.4.13", markers = "sys_platform == 'win32'" }
-
-# nextcord speedup
-aiodns = "^3.0.0"
-Brotli = "^1.0.9"
-cchardet = "^2.1.7"
-orjson = "^3.6.6"
 requests = "^2.27.1"
+
+pyttsx3 = "^2.90"
+# comtypes on pypi is fucked on 3.8+
+comtypes = { git = "https://github.com/enthought/comtypes.git" }
 
 [tool.poetry.dev-dependencies]
 #aiohttp = { version = "^3.8.1", extras = ["speedups"] }

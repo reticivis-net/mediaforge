@@ -494,7 +494,10 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                                         logger.warning(f"{func} is not coroutine!")
                                         result = func(filesforcommand, *args)
                             else:
-                                result = await renderpool.submit(func, *args)
+                                if inspect.iscoroutinefunction(func):
+                                    result = await func(*args)
+                                else:
+                                    result = await renderpool.submit(func, *args)
                             if expectresult:
                                 if not result:
                                     raise improcessing.ReturnedNothing(f"Expected image, {func} returned nothing.")
@@ -1570,7 +1573,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
         def __init__(self, bot):
             self.bot = bot
 
-        @commands.command(name="1984", aliases=["nineteeneightyfour", "georgeorwhell"])
+        @commands.command(name="1984", aliases=["nineteeneightyfour", "georgeorwell"])
         async def f1984(self, ctx, *, caption):
             """
             Creates a custom meme based off of the "living in 1984" comic.
@@ -1707,6 +1710,15 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             :param text: The text to put in the fake tweet.
             """
             await improcess(ctx, captionfunctions.dontweet, [], [text])
+
+        @commands.command()
+        async def tts(self, ctx: commands.Context, *, text):
+            await improcess(ctx, improcessing.tts, [], text)
+
+        # WIP
+        # @commands.command()
+        # async def epicbirthday(self, ctx: commands.Context, *, text):
+        #     await improcess(ctx, improcessing.epicbirthday, [], text)
 
 
     def showcog(cog):
