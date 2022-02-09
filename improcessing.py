@@ -1,5 +1,6 @@
 # standard libs
 import asyncio
+import colorsys
 import concurrent.futures
 import glob
 import json
@@ -1034,6 +1035,18 @@ async def count_frames(video):
                                  "stream=nb_read_packets", "-of", "csv=p=0", video))
 
 
+async def frame_n(video, n: int):
+    framecount = await count_frames(video)
+    if not -1 <= n < framecount:
+        raise NonBugError(f"Frame {n} does not exist.")
+    if n == -1:
+        n = framecount - 1
+    frame = temp_file("png")
+    await run_command("ffmpeg", "-hide_banner", "-i", video, "-vf", f"select='eq(n,{n})'", "-vframes", "1",
+                      frame)
+    return frame
+
+
 async def freezemotivate(files, *caption):
     """
     ends video with motivate caption
@@ -1047,10 +1060,7 @@ async def freezemotivate(files, *caption):
     else:  # just default to song lol!
         video = files
         audio = "rendering/what.mp3"
-    framecount = await count_frames(video)
-    lastframe = temp_file("png")
-    await run_command("ffmpeg", "-hide_banner", "-i", video, "-vf", f"select='eq(n,{framecount - 1})'", "-vframes", "1",
-                      lastframe)
+    lastframe = await frame_n(video, -1)
     clastframe = await handleanimated(lastframe, captionfunctions.motivate, None, *caption)
     freezeframe = await imageaudio([clastframe, audio])
     final = await concatv([video, freezeframe])
@@ -1197,6 +1207,7 @@ async def vibrato(file, frequency=5, depth=0.5):  # https://ffmpeg.org/ffmpeg-fi
     await run_command("ffmpeg", "-i", file, "-af", f"vibrato=f={frequency}:d={depth}", "-strict", "-1", *audiosettings,
                       out)
     return out
+
 
 async def pitch(file, p=12):
     mt = mediatype(file)
@@ -1550,3 +1561,52 @@ async def epicbirthday(text: str):
                       "-map", "[outa]",
                       out)
     return out
+
+
+async def crop(file, w, h, x, y):
+    mt = mediatype(file)
+    exts = {
+        "VIDEO": "mp4",
+        "GIF": "mp4",
+        "IMAGE": "png"
+    }
+    outname = temp_file(exts[mt])
+    await run_command('ffmpeg', '-i', file, '-filter:v', f'crop={w}:{h}:{x}:{y}', "-c:v", "png", outname)
+    if mt == "GIF":
+        outname = await mp4togif(outname)
+    return outname
+
+
+def rgb_to_lightness(r, g, b):
+    """
+    adapted from colorsys.rgb_to_hls()
+    :param r: red from 0-1
+    :param g: green from 0-1
+    :param b: blue from 0-1
+    :return: lightness from 0-1
+    """
+    maxc = max(r, g, b)
+    minc = min(r, g, b)
+    return (minc + maxc) / 2.0
+
+
+async def uncaption(file, frame_to_try: int, tolerance: int):
+    frame_to_try = await frame_n(file, frame_to_try)
+    # https://github.com/esmBot/esmBot/blob/master/natives/uncaption.cc
+    # comically naive approach but apparently works :p
+    with Image.open(frame_to_try) as im:
+        im = im.convert("RGB")
+        # get first pixel of every row
+        pixels = list(im.getdata())
+        width, height = im.size
+        hpixels = pixels[::width]
+        row_to_cut = 0
+        for i, pixel in enumerate(hpixels):
+            # if lightness is less than tolerance
+            if rgb_to_lightness(pixel[0]/255, pixel[1]/255, pixel[2]/255) < tolerance/100:
+                row_to_cut = i
+                break
+    # should be 0 if no caption or all caption
+    if row_to_cut == 0:
+        raise NonBugError("Unable to detect caption. Try to adjust `frame_to_try`. Run `$help uncaption` for help.")
+    return await crop(file, width, height - row_to_cut, 0, row_to_cut)

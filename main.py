@@ -1330,6 +1330,20 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                             CONCERT_A, FIXED_PITCH, FIXED_PULL, KEY, CORR_STR, CORR_SMOOTH, PITCH_SHIFT, SCALE_ROTATE,
                             LFO_DEPTH, LFO_RATE, LFO_SHAPE, LFO_SYMM, LFO_QUANT, FORM_CORR, FORM_WARP, MIX)
 
+        @commands.command(aliases=["uncap", "nocaption", "nocap", "rmcap", "removecaption", "delcap", "delcaption",
+                                   "deletecaption", "trimcap", "trimcaption"])
+        async def uncaption(self, ctx, frame_to_try: int = 0, tolerance: number_range(0, 100, False) = 95):
+            """
+            try to remove esm/default style captions from media
+            scans the leftmost column of pixels on one frame to attempt to determine where the caption is.
+
+            :param ctx:
+            :param frame_to_try: which frame to run caption detection on. -1 uses the last frame.
+            :param tolerance: in % how close to white the color must be to count as caption
+            :mediaparam media: A video, image, or GIF file
+            """
+            await improcess(ctx, improcessing.uncaption, [["VIDEO", "IMAGE", "GIF"]], frame_to_try, tolerance)
+
 
     class UnicodeEmojiNotFound(commands.BadArgument):
         def __init__(self, argument):
