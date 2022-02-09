@@ -868,13 +868,16 @@ async def addaudio(files):
         return await imageaudio(files)
     else:
         media = await forceaudio(media)
+        # yes, qa works backwards on aac vs mp3. no, i dont know why.
         if mt == "AUDIO":
             outname = temp_file("mp3")
+            audiosettings = ["-c:a", "libmp3lame", "-q:a", "0"]
         else:
             outname = temp_file("mp4")
+            audiosettings = ["-c:a", "aac", "-q:a", "2"]
         await run_command("ffmpeg", "-i", media, "-i", audio, "-max_muxing_queue_size", "4096", "-filter_complex",
                           "[0:a][1:a]amix=inputs=2:dropout_transition=100000:duration=longest[a];[a]volume=2[a]",
-                          "-map", "0:v?", "-map", "[a]", "-c:a", "libmp3lame" if mt == "AUDIO" else "copy", outname)
+                          "-map", "0:v?", "-map", "[a]", *audiosettings, outname)
         return outname
 
 
@@ -941,8 +944,7 @@ async def stack(files, style):
     outname = temp_file("mp4")
     await run_command("ffmpeg", "-hide_banner", "-i", fixedvideo0, "-i", fixedfixedvideo1, "-filter_complex",
                       f"{'h' if style == 'hstack' else 'v'}stack=inputs=2;amix=inputs=2:dropout_transition=0", "-c:v",
-                      "png", "-c:a",
-                      "copy", outname)
+                      "png", "-c:a", "aac", "-q:a", "2", outname)
     # for file in [video0, video1, fixedvideo1, fixedvideo0, fixedfixedvideo1]:
     #     os.remove(file)
     if mts[0] != "VIDEO" and mts[1] != "VIDEO":  # one or more gifs and no videos
@@ -983,8 +985,7 @@ async def overlay(files, alpha: float, mode: str = 'overlay'):
     await run_command("ffmpeg", "-hide_banner", "-i", fixedvideo0, "-i", fixedfixedvideo1, "-filter_complex",
                       f"[0:v]setpts=PTS-STARTPTS[0v];[1:v]setpts=PTS-STARTPTS,colorchannelmixer=aa={alpha}[1v];"
                       f"{blendlogic};amix=inputs=2:dropout_transition=0", "-c:v",
-                      "png", "-c:a",
-                      "copy", outname)
+                      "png", "-c:a", "aac", "-q:a", "2", outname)
     # for file in [video0, video1, fixedvideo1, fixedvideo0, fixedfixedvideo1]:
     #     os.remove(file)
     if mts[0] == "IMAGE" and mts[1] == "IMAGE":
@@ -1188,10 +1189,14 @@ async def vibrato(file, frequency=5, depth=0.5):  # https://ffmpeg.org/ffmpeg-fi
         "VIDEO": "mp4"
     }
     out = temp_file(exts[mt])
-    await run_command("ffmpeg", "-i", file, "-af", f"vibrato=f={frequency}:d={depth}", "-strict", "-1", "-c:a",
-                      "copy" if mt == "VIDEO" else "libmp3lame", out)
-    return out
+    if mt == "AUDIO":
+        audiosettings = ["-c:a", "libmp3lame", "-q:a", "0"]
+    else:
+        audiosettings = ["-c:a", "aac", "-q:a", "2"]
 
+    await run_command("ffmpeg", "-i", file, "-af", f"vibrato=f={frequency}:d={depth}", "-strict", "-1", *audiosettings,
+                      out)
+    return out
 
 async def pitch(file, p=12):
     mt = mediatype(file)
@@ -1205,8 +1210,11 @@ async def pitch(file, p=12):
     atempo = 2 ** (-p / 12)
     logger.debug((p, asetrate, atempo))
     af = f"asetrate=r={asetrate},{expanded_atempo(atempo)},aresample=48000"
-    await run_command("ffmpeg", "-i", file, "-ar", "48000", "-af", af, "-strict", "-1", "-c:a",
-                      "copy" if mt == "VIDEO" else "libmp3lame", out)
+    if mt == "AUDIO":
+        audiosettings = ["-c:a", "libmp3lame", "-q:a", "0"]
+    else:
+        audiosettings = ["-c:a", "aac", "-q:a", "2"]
+    await run_command("ffmpeg", "-i", file, "-ar", "48000", "-af", af, "-strict", "-1", "-c:a", *audiosettings, out)
     return out
 
 
@@ -1411,8 +1419,8 @@ async def handleautotune(media: str, *params):
         outname = temp_file("mp4")
         # https://superuser.com/a/1137613/1001487
         # combine video of original file with new audio
-        await run_command("ffmpeg", "-i", media, "-i", outwav, "-c:v", "copy", "-map", "0:v:0", "-map", "1:a:0",
-                          outname)
+        await run_command("ffmpeg", "-i", media, "-i", outwav, "-c:v", "copy", "-c:a", "copy", "-map", "0:v:0", "-map",
+                          "1:a:0", outname)
         return outname
 
 
