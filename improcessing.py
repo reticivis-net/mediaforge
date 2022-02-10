@@ -9,6 +9,7 @@ import multiprocessing
 import os
 import shutil
 import sys
+import time
 import typing
 from fractions import Fraction
 
@@ -1530,6 +1531,9 @@ def tts_sync(text: str):
     engine = pyttsx3.init()
     engine.save_to_file(text, fname)
     engine.runAndWait()
+    # workaround for https://github.com/nateshmbhat/pyttsx3/issues/219
+    while not os.path.exists(fname):
+        time.sleep(0.1)
     return fname
 
 
@@ -1603,7 +1607,7 @@ async def uncaption(file, frame_to_try: int, tolerance: int):
         row_to_cut = 0
         for i, pixel in enumerate(hpixels):
             # if lightness is less than tolerance
-            if rgb_to_lightness(pixel[0]/255, pixel[1]/255, pixel[2]/255) < tolerance/100:
+            if rgb_to_lightness(pixel[0] / 255, pixel[1] / 255, pixel[2] / 255) < tolerance / 100:
                 row_to_cut = i
                 break
     # should be 0 if no caption or all caption
