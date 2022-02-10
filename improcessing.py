@@ -1531,7 +1531,16 @@ async def tempo(media: str):
 def tts_sync(text: str):
     fname = temp_file("wav")
     engine = pyttsx3.init()
-    engine.setProperty("voice", "mb-en1")
+    # try:
+    #     # try to override pitch
+    #     from pyttsx3.drivers import _espeak
+    #     logger.debug(_espeak.GetParameter(_espeak.PITCH))
+    #     _espeak.SetParameter(_espeak.PITCH, 50, 0)
+    #     logger.debug(_espeak.GetParameter(_espeak.PITCH))
+    #     engine.setProperty("voice", "mb-en1")
+    #     logger.debug(_espeak.GetParameter(_espeak.PITCH))
+    # except FileNotFoundError as e:
+    #     logger.debug(f"error setting espeak params: {e}")
     engine.setProperty("rate", 150)
     engine.save_to_file(text, fname)
     engine.runAndWait()
@@ -1542,7 +1551,12 @@ def tts_sync(text: str):
 
 
 async def tts(text: str):
-    return await allreencode(await run_in_exec(tts_sync, text))
+    outname = temp_file("mp3")
+    wav = await run_in_exec(tts_sync, text)
+    # TODO: mb-en1 voice is at 16khz while default voice is at 22.05khz and pyttsx3 doesnt correct for that, manually
+    # correct for that with ffmpreg
+    await run_command("ffmpeg", "-hide_banner", "-i", wav, "-c:a", "libmp3lame", outname)
+    return outname
 
 
 async def epicbirthday(text: str):
