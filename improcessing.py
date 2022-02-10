@@ -632,6 +632,8 @@ async def allreencode(file):
         outname = temp_file("mp3")
         await run_command("ffmpeg", "-hide_banner", "-i", file, "-c:a", "libmp3lame", outname)
         return outname
+    else:
+        raise Exception(f"{file} of type {mt} cannot be re-encoded")
 
 
 async def giftomp4(gif):
@@ -1529,6 +1531,8 @@ async def tempo(media: str):
 def tts_sync(text: str):
     fname = temp_file("wav")
     engine = pyttsx3.init()
+    engine.setProperty("voice", "mb-en1")
+    engine.setProperty("rate", 150)
     engine.save_to_file(text, fname)
     engine.runAndWait()
     # workaround for https://github.com/nateshmbhat/pyttsx3/issues/219
