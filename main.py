@@ -1725,7 +1725,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             """
             await improcess(ctx, captionfunctions.dontweet, [], [text])
 
-        @commands.command()
+        @commands.command(aliases=["texttospeak", "speak", "talk", "speech", "espeak"])
         async def tts(self, ctx: commands.Context,
                       voice: typing.Optional[typing.Literal["male", "female", "retro"]] = "male", *, text):
             """
@@ -1734,7 +1734,8 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             for retro TTS: uses commodore sam
 
             :param ctx: discord ctx
-            :param voice: choose what voice you want it to be spoken in. modern TTS voices are "male" or "female", or you can use "retro" for a 1980s TTS, just for fun :p
+            :param voice: choose what voice you want it to be spoken in. modern TTS voices are "male" or "female", or
+                you can use "retro" for a 1980s TTS, just for fun :p
             :param text: the text to speak
             :return: audio file of the spoken text
             """
@@ -1783,7 +1784,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
         """
 
         def __init__(self, bot):
-            self.bot = bot
+            self.bot: commands.Bot = bot
 
         @commands.cooldown(60, config.cooldown, commands.BucketType.guild)
         @commands.guild_only()
@@ -2059,15 +2060,27 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                         break
                 else:
                     # inquiry doesnt match cog or command, not found
-                    await ctx.reply(
-                        f"{config.emojis['warning']} `{inquiry}` is not the name of a command or a command category!")
-                    return  # past this assume cmd is defined
+
+                    # get all cogs n commands n aliases
+                    allcmds = []
+                    for c in self.bot.cogs.values():
+                        if self.showcog(c):
+                            allcmds.append(c.qualified_name.lower())
+                    for cmd in self.bot.commands:
+                        if not cmd.hidden:
+                            allcmds.append(cmd.qualified_name)
+                            allcmds += cmd.aliases
+                    match = difflib.get_close_matches(inquiry, allcmds, n=1, cutoff=0)[0]
+                    raise commands.BadArgument(
+                        f"`{inquiry}` is not the name of a command or a command category. "
+                        f"Did you mean `{match}`?")
+                    # past this assume cmd is defined
                 embed = discord.Embed(title=prefix + cmd.name, description=cmd.cog_name,
                                       color=discord.Color(0xEE609C))
                 # if command func has docstring
                 if cmd.help:
                     # parse it
-                    docstring = docstring_parser.parse(cmd.help)
+                    docstring = docstring_parser.parse(cmd.help, style=docstring_parser.DocstringStyle.REST)
                     # format short/long descriptions or say if there is none.
                     if docstring.short_description or docstring.long_description:
                         command_information = \
@@ -2092,6 +2105,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                         else:
                             pend = ""
                         # format and add to paramtext list
+                        paramhelp.description = paramhelp.description.replace('\n', ' ')
                         paramtext.append(f"**{param.name}** - "
                                          f"{paramhelp.description if paramhelp.description else 'No description'}"
                                          f"{pend}")
