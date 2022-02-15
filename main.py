@@ -1726,8 +1726,22 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             await improcess(ctx, captionfunctions.dontweet, [], [text])
 
         @commands.command()
-        async def tts(self, ctx: commands.Context, *, text):
-            await improcess(ctx, improcessing.tts, [], text)
+        async def tts(self, ctx: commands.Context,
+                      voice: typing.Optional[typing.Literal["male", "female", "retro"]] = "male", *, text):
+            """
+            make an mp3 text-to-speech of a given input
+            for modern voices: uses espeak+mbrola on linux, or native tts on windows (OS of the host server)
+            for retro TTS: uses commodore sam
+
+            :param ctx: discord ctx
+            :param voice: choose what voice you want it to be spoken in. modern TTS voices are "male" or "female", or you can use "retro" for a 1980s TTS, just for fun :p
+            :param text: the text to speak
+            :return: audio file of the spoken text
+            """
+            # shouldnt happen but sanity check
+            if not voice:
+                voice = "male"
+            await improcess(ctx, improcessing.tts, [], text, voice)
 
         # WIP
         # @commands.command()
