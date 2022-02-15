@@ -125,6 +125,7 @@ def initializerenderpool():
 async def run_command(*args):
     """
     run a cli command
+
     :param args: the args of the command, what would normally be seperated by a space
     :return: the result of the command
     """
@@ -140,17 +141,21 @@ async def run_command(*args):
     # Wait for the subprocess to finish
     stdout, stderr = await process.communicate()
 
+    try:
+        result = stdout.decode().strip() + stderr.decode().strip()
+    except UnicodeDecodeError:
+        result = stdout.decode("ascii", 'ignore').strip() + stderr.decode("ascii", 'ignore').strip()
     # Progress
     if process.returncode == 0:
         logger.debug(f"PID {process.pid} Done.")
-        logger.debug(f"Results: {stdout.decode().strip() + stderr.decode().strip()}")
+        logger.debug(f"Results: {result}")
     else:
+
         logger.error(
-            f"PID {process.pid} Failed: {args} result: {stdout.decode().strip() + stderr.decode().strip()}",
+            f"PID {process.pid} Failed: {args} result: {result}",
         )
         # adds command output to traceback
-        raise CMDError(f"Command {args} failed.") from CMDError(stdout.decode().strip() + stderr.decode().strip())
-    result = stdout.decode().strip() + stderr.decode().strip()
+        raise CMDError(f"Command {args} failed.") from CMDError(result)
     # Result
 
     # Return stdout
@@ -1225,9 +1230,9 @@ async def pitch(file, p=12):
     logger.debug((p, asetrate, atempo))
     af = f"asetrate=r={asetrate},{expanded_atempo(atempo)},aresample=48000"
     if mt == "AUDIO":
-        audiosettings = ["-c:a", "libmp3lame", "-q:a", "0"]
+        audiosettings = ["libmp3lame", "-q:a", "0"]
     else:
-        audiosettings = ["-c:a", "aac", "-q:a", "2"]
+        audiosettings = ["aac", "-q:a", "2"]
     await run_command("ffmpeg", "-i", file, "-ar", "48000", "-af", af, "-strict", "-1", "-c:a", *audiosettings, out)
     return out
 
@@ -1528,34 +1533,25 @@ async def tempo(media: str):
         # print len(beats)
 
 
-def tts_sync(text: str):
-    fname = temp_file("wav")
-    engine = pyttsx3.init()
-    # try:
-    #     # try to override pitch
-    #     from pyttsx3.drivers import _espeak
-    #     logger.debug(_espeak.GetParameter(_espeak.PITCH))
-    #     _espeak.SetParameter(_espeak.PITCH, 50, 0)
-    #     logger.debug(_espeak.GetParameter(_espeak.PITCH))
-    #     engine.setProperty("voice", "mb-en1")
-    #     logger.debug(_espeak.GetParameter(_espeak.PITCH))
-    # except FileNotFoundError as e:
-    #     logger.debug(f"error setting espeak params: {e}")
-    engine.setProperty("rate", 150)
-    engine.save_to_file(text, fname)
-    engine.runAndWait()
-    # workaround for https://github.com/nateshmbhat/pyttsx3/issues/219
-    while not os.path.exists(fname):
-        time.sleep(0.1)
-    return fname
-
-
-async def tts(text: str):
+async def tts(text: str, model: typing.Literal["male", "female", "retro"] = "male"):
+    ttswav = temp_file("wav")
     outname = temp_file("mp3")
-    wav = await run_in_exec(tts_sync, text)
-    # TODO: mb-en1 voice is at 16khz while default voice is at 22.05khz and pyttsx3 doesnt correct for that, manually
-    # correct for that with ffmpreg
-    await run_command("ffmpeg", "-hide_banner", "-i", wav, "-c:a", "libmp3lame", outname)
+    if model == "retro":
+        if sys.platform == "win32":
+            await run_command("sam/sam.exe", "-wav", ttswav, text)
+        else:
+            # linux exe
+            await run_command("sam/sam", "-wav", ttswav, text)
+    else:
+        # espeak is a fucking nightmare on windows and windows has good native tts anyways sooooo
+        if sys.platform == "win32":
+            # https://docs.microsoft.com/en-us/dotnet/api/system.speech.synthesis.voicegender?view=netframework-4.8
+            voice = str({"male": 1, "female": 2}[model])
+            await run_command("powershell", "-File", "tts.ps1", ttswav, text, voice)
+        else:
+            await run_command("espeak", "-s", "150", text, "-v", "mb-us1" if model == "male" else "mb-us2",
+                              "-w", ttswav)
+    await run_command("ffmpeg", "-hide_banner", "-i", ttswav, "-c:a", "libmp3lame", outname)
     return outname
 
 

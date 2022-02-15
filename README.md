@@ -7,10 +7,12 @@
 [![uptime](https://app.statuscake.com/button/index.php?Track=6022597&Design=6)](https://uptime.statuscake.com/?TestID=JyWrfGfIjT)
 
 ![Total Lines](https://img.shields.io/tokei/lines/github/HexCodeFFF/mediaforge)
-![discord.py](https://img.shields.io/github/pipenv/locked/dependency-version/HexCodeFFF/mediaforge/nextcord)
-![python](https://img.shields.io/github/pipenv/locked/python-version/HexCodeFFF/mediaforge)
 [![stars](https://img.shields.io/github/stars/HexCodeFFF/mediaforge?style=social)](https://github.com/HexCodeFFF/mediaforge/stargazers)
 [![built with immense swag](https://img.shields.io/static/v1?label=built+with&message=immense+swag&color=D262BA)](https://knowyourmeme.com/memes/trollface)
+
+[//]: # (![discord.py]&#40;https://img.shields.io/github/pipenv/locked/dependency-version/HexCodeFFF/mediaforge/nextcord&#41;)
+
+[//]: # (![python]&#40;https://img.shields.io/github/pipenv/locked/python-version/HexCodeFFF/mediaforge&#41;)
 
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/Q5Q75US4A)
 
@@ -19,19 +21,39 @@
 ## general technical info about the bot
 
 - inspired by [esmBot](https://github.com/esmBot/esmBot)
-- uses discord.py (python discord lib)
+- uses nextcord, a fork of discord.py
 - uses FFmpeg for most media functions
 - uses selenium and ChromeDriver to render captions in html with Chrome
-    - although not the fastest approach, it is very readable, flexible, and easy to work with/expand.
+    - although not the fastest approach, it is very simple and very powerful
 
 ## to self-host
 
-verified working on windows 10/11 and ubuntu 18/20. will _probably_ work on macos and other linux distros if the below
-libraries are available but theyre untested and unsupported.
+### summary
 
-### external libraries
+ensure your OS is one of the [supported OSes](#supported-oses), then install the [python libraries](#python-libraries)
+and the [non-python libraries](#non-python-libraries), set up the [config](#config), and [run](#to-run)
 
-the bot uses many CLI programs for media processing.
+### supported OSes
+
+built and tested on windows 10/11 and ubuntu 18/20, and these 2 OSes will continue to be officially supported.
+
+will _probably_ work on macos and other linux/unix distros if the below libraries are available but theyre untested and
+unsupported. just replace `apt-get` with your system's native package manager ([`brew`](https://brew.sh/) for macos)
+
+### python libraries
+
+- This project uses [`poetry`](https://python-poetry.org/), run `poetry install` to install the required dependencies.
+    - install poetry with `pip install poetry`
+    - [`aubio`](https://pypi.org/project/aubio/) and [`PyAutoTune`](https://github.com/ederwander/PyAutoTune) are built
+      from source on installation.
+        - on Windows this will require the MSVC compiler, which is an optional component
+          of [Visual Studio](https://visualstudio.microsoft.com/downloads/)
+        - on Linux this will require [`gcc`](https://packages.ubuntu.com/bionic/gcc), installable
+          by `sudo apt-get install gcc`
+
+### non-python libraries
+
+the bot uses many external CLI programs for media processing.
 
 - FFmpeg - not included but [easily installable on windows and linux](https://ffmpeg.org/download.html)
     - **If installing on ubuntu, ensure that ffmpeg version >= 4**
@@ -39,26 +61,28 @@ the bot uses many CLI programs for media processing.
 - pngquant - windows executable is included. installable on linux with `sudo apt-get install pngquant`
 - ChromeDriver - ChromeDriver is automatically downloaded to match the chrome installation on your system when the bot
   starts.
-    - ChromeDriver requires your installation of chrome to be in one of the default paths for your system. MediaForge
-      also expects this to check if it needs to download a new driver version.
-- ImageMagick - not included but [downloadable here](https://imagemagick.org/script/download.php)
+    - if on linux, chrome must be in the system bin/path
+    - if on windows, chrome must be in [one of the default locations](https://stackoverflow.com/a/40674915/9044183)
+    - (specifically the win10 ones)
+- ImageMagick - **not included** but [downloadable here](https://imagemagick.org/script/download.php)
 - ExifTool - windows executable is included. installable on linux
   with `sudo apt-get install exiftool` https://exiftool.org/
 - apngasm - windows executable is included. installable on linux with `sudo apt-get install apngasm`
-- glaxnimate - [downloadable on its website](https://glaxnimate.mattbas.org/download)
-    - this library is not yet used. it is needed to render lottie stickers, but
-      [I am currently having issues installing the python bindings on windows.](https://gitlab.com/mattbas/glaxnimate/-/issues/398)
+- TTS
+    - on linux, this uses [`espeak`](https://sourceforge.net/projects/espeak/files/espeak/)
+      and [`mbrola`](https://github.com/numediart/MBROLA). Install
+      with `sudo apt-get install espeak mbrola-us1 mbrola-us2`
+    - on windows, [`powershell`](https://aka.ms/powershell) is used to
+      access [Windows's native TTS](https://docs.microsoft.com/en-us/uwp/api/windows.media.speechsynthesis.speechsynthesizer)
+      . Both are included in modern versions of Windows, but ensure powershell is in the system path.
+    - the "retro" voice uses [Commodore SAM](https://github.com/vidarh/SAM). the windows and linux executable are
+      included.
 
-### pip libraries
+[//]: # (- glaxnimate - [downloadable on its website]&#40;https://glaxnimate.mattbas.org/download&#41;)
 
-- This project uses [`poetry`](https://python-poetry.org/), run `poetry install` to install the required
-  dependencies.
-    - install poetry with `pip install poetry`
-    - [`aubio`](https://pypi.org/project/aubio/) and [`PyAutoTune`](https://github.com/ederwander/PyAutoTune) are built
-      from source on installation.
-        - on Windows this will require
-          the [MSVC compiler](https://visualstudio.microsoft.com/downloads/#build-tools-for-visual-studio-2019)
-        - on Linux this will require [`gcc`](https://packages.ubuntu.com/bionic/gcc)
+[//]: # (    - this library is not yet used. it is needed to render lottie stickers, but)
+
+[//]: # (      [I am currently having issues installing the python bindings on windows.]&#40;https://gitlab.com/mattbas/glaxnimate/-/issues/398&#41;)
 
 ### config
 
