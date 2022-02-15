@@ -77,6 +77,8 @@ the bot uses many external CLI programs for media processing.
       . Both are included in modern versions of Windows, but ensure powershell is in the system path.
     - the "retro" voice uses [Commodore SAM](https://github.com/vidarh/SAM). the windows and linux executable are
       included.
+        - **on linux, you will need to mark the sam executable as an executable** do this with `sudo chmod +x sam/sam`
+          (from the root dir)
 
 [//]: # (- glaxnimate - [downloadable on its website]&#40;https://glaxnimate.mattbas.org/download&#41;)
 
