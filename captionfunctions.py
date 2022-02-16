@@ -73,7 +73,9 @@ def htmlcap(file, image, caption, tosavename=None):
     if caption:
         # print(caption)
         caption = sanitizehtml(caption)
-        if len(caption) == 1:
+        if isinstance(caption, str):
+            replacedict["CaptionText"] = caption.replace("\n", "<br>")
+        elif len(caption) == 1:
             replacedict["CaptionText"] = caption[0].replace("\n", "<br>")
         else:
             for i, c in enumerate(caption):
@@ -192,6 +194,10 @@ def dontweet(caption, tosavename=None):
 
 def yskysn(caption, tosavename=None):
     return htmlcap("captionhtml/yskysn.html", None, caption, tosavename)
+
+
+def epicbirthdaytext(caption, tosavename=None):
+    return htmlcap("captionhtml/epicbirthdaytext.html", None, caption, tosavename)
 
 
 def roundcorners(image, radius, tosavename=None):

@@ -355,10 +355,71 @@ async def compresspng(png):
     return outname
 
 
-async def assurefilesize(media: str, ctx: commands.Context, re_encode=True, trim=False):
+async def twopasscapvideo(video: str, maxsize: int, audio_bitrate=128000):
     """
-    downsizes files up to 5 times if they are over discord's upload limit
-    :param trim: try to trim to under max frames
+    attempts to intelligently cap video filesize with two pass encoding
+
+    :param video: video file (str path)
+    :param maxsize: max size (in bytes) of output file
+    :param audio_bitrate: optionally specify an audio bitrate in bits per second
+    :return: new video file below maxsize
+    """
+    if (size := os.path.getsize(video)) < maxsize:
+        return video
+    # https://trac.ffmpeg.org/wiki/Encode/H.264#twopass
+    duration = await get_duration(video)
+    # bytes to bits
+    target_total_bitrate = (maxsize * 8) / duration
+    for tolerance in [.98, .95, .90, .75, .5]:
+        target_video_bitrate = (target_total_bitrate - audio_bitrate) * tolerance
+        assert target_video_bitrate > 0
+        logger.info(f"trying to force {video} ({humanize.naturalsize(size)}) "
+                    f"under {humanize.naturalsize(maxsize)} with tolerance {tolerance}. "
+                    f"trying {humanize.naturalsize(target_video_bitrate / 8)}/s")
+        pass1log = temp_file("log")
+        outfile = temp_file("mp4")
+        await run_command('ffmpeg', '-y', '-i', video, '-c:v', 'h264', '-b:v', str(target_video_bitrate), '-pass', '1',
+                          '-f', 'null', '-an', '-passlogfile', pass1log,
+                          'NUL' if sys.platform == "win32" else "/dev/null")
+        await run_command('ffmpeg', '-i', video, '-c:v', 'h264', '-b:v', str(target_video_bitrate), '-pass', '2',
+                          '-passlogfile', pass1log, '-c:a', 'aac', '-b:a', str(audio_bitrate), outfile)
+        if (size := os.path.getsize(outfile)) < maxsize:
+            logger.info(f"successfully created {humanize.naturalsize(size)} video!")
+            return outfile
+        else:
+            logger.info(f"tolerance {tolerance} failed. output is {humanize.naturalsize(size)}")
+    raise NonBugError(f"Unable to fit {video} within {humanize.naturalsize(maxsize)}")
+
+
+async def intelligentdownsize(media: str, maxsize: int):
+    """
+    tries to intelligently downsize media to fit within maxsize
+
+    :param media: media path str
+    :param maxsize: max size in bytes
+    :return: new media file below maxsize
+    """
+
+    size = os.path.getsize(media)
+    w, h = await get_resolution(media)
+    for tolerance in [.98, .95, .90, .75, .5]:
+        reduction_ratio = (maxsize / size) * tolerance
+        # this took me longer to figure out than i am willing to admit
+        new_w = math.floor(math.sqrt(reduction_ratio * (w ** 2)))
+        new_h = math.floor(math.sqrt(reduction_ratio * (h ** 2)))
+        logger.info(f"trying to resize from {w}x{h} to {new_w}x{new_h} (~{reduction_ratio} reduction)")
+        resized = await resize(media, new_w, new_h)
+        if (size := os.path.getsize(resized)) < maxsize:
+            logger.info(f"successfully created {humanize.naturalsize(size)} media!")
+            return resized
+        else:
+            logger.info(f"tolerance {tolerance} failed. output is {humanize.naturalsize(size)}")
+
+
+async def assurefilesize(media: str, ctx: commands.Context, re_encode=True):
+    """
+    compresses files to fit within config set discord limit
+
     :param re_encode: try to reencode media?
     :param media: media
     :param ctx: discord context
@@ -373,32 +434,33 @@ async def assurefilesize(media: str, ctx: commands.Context, re_encode=True, trim
         # also forces audio to aac since audio recoding is a lot more noticable so i have to use copy for some reason
         if re_encode:
             media = await reencode(media)
-    for i in range(5):
-        size = os.path.getsize(media)
-        logger.info(f"Resulting file is {humanize.naturalsize(size)}")
-        if size > config.way_too_big_size:
-            await ctx.send(f"{config.emojis['warning']} Resulting file is {humanize.naturalsize(size)}. "
-                           f"Aborting upload since resulting file is over "
-                           f"{humanize.naturalsize(config.way_too_big_size)}")
-            return
-        # https://www.reddit.com/r/discordapp/comments/aflp3p/the_truth_about_discord_file_upload_limits/
-        if size >= config.file_upload_limit:
-            if mt in ["VIDEO", "IMAGE", "GIF"]:
-                logger.info("Image too big!")
-                msg = await ctx.reply(
-                    f"{config.emojis['warning']} Resulting file too big! ({humanize.naturalsize(size)}) "
-                    f"Downsizing result...")
-                imagenew = await resize(media, "iw/2", "ih/2", trim)
-                # imagenew = await handleanimated(media, captionfunctions.halfsize, ctx)
-                media = imagenew
-                await msg.delete()
-            else:
-                await ctx.send(f"{config.emojis['warning']} Audio file is too big to upload.")
-                return False
-        if os.path.getsize(media) < config.file_upload_limit:
-            return media
-    await ctx.send(f"{config.emojis['warning']} Max downsizes reached. File is way too big.")
-    return False
+    size = os.path.getsize(media)
+    if size > config.way_too_big_size:
+        raise NonBugError(f"Resulting file is {humanize.naturalsize(size)}. "
+                          f"Aborting upload since resulting file is over "
+                          f"{humanize.naturalsize(config.way_too_big_size)}")
+    msg = await ctx.reply(f"{config.emojis['warning']} Resulting file too big! ({humanize.naturalsize(size)}) "
+                          f"Downsizing result...", mention_author=False)
+    if mt == "VIDEO":
+        # fancy ffmpeg based video thing
+        try:
+            video = await twopasscapvideo(media, config.file_upload_limit)
+            await msg.delete()
+            return video
+        except Exception as e:
+            await msg.delete()
+            raise e
+    elif mt in ["IMAGE", "GIF"]:
+        # file size should be roughly proportional to # of pixels so we can work with that :3
+        try:
+            video = await intelligentdownsize(media, config.file_upload_limit)
+            await msg.delete()
+            return video
+        except Exception as e:
+            await msg.delete()
+            raise e
+    else:
+        raise NonBugError(f"File is too big to upload.")
 
 
 async def watermark(media):
@@ -1549,7 +1611,7 @@ async def tts(text: str, model: typing.Literal["male", "female", "retro"] = "mal
             voice = str({"male": 1, "female": 2}[model])
             await run_command("powershell", "-File", "tts.ps1", ttswav, text, voice)
         else:
-            await run_command("espeak", "-s", "150", text, "-v", "mb-us1" if model == "male" else "mb-us2",
+            await run_command("espeak", "-s", "150", text, "-v", "mb-us2" if model == "male" else "mb-us1",
                               "-w", ttswav)
     await run_command("ffmpeg", "-hide_banner", "-i", ttswav, "-c:a", "libmp3lame", outname)
     return outname
@@ -1558,24 +1620,37 @@ async def tts(text: str, model: typing.Literal["male", "female", "retro"] = "mal
 async def epicbirthday(text: str):
     out = temp_file("mp4")
     birthdaytext = await tts(text)
-    # 0:09.530 / 0:11.155
-    # 0:17.133 / 0:18.777
-    # 0:40.000 / 0:41.553
-    # 0:47.767 / 0:49.173
-    # 1:07.390 / 1:11.269 (long)
+    nameimage = temp_file("png")
+    await renderpool.submit(captionfunctions.epicbirthdaytext, text, nameimage)
+    # when to show the text
+    betweens = [
+        "between(n,294,381)",
+        "between(n,520,551)",
+        "between(n,1210,1294)",
+        "between(n,1428,1467)",
+        "between(n,2024,2109)",
+    ]
     await run_command("ffmpeg", "-hide_banner",
                       "-i", "rendering/epicbirthday.mp4",
                       "-i", birthdaytext,
+                      "-i", nameimage,
                       "-filter_complex",
+                      # split the tts audio
                       "[1:a] volume=10dB,asplit=5 [b1][b2][b3][b4][b5]; "
+                      # delay to correspond with video
                       "[b1] adelay=9530:all=1 [d1];"
                       "[b2] adelay=17133:all=1 [d2];"
                       "[b3] adelay=40000:all=1 [d3];"
                       "[b4] adelay=47767:all=1 [d4];"
+                      # last one is long
                       "[b5] atempo=0.5,adelay=67390:all=1 [d5];"
                       "[0:a] volume=-5dB [a0];"
-                      "[a0][d1][d2][d3][d4][d5] amix=inputs=6:normalize=0 [outa]",
-                      "-map", "0:v",
+                      # combine audio
+                      "[a0][d1][d2][d3][d4][d5] amix=inputs=6:normalize=0 [outa];"
+                      # add text
+                      f"[0:v][2:v] overlay=enable='{'+'.join(betweens)}' [outv]",
+                      # map to output
+                      "-map", "[outv]",
                       "-map", "[outa]",
                       out)
     return out

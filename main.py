@@ -1438,7 +1438,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                         r = await improcessing.run_in_exec(ytdownload, videourl, videoformat)
                         if r:
                             tempfiles.reserve_names([r])
-                            r = await improcessing.assurefilesize(r, ctx, re_encode=False, trim=False)
+                            r = await improcessing.assurefilesize(r, ctx, re_encode=False)
                             if not r:
                                 return
                             txt = ""
@@ -1745,9 +1745,9 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             await improcess(ctx, improcessing.tts, [], text, voice)
 
         # WIP
-        # @commands.command()
-        # async def epicbirthday(self, ctx: commands.Context, *, text):
-        #     await improcess(ctx, improcessing.epicbirthday, [], text)
+        @commands.command()
+        async def epicbirthday(self, ctx: commands.Context, *, text):
+            await improcess(ctx, improcessing.epicbirthday, [], text)
 
 
     def showcog(cog):
