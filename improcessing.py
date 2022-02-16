@@ -1632,7 +1632,7 @@ async def epicbirthday(text: str):
         "between(n,1428,1467)",
         "between(n,2024,2109)",
     ]
-    await run_command("ffmpeg", "-hide_banner",
+    await run_command("ffmpeg", "-hide_banner", "-nostdin",
                       "-i", "rendering/epicbirthday.mp4",
                       "-i", birthdaytext,
                       "-i", nameimage,

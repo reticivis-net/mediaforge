@@ -1747,6 +1747,14 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
         # WIP
         @commands.command()
         async def epicbirthday(self, ctx: commands.Context, *, text):
+            """
+            let mediaforge wish someone a very epic birthday!!!
+            all credit for song goes to https://epichappybirthdaysongs.com/
+
+            :param ctx:
+            :param text: who you want to wish an epic birthday to
+            :return: a custom made song just for you!
+            """
             await improcess(ctx, improcessing.epicbirthday, [], text)
 
 
