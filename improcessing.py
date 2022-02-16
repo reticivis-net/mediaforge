@@ -439,7 +439,7 @@ async def assurefilesize(media: str, ctx: commands.Context, re_encode=True):
         raise NonBugError(f"Resulting file is {humanize.naturalsize(size)}. "
                           f"Aborting upload since resulting file is over "
                           f"{humanize.naturalsize(config.way_too_big_size)}")
-    if size < config.max_file_size:
+    if size < config.file_upload_limit:
         return media
     msg = await ctx.reply(f"{config.emojis['warning']} Resulting file too big! ({humanize.naturalsize(size)}) "
                           f"Downsizing result...", mention_author=False)
