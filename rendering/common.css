@@ -12,7 +12,7 @@
 
 @font-face {
     font-family: caption;
-    src: url(fonts/Lato-Bold.ttf);
+    src: url(fonts/AtkinsonHyperlegible-Bold.ttf);
 }
 
 body {
@@ -81,11 +81,6 @@ img.emoji {
 @font-face {
     font-family: futurabold;
     src: url(fonts/caption.otf);
-}
-
-@font-face {
-    font-family: caption;
-    src: url(fonts/Lato-Bold.ttf);
 }
 
 body:after, .clearfix:after {
