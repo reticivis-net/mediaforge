@@ -2,18 +2,10 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>1984</title>
     <base href="../">
+    <link href="rendering/common.css" rel="stylesheet">
     <style>
-        @font-face {
-            font-family: caption;
-            src: url(rendering/fonts/Lato-Bold.ttf);
-        }
-
-        body {
-            margin: 0;
-        }
-
         #base, #top {
             position: relative;
             top: 0;
@@ -25,7 +17,6 @@
             z-index: 10;
         }
 
-
         #textbox {
             position: absolute;
             left: 60px;
@@ -36,9 +27,12 @@
             font-size: 22px;
         }
 
-        @font-face {
-            font-family: impact;
-            src: url(rendering/fonts/ImpactMix.ttf);
+        #textbox p {
+            position: relative;
+            min-height: inherit;
+            padding: 0;
+            width: 100%;
+            text-align: center;
         }
 
         #text {
@@ -50,26 +44,6 @@
             transform: skewY(10deg);
             font-size: 28px;
             font-family: Impact, sans-serif;
-
-        }
-
-        .fitboxes {
-            overflow: hidden;
-            -webkit-font-smoothing: antialiased;
-            word-wrap: break-word;
-            color: black;
-            margin: 0;
-        }
-
-        .fitboxes p {
-            margin: 0;
-        }
-
-        img.emoji {
-            height: 1em;
-            width: 1em;
-            margin: 0 .05em 0 .1em;
-            vertical-align: -0.1em;
         }
     </style>
 </head>
@@ -77,7 +51,10 @@
 <img id="base" src="rendering/1984.png">
 <img id="top" src="rendering/1984cover.png">
 <div class="fitboxes" id="textbox">
-    <p>CaptionText1</p>
+    <div class="box-flex" id="textboxinner">
+        <p class="txt">CaptionText1</p>
+    </div>
+
 </div>
 <div class="fitboxes" id="text">
     <p>CaptionText2</p>
@@ -95,7 +72,7 @@
         } else {
             fit("text")
         }
-        fit("textbox")
+        fit("textboxinner")
     }
 
 </script>

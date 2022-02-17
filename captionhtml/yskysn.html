@@ -3,19 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <title>yskysn</title>
-    <script src="rendering/twemoji/twemoji.js"></script>
     <base href="../">
+    <script src="rendering/twemoji/twemoji.js"></script>
+    <link href="rendering/common.css" rel="stylesheet">
     <style>
-        @font-face {
-            font-family: cap;
-            src: url(rendering/fonts/TAHOMABD.TTF);
-        }
-
         body, html {
             font-size: 0;
             text-align: center;
-            margin: 0;
-            word-break: break-word;
             min-height: 100%;
         }
 
@@ -26,15 +20,8 @@
             left: 0;
         }
 
-        img.emoji {
-            height: 1em;
-            width: 1em;
-            margin: 0 .05em 0 .1em;
-            vertical-align: -0.1em;
-        }
-
         .caption {
-            font-family: cap, sans-serif;
+            font-family: tahoma, sans-serif;
             color: white;
             font-size: 36px;
         }
@@ -59,19 +46,6 @@
         #fitin1 * {
             letter-spacing: 0.025em;
         }
-
-        .box-flex {
-            display: flex;
-            justify-content: center;
-            height: 100%;
-        }
-
-        .box-flex .txt {
-            padding: 0;
-            align-self: center;
-            min-height: auto;
-        }
-
     </style>
 </head>
 <body>
