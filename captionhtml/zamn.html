@@ -5,16 +5,10 @@
     <title>Title</title>
     <base href="../">
     <script src="rendering/twemoji/twemoji.js"></script>
+    <link href="rendering/common.css" rel="stylesheet">
     <style>
-        @font-face {
-            font-family: caption;
-            src: url(rendering/fonts/Lato-Bold.ttf);
-        }
-
         body, html {
             font-size: 0;
-            margin: 0;
-            word-break: break-word;
             min-height: 100%;
         }
 
@@ -24,27 +18,11 @@
             left: 0;
         }
 
-        img.emoji {
-            height: 1em;
-            width: 1em;
-            margin: 0 .05em 0 .1em;
-            vertical-align: -0.1em;
-        }
-
         #top {
             position: absolute;
             z-index: 10;
         }
 
-        @font-face {
-            font-family: burbank;
-            src: url(rendering/fonts/Burbank.otf);
-        }
-
-        @font-face {
-            font-family: silkscreen;
-            src: url(rendering/fonts/slkscr.ttf);
-        }
 
         #speech {
             position: absolute;
@@ -97,18 +75,6 @@
             width: 100%;
             height: 100%;
             object-fit: contain;
-        }
-
-        .box-flex {
-            display: flex;
-            justify-content: center;
-            height: 100%;
-        }
-
-        .box-flex .txt {
-            padding: 0;
-            align-self: center;
-            min-height: auto;
         }
 
         #textstyleover {

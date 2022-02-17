@@ -3,31 +3,15 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>dontweet</title>
     <script src="rendering/twemoji/twemoji.js"></script>
+    <link href="rendering/common.css" rel="stylesheet">
+
     <style>
         body {
             text-align: left;
             margin: 0;
             word-break: break-word;
-        }
-
-        img.emoji {
-            height: 1em;
-            width: 1em;
-            margin: 0 .05em 0 .1em;
-            vertical-align: -0.1em;
-        }
-
-        /* custom font for icons, as html2canvas has issues with SVGs */
-        @font-face {
-            font-family: "SF Pro Text";
-            src: url('rendering/fonts/SF-Pro-Text-Regular.otf');
-            font-weight: normal;
-        }
-        @font-face {
-            font-family: "Tweetgen Icons";
-            src: url('rendering/fonts/TweetgenIcons.woff');
         }
 
         .css-1dbjc4n {
@@ -301,14 +285,7 @@
             height: 1.5em;
             width: 1.5em;
         }
-
-        .cloneframe {
-            visibility: hidden !important;
-            position: fixed;
-            left: -10000px;
-            top: 0px;
-            border: none;
-        }</style>
+    </style>
 </head>
 <body>
 <div class="tweetContainer" id="tweetContainer" theme="dim">

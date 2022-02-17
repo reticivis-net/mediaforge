@@ -1,0 +1,163 @@
+* {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    outline: 0;
+    font-size: 100%;
+    vertical-align: baseline;
+    background: transparent;
+    box-sizing: border-box;
+    -webkit-font-smoothing: antialiased;
+}
+
+@font-face {
+    font-family: caption;
+    src: url(fonts/Lato-Bold.ttf);
+}
+
+body {
+    margin: 0;
+    word-break: break-word;
+}
+
+@font-face {
+    font-family: impact;
+    src: url(fonts/ImpactMix.ttf);
+}
+
+.fitboxes {
+    overflow: hidden;
+    word-wrap: break-word;
+    color: black;
+    margin: 0;
+}
+
+.fitboxes p {
+    margin: 0;
+}
+
+img.emoji {
+    height: 1em;
+    width: 1em;
+    margin: 0 .05em 0 .1em;
+    vertical-align: -0.1em;
+}
+
+@font-face {
+    font-family: Signika;
+    src: url(fonts/Signika.woff2);
+}
+
+/* custom font for icons, as html2canvas has issues with SVGs */
+@font-face {
+    font-family: "SF Pro Text";
+    src: url('fonts/SF-Pro-Text-Regular.otf');
+    font-weight: normal;
+}
+
+@font-face {
+    font-family: "Tweetgen Icons";
+    src: url('fonts/TweetgenIcons.woff');
+}
+
+@font-face {
+    font-family: MarkerFeltWide;
+    src: url("fonts/MarkerFeltWide Regular.ttf");
+}
+
+.box-flex {
+    display: flex;
+    justify-content: center;
+    padding: 0;
+    height: 100%;
+}
+
+.box-flex .txt {
+    padding: 0;
+    align-self: center;
+    min-height: auto;
+}
+
+@font-face {
+    font-family: futurabold;
+    src: url(fonts/caption.otf);
+}
+
+@font-face {
+    font-family: caption;
+    src: url(fonts/Lato-Bold.ttf);
+}
+
+body:after, .clearfix:after {
+    visibility: hidden;
+    display: block;
+    font-size: 0;
+    content: " ";
+    clear: both;
+    height: 0;
+}
+
+.clearfix::before,
+.clearfix::after {
+    flex-basis: 0;
+    order: 1;
+}
+
+.caption {
+    -webkit-font-smoothing: antialiased;
+    text-align: center;
+    word-wrap: break-word;
+}
+
+@font-face {
+    font-family: impact;
+    src: url(fonts/ImpactMix.ttf);
+}
+
+@font-face {
+    font-family: slashscript;
+    src: url(fonts/Slashscript.otf);
+}
+
+@font-face {
+    font-family: helvetica;
+    src: url(fonts/HelveticaLTStd-Roman.otf);
+}
+
+@font-face {
+    font-family: tenor;
+    src: url(fonts/Ubuntu-R.ttf);
+}
+
+.top {
+    top: 0;
+}
+
+.bottom {
+    bottom: 0;
+}
+
+@font-face {
+    font-family: helveticaneue;
+    src: url(fonts/HelveticaNeue.otf);
+}
+
+@font-face {
+    font-family: whisper;
+    src: url(fonts/whisper.otf);
+}
+
+@font-face {
+    font-family: tahoma;
+    src: url(fonts/TAHOMABD.TTF);
+}
+
+@font-face {
+    font-family: burbank;
+    src: url(fonts/Burbank.otf);
+}
+
+@font-face {
+    font-family: silkscreen;
+    src: url(fonts/slkscr.ttf);
+}
