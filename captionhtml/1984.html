@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>1984</title>
     <base href="../">
+    <script src="rendering/twemoji/twemoji.js"></script>
     <link href="rendering/common.css" rel="stylesheet">
     <style>
         #base, #top {
@@ -50,23 +51,21 @@
 <body>
 <img id="base" src="rendering/1984.png">
 <img id="top" src="rendering/1984cover.png">
+<link rel="preload" as="image" href="rendering/1984originaldate.png">
 <div class="fitboxes" id="textbox">
     <div class="box-flex" id="textboxinner">
         <p class="txt">CaptionText1</p>
     </div>
-
 </div>
 <div class="fitboxes" id="text">
     <p>CaptionText2</p>
 </div>
-
-
 </body>
 <script src="rendering/common.js"></script>
 <script>
     function beforerender() {
         var tbox = document.getElementById("text");
-        if (tbox.innerText === "JANUARY 1984") {
+        if (tbox.innerText.toUpperCase() === "JANUARY 1984") {
             tbox.innerHTML = "";
             document.getElementById("top").src = "rendering/1984originaldate.png";
         } else {
