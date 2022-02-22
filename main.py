@@ -852,15 +852,16 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             await improcess(ctx, improcessing.allreencode, [["VIDEO", "IMAGE", "AUDIO"]])
 
         @commands.command(aliases=["audioadd", "dub"])
-        async def addaudio(self, ctx):
+        async def addaudio(self, ctx, loops: number_range(-1, 100, num_type='int') = -1):
             """
             Adds audio to media.
 
             :param ctx: discord context
+            :param loops: Amount of times to loop a gif. -1 loops infinitely, 0 only once. Must be between -1 and 100.
             :mediaparam media: Any valid media file.
             :mediaparam audio: An audio file.
             """
-            await improcess(ctx, improcessing.addaudio, [["IMAGE", "GIF", "VIDEO", "AUDIO"], ["AUDIO"]])
+            await improcess(ctx, improcessing.addaudio, [["IMAGE", "GIF", "VIDEO", "AUDIO"], ["AUDIO"]], loops)
 
         @commands.command()
         async def jpeg(self, ctx, strength: number_range(0, 100, False, True, 'int') = 30,
