@@ -926,7 +926,7 @@ async def imageaudio(files):
     return outname
 
 
-async def addaudio(files, loops):
+async def addaudio(files, loops = 0):
     """
     adds audio to media
     :param files: [media, audiotoadd]
