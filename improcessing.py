@@ -379,10 +379,10 @@ async def twopasscapvideo(video: str, maxsize: int, audio_bitrate=128000):
         pass1log = temp_file("log")
         outfile = temp_file("mp4")
         await run_command('ffmpeg', '-y', '-i', video, '-c:v', 'h264', '-b:v', str(target_video_bitrate), '-pass', '1',
-                          '-f', 'null', '-an', '-passlogfile', pass1log,
+                          '-f', 'mp4', '-passlogfile', pass1log,
                           'NUL' if sys.platform == "win32" else "/dev/null")
         await run_command('ffmpeg', '-i', video, '-c:v', 'h264', '-b:v', str(target_video_bitrate), '-pass', '2',
-                          '-passlogfile', pass1log, '-c:a', 'aac', '-b:a', str(audio_bitrate), outfile)
+                          '-passlogfile', pass1log, '-c:a', 'aac', '-b:a', str(audio_bitrate), "-f", "mp4", outfile)
         if (size := os.path.getsize(outfile)) < maxsize:
             logger.info(f"successfully created {humanize.naturalsize(size)} video!")
             return outfile
