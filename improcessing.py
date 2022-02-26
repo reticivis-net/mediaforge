@@ -912,7 +912,7 @@ async def videoloop(file, loop):
 
 async def imageaudio(files):
     """
-    combines an image an an audio file into a video
+    combines an image and an audio file into a video
     :param files: [image, audio]
     :return: video
     """
@@ -920,13 +920,13 @@ async def imageaudio(files):
     image = files[0]
     outname = temp_file("mp4")
     duration = await get_duration(audio)  # it is a couple seconds too long without it :(
-    await run_command("ffmpeg", "-hide_banner", "-i", audio, "-loop", "1", "-i", image, "-vf",
+    await run_command("ffmpeg", "-hide_banner", "-i", audio, "-loop", "1", "-i", image, "-pix_fmt", "yuv420p", "-vf",
                       "crop=trunc(iw/2)*2:trunc(ih/2)*2", "-c:v", "libx264", "-c:a", "copy", "-shortest", "-t",
-                      str(duration), outname)
+                       str(duration), outname)
     return outname
 
 
-async def addaudio(files):
+async def addaudio(files, loops = 0):
     """
     adds audio to media
     :param files: [media, audiotoadd]
@@ -939,6 +939,20 @@ async def addaudio(files):
     if mt == "IMAGE":
         # no use reinventing the wheel
         return await imageaudio(files)
+    elif mt == "GIF":
+        # GIF case is like imageaudio, but with stream_loop instead of loop.
+        outname = temp_file("mp4")
+        if loops >= 0:
+            # if the gif is set to loop a fixed amount of times, cut out at the longest stream.
+            await run_command("ffmpeg", "-hide_banner", "-i", audio, "-stream_loop", str(loops), "-i", media, "-pix_fmt", "yuv420p", "-vf",
+                              "crop=trunc(iw/2)*2:trunc(ih/2)*2", "-c:v", "libx264", "-c:a", "copy", outname)
+        else:
+            # if it's set to loop infinitely, cut out when the audio ends.
+            duration = await get_duration(audio)  # it is a couple seconds too long without it :(
+            await run_command("ffmpeg", "-hide_banner", "-i", audio, "-stream_loop", str(loops), "-i", media, "-pix_fmt", "yuv420p", "-vf",
+                              "crop=trunc(iw/2)*2:trunc(ih/2)*2", "-c:v", "libx264", "-c:a", "copy", "-shortest", "-t",
+                               str(duration), outname)
+        return outname
     else:
         media = await forceaudio(media)
         # yes, qa works backwards on aac vs mp3. no, i dont know why.
