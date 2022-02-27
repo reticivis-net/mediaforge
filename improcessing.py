@@ -921,12 +921,12 @@ async def imageaudio(files):
     outname = temp_file("mp4")
     duration = await get_duration(audio)  # it is a couple seconds too long without it :(
     await run_command("ffmpeg", "-hide_banner", "-i", audio, "-loop", "1", "-i", image, "-pix_fmt", "yuv420p", "-vf",
-                      "crop=trunc(iw/2)*2:trunc(ih/2)*2", "-c:v", "libx264", "-c:a", "copy", "-shortest", "-t",
-                       str(duration), outname)
+                      "crop=trunc(iw/2)*2:trunc(ih/2)*2", "-c:v", "libx264", "-c:a", "aac", "-shortest", "-t",
+                      str(duration), outname)
     return outname
 
 
-async def addaudio(files, loops = 0):
+async def addaudio(files, loops=0):
     """
     adds audio to media
     :param files: [media, audiotoadd]
@@ -944,14 +944,16 @@ async def addaudio(files, loops = 0):
         outname = temp_file("mp4")
         if loops >= 0:
             # if the gif is set to loop a fixed amount of times, cut out at the longest stream.
-            await run_command("ffmpeg", "-hide_banner", "-i", audio, "-stream_loop", str(loops), "-i", media, "-pix_fmt", "yuv420p", "-vf",
+            await run_command("ffmpeg", "-hide_banner", "-i", audio, "-stream_loop", str(loops), "-i", media,
+                              "-pix_fmt", "yuv420p", "-vf",
                               "crop=trunc(iw/2)*2:trunc(ih/2)*2", "-c:v", "libx264", "-c:a", "copy", outname)
         else:
             # if it's set to loop infinitely, cut out when the audio ends.
             duration = await get_duration(audio)  # it is a couple seconds too long without it :(
-            await run_command("ffmpeg", "-hide_banner", "-i", audio, "-stream_loop", str(loops), "-i", media, "-pix_fmt", "yuv420p", "-vf",
+            await run_command("ffmpeg", "-hide_banner", "-i", audio, "-stream_loop", str(loops), "-i", media,
+                              "-pix_fmt", "yuv420p", "-vf",
                               "crop=trunc(iw/2)*2:trunc(ih/2)*2", "-c:v", "libx264", "-c:a", "copy", "-shortest", "-t",
-                               str(duration), outname)
+                              str(duration), outname)
         return outname
     else:
         media = await forceaudio(media)
