@@ -487,8 +487,9 @@ async def mediatype(image):
     :param image: filename of media
     :return: can be VIDEO, AUDIO, GIF, IMAGE or None (invalid or other).
     """
-    probe = await run_command('ffprobe', '-v', 'panic', '-count_packets', '-show_entries', 'stream', '-print_format',
-                              'json', image)
+    probe = await run_command('ffprobe', '-v', 'panic', '-count_packets', '-show_entries',
+                              'stream=codec_type,codec_name,nb_frames',
+                              '-print_format', 'json', image)
     props = {
         "video": False,
         "audio": False,
@@ -497,11 +498,13 @@ async def mediatype(image):
     }
     probe = json.loads(probe)
     for stream in probe["streams"]:
-        if stream["codec_type"] == "audio":  # codec is audio, has audio
+        if stream["codec_type"] == "audio":  # only can be pure audio
             props["audio"] = True
-        elif stream["codec_type"] == "video":  # could be video or image or gif
+        elif stream["codec_type"] == "video":  # could be video or image or gif sadly
             if int(stream["nb_frames"]) == 1:  # if there is only one frame
                 props["image"] = True  # it's an image
+                # yes, this will mark 1 frame/non-animated gifs as images.
+                # this is intentional behavior as most commands treat gifs as videos
             else:  # if there are multiple frames
                 if stream["codec_name"] == "gif":  # if gif
                     props["gif"] = True  # gif
