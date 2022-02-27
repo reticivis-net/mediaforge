@@ -427,7 +427,7 @@ async def assurefilesize(media: str, ctx: commands.Context, re_encode=True):
     """
     if not media:
         raise ReturnedNothing(f"assurefilesize() was passed no media.")
-    mt = mediatype(media)
+    mt = await mediatype(media)
     if mt == "VIDEO":
         # this is in assurefilesize since all output media gets sent through here
         # it removes transparency if its an actual video and not a gif, since like nothing can play transparent videos
@@ -466,7 +466,7 @@ async def assurefilesize(media: str, ctx: commands.Context, re_encode=True):
 
 
 async def watermark(media):
-    if mediatype(media) == "AUDIO":  # exiftool doesnt support it :/
+    if (await mediatype(media)) == "AUDIO":  # exiftool doesnt support it :/
         try:
             t = temp_file(media.split(".")[-1])
             await run_command("ffmpeg", "-i", media, "-c", "copy", "-metadata", "artist=MediaForge", t)
@@ -481,35 +481,41 @@ async def watermark(media):
             logger.warning(f"exiftool watermarking of {media} failed")
 
 
-def mediatype(image):
+async def mediatype(image):
     """
     Gets basic type of media
     :param image: filename of media
     :return: can be VIDEO, AUDIO, GIF, IMAGE or None (invalid or other).
     """
-    if image.endswith(".m4a"):
-        return "AUDIO"  # idfk
-    mime = magic.from_file(image, mime=True)
-    if mime.startswith("video"):
-        logger.debug(f"identified type {mime} as VIDEO")
+    probe = await run_command('ffprobe', '-v', 'panic', '-count_packets', '-show_entries', 'stream', '-print_format',
+                              'json', image)
+    props = {
+        "video": False,
+        "audio": False,
+        "gif": False,
+        "image": False
+    }
+    probe = json.loads(probe)
+    for stream in probe["streams"]:
+        if stream["codec_type"] == "audio":  # codec is audio, has audio
+            props["audio"] = True
+        elif stream["codec_type"] == "video":  # could be video or image or gif
+            if int(stream["nb_frames"]) == 1:  # if there is only one frame
+                props["image"] = True  # it's an image
+            else:  # if there are multiple frames
+                if stream["codec_name"] == "gif":  # if gif
+                    props["gif"] = True  # gif
+                else:  # multiple frames, not gif
+                    props["video"] = True  # video!!
+    # ok so a container can have multiple formats, we need to return based on expected priority
+    if props["video"]:
         return "VIDEO"
-    elif mime.startswith("audio"):
-        logger.debug(f"identified type {mime} as AUDIO")
+    if props["gif"]:
+        return "GIF"
+    if props["audio"]:
         return "AUDIO"
-    elif mime.startswith("image"):
-        try:
-            with Image.open(image) as im:
-                anim = getattr(im, "is_animated", False)
-            if anim:
-                logger.debug(f"identified type {mime} with animated frames as GIF")
-                return "GIF"  # gifs dont have to be animated but if they aren't its easier to treat them like pngs
-            else:
-                logger.debug(f"identified type {mime} with no animated frames as IMAGE")
-                return "IMAGE"
-        except UnidentifiedImageError:
-            logger.debug(f"mediatype None due to UnidentifiedImageError")
-            return None
-    logger.debug(f"mediatype None due to unclassified type {mime}")
+    if props["image"]:
+        return "IMAGE"
     return None
 
 
@@ -575,7 +581,7 @@ async def handleanimated(media: typing.Union[str, typing.List[str]], capfunction
     if isinstance(media, list):
         mediaargs = media[1:]
         media = media[0]
-    imty = mediatype(media)
+    imty = await mediatype(media)
     logger.info(f"Detected type {imty}.")
     if imty is None:
         raise Exception(f"File {media} is invalid!")
@@ -646,10 +652,6 @@ async def mp4togif(mp4):
     :param mp4: mp4
     :return: gif
     """
-    mime = magic.Magic(mime=True)
-    filename = mime.from_file(mp4)
-    if filename.find('video') == -1:
-        return False
     frames, name = await ffmpegsplit(mp4)
     fps = await get_frame_rate(mp4)
     outname = temp_file("gif")
@@ -679,7 +681,7 @@ async def toapng(video):
 
 
 async def reencode(mp4):  # reencodes mp4 as libx264 since the png format used cant be played by like literally anything
-    assert (mt := mediatype(mp4)) in ["VIDEO", "GIF"], f"file {mp4} with type {mt} passed to reencode()"
+    assert (mt := await mediatype(mp4)) in ["VIDEO", "GIF"], f"file {mp4} with type {mt} passed to reencode()"
     # only reencode if need to ;)
     vcodec, acodec = await va_codecs(mp4)
     vcode = ["copy"] if vcodec == "h264" else ["libx264", "-pix_fmt", "yuv420p", "-vf",
@@ -692,7 +694,7 @@ async def reencode(mp4):  # reencodes mp4 as libx264 since the png format used c
 
 
 async def allreencode(file):
-    mt = mediatype(file)
+    mt = await mediatype(file)
     if mt == "IMAGE":
         return await compresspng(await mediatopng(file))
     elif mt == "VIDEO":
@@ -758,7 +760,7 @@ async def speed(file, sp):
     """
     # TODO: some weird bug here caused by 100fps gifski gifs that slows down gifs?
 
-    mt = mediatype(file)
+    mt = await mediatype(file)
     if mt == "AUDIO":
         outname = temp_file("mp3")
         duration = await get_duration(file)
@@ -784,7 +786,7 @@ async def reverse(file):
     :param file: media
     :return: procesed media
     """
-    mt = mediatype(file)
+    mt = await mediatype(file)
     outname = temp_file("mp4")
     await run_command("ffmpeg", "-hide_banner", "-i", await forceaudio(file), "-vf", "reverse", "-af", "areverse",
                       "-c:v", "png", outname)
@@ -800,7 +802,7 @@ async def random(file, frames: int):
     :param frames: number of frames in internal cache
     :return: procesed media
     """
-    mt = mediatype(file)
+    mt = await mediatype(file)
     outname = temp_file("mp4")
     #
     await run_command("ffmpeg", "-hide_banner", "-i", file, "-filter:v", f"random=frames={frames}",
@@ -818,7 +820,7 @@ async def quality(file, crf, qa):
     :param qa: audio bitrate
     :return: processed media
     """
-    mt = mediatype(file)
+    mt = await mediatype(file)
     outname = temp_file("mp4")
     await run_command("ffmpeg", "-hide_banner", "-i", await forceaudio(file), "-crf", str(crf), "-c:a", "aac", "-b:a",
                       f"{qa}k", outname)
@@ -835,7 +837,7 @@ async def changefps(file, fps):
     :param fps: FPS
     :return: processed media
     """
-    mt = mediatype(file)
+    mt = await mediatype(file)
     outname = temp_file("mp4")
     await run_command("ffmpeg", "-hide_banner", "-i", file, "-r", str(fps), "-c", "copy", "-c:v", "png", outname)
     if mt == "GIF":
@@ -849,7 +851,7 @@ async def invert(file):
     :param file: media
     :return: processed media
     """
-    mt = mediatype(file)
+    mt = await mediatype(file)
     exts = {
         "VIDEO": "mp4",
         "GIF": "mp4",
@@ -868,7 +870,7 @@ async def pad(file):
     :param file: media
     :return: processed media
     """
-    mt = mediatype(file)
+    mt = await mediatype(file)
     if mt == "IMAGE":
         outname = temp_file("png")
     else:
@@ -900,7 +902,7 @@ async def videoloop(file, loop):
     :param loop: # of times to loop
     :return: processed media
     """
-    mt = mediatype(file)
+    mt = await mediatype(file)
     exts = {
         "VIDEO": "mp4",
         "GIF": "gif"
@@ -935,7 +937,7 @@ async def addaudio(files, loops=0):
     # TODO: this can trim media short? not sure why...
     audio = files[1]
     media = files[0]
-    mt = mediatype(media)
+    mt = await mediatype(media)
     if mt == "IMAGE":
         # no use reinventing the wheel
         return await imageaudio(files)
@@ -997,7 +999,7 @@ async def concatv(files):
     outname = temp_file("mp4")
     await run_command("ffmpeg", "-hide_banner", "-f", "concat", "-i", concatdemuxer, "-c:v", "png", "-c:a", "copy",
                       outname)
-    if mediatype(files[0]) == "GIF" and mediatype(files[1]) == "GIF":
+    if (await mediatype(files[0])) == "GIF" and (await mediatype(files[1])) == "GIF":
         outname = await mp4togif(outname)
     # for file in [video0, video1, fixedvideo1, fixedvideo0, fixedfixedvideo1, concatdemuxer]:
     #     os.remove(file)
@@ -1011,7 +1013,7 @@ async def stack(files, style):
     :param style: "hstack" or "vstack"
     :return: processed media
     """
-    mts = [mediatype(files[0]), mediatype(files[1])]
+    mts = [await mediatype(files[0]), await mediatype(files[1])]
     if mts[0] == "IMAGE" and mts[1] == "IMAGE":  # easier to just make this an edge case
         return await imagestack(files, style)
     video0 = await forceaudio(files[0])
@@ -1051,7 +1053,7 @@ async def overlay(files, alpha: float, mode: str = 'overlay'):
     """
     assert mode in ['overlay', 'add']
     assert 0 <= alpha <= 1
-    mts = [mediatype(files[0]), mediatype(files[1])]
+    mts = [await mediatype(files[0]), await mediatype(files[1])]
     video0 = await forceaudio(files[0])
     fixedvideo0 = temp_file("mp4")
     await run_command("ffmpeg", "-hide_banner", "-i", video0, "-c:v", "png", "-c:a", "copy", "-ar", "48000",
@@ -1163,7 +1165,7 @@ async def trim(file, length, start=0):
     :param start: time in seconds to begin the trimmed video
     :return: processed media
     """
-    mt = mediatype(file)
+    mt = await mediatype(file)
     exts = {
         "AUDIO": "mp3",
         "VIDEO": "mp4",
@@ -1189,7 +1191,7 @@ async def ensuresize(ctx, file, minsize, maxsize):
     :return: original or resized media
     """
     resized = False
-    if mediatype(file) not in ["IMAGE", "VIDEO", "GIF"]:
+    if await mediatype(file) not in ["IMAGE", "VIDEO", "GIF"]:
         return file
     w, h = await get_resolution(file)
     owidth = w
@@ -1228,7 +1230,7 @@ async def rotate(file, rottype):
         "vflip": "vflip",
         "hflip": "hflip"
     }
-    mt = mediatype(file)
+    mt = await mediatype(file)
     exts = {
         "VIDEO": "mp4",
         "GIF": "mp4",
@@ -1242,7 +1244,7 @@ async def rotate(file, rottype):
 
 
 async def volume(file, vol):
-    mt = mediatype(file)
+    mt = await mediatype(file)
     exts = {
         "AUDIO": "mp3",
         "VIDEO": "mp4"
@@ -1281,7 +1283,7 @@ def expanded_atempo(arg: float):
 
 
 async def vibrato(file, frequency=5, depth=0.5):  # https://ffmpeg.org/ffmpeg-filters.html#tremolo
-    mt = mediatype(file)
+    mt = await mediatype(file)
     exts = {
         "AUDIO": "mp3",
         "VIDEO": "mp4"
@@ -1298,7 +1300,7 @@ async def vibrato(file, frequency=5, depth=0.5):  # https://ffmpeg.org/ffmpeg-fi
 
 
 async def pitch(file, p=12):
-    mt = mediatype(file)
+    mt = await mediatype(file)
     exts = {
         "AUDIO": "mp3",
         "VIDEO": "mp4"
@@ -1327,7 +1329,7 @@ async def resize(image, width, height, ensure_duration=True):
     :param height: new height, same as width
     :return: processed media
     """
-    mt = mediatype(image)
+    mt = await mediatype(image)
     exts = {
         "AUDIO": "mp3",
         "VIDEO": "mp4",
@@ -1455,7 +1457,7 @@ async def set_icon(file, guild: discord.Guild):
     :param guild: guild to add it to
     :return:
     """
-    if mediatype(file) == "GIF" and "ANIMATED_ICON" not in guild.features:
+    if (await mediatype(file)) == "GIF" and "ANIMATED_ICON" not in guild.features:
         return f"{config.emojis['x']} This guild does not support animated icons."
     with open(file, "rb") as f:
         data = f.read()
@@ -1509,7 +1511,7 @@ async def handleautotune(media: str, *params):
     # run in separate process to avoid possible segfault crashes and cause its totally blocking
     with concurrent.futures.ProcessPoolExecutor(1) as executor:
         await asyncio.get_event_loop().run_in_executor(executor, autotune.autotune, wav, outwav, *params)
-    mt = mediatype(media)
+    mt = await mediatype(media)
     if mt == "AUDIO":
         outname = temp_file("mp3")
         await run_command("ffmpeg", "-i", outwav, "-c:a", "libmp3lame", outname)
@@ -1529,7 +1531,7 @@ async def hue(file, h: float):
         "GIF": "mp4",
         "IMAGE": "png"
     }
-    mt = mediatype(file)
+    mt = await mediatype(file)
     out = temp_file(exts[mt])
     await run_command("ffmpeg", "-i", file, "-vf", f"hue=h={h},format=yuva420p", "-c:v", "png", out)
     if mt == "GIF":
@@ -1543,7 +1545,7 @@ async def tint(file, col: discord.Color):
         "GIF": "mp4",
         "IMAGE": "png"
     }
-    mt = mediatype(file)
+    mt = await mediatype(file)
     out = temp_file(exts[mt])
     # https://stackoverflow.com/a/3380739/9044183
     r, g, b = map(lambda x: x / 255, col.to_rgb())
@@ -1675,7 +1677,7 @@ async def epicbirthday(text: str):
 
 
 async def crop(file, w, h, x, y):
-    mt = mediatype(file)
+    mt = await mediatype(file)
     exts = {
         "VIDEO": "mp4",
         "GIF": "mp4",

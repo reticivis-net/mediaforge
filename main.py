@@ -460,7 +460,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                     files = []
                 if files or not allowedtypes:
                     for i, file in enumerate(files):
-                        if (imtype := improcessing.mediatype(file)) not in allowedtypes[i]:
+                        if (imtype := await improcessing.mediatype(file)) not in allowedtypes[i]:
                             await ctx.reply(
                                 f"{config.emojis['warning']} Media #{i + 1} is {imtype}, it must be: "
                                 f"{', '.join(allowedtypes[i])}")
