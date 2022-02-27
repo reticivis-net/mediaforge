@@ -1620,10 +1620,7 @@ async def tts(text: str, model: typing.Literal["male", "female", "retro"] = "mal
     outname = temp_file("mp3")
     if model == "retro":
         if sys.platform == "win32":
-            await run_command("sam/sam.exe", "-wav", ttswav, text)
-        else:
-            # linux exe
-            await run_command("sam/sam", "-wav", ttswav, text)
+            await run_command("node", "sam/bundle.js", "--moderncmu", "--wav", ttswav, text)
     else:
         # espeak is a fucking nightmare on windows and windows has good native tts anyways sooooo
         if sys.platform == "win32":
