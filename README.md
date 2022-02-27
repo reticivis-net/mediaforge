@@ -75,10 +75,9 @@ the bot uses many external CLI programs for media processing.
     - on windows, [`powershell`](https://aka.ms/powershell) is used to
       access [Windows's native TTS](https://docs.microsoft.com/en-us/uwp/api/windows.media.speechsynthesis.speechsynthesizer)
       . Both are included in modern versions of Windows, but ensure powershell is in the system path.
-    - the "retro" voice uses [Commodore SAM](https://github.com/vidarh/SAM). the windows and linux executable are
-      included.
-        - **on linux, you will need to mark the sam executable as an executable** do this with `sudo chmod +x sam/sam`
-          (from the root dir)
+    - the "retro" voice uses [sam-cli](https://github.com/HexCodeFFF/sam-cli). it is included, but it
+      requires [node.js](https://nodejs.org/) to be installed and added to the system path
+      - pretty sure both the windows & linux installers add it to path on installation but cant hurt to check
 
 [//]: # (- glaxnimate - [downloadable on its website]&#40;https://glaxnimate.mattbas.org/download&#41;)
 
