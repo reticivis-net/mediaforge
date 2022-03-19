@@ -98,11 +98,10 @@ the bot uses many external CLI programs for media processing.
 
 ### to run
 
-- once you've set up all of the libraries, just run the program with `python main.py` (or `python3.8 main.py` or
+- once you've set up all of the libraries, just run the program with `poetry run python main.py` (or `poetry run python3.8 main.py` or
   whatever your python is named). make sure it can read and write to the directory it lives in and also access/execute
   all the aforementioned libraries
-    - if using pipenv, run `pipenv run python main.py` or open the venv shell with `pipenv shell` and then
-      run `python main.py`
+    - if poetry isn't installing on the right python version, run `<yourpython> -m pip` instead of pip and `<yourpython> -m poetry` instead of `poetry`
 - terminate the bot by running the `shutdown` command, this will _probably_ close better than a termination
 
 ## !!experimental!! heroku-based hosting
