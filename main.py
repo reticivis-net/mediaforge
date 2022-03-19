@@ -1327,6 +1327,8 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             :param MIX: Blends between the modified signal and the delay-compensated Input signal. 1: wet. O: dry.
             :mediaparam media: A video or audio file.
             """
+            # TODO: flag command thing
+
             await improcess(ctx, improcessing.handleautotune, [["VIDEO", "AUDIO"]],
                             CONCERT_A, FIXED_PITCH, FIXED_PULL, KEY, CORR_STR, CORR_SMOOTH, PITCH_SHIFT, SCALE_ROTATE,
                             LFO_DEPTH, LFO_RATE, LFO_SHAPE, LFO_SYMM, LFO_QUANT, FORM_CORR, FORM_WARP, MIX)
