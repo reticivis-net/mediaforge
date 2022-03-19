@@ -1523,7 +1523,9 @@ async def handleautotune(media: str, *params):
         outname = temp_file("mp4")
         # https://superuser.com/a/1137613/1001487
         # combine video of original file with new audio
-        await run_command("ffmpeg", "-i", media, "-i", outwav, "-c:v", "copy", "-c:a", "copy", "-map", "0:v:0", "-map",
+
+        # shawty it's a wav you cant make it acodec copy 💀
+        await run_command("ffmpeg", "-i", media, "-i", outwav, "-c:v", "copy", "-c:a", "aac", "-map", "0:v:0", "-map",
                           "1:a:0", outname)
         return outname
 
