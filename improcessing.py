@@ -135,11 +135,17 @@ async def run_command(*args):
     :param args: the args of the command, what would normally be seperated by a space
     :return: the result of the command
     """
+    if sys.platform == "win32":
+        startupinfo = subprocess.STARTUPINFO()
+        startupinfo.dwFlags |= subprocess.BELOW_NORMAL_PRIORITY_CLASS
+        nicekwargs = {"startupinfo": startupinfo}
+    else:
+        nicekwargs = {"preexec_fn": lambda: os.nice(10)}
+
     # Create subprocess
     process = await asyncio.create_subprocess_exec(
         *args, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE,
-        # below normal, ffmpeg and shit is agggressive so cool it
-        creationflags=subprocess.BELOW_NORMAL_PRIORITY_CLASS
+        **nicekwargs
     )
 
     # Status
