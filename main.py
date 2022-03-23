@@ -91,9 +91,13 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
     logger.log(25, "Hello World!")
     logger.info(f"discord.py {discord.__version__}")
 
-    # set self to high priority
+    # (try to) set self to high priority
     p = psutil.Process(os.getpid())
-    p.nice(psutil.ABOVE_NORMAL_PRIORITY_CLASS if sys.platform == 'win32' else -10)
+    try:
+        p.nice(psutil.ABOVE_NORMAL_PRIORITY_CLASS if sys.platform == 'win32' else -10)
+    except (psutil.AccessDenied, PermissionError) as e:
+        logger.debug(f"Failed to set priority on {p}: {e}")
+
 
     chromiumrender.updatechromedriver()
     renderpool = improcessing.initializerenderpool()
