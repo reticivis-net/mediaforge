@@ -235,7 +235,17 @@ def initdriver():
     #     time.sleep(0.25)
     driver.set_window_size(1, 1)
     driver.get("about:blank")
+
+    # set proc priorities lower
+    for p in procs_from_pid(driver.service.process.pid) + [psutil.Process(os.getpid())]:
+        p.nice(psutil.BELOW_NORMAL_PRIORITY_CLASS if sys.platform == 'win32' else 10)
+
     return driver
+
+
+def procs_from_pid(pid):
+    p = psutil.Process(pid)
+    return p.children(recursive=True) + [p]
 
 
 def closedriver():
@@ -244,10 +254,9 @@ def closedriver():
     """
     global driver
     # force kill all processes
-    p = psutil.Process(driver.service.process.pid)
-    for proc in p.children(recursive=True) + [p]:
+    for proc in procs_from_pid(driver.service.process.pid):
         logger.debug(proc)
-        p.kill()
+        proc.kill()
     # if this doesn't work and george still accumulates chromes, keep a global list of all created processeses and
     # periodically compare it with a list generated from each chrome instance and kill any extraneous processes.
     driver.quit()

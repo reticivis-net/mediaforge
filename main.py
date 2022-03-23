@@ -27,7 +27,9 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
     import humanize
     import nextcord as discord
     import pronouncing
+    import psutil
     import regex as re
+    import sys
     import yt_dlp as youtube_dl
     from nextcord.ext import commands, tasks
 
@@ -88,6 +90,11 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
 
     logger.log(25, "Hello World!")
     logger.info(f"discord.py {discord.__version__}")
+
+    # set self to high priority
+    p = psutil.Process(os.getpid())
+    p.nice(psutil.ABOVE_NORMAL_PRIORITY_CLASS if sys.platform == 'win32' else -10)
+
     chromiumrender.updatechromedriver()
     renderpool = improcessing.initializerenderpool()
     if not os.path.exists(config.temp_dir.rstrip("/")):
@@ -2589,7 +2596,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
 
             is_hosting_issue = isinstance(commanderror, (aiohttp_client_exceptions.ClientOSError,
                                                          aiohttp_client_exceptions.ServerDisconnectedError,
-                                                         asyncio.exceptions.TimeoutError))
+                                                         asyncio.exceptions.TimeoutError)) or True
 
             if is_hosting_issue:
                 desc = "If this error keeps occurring, report this with the attached traceback file to the GitHub."
