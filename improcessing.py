@@ -75,6 +75,7 @@ class MyProcess(multiprocessing.Process):
 # https://stackoverflow.com/a/65966787/9044183
 class Pool:
     def __init__(self, nworkers):
+        multiprocessing.set_start_method('spawn')
         self._executor = concurrent.futures.ProcessPoolExecutor(nworkers, initializer=chromiumrender.initdriver)
         self._nworkers = nworkers
         self._submitted = 0
@@ -382,7 +383,8 @@ async def twopasscapvideo(video: str, maxsize: int, audio_bitrate=128000):
                           '-f', 'mp4', '-passlogfile', pass1log,
                           'NUL' if sys.platform == "win32" else "/dev/null")
         await run_command('ffmpeg', '-i', video, '-c:v', 'h264', '-b:v', str(target_video_bitrate), '-pass', '2',
-                          '-passlogfile', pass1log, '-c:a', 'aac', '-b:a', str(audio_bitrate), "-f", "mp4", outfile)
+                          '-passlogfile', pass1log, '-c:a', 'aac', '-b:a', str(audio_bitrate), "-f", "mp4", "-movflags",
+                          "+faststart", outfile)
         if (size := os.path.getsize(outfile)) < maxsize:
             logger.info(f"successfully created {humanize.naturalsize(size)} video!")
             return outfile

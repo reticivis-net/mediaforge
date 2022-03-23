@@ -1,87 +1,90 @@
-# standard libs
-import asyncio
-import concurrent.futures
-import datetime
-import difflib
-import glob
-import inspect
-import io
-import json
-import os
-import sqlite3
-import time
-import traceback
-import typing
-import urllib.parse
-
-import aiofiles
-import aiohttp
-import aiosqlite
-import discordlists
-import docstring_parser
-import emojis
-import humanize
-import nextcord as discord
-import pronouncing
-import regex as re
-import yt_dlp as youtube_dl
-from nextcord.ext import commands, tasks
-
-# project files
-import captionfunctions
-import chromiumrender
-import config
-import heartbeat
-import improcessing
-# import lottiestickers
-import sus
-import tempfiles
-from clogs import logger
-from improcessing import fetch
-from tempfiles import TempFileSession, get_random_string, temp_file
-
-# pip libs
-
-"""
-This file contains the discord.py functions, which call other files to do the actual processing.
-"""
-
-
-# TODO: reddit moment caption
-
-def get_full_class_name(obj):
-    module = obj.__class__.__module__
-    if module is None or module == str.__class__.__module__:
-        return obj.__class__.__name__
-    return module + '.' + obj.__class__.__name__
-
-
-# make copy of .reply() function
-discord.Message.orig_reply = discord.Message.reply
-
-
-async def safe_reply(self: discord.Message, *args, **kwargs) -> discord.Message:
-    # replies to original message if it exists, just sends in channel if it doesnt
-    try:
-        # retrieve this message, will throw NotFound if its not found and go to the fallback option.
-        # turns out trying to send a message will close any file objects which causes problems
-        await self.channel.fetch_message(self.id)
-        # reference copy of .reply() since this func will override .reply()
-        return await self.orig_reply(*args, **kwargs)
-    # for some reason doesnt throw specific error. if its unrelated httpexception itll just throw again and fall to the
-    # error handler hopefully
-    except (discord.errors.NotFound, discord.errors.HTTPException) as e:
-        logger.debug(f"abandoning reply to {self.id} due to {get_full_class_name(e)}, "
-                     f"sending message in {self.channel.id}.")
-        return await self.channel.send(*args, **kwargs)
-
-
-# override .reply()
-discord.Message.reply = safe_reply
-
-ready = False
-db: aiosqlite.Connection
 if __name__ == "__main__":  # prevents multiprocessing workers from running bot code
+    # imports are inside main cause it uses so much memory on multiprocessing workers
+
+    # standard libs
+    import asyncio
+    import concurrent.futures
+    import datetime
+    import difflib
+    import glob
+    import inspect
+    import io
+    import json
+    import os
+    import sqlite3
+    import time
+    import traceback
+    import typing
+    import urllib.parse
+    # pip libs
+    import aiofiles
+    import aiohttp
+    import aiosqlite
+    import discordlists
+    import docstring_parser
+    import emojis
+    import humanize
+    import nextcord as discord
+    import pronouncing
+    import regex as re
+    import yt_dlp as youtube_dl
+    from nextcord.ext import commands, tasks
+
+    # project files
+    import captionfunctions
+    import chromiumrender
+    import config
+    import heartbeat
+    import improcessing
+    # import lottiestickers
+    import sus
+    import tempfiles
+    from clogs import logger
+    from improcessing import fetch
+    from tempfiles import TempFileSession, get_random_string, temp_file
+
+    # pip libs
+
+    """
+    This file contains the discord.py functions, which call other files to do the actual processing.
+    """
+
+
+    # TODO: reddit moment caption
+
+    def get_full_class_name(obj):
+        module = obj.__class__.__module__
+        if module is None or module == str.__class__.__module__:
+            return obj.__class__.__name__
+        return module + '.' + obj.__class__.__name__
+
+
+    # make copy of .reply() function
+    discord.Message.orig_reply = discord.Message.reply
+
+
+    async def safe_reply(self: discord.Message, *args, **kwargs) -> discord.Message:
+        # replies to original message if it exists, just sends in channel if it doesnt
+        try:
+            # retrieve this message, will throw NotFound if its not found and go to the fallback option.
+            # turns out trying to send a message will close any file objects which causes problems
+            await self.channel.fetch_message(self.id)
+            # reference copy of .reply() since this func will override .reply()
+            return await self.orig_reply(*args, **kwargs)
+        # for some reason doesnt throw specific error. if its unrelated httpexception itll just throw again and fall to the
+        # error handler hopefully
+        except (discord.errors.NotFound, discord.errors.HTTPException) as e:
+            logger.debug(f"abandoning reply to {self.id} due to {get_full_class_name(e)}, "
+                         f"sending message in {self.channel.id}.")
+            return await self.channel.send(*args, **kwargs)
+
+
+    # override .reply()
+    discord.Message.reply = safe_reply
+
+    ready = False
+    db: aiosqlite.Connection
+
     logger.log(25, "Hello World!")
     logger.info(f"discord.py {discord.__version__}")
     chromiumrender.updatechromedriver()
