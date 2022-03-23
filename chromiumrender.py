@@ -240,7 +240,7 @@ def initdriver():
     for p in procs_from_pid(driver.service.process.pid) + [psutil.Process(os.getpid())]:
         try:
             p.nice(psutil.BELOW_NORMAL_PRIORITY_CLASS if sys.platform == 'win32' else 10)
-        except psutil as e:
+        except (psutil.AccessDenied, PermissionError) as e:
             logger.debug(f"Failed to set priority on {p}: {e}")
 
     return driver
