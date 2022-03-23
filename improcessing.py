@@ -135,6 +135,8 @@ async def run_command(*args):
     :param args: the args of the command, what would normally be seperated by a space
     :return: the result of the command
     """
+    # https://stackoverflow.com/a/56884806/9044183
+    # set proccess priority low
     if sys.platform == "win32":
         startupinfo = subprocess.STARTUPINFO()
         startupinfo.dwFlags |= subprocess.BELOW_NORMAL_PRIORITY_CLASS
