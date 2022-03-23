@@ -2380,7 +2380,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
 
         @commands.command()
         @commands.is_owner()
-        async def ban(self, ctx, user: discord.User, *, reason: typing.Optional[str]):
+        async def ban(self, ctx, user: discord.User, *, reason: str = ""):
             async with db.execute("SELECT count(*) from bans WHERE user=?", (user.id,)) as cur:
                 if (await cur.fetchone())[0] > 0:  # check if ban exists
                     await ctx.reply(f"{config.emojis['x']} {user.mention} is already banned.")
@@ -2399,6 +2399,11 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                 await ctx.reply(f"{config.emojis['check']} Unbanned {user.mention}.")
             else:
                 await ctx.reply(f"{config.emojis['x']} {user.mention} is not banned.")
+
+        @commands.command()
+        @commands.is_owner()
+        async def quote(self, ctx, *, string):
+            await ctx.reply(quote(string))
 
 
     class Slashscript(commands.Cog, name="Slashscript"):
@@ -2481,6 +2486,15 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                    f"is complete!")
 
 
+    def quote(string: str) -> str:
+        """
+        (tries to) discord quote a string
+        :param string: string to quote
+        :return: quoted string
+        """
+        return re.sub("([\n\r]|^) *>* *", "\n> ", string)
+
+
     @bot.check
     async def banned_users(ctx: commands.Context):
         if await bot.is_owner(ctx.author):
@@ -2490,12 +2504,13 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
         if ban:
             outtext = "You are banned from this bot"
             if ban[0]:
-                outtext += f" for the following reason: \n\n{ban[0]}\n\n"
+                outtext += f" for the following reason:\n{quote(ban[0])}\n"
             else:
                 outtext += f".\n"
             outtext += f"To appeal this, "
             if bot.owner_id == 214511018204725248:  # my ID
-                outtext += "raise an issue at https://github.com/HexCodeFFF/mediaforge/issues"
+                outtext += "raise an issue at https://github.com/HexCodeFFF/mediaforge/issues/new?assignees=" \
+                           "&labels=unban+request&template=unban-request.md&title=Unban+request+for+"
             else:
                 outtext += "contact the bot owner."
             raise commands.CheckFailure(outtext)
