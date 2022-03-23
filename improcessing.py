@@ -75,7 +75,6 @@ class MyProcess(multiprocessing.Process):
 # https://stackoverflow.com/a/65966787/9044183
 class Pool:
     def __init__(self, nworkers):
-        multiprocessing.set_start_method('spawn')
         self._executor = concurrent.futures.ProcessPoolExecutor(nworkers, initializer=chromiumrender.initdriver)
         self._nworkers = nworkers
         self._submitted = 0
@@ -116,6 +115,11 @@ def initializerenderpool():
     :return: the worker pool
     """
     global renderpool
+    try:
+        # looks like it uses less memory
+        multiprocessing.set_start_method('spawn')
+    except RuntimeError:
+        pass
     logger.info(f"Starting {config.chrome_driver_instances} pool processes...")
     # renderpool = multiprocessing.Pool(config.chrome_driver_instances, initializer=chromiumrender.initdriver)
     renderpool = Pool(config.chrome_driver_instances)
