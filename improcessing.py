@@ -8,6 +8,7 @@ import math
 import multiprocessing
 import os
 import shutil
+import subprocess
 import sys
 import time
 import typing
@@ -136,7 +137,9 @@ async def run_command(*args):
     """
     # Create subprocess
     process = await asyncio.create_subprocess_exec(
-        *args, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
+        *args, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE,
+        # below normal, ffmpeg and shit is agggressive so cool it
+        creationflags=subprocess.BELOW_NORMAL_PRIORITY_CLASS
     )
 
     # Status
