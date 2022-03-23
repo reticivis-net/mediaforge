@@ -19,6 +19,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
     # pip libs
     import aiofiles
     import aiohttp
+    from aiohttp import client_exceptions as aiohttp_client_exceptions
     import aiosqlite
     import discordlists
     import docstring_parser
@@ -2585,8 +2586,16 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             if isinstance(commanderror, discord.ext.commands.errors.CommandInvokeError):
                 commanderror = commanderror.original
             logger.error(commanderror, exc_info=(type(commanderror), commanderror, commanderror.__traceback__))
-            embed = discord.Embed(color=0xed1c24, description="Please report this error with the attached "
-                                                              "traceback file to the GitHub.")
+
+            is_hosting_issue = isinstance(commanderror, (aiohttp_client_exceptions.ClientOSError,
+                                                         aiohttp_client_exceptions.ServerDisconnectedError,
+                                                         asyncio.exceptions.TimeoutError))
+
+            if is_hosting_issue:
+                desc = "If this error keeps occurring, report this with the attached traceback file to the GitHub."
+            else:
+                desc = "Please report this error with the attached traceback file to the GitHub."
+            embed = discord.Embed(color=0xed1c24, description=desc)
             embed.add_field(name=f"{config.emojis['2exclamation']} Report Issue to GitHub",
                             value=f"[Create New Issue](https://github.com/HexCodeFFF/mediaforge"
                                   f"/issues/new?labels=bug&template=bug_report.md&title"
@@ -2598,9 +2607,14 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                     traceback.format_exception(etype=type(commanderror), value=commanderror,
                                                tb=commanderror.__traceback__)), encoding='utf8'))
                 buf.seek(0)
-                await reply((f"{config.emojis['2exclamation']} `{get_full_class_name(commanderror)}: "
-                             f"{errorstring}`")[:2000],
-                            file=discord.File(buf, filename="traceback.txt"), embed=embed)
+                if is_hosting_issue:
+                    errtxt = f"{config.emojis['2exclamation']} Your command encountered an error due to limited " \
+                             f"resources on the server. If you would like to support the upkeep of MediaForge and " \
+                             f"getting a better server, support me on Ko-Fi here: <https://ko-fi.com/reticivis>"
+                else:
+                    errtxt = (f"{config.emojis['2exclamation']} `{get_full_class_name(commanderror)}: "
+                              f"{errorstring}`")[:2000]
+                await reply(errtxt, file=discord.File(buf, filename="traceback.txt"), embed=embed)
 
 
     class DiscordListsPost(commands.Cog):
