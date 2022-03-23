@@ -98,7 +98,6 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
     except (psutil.AccessDenied, PermissionError) as e:
         logger.debug(f"Failed to set priority on {p}: {e}")
 
-
     chromiumrender.updatechromedriver()
     renderpool = improcessing.initializerenderpool()
     if not os.path.exists(config.temp_dir.rstrip("/")):
