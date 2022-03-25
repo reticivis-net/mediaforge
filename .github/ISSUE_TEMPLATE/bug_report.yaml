@@ -10,6 +10,12 @@ body:
       required: true
   - type: textarea
     attributes:
+      label: Traceback
+      description: If the bot sent a "traceback.txt" file, upload it here. If not, put "no traceback".
+    validations:
+      required: true
+  - type: textarea
+    attributes:
       label: Expected Behavior
       description: A concise description of what you expected to happen.
     validations:
@@ -21,15 +27,9 @@ body:
       placeholder: |
         1. Send this type of media...
         2. Run this command...
-        4. See error
+        3. See error
     validations:
       required: false
-  - type: textarea
-    attributes:
-      label: Traceback
-      description: If the bot sent a "traceback.txt" file, upload it here. If not, put "no traceback".
-    validations:
-      required: true
   - type: textarea
     attributes:
       label: Anything Else
