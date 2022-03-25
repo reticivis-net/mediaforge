@@ -1,0 +1,38 @@
+name: Report a Bug
+description: Report unintended behavior
+labels: [ bug ]
+body:
+  - type: textarea
+    attributes:
+      label: Describe the bug
+      description: A concise description of what you're experiencing.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Expected Behavior
+      description: A concise description of what you expected to happen.
+    validations:
+      required: false
+  - type: textarea
+    attributes:
+      label: Steps To Reproduce
+      description: Steps to reproduce/cause the bug, if known.
+      placeholder: |
+        1. Send this type of media...
+        2. Run this command...
+        4. See error
+    validations:
+      required: false
+  - type: textarea
+    attributes:
+      label: Traceback
+      description: If the bot sent a "traceback.txt" file, upload it here. If not, put "no traceback".
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Anything Else
+      description: Put any screenshots or other context/details about the bug here.
+    validations:
+      required: false
