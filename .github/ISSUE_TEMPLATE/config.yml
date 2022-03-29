@@ -1,0 +1,7 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Official Discord Server
+    url: https://discord.gg/QhMyz3n4V7
+    about: See updates about MediaForge and test it out!
+  - name: Invite MediaForge to your server!
+    url: https://discord.com/api/oauth2/authorize?client_id=780570413767983122&permissions=379968&scope=bot
