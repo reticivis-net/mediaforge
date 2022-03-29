@@ -1,6 +1,6 @@
 name: Other Issue
 description: Inquire about non-bug issues
-labels: [ other issue ]
+labels: [ "other issue" ]
 body:
   - type: textarea
     attributes:
