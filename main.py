@@ -2614,7 +2614,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
 
             is_hosting_issue = isinstance(commanderror, (aiohttp_client_exceptions.ClientOSError,
                                                          aiohttp_client_exceptions.ServerDisconnectedError,
-                                                         asyncio.exceptions.TimeoutError)) or True
+                                                         asyncio.exceptions.TimeoutError))
 
             if is_hosting_issue:
                 desc = "If this error keeps occurring, report this with the attached traceback file to the GitHub."
