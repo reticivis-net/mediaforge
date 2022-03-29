@@ -15,7 +15,7 @@ body:
     attributes:
       label: Is your feature request related to a problem? Please describe.
       description: A clear and concise description of what the problem is and how this feature would solve it
-      placeholder: I'm always frustrated when [...]
+      placeholder: I'm always frustrated when...
   - type: textarea
     attributes:
       label: Describe alternatives you've considered
