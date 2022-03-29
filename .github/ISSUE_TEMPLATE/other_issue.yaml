@@ -1,9 +1,0 @@
-name: Other Issue
-description: Inquire about non-bug issues
-labels: [ "other issue" ]
-body:
-  - type: textarea
-    attributes:
-      label: What is your inquiry?
-    validations:
-      required: true
