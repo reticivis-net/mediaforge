@@ -1,0 +1,10 @@
+*.py linguist-detectable
+*.js linguist-detectable
+*.html linguist-detectable
+*.css linguist-detectable
+
+rendering/twemoji/** linguist-vendored
+lottietest.json linguist-vendored
+poetry.lock linguist-generated
+media/topgg.md linguist-vendored
+sam/** linguist-vendored
