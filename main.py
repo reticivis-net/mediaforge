@@ -2508,9 +2508,10 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             else:
                 outtext += f".\n"
             outtext += f"To appeal this, "
-            if bot.owner_id == 214511018204725248:  # my ID
+            if bot.owner_id == 214511018204725248:  # my ID; public bot
                 outtext += "raise an issue at https://github.com/HexCodeFFF/mediaforge/issues/new?assignees=" \
-                           "&labels=unban+request&template=unban-request.md&title=Unban+request+for+"
+                           "&labels=unban+request&template=unban_request.yaml&title=Unban+request+for" \
+                           "+%3CYOUR+NAME+HERE%3E"
             else:
                 outtext += "contact the bot owner."
             raise commands.CheckFailure(outtext)
