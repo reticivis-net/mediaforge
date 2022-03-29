@@ -7,7 +7,7 @@ body:
     attributes:
       label: Your Discord tag
       description: Your username AND descriminator
-      placeholder: @MediaForge#5871
+      placeholder: "@MediaForge#5871"
     validations:
       required: true
   - type: input
