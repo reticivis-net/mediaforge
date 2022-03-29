@@ -1,6 +1,6 @@
 name: Unban Request
 description: Request to be unbanned from the public MediaForge bot
-labels: [ unban request ]
+labels: [ "unban request" ]
 title: Unban request for <YOUR NAME HERE>
 body:
   - type: input
