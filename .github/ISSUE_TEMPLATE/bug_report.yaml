@@ -18,8 +18,6 @@ body:
     attributes:
       label: Expected Behavior
       description: A concise description of what you expected to happen.
-    validations:
-      required: false
   - type: textarea
     attributes:
       label: Steps To Reproduce
@@ -28,11 +26,7 @@ body:
         1. Send this type of media...
         2. Run this command...
         3. See error
-    validations:
-      required: false
   - type: textarea
     attributes:
       label: Anything Else
       description: Put any screenshots or other context/details about the bug here.
-    validations:
-      required: false
