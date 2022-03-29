@@ -40,7 +40,7 @@
 </head>
 <body>
 <div class="wrap">
-    <img src="rendering/demoimage.png" alt="An error has occurred loading your image.">
+    <img alt="An error has occurred loading your image." src="rendering/demoimage.png">
     <div class="top container caption" id="fitin1">
         <span class="caption top">CaptionText1</span>
     </div>
@@ -58,6 +58,7 @@
         fit("fitin1")
         fit("fitin2")
     }
+
     const style = document.createElement('style');
     style.innerHTML = `.caption {\ntext-shadow:\n${calculateStrokeTextCSS(32)}\n}`;
     document.head.appendChild(style);

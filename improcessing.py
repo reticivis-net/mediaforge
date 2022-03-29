@@ -1,6 +1,5 @@
 # standard libs
 import asyncio
-import colorsys
 import concurrent.futures
 import glob
 import json
@@ -10,7 +9,6 @@ import os
 import shutil
 import subprocess
 import sys
-import time
 import typing
 from fractions import Fraction
 
@@ -21,9 +19,8 @@ import aubio
 import humanize
 import nextcord as discord
 import numpy
-import pyttsx3
+from PIL import Image
 from nextcord.ext import commands
-from PIL import Image, UnidentifiedImageError
 
 if sys.platform == "win32":  # this hopefully wont cause any problems :>
     from winmagic import magic

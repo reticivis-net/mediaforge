@@ -1,7 +1,7 @@
 import random
 import string
 
-from PIL import Image, ImageDraw, ImageFile, ImageFont
+from PIL import Image, ImageDraw, ImageFont
 
 from tempfiles import temp_file
 

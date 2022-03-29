@@ -1,6 +1,4 @@
-import collections
 import inspect
-import logging
 import multiprocessing
 import os
 import random
