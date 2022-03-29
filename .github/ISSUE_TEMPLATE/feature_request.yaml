@@ -18,23 +18,9 @@ body:
       placeholder: I'm always frustrated when [...]
   - type: textarea
     attributes:
-      label: Expected Behavior
-      description: A concise description of what you expected to happen.
-    validations:
-      required: false
-  - type: textarea
-    attributes:
-      label: Steps To Reproduce
-      description: Steps to reproduce/cause the bug, if known.
-      placeholder: |
-        1. Send this type of media...
-        2. Run this command...
-        3. See error
-    validations:
-      required: false
+      label: Describe alternatives you've considered
+      description: A clear and concise description of any alternative solutions or features you've considered.
   - type: textarea
     attributes:
       label: Anything Else
-      description: Put any screenshots or other context/details about the bug here.
-    validations:
-      required: false
+      description: Put any screenshots or other context/details about the feature here.
