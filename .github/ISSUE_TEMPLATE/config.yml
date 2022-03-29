@@ -4,4 +4,5 @@ contact_links:
     url: https://discord.gg/QhMyz3n4V7
     about: See updates about MediaForge and test it out!
   - name: Invite MediaForge to your server!
+    about: add the official public MediaForge discord bot to your server via discord
     url: https://discord.com/api/oauth2/authorize?client_id=780570413767983122&permissions=379968&scope=bot
