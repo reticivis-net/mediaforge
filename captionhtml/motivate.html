@@ -53,7 +53,7 @@
 </head>
 <body>
 <div class="wrap">
-    <img class=img src="rendering/demoimage.png" alt="An error has occurred loading your image." id="img">
+    <img alt="An error has occurred loading your image." class=img id="img" src="rendering/demoimage.png">
     <div class="caption">CaptionText1</div>
     <div class="captionsmall">CaptionText2</div>
 </div>
@@ -63,6 +63,7 @@
     function onload() {
         document.querySelector(':root').style.setProperty('--1vw', `${document.getElementById("img").scrollWidth / 100}px`);
     }
+
     window.onload = onload;
 
     function beforerender() {
