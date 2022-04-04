@@ -16,37 +16,47 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
     import traceback
     import typing
     import urllib.parse
-    # pip libs
-    import aiofiles
-    import aiohttp
-    from aiohttp import client_exceptions as aiohttp_client_exceptions
-    import aiosqlite
-    import discordlists
-    import docstring_parser
-    import emojis
-    import humanize
-    import nextcord as discord
-    import pronouncing
-    import psutil
-    import regex as re
-    import sys
-    import yt_dlp as youtube_dl
-    from nextcord.ext import commands, tasks
 
-    # project files
-    import captionfunctions
-    import chromiumrender
-    import config
-    import heartbeat
-    import improcessing
-    # import lottiestickers
-    import sus
-    import tempfiles
-    from clogs import logger
-    from improcessing import fetch
-    from tempfiles import TempFileSession, get_random_string, temp_file
+    try:
+        # pip libs
+        import aiofiles
+        import aiohttp
+        from aiohttp import client_exceptions as aiohttp_client_exceptions
+        import aiosqlite
+        import discordlists
+        import docstring_parser
+        import emojis
+        import humanize
+        import nextcord as discord
+        import pronouncing
+        import psutil
+        import regex as re
+        import sys
+        import yt_dlp as youtube_dl
+        from nextcord.ext import commands, tasks
 
-    # pip libs
+        # project files
+        import captionfunctions
+        import chromiumrender
+        import config
+        import heartbeat
+        import improcessing
+        # import lottiestickers
+        import sus
+        import tempfiles
+        from clogs import logger
+        from improcessing import fetch
+        from tempfiles import TempFileSession, get_random_string, temp_file
+    except ModuleNotFoundError as e:
+        print("".join(traceback.format_exception(type(e), e, tb=e.__traceback__)), file=sys.stderr)
+        print("MediaForge was unable to import the required libraries and files. Did you follow the self-hosting guide "
+              "on the GitHub? https://github.com/HexCodeFFF/mediaforge#to-self-host", file=sys.stderr)
+        sys.exit(1)
+
+    if not hasattr(config, "bot_token") or config.bot_token == "EXAMPLE_TOKEN":
+        print("The bot token could not be found or hasn't been properly set. Be sure to follow the self-hosting guide "
+              "on GitHub. https://github.com/HexCodeFFF/mediaforge#to-self-host", file=sys.stderr)
+        sys.exit(1)
 
     """
     This file contains the discord.py functions, which call other files to do the actual processing.
