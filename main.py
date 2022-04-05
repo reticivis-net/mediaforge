@@ -11,6 +11,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
     import io
     import json
     import os
+    import shutil
     import sqlite3
     import time
     import traceback
@@ -52,11 +53,28 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
         print("MediaForge was unable to import the required libraries and files. Did you follow the self-hosting guide "
               "on the GitHub? https://github.com/HexCodeFFF/mediaforge#to-self-host", file=sys.stderr)
         sys.exit(1)
-
+    docker = os.environ.get('AM_I_IN_A_DOCKER_CONTAINER', False)
     if not hasattr(config, "bot_token") or config.bot_token == "EXAMPLE_TOKEN":
-        print("The bot token could not be found or hasn't been properly set. Be sure to follow the self-hosting guide "
-              "on GitHub. https://github.com/HexCodeFFF/mediaforge#to-self-host", file=sys.stderr)
-        sys.exit(1)
+        if docker:  # inside docker
+            print("The bot token could not be found or hasn't been properly set.", file=sys.stderr)
+            print("I've detected you are running MediaForge within docker. Would you like me to open the "
+                  "config file inside a text editor?")
+            print("Type exactly 'y' for yes, anything else for no.")
+            print("If you're unable to type, restart the docker container with the `-it` arguments.")
+            setting = input()
+            if setting.strip().lower() == "y":
+                if not os.path.isfile("config.py"):
+                    shutil.copy("config.example.py", "config.py")
+                # docker has nano installed, this is safe.
+                os.system(f"nano {os.path.realpath('config.py')}")
+                print("Restart MediaForge for the changes to take place.")
+                sys.exit(0)
+            else:
+                sys.exit(1)
+        else:
+            print("The bot token could not be found or hasn't been properly set. Be sure to follow the self-hosting "
+                  "guide on GitHub. https://github.com/HexCodeFFF/mediaforge#to-self-host", file=sys.stderr)
+            sys.exit(1)
 
     """
     This file contains the discord.py functions, which call other files to do the actual processing.
@@ -102,12 +120,31 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
     logger.info(f"discord.py {discord.__version__}")
 
     # (try to) set self to high priority
-    p = psutil.Process(os.getpid())
+    # https://stackoverflow.com/questions/1023038/change-process-priority-in-python-cross-platform
     try:
-        p.nice(psutil.ABOVE_NORMAL_PRIORITY_CLASS if sys.platform == 'win32' else -10)
-    except (psutil.AccessDenied, PermissionError) as e:
-        logger.debug(f"Failed to set priority on {p}: {e}")
+        if sys.platform == 'win32':
+            # Based on:
+            #   "Recipe 496767: Set Process Priority In Windows" on ActiveState
+            #   http://code.activestate.com/recipes/496767/
+            import win32api
+            import win32process
+            import win32con
 
+            pid = win32api.GetCurrentProcessId()
+            handle = win32api.OpenProcess(win32con.PROCESS_ALL_ACCESS, True, pid)
+            win32process.SetPriorityClass(handle, win32process.HIGH_PRIORITY_CLASS if docker
+            else win32process.ABOVE_NORMAL_PRIORITY_CLASS)
+        else:
+            os.nice(-19 if docker else -10)
+    except Exception as commanderror:
+        if docker:
+            logger.log(25, f"Failed to set main process priority. I've detected you're running me within a docker "
+                           f"container. To fix this, add `--cap-add SYS_NICE` to the run arguments.")
+        else:
+            logger.debug(f"Failed to set own priority.")
+        logger.debug(commanderror, exc_info=(type(commanderror), commanderror, commanderror.__traceback__))
+
+    # other misc init code (really need to organize this :p)
     chromiumrender.updatechromedriver()
     renderpool = improcessing.initializerenderpool()
     if not os.path.exists(config.temp_dir.rstrip("/")):
