@@ -33,8 +33,8 @@ RUN cp config.example.py config.py
 # so mediaforge knows to prompt with nano
 ENV AM_I_IN_A_DOCKER_CONTAINER Yes
 
-ENTRYPOINT ["dockerentry.sh"]
-CMD ["dockerentry.sh"]
+ENTRYPOINT ["./dockerentry.sh"]
+CMD ["./dockerentry.sh"]
 
 
 
