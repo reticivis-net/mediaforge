@@ -19,8 +19,20 @@ select fav in "${foods[@]}"; do
       git init . --initial-branch=master
       git remote add origin https://github.com/HexCodeFFF/mediaforge.git
     fi
+    echo "Updating MediaForge Code..."
     git fetch --all
     git reset --hard origin/master
+    echo "Updating APT Packages..."
+    # ffmpeg's repo conflicts with like everything else
+    rm "/etc/apt/sources.list.d/debian-extended.list"
+    apt-get update -y
+    apt-get upgrade -y
+    # re-add ffmpeg's repo
+    echo "deb http://deb.debian.org/debian bullseye contrib non-free\ndeb http://deb.debian.org/debian experimental main\ndeb http://deb.debian.org/debian unstable main" >> "/etc/apt/sources.list.d/debian-extended.list"
+    apt-get update -y
+    apt-get install --only-upgrade -t experimental -y ffmpeg
+    apt autoremove -y
+    echo "Done!"
     ;;
   "Debug Shell")
     /bin/bash
