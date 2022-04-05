@@ -4,7 +4,7 @@ foods=("Run MediaForge" "Edit Config" "Update MediaForge" "Quit")
 select fav in "${foods[@]}"; do
   case $fav in
   "Run MediaForge")
-    python -m poetry run main.py
+    python -m poetry run python main.py
     ;;
   "Edit Config")
     nano config.py
