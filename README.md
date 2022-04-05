@@ -26,7 +26,46 @@
 - uses selenium and ChromeDriver to render captions in html with Chrome
     - although not the fastest approach, it is very simple and very powerful
 
-## to self-host
+## self-host with docker (experimental!)
+
+### to install
+All you need to install yourself is [Docker Desktop](https://docs.docker.com/get-docker/)
+
+as of writing, a working docker copy of MediaForge takes up ~2.5GB. 
+if this is a concern and you are using some of the apt libraries MediaForge does, see [to self-host natively](#to-self-host-natively)
+
+once that's installed, run these commands in your terminal of choice.
+```shell
+docker build -t melodyflorum/mediaforge https://github.com/HexCodeFFF/mediaforge.git
+docker run -it --cap-add SYS_NICE melodyflorum/mediaforge
+```
+if the installation succeeded, you should be prompted with some options. you'll need to select "Edit Config".
+this will open a text editor within your terminal. 
+the 2 required config settings to change for proper functionality are the discord and tenor tokens.
+press `CTRL+S` to save and `CTRL+X` to exit.
+
+### to run
+run `docker ps -a` in your terminal to see the created docker image. 
+your container should have a 12 character "ID", which you'll need to run it.
+
+run in your favorite terminal:
+```shell
+docker start -a <ID>
+```
+replacing `<ID>` with the aforementioned ID.
+run this every time you want to start MediaForge.
+
+### to stop
+
+killing the terminal window/`CTRL+C` won't kill the bot, because docker runs in the background.
+
+to kill the bot, run
+```shell
+docker stop <ID>
+```
+replacing `<ID>` with the ID from the previous step (you can always re-run the command to get it)
+
+## to self-host natively
 
 ### summary
 
