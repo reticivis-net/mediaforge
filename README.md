@@ -39,6 +39,8 @@ once that's installed, run these commands in your terminal of choice.
 docker build -t melodyflorum/mediaforge https://github.com/HexCodeFFF/mediaforge.git
 docker run -it --cap-add SYS_NICE melodyflorum/mediaforge
 ```
+on linux, you may need to run docker with `sudo`
+
 if the installation succeeded, you should be prompted with some options. you'll need to select "Edit Config".
 this will open a text editor within your terminal. 
 the 2 required config settings to change for proper functionality are the discord and tenor tokens.
@@ -65,6 +67,23 @@ docker stop <ID>
 ```
 replacing `<ID>` with the ID from the previous step (you can always re-run the command to get it)
 
+### to limit resource consumption
+
+since docker is very containerized, you can easily limit the amount of resources it's allowed to consume.
+
+the main command to do this is [`docker update`](https://docs.docker.com/engine/reference/commandline/update/#usage), 
+though most of these arguments can be passed verbatim to `docker run` during setup.
+
+the most useful options are `--memory` and `--cpus`.
+
+for example, this is (as of writing) what the official MediaForge bot uses:
+```shell
+docker update --memory 9000M --memory-swap -1 --cpus "3.9" <containerid>
+```
+- `--memory 9000M`: this limits it to 9gb (9000mb) of physical memory
+- `--memory-swap -1`: this allows it to use as much swap memory as it wants (swap memory is temporarily storing memory on disk)
+- `--cpus "3.9"`: the host server has 4 cores, so this allows it to use "3.9"/4 (97.5%) of the PC's CPU time.
+
 ## to self-host natively
 
 ### summary
@@ -74,10 +93,10 @@ and the [non-python libraries](#non-python-libraries), set up the [config](#conf
 
 ### supported OSes
 
-built and tested on windows 10/11 and ubuntu 18/20, and these 2 OSes will continue to be officially supported.
+built and tested on windows 10/11 and ubuntu 18/20, and these 2 OSes (and their successors) will continue to be officially supported.
 
 will _probably_ work on macos and other linux/unix distros if the below libraries are available but theyre untested and
-unsupported. just replace `apt-get` with your system's native package manager ([`brew`](https://brew.sh/) for macos)
+unsupported. just replace `apt-get` with your system's preferred package manager ([`brew`](https://brew.sh/) for macos)
 
 ### python libraries
 

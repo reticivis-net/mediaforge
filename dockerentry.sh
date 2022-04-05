@@ -32,7 +32,7 @@ select fav in "${foods[@]}"; do
     apt-get upgrade -y
     apt-mark unhold $ffmpeganddependents
     # re-add ffmpeg's repo
-    echo -e "deb http://deb.debian.org/debian bullseye contrib non-free\ndeb http://deb.debian.org/debian experimental main\ndeb http://deb.debian.org/debian unstable main" >> "/etc/apt/sources.list.d/debian-extended.list"
+    echo -e "deb http://deb.debian.org/debian bullseye contrib non-free\ndeb http://deb.debian.org/debian experimental main\ndeb http://deb.debian.org/debian unstable main" >>"/etc/apt/sources.list.d/debian-extended.list"
     apt-get update -y
     apt-get install -t experimental -y ffmpeg
     apt autoremove -y
