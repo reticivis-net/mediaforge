@@ -55,26 +55,9 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
         sys.exit(1)
     docker = os.environ.get('AM_I_IN_A_DOCKER_CONTAINER', False)
     if not hasattr(config, "bot_token") or config.bot_token == "EXAMPLE_TOKEN":
-        if docker:  # inside docker
-            print("The bot token could not be found or hasn't been properly set.", file=sys.stderr)
-            print("I've detected you are running MediaForge within docker. Would you like me to open the "
-                  "config file inside a text editor?")
-            print("Type exactly 'y' for yes, anything else for no.")
-            print("If you're unable to type, restart the docker container with the `-it` arguments.")
-            setting = input()
-            if setting.strip().lower() == "y":
-                if not os.path.isfile("config.py"):
-                    shutil.copy("config.example.py", "config.py")
-                # docker has nano installed, this is safe.
-                os.system(f"nano {os.path.realpath('config.py')}")
-                print("Restart MediaForge for the changes to take place.")
-                sys.exit(0)
-            else:
-                sys.exit(1)
-        else:
-            print("The bot token could not be found or hasn't been properly set. Be sure to follow the self-hosting "
-                  "guide on GitHub. https://github.com/HexCodeFFF/mediaforge#to-self-host", file=sys.stderr)
-            sys.exit(1)
+        print("The bot token could not be found or hasn't been properly set. Be sure to follow the self-hosting "
+              "guide on GitHub. https://github.com/HexCodeFFF/mediaforge#to-self-host", file=sys.stderr)
+        sys.exit(1)
 
     """
     This file contains the discord.py functions, which call other files to do the actual processing.
