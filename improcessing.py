@@ -634,7 +634,7 @@ async def handleanimated(media: typing.Union[str, typing.List[str]], capfunction
         if imty == "GIF":
             frames = glob.glob(name.replace('.png', '_rendered.png').replace('%09d', '*'))
             outname = temp_file("gif")
-            await run_command("gifski", "--quiet", "--fast", "-o", outname, "--fps", str(fps), "--width", "1000",
+            await run_command("gifski", "--quiet", "--fast", "--output", outname, "--fps", str(fps), "--width", "1000",
                               *frames)
         else:  # imty == "VIDEO":
             outname = temp_file("mp4")
@@ -676,7 +676,7 @@ async def mp4togif(mp4):
     if len(n) <= 1:
         raise NonBugError(f"Output file only has {len(n)} frames, GIFs must have at least 2.")
     else:
-        await run_command("gifski", "--quiet", "--fast", "-o", outname, "--fps", str(fps), *n)
+        await run_command("gifski", "--quiet", "--fast", "--output", outname, "--fps", str(fps), *n)
         # logger.info("Cleaning files...")
         # for f in glob.glob(name.replace('%09d', '*')):
         #     os.remove(f)
