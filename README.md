@@ -26,7 +26,9 @@
 - uses selenium and ChromeDriver to render captions in html with Chrome
     - although not the fastest approach, it is very simple and very powerful
 
-## self-host with docker (experimental!)
+## self-host with docker
+
+MediaForge inside docker is very new, [please report any issues or unintended behavior.](https://github.com/HexCodeFFF/mediaforge/issues)
 
 ### to install
 All you need to install yourself is [Docker Desktop](https://docs.docker.com/get-docker/)
@@ -44,7 +46,11 @@ on linux, you may need to run docker with `sudo`
 if the installation succeeded, you should be prompted with some options. you'll need to select "Edit Config".
 this will open a text editor within your terminal. 
 the 2 required config settings to change for proper functionality are the discord and tenor tokens.
+be sure not to add or remove quotes.
 press `CTRL+S` to save and `CTRL+X` to exit.
+
+if you don't want to use the built-in text editor, you can [get the example config from GitHub](config.example.py), 
+hold down `CTRL+K` to clear the file and then use `CTRL+V` to paste in your config.
 
 ### to run
 run `docker ps -a` in your terminal to see the created docker image. 
@@ -85,6 +91,9 @@ docker update --memory 9000M --memory-swap -1 --cpus "3.9" <containerid>
 - `--cpus "3.9"`: the host server has 4 cores, so this allows it to use "3.9"/4 (97.5%) of the PC's CPU time.
 
 ## to self-host natively
+
+MediaForge is a complex application and manually installing all dependencies is a headache.
+for almost all use cases, [the docker distribution](#self-host-with-docker) is much better.
 
 ### summary
 
