@@ -25,10 +25,12 @@ select fav in "${foods[@]}"; do
     echo "Updating APT Packages..."
     # ffmpeg's repo conflicts with like everything else
     rm "/etc/apt/sources.list.d/debian-extended.list"
+    apt-mark hold ffmpeg
     apt-get update -y
     apt-get upgrade -y
+    apt-mark unhold ffmpeg
     # re-add ffmpeg's repo
-    echo "deb http://deb.debian.org/debian bullseye contrib non-free\ndeb http://deb.debian.org/debian experimental main\ndeb http://deb.debian.org/debian unstable main" >> "/etc/apt/sources.list.d/debian-extended.list"
+    echo -e "deb http://deb.debian.org/debian bullseye contrib non-free\ndeb http://deb.debian.org/debian experimental main\ndeb http://deb.debian.org/debian unstable main" >> "/etc/apt/sources.list.d/debian-extended.list"
     apt-get update -y
     apt-get install --only-upgrade -t experimental -y ffmpeg
     apt autoremove -y
