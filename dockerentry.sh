@@ -23,17 +23,18 @@ select fav in "${foods[@]}"; do
     git fetch --all
     git reset --hard origin/master
     echo "Updating APT Packages..."
-    # ffmpeg's repo conflicts with like everything else
+    # ffmpeg's repo conflicts with like everything else, do apt update without it
     rm "/etc/apt/sources.list.d/debian-extended.list"
-    # freeze ffmpeg and all dependencies
+    # freeze ffmpeg and all dependencies just in case
     ffmpeganddependents=$(apt-cache depends --recurse --no-recommends --no-suggests --no-conflicts --no-breaks --no-replaces --no-enhances ffmpeg | grep "^\w" | tr '\n' ' ')
     apt-mark hold $ffmpeganddependents
     apt-get update -y
     apt-get upgrade -y
-    apt-mark unhold $ffmpeganddependents
     # re-add ffmpeg's repo
+    apt-mark unhold $ffmpeganddependents
     echo -e "deb http://deb.debian.org/debian bullseye contrib non-free\ndeb http://deb.debian.org/debian experimental main\ndeb http://deb.debian.org/debian unstable main" >>"/etc/apt/sources.list.d/debian-extended.list"
     apt-get update -y
+    # i tried to use it with $ffmpeganddependents but it broke i think this is fineeeee
     apt-get install -t experimental -y ffmpeg
     apt autoremove -y
     echo "Done!"
