@@ -50,7 +50,7 @@ your container should have a 12 character "ID", which you'll need to run it.
 
 run in your favorite terminal:
 ```shell
-docker start -a <ID>
+docker start -ia <ID>
 ```
 replacing `<ID>` with the aforementioned ID.
 run this every time you want to start MediaForge.
