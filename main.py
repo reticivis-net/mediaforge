@@ -499,7 +499,8 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
         async def updatestatus(st):
             nonlocal msg
             try:
-                msg = await msg.edit(content=f"{config.emojis['working']} {st}")
+                msg = await msg.edit(content=f"{config.emojis['working']} {st}",
+                                     allowed_mentions=discord.AllowedMentions.none())
             except discord.NotFound:
                 msg = await ctx.reply(f"{config.emojis['working']} {st}", mention_author=False)
 
