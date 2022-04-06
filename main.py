@@ -2560,6 +2560,9 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                 raise commands.CheckFailure("Your command contains one or more blocked words.")
         return True
 
+    def now():
+        return datetime.datetime.now(tz=datetime.timezone.utc).timestamp()
+    antispambucket = {}
 
     @bot.listen()
     async def on_command_error(ctx: commands.Context, commanderror: commands.CommandError):
@@ -2597,8 +2600,13 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             await dmauthor(f"{config.emojis['x']} I don't have permissions to send messages in that channel.")
             logger.warning(commanderror)
         if isinstance(commanderror, discord.ext.commands.errors.CommandNotFound):
+            # to prevent funny 429s, error cooldowns are only sent once before the cooldown is over.
+            if ctx.author.id in antispambucket.keys():
+                if antispambucket[ctx.author.id] > now():
+                    logger.debug(f"Skipping error reply to {ctx.author} ({ctx.author.id}): {errorstring}")
+                    return
             if ctx.message.content.strip().lower() in ["$w", "$wa", "$waifu", "$h", "$ha", "$husbando", "$wx", "$hx",
-                                                       "$m", "$ma", "$marry", "$mx"]:
+                                                       "$m", "$ma", "$marry", "$mx", "$g"]:
                 # this command is spammed so much, fuckn ignore it
                 # https://mudae.fandom.com/wiki/List_of_Commands#.24waifu_.28.24w.29
                 logger.debug(f"Ignoring {ctx.message.content}")
@@ -2617,12 +2625,19 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             if not (cmd.startswith("$") and all([i.isdecimal() or i in ".," for i in cmd.replace("$", "")])):
                 # exclude just numbers/decimals, it annoys people
                 await logandreply(err)
+                antispambucket[ctx.author.id] = now() + config.cooldown
         elif isinstance(commanderror, discord.ext.commands.errors.NotOwner):
             err = f"{config.emojis['x']} You are not authorized to use this command."
             await logandreply(err)
         elif isinstance(commanderror, discord.ext.commands.errors.CommandOnCooldown):
+            # to prevent funny 429s, error cooldowns are only sent once before the cooldown is over.
+            if ctx.author.id in antispambucket.keys():
+                if antispambucket[ctx.author.id] > now():
+                    logger.debug(f"Skipping error reply to {ctx.author} ({ctx.author.id}): {errorstring}")
+                    return
             err = f"{config.emojis['clock']} {errorstring}"
             await logandreply(err)
+            antispambucket[ctx.author.id] = now() + commanderror.retry_after
         elif isinstance(commanderror, discord.ext.commands.errors.UserInputError):
             err = f"{config.emojis['warning']} {errorstring}"
             if ctx.command:
@@ -2725,9 +2740,9 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
         if ctx.command.name == "help":
             return True
         # owner(s) are exempt from cooldown
-        if await bot.is_owner(ctx.message.author):
-            logger.debug("Owner ran command, exempt from cooldown.")
-            return True
+        # if await bot.is_owner(ctx.message.author):
+        #     logger.debug("Owner ran command, exempt from cooldown.")
+        #     return True
         # Then apply a bot check that will run before every command
         # Very similar to ?tag cooldown mapping but in Bot scope instead of Cog scope
         bucket = _cd.get_bucket(ctx.message)
