@@ -45,7 +45,7 @@ if [ "$AUTOMODE" == "ON" ] && [ "$CONFIG" != "" ]; then
 fi
 
 PS3='What would you like to do? '
-foods=("Run MediaForge" "Edit Config" "Update MediaForge" "Update APT Packages" "Debug Shell" "Quit")
+foods=("Run MediaForge" "Edit Config" "Update MediaForge" "Update APT Packages" "Update MediaForge & APT Packages" "Debug Shell" "Quit")
 select fav in "${foods[@]}"; do
   case $fav in
   "Run MediaForge")
