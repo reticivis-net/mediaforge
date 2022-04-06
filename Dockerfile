@@ -1,10 +1,10 @@
+FROM python:3.8 AS builder
+
 # automode
 ARG AUTOMODE="OFF"
 ARG CONFIG=""
 ARG AUTOUPDATE="OFF"
 ENV AUTOMODE=$AUTOMODE CONFIG=$CONFIG AUTOUPDATE=$AUTOUPDATE
-
-FROM python:3.8 AS builder
 
 COPY . mediaforge
 # like cd but for docker
