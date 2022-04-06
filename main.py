@@ -11,7 +11,6 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
     import io
     import json
     import os
-    import shutil
     import sqlite3
     import time
     import traceback
@@ -495,34 +494,42 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
         :param spoiler: wether to spoil the uploaded file or not.
         :return: nothing, all processing and uploading is done in this function
         """
+        msg = await ctx.reply(f"{config.emojis['working']} Downloading...", mention_author=False)
+
+        async def updatestatus(st):
+            nonlocal msg
+            try:
+                msg = await msg.edit(content=f"{config.emojis['working']} {st}")
+            except discord.NotFound:
+                msg = await ctx.reply(f"{config.emojis['working']} {st}", mention_author=False)
+
         with TempFileSession() as tempfilesession:
-            if allowedtypes:
-                urls = await imagesearch(ctx, len(allowedtypes))
-                files = await saveurls(urls)
-            else:
-                files = []
-            if files or not allowedtypes:
-                for i, file in enumerate(files):
-                    if (imtype := await improcessing.mediatype(file)) not in allowedtypes[i]:
-                        await ctx.reply(
-                            f"{config.emojis['warning']} Media #{i + 1} is {imtype}, it must be: "
-                            f"{', '.join(allowedtypes[i])}")
-                        logger.warning(f"Media {i} type {imtype} is not in {allowedtypes[i]}")
-                        # for f in files:
-                        #     os.remove(f)
-                        break
-                    else:
-                        if await improcessing.is_apng(file):
-                            asyncio.create_task(ctx.reply(f"{config.emojis['warning']} Media #{i + 1} is an apng, w"
-                                                          f"hich FFmpeg and MediaForge have limited support for. Ex"
-                                                          f"pect errors.", delete_after=10))
-                        if resize:
-                            files[i] = await improcessing.ensuresize(ctx, file, config.min_size, config.max_size)
+            try:
+                if allowedtypes:
+                    urls = await imagesearch(ctx, len(allowedtypes))
+                    files = await saveurls(urls)
                 else:
-                    logger.info("Processing...")
-                    msgtask = asyncio.create_task(
-                        ctx.reply(f"{config.emojis['working']} Processing...", mention_author=False))
-                    try:
+                    files = []
+                if files or not allowedtypes:
+                    for i, file in enumerate(files):
+                        if (imtype := await improcessing.mediatype(file)) not in allowedtypes[i]:
+                            await ctx.reply(
+                                f"{config.emojis['warning']} Media #{i + 1} is {imtype}, it must be: "
+                                f"{', '.join(allowedtypes[i])}")
+                            logger.warning(f"Media {i} type {imtype} is not in {allowedtypes[i]}")
+                            # for f in files:
+                            #     os.remove(f)
+                            break
+                        else:
+                            if await improcessing.is_apng(file):
+                                asyncio.create_task(ctx.reply(f"{config.emojis['warning']} Media #{i + 1} is an apng, w"
+                                                              f"hich FFmpeg and MediaForge have limited support for. Ex"
+                                                              f"pect errors.", delete_after=10))
+                            if resize:
+                                files[i] = await improcessing.ensuresize(ctx, file, config.min_size, config.max_size)
+                    else:
+                        logger.info("Processing...")
+                        await updatestatus("Processing...")
                         if allowedtypes and not forcerenderpool:
                             if len(files) == 1:
                                 filesforcommand = files[0]
@@ -551,36 +558,24 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                                 raise improcessing.ReturnedNothing(f"Expected string, {func} returned nothing.")
                             else:
                                 asyncio.create_task(ctx.reply(result))
-                                msg = await msgtask
-                                asyncio.create_task(msg.delete())
-                    except Exception as e:  # delete the processing message if it errors
-                        msg = await msgtask
-                        asyncio.create_task(msg.delete())
-                        raise e
-                    if result and expectresult:
-                        logger.info("Uploading...")
-                        if filename is not None:
-                            uploadtask = asyncio.create_task(ctx.reply(file=discord.File(result, spoiler=spoiler,
-                                                                                         filename=filename)))
-                        else:
-                            uploadtask = asyncio.create_task(ctx.reply(file=discord.File(result, spoiler=spoiler)))
-                        msg = await msgtask
-                        uplt = f"{config.emojis['working']} Uploading..."
-                        try:
-                            await msg.edit(content=uplt)
-                        except discord.NotFound:
-                            msg = await ctx.reply(uplt)
-                        await uploadtask
-                        asyncio.create_task(msg.delete())
-                        # for f in files:
-                        #     try:
-                        #         os.remove(f)
-                        #     except FileNotFoundError:
-                        #         pass
-                        # os.remove(result)
+                        if result and expectresult:
+                            logger.info("Uploading...")
+                            await updatestatus("Uploading...")
+                            if filename is not None:
+                                uploadtask = asyncio.create_task(ctx.reply(file=discord.File(result, spoiler=spoiler,
+                                                                                             filename=filename)))
+                            else:
+                                uploadtask = asyncio.create_task(ctx.reply(file=discord.File(result, spoiler=spoiler)))
+                            await uploadtask
+                else:
+                    logger.warning("No media found.")
+                    await ctx.reply(f"{config.emojis['x']} No file found.")
+            except Exception as e:
+                await msg.delete()
+                raise e
             else:
-                logger.warning("No media found.")
-                asyncio.create_task(ctx.send(f"{config.emojis['x']} No file found."))
+                await msg.delete()
+
 
 
     number = typing.Union[float, int]
@@ -2556,9 +2551,13 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                 raise commands.CheckFailure("Your command contains one or more blocked words.")
         return True
 
+
     def now():
         return datetime.datetime.now(tz=datetime.timezone.utc).timestamp()
+
+
     antispambucket = {}
+
 
     @bot.listen()
     async def on_command_error(ctx: commands.Context, commanderror: commands.CommandError):
