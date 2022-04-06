@@ -2741,9 +2741,9 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
         if ctx.command.name == "help":
             return True
         # owner(s) are exempt from cooldown
-        # if await bot.is_owner(ctx.message.author):
-        #     logger.debug("Owner ran command, exempt from cooldown.")
-        #     return True
+        if await bot.is_owner(ctx.message.author):
+            logger.debug("Owner ran command, exempt from cooldown.")
+            return True
         # Then apply a bot check that will run before every command
         # Very similar to ?tag cooldown mapping but in Bot scope instead of Cog scope
         bucket = _cd.get_bucket(ctx.message)
