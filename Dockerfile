@@ -1,8 +1,10 @@
 FROM python:3.8 AS builder
 
-# for release
-#RUN git clone --depth 1 https://github.com/HexCodeFFF/mediaforge.git
-# for development
+# automode
+ARG AUTOMODE
+ARG CONFIG
+ARG AUTOUPDATE
+
 COPY . mediaforge
 # like cd but for docker
 WORKDIR mediaforge
@@ -13,7 +15,7 @@ RUN echo "deb https://dl.google.com/linux/chrome/deb/ stable main" >> "/etc/apt/
 # the static deb here makes me nervous but the alternative is Really Weird so no
 RUN dpkg -i $(curl -w "%{filename_effective}" -LO "https://www.deb-multimedia.org/pool/main/d/deb-multimedia-keyring/deb-multimedia-keyring_2016.8.1_all.deb")
 # experimental/testing/unstable for ffmpeg and non-free/contrib for mbrola
-RUN echo -e "deb http://deb.debian.org/debian bullseye contrib non-free\ndeb http://deb.debian.org/debian experimental main\ndeb http://deb.debian.org/debian unstable main" >> "/etc/apt/sources.list.d/debian-extended.list"
+RUN printf "\ndeb http://deb.debian.org/debian bullseye contrib non-free\ndeb http://deb.debian.org/debian experimental main\ndeb http://deb.debian.org/debian unstable main\n" >> "/etc/apt/sources.list.d/debian-extended.list"
 
 # apt
 RUN apt-get -y update && apt-get -t experimental install -y ffmpeg
