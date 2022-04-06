@@ -8,3 +8,4 @@ __pycache__
 # its now autodownloaded and updated, no need to keep on git/github
 chromedriver
 chromedriver.exe
+discord.log
