@@ -19,7 +19,7 @@ import aubio
 import humanize
 import nextcord as discord
 import numpy
-from PIL import Image
+from PIL import Image, UnidentifiedImageError
 from nextcord.ext import commands
 
 if sys.platform == "win32":  # this hopefully wont cause any problems :>
@@ -501,6 +501,20 @@ async def mediatype(image):
     :param image: filename of media
     :return: can be VIDEO, AUDIO, GIF, IMAGE or None (invalid or other).
     """
+    # ffmpeg doesn't work well with detecting images so let PIL do that
+    mime = magic.from_file(image, mime=True)
+    try:
+        with Image.open(image) as im:
+            anim = getattr(im, "is_animated", False)
+        if anim:
+            logger.debug(f"identified type {mime} with animated frames as GIF")
+            return "GIF"  # gifs dont have to be animated but if they aren't its easier to treat them like pngs
+        else:
+            logger.debug(f"identified type {mime} with no animated frames as IMAGE")
+            return "IMAGE"
+    except UnidentifiedImageError:
+        logger.debug(f"UnidentifiedImageError on {image}")
+    # PIL isn't sure so let ffmpeg take control
     probe = await run_command('ffprobe', '-v', 'panic', '-count_packets', '-show_entries',
                               'stream=codec_type,codec_name,nb_read_packets',
                               '-print_format', 'json', image)
@@ -517,6 +531,7 @@ async def mediatype(image):
         elif stream["codec_type"] == "video":  # could be video or image or gif sadly
             if "nb_read_packets" in stream and int(stream["nb_read_packets"]) != 1:  # if there are multiple frames
                 if stream["codec_name"] == "gif":  # if gif
+                    # should have been detected in the previous step but cant hurt to be too sure
                     props["gif"] = True  # gif
                 else:  # multiple frames, not gif
                     props["video"] = True  # video!!
@@ -533,6 +548,7 @@ async def mediatype(image):
         return "AUDIO"
     if props["image"]:
         return "IMAGE"
+    logger.debug(f"mediatype None due to unclassified type {mime}")
     return None
 
 
