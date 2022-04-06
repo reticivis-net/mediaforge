@@ -1,14 +1,16 @@
 #!/bin/bash
 
-update() {
+updategit() {
   # remote isnt set up by default when container is set up
+  echo "Updating MediaForge Code..."
   if [ ! -d ".git" ]; then
     git init . --initial-branch=master
     git remote add origin https://github.com/HexCodeFFF/mediaforge.git
   fi
-  echo "Updating MediaForge Code..."
   git fetch --all
   git reset --hard origin/master
+}
+updateapt() {
   echo "Updating APT Packages..."
   # ffmpeg's repo conflicts with like everything else, do apt update without it
   rm "/etc/apt/sources.list.d/debian-extended.list"
@@ -19,7 +21,7 @@ update() {
   apt-get upgrade -y
   # re-add ffmpeg's repo
   apt-mark unhold $ffmpeganddependents
-  printf "\ndeb http://deb.debian.org/debian bullseye contrib non-free\ndeb http://deb.debian.org/debian experimental main\ndeb http://deb.debian.org/debian unstable main\n" >> "/etc/apt/sources.list.d/debian-extended.list"
+  printf "\ndeb http://deb.debian.org/debian bullseye contrib non-free\ndeb http://deb.debian.org/debian experimental main\ndeb http://deb.debian.org/debian unstable main\n" >>"/etc/apt/sources.list.d/debian-extended.list"
   apt-get update -y
   # i tried to use it with $ffmpeganddependents but it broke i think this is fineeeee
   apt-get install -t experimental -y ffmpeg
@@ -34,7 +36,8 @@ printf "\n\n"
 if [ "$AUTOMODE" == "ON" ] && [ "$CONFIG" != "" ]; then
   echo "We're in automode. Running MediaForge"
   if [ "$AUTOUPDATE" == "ON" ]; then
-    update
+    updategit
+    updateapt
   fi
   echo "$CONFIG" | base64 -d >config.py
   python -m poetry run python main.py
@@ -42,7 +45,7 @@ if [ "$AUTOMODE" == "ON" ] && [ "$CONFIG" != "" ]; then
 fi
 
 PS3='What would you like to do? '
-foods=("Run MediaForge" "Edit Config" "Update MediaForge" "Debug Shell" "Quit")
+foods=("Run MediaForge" "Edit Config" "Update MediaForge" "Update APT Packages" "Debug Shell" "Quit")
 select fav in "${foods[@]}"; do
   case $fav in
   "Run MediaForge")
@@ -52,7 +55,14 @@ select fav in "${foods[@]}"; do
     nano config.py
     ;;
   "Update MediaForge")
-    update
+    updategit
+    ;;
+  "Update APT Packages")
+    updateapt
+    ;;
+  "Update MediaForge & APT Packages")
+    updategit
+    updateapt
     ;;
   "Debug Shell")
     /bin/bash
