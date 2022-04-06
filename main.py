@@ -2606,7 +2606,8 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                     logger.debug(f"Skipping error reply to {ctx.author} ({ctx.author.id}): {errorstring}")
                     return
             if ctx.message.content.strip().lower() in ["$w", "$wa", "$waifu", "$h", "$ha", "$husbando", "$wx", "$hx",
-                                                       "$m", "$ma", "$marry", "$mx", "$g"]:
+                                                       "$m", "$ma", "$marry", "$mx", "$g", "$tu", "$top", "$mmrk",
+                                                       "$rolls"]:
                 # this command is spammed so much, fuckn ignore it
                 # https://mudae.fandom.com/wiki/List_of_Commands#.24waifu_.28.24w.29
                 logger.debug(f"Ignoring {ctx.message.content}")
