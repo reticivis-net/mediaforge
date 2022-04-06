@@ -22,3 +22,10 @@ loglevel = 25 if config.log_level == "NOTICE" else config.log_level
 coloredlogs.install(level=loglevel, fmt='[%(asctime)s] [%(filename)s:%(funcName)s:%(lineno)d] '
                                         '%(levelname)s %(message)s',
                     datefmt='%m/%d/%Y %I:%M:%S %p', field_styles=field_styles, level_styles=level_styles, logger=logger)
+if hasattr(config, "logdiscordpytofile") and config.logdiscordpytofile:
+    dlogger = logging.getLogger('discord')
+    dlogger.setLevel(logging.DEBUG)
+    handler = logging.FileHandler(filename='discord.log', encoding='utf-8', mode='w+')
+    handler.setFormatter(logging.Formatter('[%(asctime)s] [%(filename)s:%(funcName)s:%(lineno)d] '
+                                           '%(levelname)s %(message)s'))
+    dlogger.addHandler(handler)
