@@ -558,12 +558,13 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                             if resize:
                                 files[i] = await improcessing.ensuresize(ctx, file, config.min_size, config.max_size)
                     else:
+                        pt = "Processing... (this may take a while or not finish due to an error)"
                         logger.info("Processing...")
                         if allowedtypes:
-                            await updatestatus("Processing...")
+                            await updatestatus(pt)
                         else:
                             # Downloading message doesnt exist, create it
-                            msg = await ctx.reply(f"{config.emojis['working']} Processing...", mention_author=False)
+                            msg = await ctx.reply(f"{config.emojis['working']} {pt}", mention_author=False)
                         if allowedtypes and not forcerenderpool:
                             if len(files) == 1:
                                 filesforcommand = files[0]
