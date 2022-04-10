@@ -521,7 +521,9 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
         :param spoiler: wether to spoil the uploaded file or not.
         :return: nothing, all processing and uploading is done in this function
         """
-        msg = await ctx.reply(f"{config.emojis['working']} Downloading...", mention_author=False)
+        if allowedtypes:
+            # nothing to download sometimes
+            msg = await ctx.reply(f"{config.emojis['working']} Downloading...", mention_author=False)
 
         async def updatestatus(st):
             nonlocal msg
@@ -557,7 +559,11 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                                 files[i] = await improcessing.ensuresize(ctx, file, config.min_size, config.max_size)
                     else:
                         logger.info("Processing...")
-                        await updatestatus("Processing...")
+                        if allowedtypes:
+                            await updatestatus("Processing...")
+                        else:
+                            # Downloading message doesnt exist, create it
+                            msg = await ctx.reply(f"{config.emojis['working']} Processing...", mention_author=False)
                         if allowedtypes and not forcerenderpool:
                             if len(files) == 1:
                                 filesforcommand = files[0]
