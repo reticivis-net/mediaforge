@@ -1655,7 +1655,7 @@ async def tts(text: str, model: typing.Literal["male", "female", "retro"] = "mal
     ttswav = temp_file("wav")
     outname = temp_file("mp3")
     if model == "retro":
-        await run_command("node", "sam/bundle.js", "--moderncmu", "--wav", ttswav, text)
+        await run_command("node", "ttssam.js", "--moderncmu", "--wav", ttswav, text)
     else:
         # espeak is a fucking nightmare on windows and windows has good native tts anyways sooooo
         if sys.platform == "win32":
@@ -1663,8 +1663,9 @@ async def tts(text: str, model: typing.Literal["male", "female", "retro"] = "mal
             voice = str({"male": 1, "female": 2}[model])
             await run_command("powershell", "-File", "tts.ps1", ttswav, text, voice)
         else:
-            await run_command("espeak", "-s", "150", text, "-v", "mb-us2" if model == "male" else "mb-us1",
-                              "-w", ttswav)
+            await run_command("mimic", "-voice",
+                              "tts/mycroft_voice_4.0.flitevox" if model == "male" else "tts/cmu_us_slt.flitevox",
+                              "-o", ttswav, "-t", text)
     await run_command("ffmpeg", "-hide_banner", "-i", ttswav, "-c:a", "libmp3lame", outname)
     return outname
 

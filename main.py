@@ -1,3 +1,5 @@
+import requests
+
 if __name__ == "__main__":  # prevents multiprocessing workers from running bot code
     # imports are inside main cause it uses so much memory on multiprocessing workers
 
@@ -126,7 +128,30 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             logger.debug(f"Failed to set own priority.")
         logger.debug(commanderror, exc_info=(type(commanderror), commanderror, commanderror.__traceback__))
 
+
+    def download_sync(url, filename):
+        with requests.get(url, stream=True) as r:
+            r.raise_for_status()
+            with open(filename, 'wb+') as f:
+                for chunk in r.iter_content(chunk_size=8192):
+                    # If you have chunk encoded response uncomment if
+                    # and set chunk_size parameter to None.
+                    # if chunk:
+                    f.write(chunk)
+
+
     # other misc init code (really need to organize this :p)
+    if sys.platform != 'win32':
+        if not os.path.isfile("tts/mycroft_voice_4.0.flitevox"):
+            logger.log(25, "Downloading male TTS voice...")
+            download_sync("https://github.com/MycroftAI/mimic1/raw/development/voices/mycroft_voice_4.0.flitevox",
+                          "tts/mycroft_voice_4.0.flitevox")
+            logger.log(35, "Male TTS voice downloaded!")
+        if not os.path.isfile("tts/cmu_us_slt.flitevox"):
+            logger.log(25, "Downloading female TTS voice...")
+            download_sync("https://github.com/MycroftAI/mimic1/raw/development/voices/cmu_us_slt.flitevox",
+                          "tts/cmu_us_slt.flitevox")
+            logger.log(35, "Female TTS voice downloaded!")
     chromiumrender.updatechromedriver()
     renderpool = improcessing.initializerenderpool()
     if not os.path.exists(config.temp_dir.rstrip("/")):
@@ -576,7 +601,6 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                 raise e
             else:
                 await msg.delete()
-
 
 
     number = typing.Union[float, int]
