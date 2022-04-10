@@ -152,6 +152,8 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             download_sync("https://github.com/MycroftAI/mimic1/raw/development/voices/cmu_us_slt.flitevox",
                           "tts/cmu_us_slt.flitevox")
             logger.log(35, "Female TTS voice downloaded!")
+        # chmod +x (mark executable)
+        os.chmod('tts/mimic', os.stat('tts/mimic').st_mode | 0o111)
     chromiumrender.updatechromedriver()
     renderpool = improcessing.initializerenderpool()
     if not os.path.exists(config.temp_dir.rstrip("/")):
