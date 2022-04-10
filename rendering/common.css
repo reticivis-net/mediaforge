@@ -25,6 +25,11 @@ body {
     src: url(fonts/ImpactMix.ttf);
 }
 
+@font-face {
+    font-family: timesnewroman;
+    src: url("fonts/times new roman.ttf");
+}
+
 .fitboxes {
     overflow: hidden;
     word-wrap: break-word;
