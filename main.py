@@ -558,7 +558,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
                             if resize:
                                 files[i] = await improcessing.ensuresize(ctx, file, config.min_size, config.max_size)
                     else:
-                        pt = "Processing... (this may take a while or not finish due to an error)"
+                        pt = "Processing... (this may take a while or, if a severe error occurs, may not finish)"
                         logger.info("Processing...")
                         if allowedtypes:
                             await updatestatus(pt)
