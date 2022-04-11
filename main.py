@@ -1,5 +1,3 @@
-import requests
-
 if __name__ == "__main__":  # prevents multiprocessing workers from running bot code
     # imports are inside main cause it uses so much memory on multiprocessing workers
 
@@ -13,6 +11,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
     import io
     import json
     import os
+
     import sqlite3
     import time
     import traceback
@@ -33,6 +32,9 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
         import pronouncing
         import psutil
         import regex as re
+        import requests
+        import selenium.common.exceptions
+
         import sys
         import yt_dlp as youtube_dl
         from nextcord.ext import commands, tasks
@@ -2691,7 +2693,8 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             is_hosting_issue = isinstance(commanderror, (aiohttp_client_exceptions.ClientOSError,
                                                          aiohttp_client_exceptions.ServerDisconnectedError,
                                                          asyncio.exceptions.TimeoutError,
-                                                         concurrent.futures.process.BrokenProcessPool))
+                                                         concurrent.futures.process.BrokenProcessPool,
+                                                         selenium.common.exceptions.TimeoutException))
 
             if is_hosting_issue:
                 desc = "If this error keeps occurring, report this with the attached traceback file to the GitHub."
