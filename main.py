@@ -1561,7 +1561,7 @@ if __name__ == "__main__":  # prevents multiprocessing workers from running bot 
             :param ctx: discord context
             :mediaparam video: A video or gif.
             """
-            await improcess(ctx, improcessing.toapng, [["VIDEO", "GIF"]])
+            await improcess(ctx, improcessing.toapng, [["VIDEO", "GIF"]], resize=False)
 
         @commands.command(aliases=["audio", "mp3", "tomp3", "aac", "toaac"])
         async def toaudio(self, ctx):
