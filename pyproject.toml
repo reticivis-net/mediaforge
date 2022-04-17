@@ -32,6 +32,7 @@ requests = "^2.27.1"
 pyttsx3 = "^2.90"
 # comtypes on pypi is fucked on 3.8+
 comtypes = { git = "https://github.com/enthought/comtypes.git" }
+Wand = "^0.6.7"
 
 [tool.poetry.dev-dependencies]
 #aiohttp = { version = "^3.8.1", extras = ["speedups"] }
