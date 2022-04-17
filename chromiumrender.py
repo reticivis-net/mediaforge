@@ -218,11 +218,7 @@ def initdriver():
     if sys.platform == "win32":
         driver = webdriver.Chrome("chromedriver.exe", options=opts, service_log_path='NUL')
     else:
-        if "GOOGLE_CHROME_SHIM" in os.environ:  # if on heroku
-            driver = webdriver.Chrome(executable_path=os.environ["GOOGLE_CHROME_SHIM"], options=opts,
-                                      service_log_path='/dev/null')
-        else:
-            driver = webdriver.Chrome("./chromedriver", options=opts, service_log_path='/dev/null')
+        driver = webdriver.Chrome("./chromedriver", options=opts, service_log_path='/dev/null')
     driverlogger = logging.getLogger('selenium.webdriver.remote.remote_connection')
     if config.log_level.lower() == "debug":
         driverlogger.setLevel(logging.DEBUG)

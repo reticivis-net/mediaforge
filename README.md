@@ -108,8 +108,27 @@ or [environment variables](https://docs.docker.com/engine/reference/commandline/
 .
 `AUTOMODE`: set to "ON" to enable automode
 `AUTOUPDATE`: set to "ON" to update code and packages every run
-`CONFIG`: base64 encoded version of your config file. see
-the [set up bot config step of the heroku tutorial](#6-set-up-bot-config)
+`CONFIG`: base64 encoded version of your config file.
+
+#### to encode base 64
+
+##### on linux:
+
+- `base64 config.py` prints the output to terminal
+- `base64 config.py > config.txt` writes the output to `config.txt`
+
+##### with python:
+
+```python
+import base64
+
+with open("config.py", "rb") as f:
+    out = base64.b64encode(f.read())
+print(out)  # write to terminal
+# write to file
+with open("config.txt", "wb+") as f:
+    f.write(out)
+```
 
 ## to self-host natively
 
@@ -194,58 +213,3 @@ the bot uses many external CLI programs for media processing.
       and `<yourpython> -m poetry` instead of `poetry`
 - terminate the bot by running the `shutdown` command, this will _probably_ close better than a termination
 
-## !!experimental!! heroku-based hosting
-
-### 1. [install heroku cli and log in](https://devcenter.heroku.com/articles/getting-started-with-python#set-up)
-
-### 2. clone mediaforge onto your computer (`git clone https://github.com/HexCodeFFF/mediaforge`)
-
-- this will create a folder in the current directory
-
-### 3. run `heroku create` in the newly created mediaforge directory to create a heroku app
-
-### 4. add heroku buildpacks
-
-```shell
-heroku buildpacks:add https://github.com/jonathanong/heroku-buildpack-ffmpeg-latest.git
-heroku buildpacks:add https://github.com/heroku/heroku-buildpack-google-chrome.git
-heroku buildpacks:add https://github.com/heroku/heroku-buildpack-chromedriver.git
-heroku buildpacks:add heroku-community/apt
-heroku buildpacks:add heroku/python
-```
-
-### 5. add [Heroku Postgres addon](https://elements.heroku.com/addons/heroku-postgresql)
-
-### 6. set up bot config
-
-- [create a local config file](#config)
-    - don't worry about `chrome_driver_linux`, this option is ignored in heroku production.
-- encode the file as base64
-    - on linux:
-        - `base64 config.py` prints the output to terminal
-        - `base64 config.py > config.txt` writes the output to config.txt
-    - with python:
-        ```python
-        import base64
-        with open("config.py", "rb") as f:
-            out = base64.b64encode(f.read())
-        print(out)  # write to terminal
-        # write to file
-        with open("config.txt", "wb+") as f:
-            f.write(out)
-        ```
-- save file as config option (replace `<BASE64OUTPUT>` with the output from earlier.)
-    ```shell
-    heroku config:set PRIVATEFILE_config.py=<BASE64OUTPUT>
-    ```
-    - note: if you want other private files deployed to heroku, do the same steps but replace `config.py`
-      in `PRIVATEFILE_config.py` with the filename.
-
-### 7. start app
-
-```shell
-heroku ps:scale worker=1
-```
-
-**NOTE:** currently, guild-specific prefixes wont persist after a re-deployment. heroku files are temporary and i
-haven't YET written the code to interface with their databases.
