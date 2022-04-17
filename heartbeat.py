@@ -7,7 +7,7 @@ import psutil
 
 import config
 from clogs import logger
-from improcessing import fetch
+from mainutils import fetch
 
 
 async def send_heartbeat():

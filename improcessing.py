@@ -1,10 +1,12 @@
+"""
+This file contains functions for processing and editing media
+"""
 # standard libs
 import asyncio
 import concurrent.futures
 import glob
 import json
 import math
-import multiprocessing
 import os
 import shutil
 import subprocess
@@ -12,7 +14,6 @@ import sys
 import typing
 from fractions import Fraction
 
-import aiohttp
 # pip libs
 import apng
 import aubio
@@ -30,15 +31,11 @@ else:
 # project files
 import autotune
 import captionfunctions
-import chromiumrender
+import renderpool
 import config
 import tempfiles
 from clogs import logger
 from tempfiles import temp_file
-
-"""
-This file contains functions for processing and editing media
-"""
 
 
 class NonBugError(Exception):
@@ -55,73 +52,6 @@ class CMDError(Exception):
 class ReturnedNothing(Exception):
     """raised by improcess()"""
     pass
-
-
-def pass_temp_session(fn, args, kwargs, sessionlist):
-    """used in Pool to pass the current TempFileSession into the process"""
-    tempfiles.globallist = sessionlist
-    result = fn(*args, **kwargs)
-    tempfiles.globallist = None
-    return result
-
-
-class MyProcess(multiprocessing.Process):
-    def start(self):
-        super(MyProcess, self).start()
-
-
-# https://stackoverflow.com/a/65966787/9044183
-class Pool:
-    def __init__(self, nworkers):
-        self._executor = concurrent.futures.ProcessPoolExecutor(nworkers, initializer=chromiumrender.initdriver)
-        self._nworkers = nworkers
-        self._submitted = 0
-        # loop = asyncio.get_event_loop()
-        # loop.run_until_complete(self.init())
-
-    async def init(self):
-        await asyncio.gather(*([self.submit(chromiumrender.initdriver)] * self._nworkers))
-
-    async def submit(self, fn, *args, ses=None, **kwargs):
-        self._submitted += 1
-        if ses is None:
-            ses = tempfiles.get_session_list()
-        loop = asyncio.get_event_loop()
-        fut = loop.run_in_executor(self._executor, pass_temp_session, fn, args, kwargs, ses)
-        try:
-            return await fut
-        finally:
-            self._submitted -= 1
-
-    async def shutdown(self):
-        await asyncio.wait([self.submit(chromiumrender.closedriver)] * self._nworkers)
-        self._executor.shutdown(wait=True)
-
-    def stats(self):
-        queued = max(0, self._submitted - self._nworkers)
-        executing = min(self._submitted, self._nworkers)
-        return queued, executing
-
-
-def updatechromedriver():
-    pass
-
-
-def initializerenderpool():
-    """
-    Start the worker pool
-    :return: the worker pool
-    """
-    global renderpool
-    try:
-        # looks like it uses less memory
-        multiprocessing.set_start_method('spawn')
-    except RuntimeError:
-        pass
-    logger.info(f"Starting {config.chrome_driver_instances} pool processes...")
-    # renderpool = multiprocessing.Pool(config.chrome_driver_instances, initializer=chromiumrender.initdriver)
-    renderpool = Pool(config.chrome_driver_instances)
-    return renderpool
 
 
 # https://fredrikaverpil.github.io/2017/06/20/async-and-await-with-subprocesses/
@@ -621,7 +551,7 @@ async def handleanimated(media: typing.Union[str, typing.List[str]], capfunction
     elif imty == "IMAGE":
         logger.info(f"Processing frame...")
         # media = minimagesize(media, 200)
-        result = await renderpool.submit(capfunction, [media] + mediaargs if mediaargs else media, caption)
+        result = await renderpool.renderpool.submit(capfunction, [media] + mediaargs if mediaargs else media, caption)
         # capped = await run_in_exec(result.get)
         return await compresspng(result)
     elif imty == "VIDEO" or imty == "GIF":
@@ -637,13 +567,14 @@ async def handleanimated(media: typing.Union[str, typing.List[str]], capfunction
 
         ses = tempfiles.get_session_list()
         for i, frame in enumerate(frames):
-            framefuncs.append(renderpool.submit(capfunction, [frame] + mediaargs if mediaargs else frame, caption,
-                                                frame.replace('.png', '_rendered.png'), ses=ses))
+            framefuncs.append(
+                renderpool.renderpool.submit(capfunction, [frame] + mediaargs if mediaargs else frame, caption,
+                                             frame.replace('.png', '_rendered.png'), ses=ses))
         await asyncio.wait(framefuncs)
         tempfiles.reserve_names(glob.glob(name.replace('.png', '_rendered.png').replace('%09d', '*')))
-        # result = renderpool.starmap_async(capfunction, capargs)
+        # result = renderpool.renderpool.starmap_async(capfunction, capargs)
         # await run_in_exec(result.get)
-        # result = await renderpool.
+        # result = await renderpool.renderpool.
         logger.info(f"Joining {len(frames)} frames...")
         # frames = await forcesize(glob.glob(name.replace('.png', '_rendered.png').replace('%09d', '*')))
 
@@ -1506,17 +1437,6 @@ async def set_icon(file, guild: discord.Guild):
         return "Successfully changed guild icon."
 
 
-async def contentlength(url):
-    async with aiohttp.ClientSession(headers={'Connection': 'keep-alive'}) as session:
-        # i used to make a head request to check size first, but for some reason head requests can be super slow
-        async with session.get(url) as resp:
-            if resp.status == 200:
-                if "Content-Length" not in resp.headers:  # size of file to download
-                    return False
-                else:
-                    return int(resp.headers["Content-Length"])
-
-
 async def iconfromsnowflakeid(snowflake: int, bot, ctx):
     try:
         user = await bot.fetch_user(snowflake)
@@ -1594,14 +1514,6 @@ async def tint(file, col: discord.Color):
     return out
 
 
-async def fetch(url):
-    async with aiohttp.ClientSession(headers={'Connection': 'keep-alive'}) as session:
-        async with session.get(url) as response:
-            if response.status != 200:
-                response.raise_for_status()
-            return await response.text()
-
-
 async def tempofunc(media: str) -> typing.Optional[float]:
     """
     detects BPM of media using aubio
@@ -1674,7 +1586,7 @@ async def epicbirthday(text: str):
     out = temp_file("mp4")
     birthdaytext = await tts(text)
     nameimage = temp_file("png")
-    await renderpool.submit(captionfunctions.epicbirthdaytext, text, nameimage)
+    await renderpool.renderpool.submit(captionfunctions.epicbirthdaytext, text, nameimage)
     # when to show the text
     betweens = [
         "between(n,294,381)",
