@@ -1,3 +1,5 @@
+## this branch is an experimental rewrite of the captioning system. use at your own discretion.
+
 # ![MediaForge](media/banner.png)
 
 [![MediaForge Discord](https://discordapp.com/api/guilds/803788965215338546/widget.png)](https://discord.gg/xwWjgyVqBz)
@@ -22,9 +24,8 @@
 
 - inspired by [esmBot](https://github.com/esmBot/esmBot)
 - uses nextcord, a fork of discord.py
-- uses FFmpeg for most media functions
-- uses selenium and ChromeDriver to render captions in html with Chrome
-    - although not the fastest approach, it is very simple and very powerful
+- uses ImageMagick for captioning
+- uses FFmpeg for media processing
 
 ## self-host with docker
 
