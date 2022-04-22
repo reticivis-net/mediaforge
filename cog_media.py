@@ -6,7 +6,7 @@ from nextcord.ext import commands
 import captionfunctions
 import config
 import improcessing
-from mainutils import improcess, number_range
+from mainutils import improcess, number_range, prefix_function
 
 
 class Media(commands.Cog, name="Editing"):
