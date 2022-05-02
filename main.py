@@ -83,7 +83,14 @@ async def safe_reply(self: discord.Message, *args, **kwargs) -> discord.Message:
     except (discord.errors.NotFound, discord.errors.HTTPException) as e:
         logger.debug(f"abandoning reply to {self.id} due to {get_full_class_name(e)}, "
                      f"sending message in {self.channel.id}.")
-        return await self.channel.send(*args, **kwargs)
+        # mention author
+        author = self.author.mention
+        if len(args):
+            content = author + (args[0] or "")[:2000 - len(author)]
+        else:
+            content = author
+        return await self.channel.send(content, **kwargs, allowed_mentions=discord.AllowedMentions(
+            everyone=False, users=True, roles=False, replied_user=True))
 
 
 # override .reply()
