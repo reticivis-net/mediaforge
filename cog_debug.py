@@ -81,6 +81,15 @@ class Debug(commands.Cog, name="Owner Only", command_attrs=dict(hidden=True)):
 
     @commands.command(hidden=True)
     @commands.is_owner()
+    async def errorafter5(self, _):
+        """
+        Raise an error after 5 seconds
+        """
+        await asyncio.sleep(5)
+        raise Exception("Exception raised by $error command")
+
+    @commands.command(hidden=True)
+    @commands.is_owner()
     async def errorcmd(self, _):
         """
         Raise an error from the commandline
