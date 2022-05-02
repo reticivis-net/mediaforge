@@ -169,6 +169,7 @@ def initdbsync():
 def init():
     global renderpool
     setselfpriority()
+    initdbsync()
     downloadttsvoices()
     cleartempdir()
     chromiumrender.updatechromedriver()
