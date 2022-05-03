@@ -4,9 +4,9 @@ import time
 import typing
 
 import docstring_parser
-import nextcord as discord
+import discord
 import regex as re
-from nextcord.ext import commands
+from discord.ext import commands
 
 import config
 import database

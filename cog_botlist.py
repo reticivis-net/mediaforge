@@ -1,5 +1,5 @@
 import discordlists
-from nextcord.ext import commands
+from discord.ext import commands
 
 import config
 

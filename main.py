@@ -24,7 +24,7 @@ try:
     import docstring_parser
     import emojis
     import humanize
-    import nextcord as discord
+    import discord
     import pronouncing
     import psutil
     import regex as re
@@ -32,7 +32,7 @@ try:
     import selenium.common.exceptions
     import yt_dlp as youtube_dl
 
-    from nextcord.ext import commands, tasks
+    from discord.ext import commands, tasks
 
     # project files
     import captionfunctions

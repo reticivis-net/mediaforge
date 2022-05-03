@@ -1,6 +1,6 @@
 import typing
 
-from nextcord.ext import commands
+from discord.ext import commands
 
 import captionfunctions
 import improcessing

@@ -21,7 +21,7 @@
 ## general technical info about the bot
 
 - inspired by [esmBot](https://github.com/esmBot/esmBot)
-- uses nextcord, a fork of discord.py
+- uses discord.py 2
 - uses FFmpeg for most media functions
 - uses selenium and ChromeDriver to render captions in html with Chrome
     - although not the fastest approach, it is very simple and very powerful
