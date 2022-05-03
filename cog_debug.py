@@ -4,8 +4,8 @@ import io
 import os
 import typing
 
-import nextcord as discord
-from nextcord.ext import commands
+import discord
+from discord.ext import commands
 
 import config
 import database

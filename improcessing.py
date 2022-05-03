@@ -18,10 +18,10 @@ from fractions import Fraction
 import apng
 import aubio
 import humanize
-import nextcord as discord
+import discord
 import numpy
 from PIL import Image, UnidentifiedImageError
-from nextcord.ext import commands
+from discord.ext import commands
 
 if sys.platform == "win32":  # this hopefully wont cause any problems :>
     from winmagic import magic

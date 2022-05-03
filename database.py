@@ -1,7 +1,7 @@
 import asyncio
 
 import aiosqlite
-from nextcord.ext import commands
+from discord.ext import commands
 
 import config
 

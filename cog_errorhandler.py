@@ -6,10 +6,10 @@ import io
 import traceback
 import urllib.parse
 
-import nextcord as discord
+import discord
 import selenium.common
 from aiohttp import client_exceptions as aiohttp_client_exceptions
-from nextcord.ext import commands
+from discord.ext import commands
 
 import config
 import improcessing
