@@ -1375,6 +1375,7 @@ async def add_sticker(file, guild: discord.Guild, sticker_emoji, name):
     :param name: sticker name
     :return: result text
     """
+    size = os.path.getsize(file)
     file = discord.File(file)
     try:
         await guild.create_sticker(name=name, emoji=sticker_emoji, file=file, reason="$addsticker command",
@@ -1389,6 +1390,8 @@ async def add_sticker(file, guild: discord.Guild, sticker_emoji, name):
         if "Invalid Asset" in str(e):
             toreturn += "\nNote: `Invalid Asset` means Discord does not accept this file format. Stickers are only " \
                         "allowed to be png or apng."
+        if "Asset exceeds maximum size" in str(e):
+            toreturn += f"\nNote: Stickers must be under ~500kb. Your sticker is {humanize.naturalsize(size)}"
         return toreturn
     else:
         return f"{config.emojis['check']} Sticker successfully added.\n" \
