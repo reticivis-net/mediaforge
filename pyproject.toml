@@ -10,7 +10,7 @@ python = "^3.10"
 "discord.py" = { git = "https://github.com/Rapptz/discord.py.git", allow-prereleases = true, extras = ["speed"] }
 "discordlists.py" = { git = "https://github.com/HexCodeFFF/dpy2-discordlists.py.git" }
 aiofiles = "^0.8.0"
-humanize = "^3.13.1"
+humanize = "^4.1.0"
 coloredlogs = "^15.0.1"
 selenium = "^4.1.0"
 Pillow = "^9.0.0"
@@ -22,7 +22,7 @@ aiosqlite = "^0.17.0"
 psutil = "^5.9.0"
 aubio = "^0.4.9"
 apng = "^0.3.4"
-docstring-parser = "^0.13"
+docstring-parser = "^0.14.1"
 yt-dlp = "^2022.1.21"
 emojis = "^0.6.0"
 python-magic = { version = "^0.4.13", markers = "sys_platform != 'win32'" }
@@ -30,6 +30,7 @@ python-magic-win64 = { version = "^0.4.13", markers = "sys_platform == 'win32'" 
 requests = "^2.27.1"
 # comtypes on pypi is fucked on 3.8+
 comtypes = { git = "https://github.com/enthought/comtypes.git" }
+pypiwin32 = "^223"
 
 [tool.poetry.dev-dependencies]
 #aiohttp = { version = "^3.8.1", extras = ["speedups"] }
