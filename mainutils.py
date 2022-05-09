@@ -12,11 +12,11 @@ import typing
 import aiofiles
 import aiohttp
 import humanize
-import nextcord as discord
+import discord
 import regex as re
 import requests
 import yt_dlp as youtube_dl
-from nextcord.ext import commands
+from discord.ext import commands
 
 import config
 import database

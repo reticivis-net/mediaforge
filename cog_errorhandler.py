@@ -6,10 +6,10 @@ import io
 import traceback
 import urllib.parse
 
-import nextcord as discord
+import discord
 import selenium.common
 from aiohttp import client_exceptions as aiohttp_client_exceptions
-from nextcord.ext import commands
+from discord.ext import commands
 
 import config
 import improcessing
@@ -51,9 +51,8 @@ class ErrorHandlerCog(commands.Cog):
                            f"in {ch} failed due to {message}.")
             await reply(message)
 
-        global renderpool
         if isinstance(commanderror, concurrent.futures.process.BrokenProcessPool):
-            renderpool = renderpoolmodule.initializerenderpool()
+            renderpoolmodule.renderpool = renderpoolmodule.initializerenderpool()
         errorstring = str(commanderror)
         if isinstance(commanderror, discord.Forbidden):
             await dmauthor(f"{config.emojis['x']} I don't have permissions to send messages in that channel.")

@@ -23,7 +23,7 @@
 ## general technical info about the bot
 
 - inspired by [esmBot](https://github.com/esmBot/esmBot)
-- uses nextcord, a fork of discord.py
+- uses discord.py 2
 - uses ImageMagick for captioning
 - uses FFmpeg for media processing
 

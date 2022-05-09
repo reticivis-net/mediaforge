@@ -24,7 +24,7 @@ try:
     import docstring_parser
     import emojis
     import humanize
-    import nextcord as discord
+    import discord
     import pronouncing
     import psutil
     import regex as re
@@ -32,7 +32,7 @@ try:
     import selenium.common.exceptions
     import yt_dlp as youtube_dl
 
-    from nextcord.ext import commands, tasks
+    from discord.ext import commands, tasks
 
     # project files
     import captionfunctions
@@ -55,7 +55,6 @@ try:
     from cog_media import Media
     from cog_other import Other
     from cog_slashscript import Slashscript
-    from database import CreateDB
 except ModuleNotFoundError as e:
     print("".join(traceback.format_exception(type(e), e, tb=e.__traceback__)), file=sys.stderr)
     sys.exit("MediaForge was unable to import the required libraries and files. Did you follow the self-hosting guide "
@@ -83,7 +82,14 @@ async def safe_reply(self: discord.Message, *args, **kwargs) -> discord.Message:
     except (discord.errors.NotFound, discord.errors.HTTPException) as e:
         logger.debug(f"abandoning reply to {self.id} due to {get_full_class_name(e)}, "
                      f"sending message in {self.channel.id}.")
-        return await self.channel.send(*args, **kwargs)
+        # mention author
+        author = self.author.mention
+        if len(args):
+            content = author + (args[0] or "")[:2000 - len(author)]
+        else:
+            content = author
+        return await self.channel.send(content, **kwargs, allowed_mentions=discord.AllowedMentions(
+            everyone=False, users=True, roles=False, replied_user=True))
 
 
 # override .reply()
@@ -162,11 +168,36 @@ def initdbsync():
 def init():
     global renderpool
     setselfpriority()
+    initdbsync()
     downloadttsvoices()
     cleartempdir()
     chromiumrender.updatechromedriver()
     renderpool = renderpoolmodule.initializerenderpool()
     heartbeat.init()
+
+
+class MyBot(commands.AutoShardedBot):
+    async def setup_hook(self):
+        logger.debug(f"initializing cogs")
+        await database.create_db()
+        if config.bot_list_data:
+            logger.info("bot list data found. botblock will start when bot is ready.")
+            await bot.add_cog(DiscordListsPost(bot))
+        else:
+            logger.debug("no bot list data found")
+        await asyncio.gather(
+            bot.add_cog(Caption(bot)),
+            bot.add_cog(Media(bot)),
+            bot.add_cog(Conversion(bot)),
+            bot.add_cog(Image(bot)),
+            bot.add_cog(Other(bot)),
+            bot.add_cog(Debug(bot)),
+            bot.add_cog(Slashscript(bot)),
+            bot.add_cog(StatusCog(bot)),
+            bot.add_cog(ErrorHandlerCog(bot)),
+            bot.add_cog(CommandChecksCog(bot)),
+            bot.add_cog(BotEventsCog(bot))
+        )
 
 
 if __name__ == "__main__":
@@ -178,28 +209,16 @@ if __name__ == "__main__":
     else:
         shard_count = None
     # if on_ready is firing before guild count is collected, increase guild_ready_timeout
-    bot = commands.AutoShardedBot(command_prefix=prefix_function, help_command=None, case_insensitive=True,
-                                  shard_count=shard_count, guild_ready_timeout=30,
-                                  allowed_mentions=discord.AllowedMentions(everyone=False, users=False, roles=False,
-                                                                           replied_user=True))
-    logger.debug(f"initializing cogs")
-    if config.bot_list_data:
-        logger.info("bot list data found. botblock will start when bot is ready.")
-        bot.add_cog(DiscordListsPost(bot))
-    else:
-        logger.debug("no bot list data found")
-    bot.add_cog(CreateDB(bot))
-    bot.add_cog(Caption(bot))
-    bot.add_cog(Media(bot))
-    bot.add_cog(Conversion(bot))
-    bot.add_cog(Image(bot))
-    bot.add_cog(Other(bot))
-    bot.add_cog(Debug(bot))
-    bot.add_cog(Slashscript(bot))
-    bot.add_cog(StatusCog(bot))
-    bot.add_cog(ErrorHandlerCog(bot))
-    bot.add_cog(CommandChecksCog(bot))
-    bot.add_cog(BotEventsCog(bot))
+    intents = discord.Intents.all()
+    intents.presences = False
+    intents.members = False
+    bot = MyBot(command_prefix=prefix_function,
+                help_command=None,
+                case_insensitive=True,
+                shard_count=shard_count,
+                guild_ready_timeout=30,
+                allowed_mentions=discord.AllowedMentions(everyone=False, users=False, roles=False, replied_user=True),
+                intents=intents)
 
     logger.debug("running bot")
     bot.run(config.bot_token)
