@@ -31,6 +31,10 @@ requests = "^2.27.1"
 # comtypes on pypi is fucked on 3.8+
 comtypes = { git = "https://github.com/enthought/comtypes.git" }
 pypiwin32 = "^223"
+# poretry doesnt like discord.py idfk
+aiohttp = "^3.8.1"
+aiodns = "^3.0.0"
+cchardet = "^2.1.7"
 
 [tool.poetry.dev-dependencies]
 #aiohttp = { version = "^3.8.1", extras = ["speedups"] }
