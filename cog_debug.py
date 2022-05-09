@@ -4,8 +4,8 @@ import io
 import os
 import typing
 
-import nextcord as discord
-from nextcord.ext import commands
+import discord
+from discord.ext import commands
 
 import config
 import database
@@ -77,6 +77,15 @@ class Debug(commands.Cog, name="Owner Only", command_attrs=dict(hidden=True)):
         """
         Raise an error
         """
+        raise Exception("Exception raised by $error command")
+
+    @commands.command(hidden=True)
+    @commands.is_owner()
+    async def errorafter5(self, _):
+        """
+        Raise an error after 5 seconds
+        """
+        await asyncio.sleep(5)
         raise Exception("Exception raised by $error command")
 
     @commands.command(hidden=True)

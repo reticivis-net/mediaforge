@@ -1,6 +1,6 @@
 import pronouncing
 import regex as re
-from nextcord.ext import commands
+from discord.ext import commands
 
 import captionfunctions
 from mainutils import improcess
