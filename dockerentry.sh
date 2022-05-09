@@ -28,6 +28,17 @@ updateapt() {
   apt autoremove -y
   echo "Done!"
 }
+updatepip() {
+  # remote isnt set up by default when container is set up
+  echo "Updating PIP Packages..."
+  python -m poetry install
+}
+
+run() {
+  # remote isnt set up by default when container is set up
+  echo "Running..."
+  python -m poetry run python main.py
+}
 
 # mediaforge ascii art :3
 base64 -d <<<"bGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGwKbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGwKbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGwKbGxsbGxsbGxsbGwqICAiICAgICAgICAgICAgIF1sbGxsbGxsICAgamxsbGxsICAgbGxsbGxsbGxsbGxsbGwgIF1MICBdbGxsbGxsbGxsbGwKbGxsbGxsbGxsKiAgICAgICAgICAgICAgICAsZ2xsbGxsbGxsICAgIFxsbCQgICAgaWwkKiIiKiVsbEYiIiIgIF1sIiJqbEZeIiIqJGxsbGwKbGxsbGxsbGxsTCAgICAgICAgICAgICAgLCRsbGxsbGxsbGxsICB8ICB9QCAgIyAgaUwgIE1NICB9TCAgQEAgIF1sICB8bHdnQEwgIGxsbGwKbGxsbGxsbCogICAgICAgICAgICAgICwkbGxsbGxsbGxsbGxsICB8bCwgICAkbCAgaUwgIGdnZ2dAICAgbGwgIF1sICB8RiAgLCwgIGxsbGwKbGxsbGwqICAgICAgICAgICAgICAgICAqbGxsbGxsbGxsbGxsICB8bGx3dyRsbCAgaWwsICAgICxdJiwgICAgIF1sICB8TCAgICwgIGxsbGwKbGxsbGwsICAgICAgICAgICAgICAgICAgICpsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGwKbGxsbGxsQCwgICAgICAgLGcmLCAgICAgICAgIiRsbGxsbGxsICAgICAgIGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGwKbGxsbGxsbGwkeSAgICwkbGxsbEAsICAgICAgICAnJmxsbGxsICAgbGxsbGwmKiIiKiZsbCoqJioqbEYqIioqKmpsTSoiKipsbGxsbGxsbGwKbGxsbGxsbGxsbCRAJGxsbGxsbGxsJHkgICAgICAgIGBZbGxsICAgICAgfEwgIGdnICAnbCAgLHdnTCA6JEwgICQgICwmdyAgbGxsbGxsbGwKbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsdyAgICAgICAgIGxsICAgJCQkJCAgXWxsTCAgbCAgfGxsJCAgLCwsJGwgIDt3d3d3bGxsbGxsbGwKbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxnLCAgICAgZ2xsICAgbGxsbCYsICAgICwkbCAgfGxsJiAgICAgIFl3ICAgICAsbGxsbGxsbGwKbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGksLHtsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsLCAnIicgLCRsbGxsbGxsbGxsbGxsbGwKbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbCQkJCQkbGxsbGxsbGxsbGxsbGxsbGwKbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGwKbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGw="
@@ -38,31 +49,38 @@ if [ "$AUTOMODE" == "ON" ] && [ "$CONFIG" != "" ]; then
   if [ "$AUTOUPDATE" == "ON" ]; then
     updategit
     updateapt
+    updatepip
   fi
   echo "$CONFIG" | base64 -d >config.py
-  python -m poetry run python main.py
+  run
   exit
 fi
 
+# weird variable name thing for prompt
 PS3='What would you like to do? '
-foods=("Run MediaForge" "Edit Config" "Update MediaForge" "Update APT Packages" "Update MediaForge & APT Packages" "Debug Shell" "Quit")
-select fav in "${foods[@]}"; do
+choices=("Run MediaForge" "Edit Config" "Update All And Run" "Update MediaForge Code" "Update APT Packages" "Update PIP Packages" "Debug Shell" "Quit")
+select fav in "${choices[@]}"; do
   case $fav in
   "Run MediaForge")
-    python -m poetry run python main.py
+    run
     ;;
   "Edit Config")
     nano config.py
     ;;
-  "Update MediaForge")
+  "Update All And Run")
+    updategit
+    updateapt
+    updatepip
+    run
+    ;;
+  "Update MediaForge Code")
     updategit
     ;;
   "Update APT Packages")
     updateapt
     ;;
-  "Update MediaForge & APT Packages")
-    updategit
-    updateapt
+  "Update PIP Packages")
+    updatepip
     ;;
   "Debug Shell")
     /bin/bash
