@@ -55,7 +55,6 @@ try:
     from cog_media import Media
     from cog_other import Other
     from cog_slashscript import Slashscript
-    from database import CreateDB
 except ModuleNotFoundError as e:
     print("".join(traceback.format_exception(type(e), e, tb=e.__traceback__)), file=sys.stderr)
     sys.exit("MediaForge was unable to import the required libraries and files. Did you follow the self-hosting guide "
@@ -177,6 +176,30 @@ def init():
     heartbeat.init()
 
 
+class MyBot(commands.AutoShardedBot):
+    async def setup_hook(self):
+        logger.debug(f"initializing cogs")
+        await database.create_db()
+        if config.bot_list_data:
+            logger.info("bot list data found. botblock will start when bot is ready.")
+            await bot.add_cog(DiscordListsPost(bot))
+        else:
+            logger.debug("no bot list data found")
+        await asyncio.gather(
+            bot.add_cog(Caption(bot)),
+            bot.add_cog(Media(bot)),
+            bot.add_cog(Conversion(bot)),
+            bot.add_cog(Image(bot)),
+            bot.add_cog(Other(bot)),
+            bot.add_cog(Debug(bot)),
+            bot.add_cog(Slashscript(bot)),
+            bot.add_cog(StatusCog(bot)),
+            bot.add_cog(ErrorHandlerCog(bot)),
+            bot.add_cog(CommandChecksCog(bot)),
+            bot.add_cog(BotEventsCog(bot))
+        )
+
+
 if __name__ == "__main__":
     logger.log(25, "Hello World!")
     logger.info(f"discord.py {discord.__version__}")
@@ -186,28 +209,16 @@ if __name__ == "__main__":
     else:
         shard_count = None
     # if on_ready is firing before guild count is collected, increase guild_ready_timeout
-    bot = commands.AutoShardedBot(command_prefix=prefix_function, help_command=None, case_insensitive=True,
-                                  shard_count=shard_count, guild_ready_timeout=30,
-                                  allowed_mentions=discord.AllowedMentions(everyone=False, users=False, roles=False,
-                                                                           replied_user=True))
-    logger.debug(f"initializing cogs")
-    if config.bot_list_data:
-        logger.info("bot list data found. botblock will start when bot is ready.")
-        bot.add_cog(DiscordListsPost(bot))
-    else:
-        logger.debug("no bot list data found")
-    bot.add_cog(CreateDB(bot))
-    bot.add_cog(Caption(bot))
-    bot.add_cog(Media(bot))
-    bot.add_cog(Conversion(bot))
-    bot.add_cog(Image(bot))
-    bot.add_cog(Other(bot))
-    bot.add_cog(Debug(bot))
-    bot.add_cog(Slashscript(bot))
-    bot.add_cog(StatusCog(bot))
-    bot.add_cog(ErrorHandlerCog(bot))
-    bot.add_cog(CommandChecksCog(bot))
-    bot.add_cog(BotEventsCog(bot))
+    intents = discord.Intents.all()
+    intents.presences = False
+    intents.members = False
+    bot = MyBot(command_prefix=prefix_function,
+                help_command=None,
+                case_insensitive=True,
+                shard_count=shard_count,
+                guild_ready_timeout=30,
+                allowed_mentions=discord.AllowedMentions(everyone=False, users=False, roles=False, replied_user=True),
+                intents=intents)
 
     logger.debug("running bot")
     bot.run(config.bot_token)

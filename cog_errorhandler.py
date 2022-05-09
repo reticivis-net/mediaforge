@@ -51,9 +51,8 @@ class ErrorHandlerCog(commands.Cog):
                            f"in {ch} failed due to {message}.")
             await reply(message)
 
-        global renderpool
         if isinstance(commanderror, concurrent.futures.process.BrokenProcessPool):
-            renderpool = renderpoolmodule.initializerenderpool()
+            renderpoolmodule.renderpool = renderpoolmodule.initializerenderpool()
         errorstring = str(commanderror)
         if isinstance(commanderror, discord.Forbidden):
             await dmauthor(f"{config.emojis['x']} I don't have permissions to send messages in that channel.")
