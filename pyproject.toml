@@ -35,6 +35,7 @@ pypiwin32 = "^223"
 aiohttp = "^3.8.1"
 aiodns = "^3.0.0"
 cchardet = "^2.1.7"
+celery = "^5.2.6"
 
 [tool.poetry.dev-dependencies]
 #aiohttp = { version = "^3.8.1", extras = ["speedups"] }
