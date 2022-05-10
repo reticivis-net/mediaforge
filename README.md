@@ -26,6 +26,7 @@
 - uses discord.py 2
 - uses ImageMagick for captioning
 - uses FFmpeg for media processing
+- Celery and RabbitMQ for queuing
 
 ## self-host with docker
 
