@@ -36,13 +36,14 @@ body:
     attributes:
       label: Hosting Provider
       description: What hosting provider (if any) are you using?
+      placeholder: My own machine, DigitalOcean, AWS, Azure, etc.
     validations:
       required: true
   - type: textarea
     attributes:
       label: Hosting Method
       description: How are you running MediaForge?
-      placeholder: I'm using X tier with Y settings to run Docker
+      placeholder: I'm using X tier with Y settings to run Docker in Automode
     validations:
       required: true
   - type: textarea
