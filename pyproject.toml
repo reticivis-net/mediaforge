@@ -8,7 +8,6 @@ license = "GPL-3.0"
 [tool.poetry.dependencies]
 python = "^3.10"
 "discord.py" = { git = "https://github.com/Rapptz/discord.py.git", allow-prereleases = true, extras = ["speed"] }
-"discordlists.py" = { git = "https://github.com/HexCodeFFF/dpy2-discordlists.py.git" }
 aiofiles = "^0.8.0"
 humanize = "^4.1.0"
 coloredlogs = "^15.0.1"
@@ -28,14 +27,14 @@ emojis = "^0.6.0"
 python-magic = { version = "^0.4.13", markers = "sys_platform != 'win32'" }
 python-magic-win64 = { version = "^0.4.13", markers = "sys_platform == 'win32'" }
 requests = "^2.27.1"
-# comtypes on pypi is fucked on 3.8+
-comtypes = { git = "https://github.com/enthought/comtypes.git" }
 pypiwin32 = "^223"
 # poretry doesnt like discord.py idfk
 aiohttp = "^3.8.1"
 aiodns = "^3.0.0"
 cchardet = "^2.1.7"
-celery-pool-asyncio = "^0.2.0"
+celery = "^5.2.6"
+"discordlists.py" = "^1.1.1"
+ffmpeg-python = "^0.2.0"
 
 [tool.poetry.dev-dependencies]
 #aiohttp = { version = "^3.8.1", extras = ["speedups"] }
