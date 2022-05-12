@@ -1,0 +1,58 @@
+name: Self-hosting Issue
+description: Request help with your self-hosted copy of MediaForge
+labels: [ self-hosting ]
+body:
+  - type: textarea
+    attributes:
+      label: Describe the issue
+      description: A concise description of what you're experiencing.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Expected Behavior
+      description: A concise description of what you expected to happen.
+  - type: textarea
+    attributes:
+      label: Steps To Reproduce
+      description: Steps to reproduce/cause the issue, if known.
+      placeholder: |
+        1. Send this type of media...
+        2. Run this command...
+        3. See error
+  - type: textarea
+    attributes:
+      label: Logs
+      description: Send **all** available logs printed to the console.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Config
+      description: Send a copy/screenshot(s) of your `config.py` file. Be sure to redact your token(s).
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Hosting Provider
+      description: What hosting provider (if any) are you using?
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Hosting Method
+      description: How are you running MediaForge?
+      placeholder: I'm using X tier with Y settings to run Docker
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Hosting Resources
+      description: What are the available resources (memory, cpu, storage) on your provider/machine?
+      placeholder: X GB of RAM, Y GB of storage, etc.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Anything Else
+      description: Put any screenshots or other context/details about the issue here.

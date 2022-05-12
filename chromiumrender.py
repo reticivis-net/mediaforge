@@ -199,6 +199,7 @@ def initdriver():
     global opts
     global driver
     opts = webdriver.ChromeOptions()
+    opts.add_argument("--no-sandbox")
     opts.headless = True
     if config.log_level.lower() != "debug":  # switches that disable logging
         opts.add_experimental_option('excludeSwitches', ['enable-logging'])
@@ -207,13 +208,13 @@ def initdriver():
     opts.add_argument("--window-size=0,0")
     opts.add_argument("--hide-scrollbars")
     opts.add_argument("--headless")
+    opts.add_argument('--disable-infobars')
     opts.add_argument("--disable-web-security")
     opts.add_argument("--allow-file-access-from-files")
     opts.add_argument("--allow-file-access-from-file")
     opts.add_argument("--allow-file-access")
     opts.add_argument("--disable-extensions")
     opts.add_argument("--disable-dev-shm-usage")
-    opts.add_argument("--no-sandbox")
     opts.add_argument("--incognito")
     if sys.platform == "win32":
         driver = webdriver.Chrome("chromedriver.exe", options=opts, service_log_path='NUL')
