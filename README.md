@@ -164,7 +164,7 @@ unsupported. just replace `apt-get` with your system's preferred package manager
 the bot uses many external CLI programs for media processing.
 
 - FFmpeg - not included but [easily installable on windows and linux](https://ffmpeg.org/download.html)
-    - **If installing on ubuntu, ensure that ffmpeg version >= 4**
+    - **Ensure that ffmpeg version >= 5**
 - gifski - windows executable is included. linux version [downloadable from the website](https://gif.ski/)
 - pngquant - windows executable is included. installable on linux with `sudo apt-get install pngquant`
 - ChromeDriver - ChromeDriver is automatically downloaded to match the chrome installation on your system when the bot
