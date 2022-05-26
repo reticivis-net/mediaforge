@@ -145,7 +145,7 @@ and the [non-python libraries](#non-python-libraries), set up the [config](#conf
 built and tested on windows 10/11 and ubuntu 18/20, and these 2 OSes (and their successors) will continue to be
 officially supported.
 
-will _probably_ work on macos and other linux/unix distros if the below libraries are available but theyre untested and
+will _probably_ work on macos and other linux/unix distros if the below libraries are available but they're untested and
 unsupported. just replace `apt-get` with your system's preferred package manager ([`brew`](https://brew.sh/) for macos)
 
 ### python libraries
@@ -171,7 +171,7 @@ the bot uses many external CLI programs for media processing.
   starts.
     - if on linux, chrome must be in the system bin/path
     - if on windows, chrome must be in [one of the default locations](https://stackoverflow.com/a/40674915/9044183)
-    - (specifically the win10 ones)
+    - (specifically the win 10 ones)
 - ImageMagick - **not included** but [downloadable here](https://imagemagick.org/script/download.php)
 - ExifTool - windows executable is included. installable on linux
   with `sudo apt-get install exiftool` https://exiftool.org/
