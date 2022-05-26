@@ -145,7 +145,7 @@ and the [non-python libraries](#non-python-libraries), set up the [config](#conf
 built and tested on windows 10/11 and ubuntu 18/20, and these 2 OSes (and their successors) will continue to be
 officially supported.
 
-will _probably_ work on macos and other linux/unix distros if the below libraries are available but theyre untested and
+will _probably_ work on macos and other linux/unix distros if the below libraries are available but they're untested and
 unsupported. just replace `apt-get` with your system's preferred package manager ([`brew`](https://brew.sh/) for macos)
 
 ### python libraries
