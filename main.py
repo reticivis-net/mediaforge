@@ -185,11 +185,17 @@ if __name__ == "__main__":
         shard_count = config.shard_count
     else:
         shard_count = None
+    # api v10
+    intents = discord.Intents.all()
+    intents.presences = False
+    intents.members = False
+
     # if on_ready is firing before guild count is collected, increase guild_ready_timeout
     bot = commands.AutoShardedBot(command_prefix=prefix_function, help_command=None, case_insensitive=True,
                                   shard_count=shard_count, guild_ready_timeout=30,
                                   allowed_mentions=discord.AllowedMentions(everyone=False, users=False, roles=False,
-                                                                           replied_user=True))
+                                                                           replied_user=True),
+                                  intents=intents)
     logger.debug(f"initializing cogs")
     if config.bot_list_data:
         logger.info("bot list data found. botblock will start when bot is ready.")
