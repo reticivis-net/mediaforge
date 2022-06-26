@@ -13,7 +13,6 @@ class GuildBansCog(commands.Cog):
 
     # @commands.check
     async def bot_check(self, ctx: commands.Context):
-        logger.error("HI")
         # if await self.bot.is_owner(ctx.author):
         #     return True
         async with database.db.execute("SELECT banreason from server_bans WHERE server_id=?", (ctx.guild.id,)) as cur:
