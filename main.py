@@ -12,6 +12,7 @@ from cog_botevents import BotEventsCog
 from cog_botlist import DiscordListsPost
 from cog_commandchecks import CommandChecksCog
 from cog_errorhandler import ErrorHandlerCog
+from cog_guild_bans import GuildBansCog
 from cog_status import StatusCog
 
 try:
@@ -163,6 +164,10 @@ def initdbsync():
         cur = syncdb.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='bans'")
         if not cur.fetchall():
             syncdb.execute("create table bans ( user int not null constraint bans_pk primary key, banreason text );  ")
+        cur = syncdb.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='server_bans'")
+        if not cur.fetchall():
+            syncdb.execute("create table server_bans(server_id integer not null constraint key primary key, "
+                           "banreason text default \"No Reason Given\" not null);")
     syncdb.close()
 
 
@@ -214,6 +219,7 @@ if __name__ == "__main__":
     bot.add_cog(ErrorHandlerCog(bot))
     bot.add_cog(CommandChecksCog(bot))
     bot.add_cog(BotEventsCog(bot))
+    bot.add_cog(GuildBansCog(bot))
 
     logger.debug("running bot")
     bot.run(config.bot_token)
