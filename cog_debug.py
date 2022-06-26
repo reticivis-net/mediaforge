@@ -21,7 +21,7 @@ from tempfiles import TempFileSession
 
 class Debug(commands.Cog, name="Owner Only", command_attrs=dict(hidden=True)):
     def __init__(self, bot):
-        self.bot = bot
+        self.bot: commands.Bot = bot
 
     @commands.command(aliases=["segfault", "segmentationfault"])
     @commands.is_owner()

@@ -1,0 +1,49 @@
+name: Server Unban Request
+description: Request your server to be unbanned from the public MediaForge bot
+labels: [ "unban request" ]
+title: Unban request for <YOUR SERVER HERE>
+body:
+  - type: markdown
+    attributes:
+      value: Only the owner of the server can appeal the ban.
+  - type: input
+    attributes:
+      label: Your Discord tag
+      description: Your username AND descriminator
+      placeholder: "@MediaForge#5871"
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: Your Discord ID
+      description: you can get this by enabling developer mode, right-clicking on yourself, and clicking "copy ID". this is NOT your 4 digit discriminator and will likely be 18-22 digits long.
+      placeholder: "780570413767983122"
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: Your server's name
+      description: Your server's current name
+      placeholder: "MediaForge"
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: Your Server ID
+      description: you can get this by enabling developer mode, right-clicking on the server, and clicking "copy ID". it will likely be 18-22 digits long.
+      placeholder: "803788965215338546"
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Why was your server banned?
+      description: if the bot gives you a specific reason, copy-paste it here. if not, take a guess and i'll check the database.
+      placeholder: My server was banned because...
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Why should your server be unbanned?
+      placeholder: My server should be unbanned because...
+    validations:
+      required: true

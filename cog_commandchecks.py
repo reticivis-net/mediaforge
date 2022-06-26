@@ -12,7 +12,7 @@ class CommandChecksCog(commands.Cog):
         # from ?tag cooldown mapping
         self._cd = commands.CooldownMapping.from_cooldown(1.0, config.cooldown, commands.BucketType.member)
 
-    @commands.check
+    # @commands.check
     async def banned_users(self, ctx: commands.Context):
         if await self.bot.is_owner(ctx.author):
             return True
@@ -35,7 +35,7 @@ class CommandChecksCog(commands.Cog):
         else:
             return True
 
-    @commands.check
+    # @commands.Cog.bot_check
     def block_filter(self, ctx: commands.Context):
         # TODO: implement advanced regex-based filter to prevent filter bypass
         # this command is exempt because it only works on URLs and there have been issues with r/okbr
@@ -46,7 +46,7 @@ class CommandChecksCog(commands.Cog):
                 raise commands.CheckFailure("Your command contains one or more blocked words.")
         return True
 
-    @commands.check
+    # @commands.check
     async def cooldown_check(self, ctx):
         # no cooldown for help
         if ctx.command.name == "help":
@@ -62,3 +62,11 @@ class CommandChecksCog(commands.Cog):
         if retry_after:
             raise commands.CommandOnCooldown(bucket, retry_after, commands.BucketType.user)
         return True
+
+    async def bot_check(self, ctx: commands.Context):
+        results = [
+            self.block_filter(ctx),
+            await self.cooldown_check(ctx),
+            await self.banned_users(ctx)
+        ]
+        return all(results)
