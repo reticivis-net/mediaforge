@@ -69,7 +69,7 @@ def sus(input_string: str):
 
     input_string = input_string.lower().replace(":flushed:", "😳")
 
-    font = ImageFont.truetype("arial.ttf", 13)
+    font = ImageFont.truetype("rendering/fonts/arial.ttf", 13)
 
     final_image = Image.new('RGB', (len(input_string) * 23, master_im.height))
 
