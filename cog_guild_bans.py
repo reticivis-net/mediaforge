@@ -15,6 +15,8 @@ class GuildBansCog(commands.Cog):
     async def bot_check(self, ctx: commands.Context):
         # if await self.bot.is_owner(ctx.author):
         #     return True
+        if not ctx.guild:
+            return True
         async with database.db.execute("SELECT banreason from server_bans WHERE server_id=?", (ctx.guild.id,)) as cur:
             ban = await cur.fetchone()
         if ban:
