@@ -145,7 +145,7 @@ class Conversion(commands.Cog, name="Conversion"):
         :param ctx: discord context
         :mediaparam video: A video.
         """
-        await improcess(ctx, improcessing.mp4togif, [["VIDEO"]])
+        await improcess(ctx, improcessing.mp4togif, [["VIDEO", "IMAGE"]])
 
     @commands.command(aliases=["apng", "videotoapng", "giftoapng"])
     async def toapng(self, ctx):
