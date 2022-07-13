@@ -621,13 +621,16 @@ async def mp4togif(mp4):
     outname = temp_file("gif")
     n = glob.glob(name.replace('%09d', '*'))
     if len(n) <= 1:
-        raise NonBugError(f"Output file only has {len(n)} frames, GIFs must have at least 2.")
+
+        fp_out = outname
+        
+        imgs = (Image.open(f) for f in sorted(n))
+        img = next(imgs)  # extract first image from iterator
+        img.save(fp=fp_out, format='GIF', append_images=imgs, save_all=True, duration=200, loop=0)
     else:
         await run_command("gifski", "--quiet", "--fast", "--output", outname, "--fps", str(fps), *n)
-        # logger.info("Cleaning files...")
-        # for f in glob.glob(name.replace('%09d', '*')):
-        #     os.remove(f)
-        return outname
+
+    return outname
 
 
 async def toapng(video):
