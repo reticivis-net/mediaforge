@@ -3,7 +3,6 @@ This file contains functions for processing and editing media
 """
 # standard libs
 import asyncio
-import concurrent.futures
 import glob
 import json
 import math
@@ -16,10 +15,8 @@ from fractions import Fraction
 
 # pip libs
 import apng
-import aubio
-import humanize
 import discord
-import numpy
+import humanize
 from PIL import Image, UnidentifiedImageError
 from discord.ext import commands
 
@@ -29,7 +26,6 @@ else:
     import magic
 
 # project files
-import autotune
 import captionfunctions
 import renderpool
 import config
@@ -482,14 +478,6 @@ async def mediatype(image):
     return None
 
 
-async def run_in_exec(func, *args, **kwargs):
-    """
-    prevents intense non-async functions from blocking event loop
-    """
-    loop = asyncio.get_running_loop()
-    return await loop.run_in_executor(None, lambda: func(*args, **kwargs))
-
-
 async def ensureduration(media, ctx: typing.Union[commands.Context, None]):
     """
     ensures that media is under or equal to the config minimum frame count
@@ -528,87 +516,6 @@ async def ensureduration(media, ctx: typing.Union[commands.Context, None]):
 #         jobs.append(renderpool.submit(captionfunctions.resize, f, res, n))
 #     await asyncio.wait(jobs)
 #     return out
-
-
-async def handleanimated(media: typing.Union[str, typing.List[str]], capfunction: callable, ctx: commands.Context,
-                         *caption):
-    """
-    handles processing functions that only work in singular frames and applies to videos/gifs
-    :param media: image, video, or gif
-    :param capfunction: function to process media with
-    :param ctx: discord context
-    :param caption: other params (usually caption)
-    :return: processed media
-    """
-    mediaargs = []
-    if isinstance(media, list):
-        mediaargs = media[1:]
-        media = media[0]
-    imty = await mediatype(media)
-    logger.info(f"Detected type {imty}.")
-    if imty is None:
-        raise Exception(f"File {media} is invalid!")
-    elif imty == "IMAGE":
-        logger.info(f"Processing frame...")
-        # media = minimagesize(media, 200)
-        result = await renderpool.renderpool.submit(capfunction, [media] + mediaargs if mediaargs else media, caption)
-        # capped = await run_in_exec(result.get)
-        return await compresspng(result)
-    elif imty == "VIDEO" or imty == "GIF":
-        media = await ensureduration(media, ctx)
-        frames, name = await ffmpegsplit(media)
-        audio = await splitaudio(media)
-        fps = await get_frame_rate(media)
-        # logger.info(
-        #     f"Processing {len(frames)} frames with {min(len(frames), POOLWORKERS)} processes...")
-
-        logger.info(f"Processing {len(frames)} frames...")
-        framefuncs = []
-
-        ses = tempfiles.get_session_list()
-        for i, frame in enumerate(frames):
-            framefuncs.append(
-                renderpool.renderpool.submit(capfunction, [frame] + mediaargs if mediaargs else frame, caption,
-                                             frame.replace('.png', '_rendered.png'), ses=ses))
-        await asyncio.wait(framefuncs)
-        tempfiles.reserve_names(glob.glob(name.replace('.png', '_rendered.png').replace('%09d', '*')))
-        # result = renderpool.renderpool.starmap_async(capfunction, capargs)
-        # await run_in_exec(result.get)
-        # result = await renderpool.renderpool.
-        logger.info(f"Joining {len(frames)} frames...")
-        # frames = await forcesize(glob.glob(name.replace('.png', '_rendered.png').replace('%09d', '*')))
-
-        if imty == "GIF":
-            frames = glob.glob(name.replace('.png', '_rendered.png').replace('%09d', '*'))
-            outname = temp_file("gif")
-            await run_command("gifski", "--quiet", "--fast", "--output", outname, "--fps", str(fps), "--width", "1000",
-                              *frames)
-        else:  # imty == "VIDEO":
-            outname = temp_file("mp4")
-            frames = name.replace('.png', '_rendered.png')
-            if audio:
-                await run_command("ffmpeg", "-hide_banner", "-r", str(fps), "-i", frames,
-                                  "-i", audio, "-c:a", "aac", "-shortest",
-                                  "-c:v", "libx264", "-crf", "25", "-pix_fmt", "yuv420p",
-                                  "-vf", "crop=trunc(iw/2)*2:trunc(ih/2)*2", outname)
-            else:
-                await run_command("ffmpeg", "-hide_banner", "-r", str(fps), "-i", frames,
-                                  "-c:v", "libx264", "-crf", "25", "-pix_fmt", "yuv420p",
-                                  "-vf", "crop=trunc(iw/2)*2:trunc(ih/2)*2", outname)
-        # cleanup
-        # logger.info("Cleaning files...")
-        # for f in glob.glob(name.replace('%09d', '*')):
-        #     try:
-        #         os.remove(f)
-        #     except FileNotFoundError:
-        #         pass
-        # for f in glob.glob(name.replace('.png', '_rendered.png').replace('%09d', '*')):
-        #     try:
-        #         os.remove(f)
-        #     except FileNotFoundError:
-        #         pass
-        return outname
-
 
 async def mp4togif(mp4):
     """
@@ -1052,38 +959,6 @@ async def overlay(files, alpha: float, mode: str = 'overlay'):
     return outname
 
 
-# https://stackoverflow.com/a/30228789/9044183
-async def imagestack(files, style):
-    """
-    stack() calls this function since ffmpeg can be weird about pngs
-    :param files: [image,image]
-    :param style: "hstack" or "vstack"
-    :return: processed media
-    """
-    image0 = Image.open(files[0]).convert("RGBA")
-    image1 = Image.open(files[1]).convert("RGBA")
-    if style == "vstack":
-        width = image0.size[0]
-        ratio1 = image1.size[1] / image1.size[0]
-        height1 = width * ratio1
-        image1 = image1.resize((int(width), int(height1)), resample=Image.BICUBIC)
-        outimg = Image.new("RGBA", (width, image0.size[1] + image1.size[1]))
-        outimg.alpha_composite(image0)
-        outimg.alpha_composite(image1, (0, image0.size[1]))
-    else:
-        height = image0.size[1]
-        ratio1 = image1.size[0] / image1.size[1]
-        width1 = height * ratio1
-        image1 = image1.resize((int(width1), int(height)), resample=Image.BICUBIC)
-        outimg = Image.new("RGBA", (image0.size[0] + image1.size[0], height))
-        outimg.alpha_composite(image0)
-        outimg.alpha_composite(image1, (image0.size[0], 0))
-    outname = temp_file("png")
-    outimg.save(outname)
-    outname = await compresspng(outname)
-    return outname
-
-
 async def count_frames(video):
     # https://stackoverflow.com/a/28376817/9044183
     return int(await run_command("ffprobe", "-v", "error", "-select_streams", "v:0", "-count_packets", "-show_entries",
@@ -1327,160 +1202,6 @@ async def checkwatermark(file):
     return False
 
 
-async def count_emoji(guild: discord.Guild):
-    anim = 0
-    static = 0
-    for emoji in guild.emojis:
-        if emoji.animated:
-            anim += 1
-        else:
-            static += 1
-    return {"animated": anim, "static": static}
-
-
-async def add_emoji(file, guild: discord.Guild, name):
-    """
-    adds emoji to guild
-    :param file: emoji to add
-    :param guild: guild to add it to
-    :param name: emoji name
-    :return: result text
-    """
-    with open(file, "rb") as f:
-        data = f.read()
-    try:
-        emoji = await guild.create_custom_emoji(name=name, image=data, reason="$addemoji command")
-    except discord.Forbidden:
-        return f"{config.emojis['x']} I don't have permission to create an emoji. Make sure I have the Manage Emojis " \
-               f"permission. "
-    except discord.HTTPException as e:
-        logger.error(e, exc_info=(type(e), e, e.__traceback__))
-        return f"{config.emojis['2exclamation']} Something went wrong trying to add your emoji! ```{e}```"
-    else:
-        count = await count_emoji(guild)
-        if emoji.animated:
-            return f"{config.emojis['check']} Animated emoji successfully added: " \
-                   f"{emoji}\n{guild.emoji_limit - count['animated']} slots are left."
-        else:
-            return f"{config.emojis['check']} Emoji successfully added: " \
-                   f"{emoji}\n{guild.emoji_limit - count['static']} slots are left."
-
-
-async def add_sticker(file, guild: discord.Guild, sticker_emoji, name):
-    """
-    adds sticker to guild
-    :param file: sticker to add
-    :param guild: guild to add it to
-    :param sticker_emoji "related" emoji of the sticker
-    :param name: sticker name
-    :return: result text
-    """
-    file = discord.File(file)
-    try:
-        await guild.create_sticker(name=name, emoji=sticker_emoji, file=file, reason="$addsticker command",
-                                   description=" ")
-        # description MUST NOT be empty. see https://github.com/nextcord/nextcord/issues/165
-    except discord.Forbidden:
-        return f"{config.emojis['x']} I don't have permission to create a sticker. Make sure I have the Manage " \
-               f"Emojis and Stickers permission. "
-    except discord.HTTPException as e:
-        logger.error(e, exc_info=(type(e), e, e.__traceback__))
-        toreturn = f"{config.emojis['2exclamation']} Something went wrong trying to add your sticker! ```{e}```"
-        if "Invalid Asset" in str(e):
-            toreturn += "\nNote: `Invalid Asset` means Discord does not accept this file format. Stickers are only " \
-                        "allowed to be png or apng."
-        return toreturn
-    else:
-        return f"{config.emojis['check']} Sticker successfully added.\n" \
-               f"\n{guild.sticker_limit - len(guild.stickers)} slots are left."
-
-
-async def set_banner(file, guild: discord.Guild):
-    """
-    sets guild banner
-    :param file: banner file
-    :param guild: guild to add it to
-    :return:
-    """
-    with open(file, "rb") as f:
-        data = f.read()
-    try:
-        await guild.edit(banner=bytes(data))
-    except discord.Forbidden:
-        return f"{config.emojis['x']} I don't have permission to set your banner. Make sure I have the Manage Server " \
-               f"permission. "
-    except discord.HTTPException as e:
-        return f"{config.emojis['2exclamation']} Something went wrong trying to set your banner! ```{e}```"
-    else:
-        return f"{config.emojis['check']} Successfully changed guild banner."
-
-
-async def set_icon(file, guild: discord.Guild):
-    """
-    sets guild icon
-    :param file: icon file
-    :param guild: guild to add it to
-    :return:
-    """
-    if (await mediatype(file)) == "GIF" and "ANIMATED_ICON" not in guild.features:
-        return f"{config.emojis['x']} This guild does not support animated icons."
-    with open(file, "rb") as f:
-        data = f.read()
-    try:
-        await guild.edit(icon=bytes(data))
-    except discord.Forbidden:
-        return f"{config.emojis['x']} I don't have permission to set your icon. Make sure I have the Manage Server " \
-               f"permission. "
-    except discord.HTTPException as e:
-        return f"{config.emojis['2exclamation']} Something went wrong trying to set your icon! ```{e}```"
-    else:
-        return "Successfully changed guild icon."
-
-
-async def iconfromsnowflakeid(snowflake: int, bot, ctx):
-    try:
-        user = await bot.fetch_user(snowflake)
-        return str(user.avatar.url)
-    except (discord.NotFound, discord.Forbidden):
-        pass
-    try:
-        guild = await bot.fetch_guild(snowflake)
-        return str(guild.icon.url)
-    except (discord.NotFound, discord.Forbidden):
-        pass
-    try:  # get the icon through a message author to support webhook/pk icons
-        msg = await ctx.channel.fetch_message(snowflake)
-        return str(msg.author.avatar.url)
-    except (discord.NotFound, discord.Forbidden):
-        pass
-    return None
-
-
-async def handleautotune(media: str, *params):
-    audio = await splitaudio(media)
-    assert audio, "Video file must have audio."
-    wav = temp_file("wav")
-    await run_command("ffmpeg", "-i", audio, "-ac", "1", wav)  # "-acodec", "",
-    outwav = temp_file("wav")
-    # run in separate process to avoid possible segfault crashes and cause its totally blocking
-    with concurrent.futures.ProcessPoolExecutor(1) as executor:
-        await asyncio.get_event_loop().run_in_executor(executor, autotune.autotune, wav, outwav, *params)
-    mt = await mediatype(media)
-    if mt == "AUDIO":
-        outname = temp_file("mp3")
-        await run_command("ffmpeg", "-i", outwav, "-c:a", "libmp3lame", outname)
-        return outname
-    elif mt == "VIDEO":
-        outname = temp_file("mp4")
-        # https://superuser.com/a/1137613/1001487
-        # combine video of original file with new audio
-
-        # shawty it's a wav you cant make it acodec copy 💀
-        await run_command("ffmpeg", "-i", media, "-i", outwav, "-c:v", "copy", "-c:a", "aac", "-map", "0:v:0", "-map",
-                          "1:a:0", outname)
-        return outname
-
-
 async def hue(file, h: float):
     exts = {
         "VIDEO": "mp4",
@@ -1512,55 +1233,6 @@ async def tint(file, col: discord.Color):
     if mt == "GIF":
         out = await mp4togif(out)
     return out
-
-
-async def tempofunc(media: str) -> typing.Optional[float]:
-    """
-    detects BPM of media using aubio
-    :param media: path to media
-    :return: BPM if detected or None
-    """
-    # https://github.com/aubio/aubio/blob/master/python/demos/demo_bpm_extract.py
-    audio = await splitaudio(media)
-    assert audio, "Video file must have audio."
-    wav = temp_file("wav")
-    await run_command("ffmpeg", "-i", audio, "-ac", "1", "-ar", "44100", wav)
-    with aubio.source(wav) as src:
-        win_s = 1024  # fft size
-        hop_s = 512  # hop size
-        samplerate = 44100  # hardcoded just in case
-        aubiotempo = aubio.tempo("default", win_s, hop_s, samplerate)
-
-        # list of beats, in samples
-        beats = []
-
-        # total number of frames read
-        total_frames = 0
-        while True:
-            samples, read = src()
-            is_beat = aubiotempo(samples)
-            if is_beat:
-                this_beat = aubiotempo.get_last_s()
-                # logger.debug(f"{this_beat / float(samplerate):f}")
-                beats.append(this_beat)
-            total_frames += read
-            if read < hop_s:
-                break
-        logger.debug(beats)
-        if len(beats) > 1:
-            bpms = 60. / numpy.diff(beats)
-            return float(numpy.median(bpms))
-        else:
-            return None
-
-
-async def tempo(media: str):
-    res = await tempofunc(media)
-    if res:
-        return f"Detected BPM of **~{round(res, 1)}**"
-    else:
-        return f"{config.emojis['warning']} Not enough beats found to detect BPM."
-        # print len(beats)
 
 
 async def tts(text: str, model: typing.Literal["male", "female", "retro"] = "male"):
@@ -1646,25 +1318,3 @@ def rgb_to_lightness(r, g, b):
     maxc = max(r, g, b)
     minc = min(r, g, b)
     return (minc + maxc) / 2.0
-
-
-async def uncaption(file, frame_to_try: int, tolerance: int):
-    frame_to_try = await frame_n(file, frame_to_try)
-    # https://github.com/esmBot/esmBot/blob/master/natives/uncaption.cc
-    # comically naive approach but apparently works :p
-    with Image.open(frame_to_try) as im:
-        im = im.convert("RGB")
-        # get first pixel of every row
-        pixels = list(im.getdata())
-        width, height = im.size
-        hpixels = pixels[::width]
-        row_to_cut = 0
-        for i, pixel in enumerate(hpixels):
-            # if lightness is less than tolerance
-            if rgb_to_lightness(pixel[0] / 255, pixel[1] / 255, pixel[2] / 255) < tolerance / 100:
-                row_to_cut = i
-                break
-    # should be 0 if no caption or all caption
-    if row_to_cut == 0:
-        raise NonBugError("Unable to detect caption. Try to adjust `frame_to_try`. Run `$help uncaption` for help.")
-    return await crop(file, width, height - row_to_cut, 0, row_to_cut)
