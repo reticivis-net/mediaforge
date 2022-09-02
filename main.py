@@ -96,33 +96,6 @@ async def safe_reply(self: discord.Message, *args, **kwargs) -> discord.Message:
 discord.Message.reply = safe_reply
 
 
-def setselfpriority():
-    # (try to) set self to high priority
-    # https://stackoverflow.com/questions/1023038/change-process-priority-in-python-cross-platform
-    try:
-        if sys.platform == 'win32':
-            # Based on:
-            #   "Recipe 496767: Set Process Priority In Windows" on ActiveState
-            #   http://code.activestate.com/recipes/496767/
-            import win32api
-            import win32process
-            import win32con
-
-            pid = win32api.GetCurrentProcessId()
-            handle = win32api.OpenProcess(win32con.PROCESS_ALL_ACCESS, True, pid)
-            win32process.SetPriorityClass(handle, win32process.HIGH_PRIORITY_CLASS if docker
-            else win32process.ABOVE_NORMAL_PRIORITY_CLASS)
-        else:
-            os.nice(-19 if docker else -10)
-    except Exception as commanderror:
-        if docker:
-            logger.log(25, f"Failed to set main process priority. I've detected you're running me within a docker "
-                           f"container. To fix this, add `--cap-add SYS_NICE` to the run arguments.")
-        else:
-            logger.debug(f"Failed to set own priority.")
-        logger.debug(commanderror, exc_info=(type(commanderror), commanderror, commanderror.__traceback__))
-
-
 def downloadttsvoices():
     # other misc init code (really need to organize this :p)
     if sys.platform != 'win32':
@@ -166,13 +139,9 @@ def initdbsync():
 
 
 def init():
-    global renderpool
-    setselfpriority()
     initdbsync()
     downloadttsvoices()
     cleartempdir()
-    chromiumrender.updatechromedriver()
-    renderpool = renderpoolmodule.initializerenderpool()
     heartbeat.init()
 
 

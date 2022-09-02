@@ -20,7 +20,6 @@ from discord.ext import commands
 
 import config
 import database
-import improcessing
 import renderpool
 from clogs import logger
 from tempfiles import TempFileSession, get_random_string, temp_file
@@ -94,6 +93,7 @@ def ytdownload(vid, form):
         logger.debug(nfo)
         if "is_live" in nfo and nfo["is_live"]:
             raise youtube_dl.DownloadError("Livestreams cannot be downloaded.")
+        # TODO: YOU IDIOT THIS IS SYNC!!!
         ydl.download([vid])
     filename = glob.glob(name + ".*")
     if len(filename) > 0:
@@ -295,7 +295,7 @@ async def tenorsearch(ctx, gif=False):
 
 
 async def improcess(ctx: discord.ext.commands.Context, func: callable, allowedtypes: list, *args,
-                    handleanimated=False, resize=True, forcerenderpool=False, expectresult=True,
+                    resize=True, expectresult=True,
                     filename=None, spoiler=False):
     """
     The core function of the bot. Gathers media and sends it to the proper function.
