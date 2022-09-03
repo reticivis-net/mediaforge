@@ -23,7 +23,7 @@ RUN apt-get -y update && apt-get -t stable install -y pngquant exiftool apngasm 
 
     # chrome is weird
 RUN wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-RUN apt install ./google-chrome-stable_current_amd64.deb
+RUN apt install -y ./google-chrome-stable_current_amd64.deb
 
 # gifski isnt on an actual repo, use this shit i found on github to install the latest deb off github
 RUN dpkg -i $(curl -w "%{filename_effective}" -LO $(curl -s https://api.github.com/repos/ImageOptim/gifski/releases | grep browser_download_url | grep '64[.]deb' | head -n 1 | cut -d '"' -f 4))
