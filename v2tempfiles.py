@@ -14,7 +14,7 @@ def is_named_used(name):
     return os.path.exists(name)
 
 
-def temp_file_name(extension="png"):
+def temp_file_name(extension):
     while True:
         if extension is not None:
             name = f"{config.temp_dir}{get_random_string(8)}.{extension}"
@@ -26,7 +26,6 @@ def temp_file_name(extension="png"):
 
 class TempFile(str):
     todelete: bool = True
-    type: str | None = None
 
     # literally just a path but it removes itself on garbage collection
     def __init__(self, arg: str | None):

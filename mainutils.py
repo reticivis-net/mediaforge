@@ -51,17 +51,6 @@ def download_sync(url, filename):
                 f.write(chunk)
 
 
-class MyLogger(object):
-    def debug(self, msg: ""):
-        logger.debug(msg.replace("\r", ""))
-
-    def warning(self, msg: ""):
-        logger.warning(msg.replace("\r", ""))
-
-    def error(self, msg: ""):
-        logger.error(msg.replace("\r", ""))
-
-
 def ytdownload(vid, form):
     while True:
         name = f"temp/{get_random_string(12)}"
@@ -245,7 +234,7 @@ async def saveurls(urls: list):
     return files
 
 
-async def handletenor(m, ctx, gif=False):
+async def handletenor(m: discord.Message, ctx: commands.Context, gif=False):
     """
     like handlemessagesave() but only for tenor
     :param m: discord message
@@ -295,8 +284,7 @@ async def tenorsearch(ctx, gif=False):
 
 
 async def improcess(ctx: discord.ext.commands.Context, func: callable, allowedtypes: list, *args,
-                    resize=True, expectresult=True,
-                    filename=None, spoiler=False):
+                    resize=True, expectresult=True, filename=None, spoiler=False):
     """
     The core function of the bot. Gathers media and sends it to the proper function.
 
@@ -305,7 +293,6 @@ async def improcess(ctx: discord.ext.commands.Context, func: callable, allowedty
     :param allowedtypes: list of lists of strings. each inner list is an argument, the strings it contains are the
     types that arg must be. or just False/[] if no media needed
     :param args: any non-media arguments, passed into func()
-    :param handleanimated: if func() only works on still images, set to True to process each frame individually.
     :param expectresult: is func() supposed to return a result? if true, it expects an image. if false, can use a
     string.
     :param filename: filename of the uploaded file. if None, not passed.
