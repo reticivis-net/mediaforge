@@ -10,9 +10,6 @@ COPY . mediaforge
 # like cd but for docker
 WORKDIR mediaforge
 # add repos for weird packages
-# google's key TODO: "apt-key is deprecated"
-RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -
-RUN echo "deb https://dl.google.com/linux/chrome/deb/ stable main" >> "/etc/apt/sources.list.d/google-chrome.list"
 # the static deb here makes me nervous but the alternative is Really Weird so no
 RUN dpkg -i $(curl -w "%{filename_effective}" -LO "https://www.deb-multimedia.org/pool/main/d/deb-multimedia-keyring/deb-multimedia-keyring_2016.8.1_all.deb")
 # experimental/testing/unstable for ffmpeg and non-free/contrib for mbrola
