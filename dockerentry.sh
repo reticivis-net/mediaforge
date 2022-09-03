@@ -21,7 +21,7 @@ updateapt() {
   apt-get upgrade -y
   # re-add ffmpeg's repo
   apt-mark unhold $ffmpeganddependents
-  printf "\ndeb http://deb.debian.org/debian bullseye contrib non-free\ndeb http://deb.debian.org/debian experimental main\ndeb http://deb.debian.org/debian unstable main\n" >>"/etc/apt/sources.list.d/debian-extended.list"
+  printf "\ndeb https://deb.debian.org/debian bullseye contrib non-free\ndeb https://deb.debian.org/debian experimental main\ndeb https://deb.debian.org/debian unstable main\n" >>"/etc/apt/sources.list.d/debian-extended.list"
   apt-get update -y
   # i tried to use it with $ffmpeganddependents but it broke i think this is fineeeee
   apt-get install -t experimental -y ffmpeg
