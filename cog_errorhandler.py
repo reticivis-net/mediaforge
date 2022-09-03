@@ -7,13 +7,11 @@ import traceback
 import urllib.parse
 
 import discord
-import selenium.common
 from aiohttp import client_exceptions as aiohttp_client_exceptions
 from discord.ext import commands
 
 import config
-import improcessing
-import renderpool as renderpoolmodule
+import processing_common
 from clogs import logger
 from mainutils import now, prefix_function, get_full_class_name
 
@@ -51,8 +49,6 @@ class ErrorHandlerCog(commands.Cog):
                            f"in {ch} failed due to {message}.")
             await reply(message)
 
-        if isinstance(commanderror, concurrent.futures.process.BrokenProcessPool):
-            renderpoolmodule.renderpool = renderpoolmodule.initializerenderpool()
         errorstring = str(commanderror)
         if isinstance(commanderror, discord.Forbidden):
             await dmauthor(f"{config.emojis['x']} I don't have permissions to send messages in that channel.")
@@ -110,7 +106,7 @@ class ErrorHandlerCog(commands.Cog):
             err = f"{config.emojis['x']} {errorstring}"
             await logandreply(err)
         elif isinstance(commanderror, discord.ext.commands.errors.CommandInvokeError) and \
-                isinstance(commanderror.original, improcessing.NonBugError):
+                isinstance(commanderror.original, processing_common.NonBugError):
             await logandreply(f"{config.emojis['2exclamation']} {str(commanderror.original)[:1000]}")
         else:
             if isinstance(commanderror, discord.ext.commands.errors.CommandInvokeError):
@@ -120,8 +116,7 @@ class ErrorHandlerCog(commands.Cog):
             is_hosting_issue = isinstance(commanderror, (aiohttp_client_exceptions.ClientOSError,
                                                          aiohttp_client_exceptions.ServerDisconnectedError,
                                                          asyncio.exceptions.TimeoutError,
-                                                         concurrent.futures.process.BrokenProcessPool,
-                                                         selenium.common.exceptions.TimeoutException))
+                                                         concurrent.futures.process.BrokenProcessPool))
 
             if is_hosting_issue:
                 desc = "If this error keeps occurring, report this with the attached traceback file to the GitHub."

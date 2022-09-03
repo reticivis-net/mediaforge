@@ -11,8 +11,8 @@ import typing
 
 import aiofiles
 import aiohttp
-import humanize
 import discord
+import humanize
 import regex as re
 import requests
 import yt_dlp as youtube_dl
@@ -20,9 +20,12 @@ from discord.ext import commands
 
 import config
 import database
-import renderpool
+import processing_common
+import processing_ffmpeg
+import processing_ffprobe
+import processing_other
 from clogs import logger
-from tempfiles import TempFileSession, get_random_string, temp_file
+from v2tempfiles import TempFile
 
 
 async def fetch(url):
@@ -52,43 +55,45 @@ def download_sync(url, filename):
 
 
 def ytdownload(vid, form):
-    while True:
-        name = f"temp/{get_random_string(12)}"
-        if len(glob.glob(name + ".*")) == 0:
-            break
-    opts = {
-        # "max_filesize": config.file_upload_limit,
-        "quiet": True,
-        "outtmpl": f"{name}.%(ext)s",
-        "default_search": "auto",
-        "logger": MyLogger(),
-        "merge_output_format": "mp4",
-        "format": f'(bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/bestvideo+bestaudio/best)'
-                  f'[filesize<?{config.file_upload_limit}]',
-        "max_filesize": config.file_upload_limit
-        # "format": "/".join(f"({i})[filesize<{config.file_upload_limit}]" for i in [
-        #     "bestvideo[ext=mp4]+bestaudio", "best[ext=mp4]", "bestvideo+bestaudio", "best"
-        # ]),
-    }
-    if form == "audio":
-        opts['format'] = f"bestaudio[filesize<{config.file_upload_limit}]"
-        opts['postprocessors'] = [{
-            'key': 'FFmpegExtractAudio',
-            'preferredcodec': 'mp3',
-        }]
-    with youtube_dl.YoutubeDL(opts) as ydl:
-        # manually exclude livestreams, cant find a better way to do this ¯\_(ツ)_/¯
-        nfo = ydl.extract_info(vid, download=False)
-        logger.debug(nfo)
-        if "is_live" in nfo and nfo["is_live"]:
-            raise youtube_dl.DownloadError("Livestreams cannot be downloaded.")
-        # TODO: YOU IDIOT THIS IS SYNC!!!
-        ydl.download([vid])
-    filename = glob.glob(name + ".*")
-    if len(filename) > 0:
-        return filename[0]
-    else:
-        return None
+    raise NotImplementedError  # TODO: implement
+
+    # while True:
+    #     name = f"temp/{get_random_string(12)}"
+    #     if len(glob.glob(name + ".*")) == 0:
+    #         break
+    # opts = {
+    #     # "max_filesize": config.file_upload_limit,
+    #     "quiet": True,
+    #     "outtmpl": f"{name}.%(ext)s",
+    #     "default_search": "auto",
+    #     "logger": MyLogger(),
+    #     "merge_output_format": "mp4",
+    #     "format": f'(bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/bestvideo+bestaudio/best)'
+    #               f'[filesize<?{config.file_upload_limit}]',
+    #     "max_filesize": config.file_upload_limit
+    #     # "format": "/".join(f"({i})[filesize<{config.file_upload_limit}]" for i in [
+    #     #     "bestvideo[ext=mp4]+bestaudio", "best[ext=mp4]", "bestvideo+bestaudio", "best"
+    #     # ]),
+    # }
+    # if form == "audio":
+    #     opts['format'] = f"bestaudio[filesize<{config.file_upload_limit}]"
+    #     opts['postprocessors'] = [{
+    #         'key': 'FFmpegExtractAudio',
+    #         'preferredcodec': 'mp3',
+    #     }]
+    # with youtube_dl.YoutubeDL(opts) as ydl:
+    #     # manually exclude livestreams, cant find a better way to do this ¯\_(ツ)_/¯
+    #     nfo = ydl.extract_info(vid, download=False)
+    #     logger.debug(nfo)
+    #     if "is_live" in nfo and nfo["is_live"]:
+    #         raise youtube_dl.DownloadError("Livestreams cannot be downloaded.")
+    #     # TODO: YOU IDIOT THIS IS SYNC!!!
+    #     ydl.download([vid])
+    # filename = glob.glob(name + ".*")
+    # if len(filename) > 0:
+    #     return filename[0]
+    # else:
+    #     return None
 
 
 tenor_url_regex = re.compile(r"https?://tenor\.com/view/([\w\d]+-)*(\d+)/?")
@@ -189,7 +194,7 @@ async def saveurl(url, extension=None):
         if "." in after_slash:
             extension = after_slash.split(".")[-1]
         # extension will stay None if no extension detected.
-    name = temp_file(extension)
+    name = TempFile(extension)
     # https://github.com/aio-libs/aiohttp/issues/3904#issuecomment-632661245
     async with aiohttp.ClientSession(headers={'Connection': 'keep-alive'}) as session:
         # i used to make a head request to check size first, but for some reason head requests can be super slow
@@ -201,7 +206,7 @@ async def saveurl(url, extension=None):
                     size = int(resp.headers["Content-Length"])
                     logger.info(f"Url is {humanize.naturalsize(size)}")
                     if config.max_file_size < size:  # file size to download must be under max configured size.
-                        raise improcessing.NonBugError(f"Your file is too big ({humanize.naturalsize(size)}). "
+                        raise processing_common.NonBugError(f"Your file is too big ({humanize.naturalsize(size)}). "
                                                        f"I'm configured to only download files up to "
                                                        f"{humanize.naturalsize(config.max_file_size)}.")
                 logger.info(f"Saving url {url} as {name}")
@@ -214,7 +219,7 @@ async def saveurl(url, extension=None):
                 logger.error(f"aiohttp status {await resp.read()}")
                 resp.raise_for_status()
     if tenorgif:
-        name = await improcessing.mp4togif(name)
+        name = await processing_ffmpeg.mp4togif(name)
     # if lottie:
     #     name = await renderpool.submit(lottiestickers.lottiestickertogif, name)
     return name
@@ -311,86 +316,79 @@ async def improcess(ctx: discord.ext.commands.Context, func: callable, allowedty
         except discord.NotFound:
             msg = await ctx.reply(f"{config.emojis['working']} {st}", mention_author=False)
 
-    with TempFileSession() as tempfilesession:
-        try:
-            if allowedtypes:
-                urls = await imagesearch(ctx, len(allowedtypes))
-                files = await saveurls(urls)
-            else:
-                files = []
-            if files or not allowedtypes:
-                for i, file in enumerate(files):
-                    if (imtype := await improcessing.mediatype(file)) not in allowedtypes[i]:
-                        await ctx.reply(
-                            f"{config.emojis['warning']} Media #{i + 1} is {imtype}, it must be: "
-                            f"{', '.join(allowedtypes[i])}")
-                        logger.warning(f"Media {i} type {imtype} is not in {allowedtypes[i]}")
-                        # for f in files:
-                        #     os.remove(f)
-                        break
-                    else:
-                        if await improcessing.is_apng(file):
-                            asyncio.create_task(ctx.reply(f"{config.emojis['warning']} Media #{i + 1} is an apng, w"
-                                                          f"hich FFmpeg and MediaForge have limited support for. Ex"
-                                                          f"pect errors.", delete_after=10))
-                        if resize:
-                            files[i] = await improcessing.ensuresize(ctx, file, config.min_size, config.max_size)
-                else:
-                    pt = "Processing... (this may take a while or, if a severe error occurs, may not finish)"
-                    logger.info("Processing...")
-                    if allowedtypes:
-                        await updatestatus(pt)
-                    else:
-                        # Downloading message doesnt exist, create it
-                        msg = await ctx.reply(f"{config.emojis['working']} {pt}", mention_author=False)
-                    if allowedtypes and not forcerenderpool:
-                        if len(files) == 1:
-                            filesforcommand = files[0]
-                        else:
-                            filesforcommand = files.copy()
-                        if handleanimated:
-                            result = await improcessing.handleanimated(filesforcommand, func, ctx, *args)
-                        else:
-                            if inspect.iscoroutinefunction(func):
-                                result = await func(filesforcommand, *args)
-                            else:
-                                logger.warning(f"{func} is not coroutine!")
-                                result = func(filesforcommand, *args)
-                    else:
-                        if inspect.iscoroutinefunction(func):
-                            result = await func(*args)
-                        else:
-                            result = await renderpool.renderpool.submit(func, *args)
-                    if expectresult:
-                        if not result:
-                            raise improcessing.ReturnedNothing(f"Expected image, {func} returned nothing.")
-                        result = await improcessing.assurefilesize(result, ctx)
-                        await improcessing.watermark(result)
-                    else:
-                        if not result:
-                            raise improcessing.ReturnedNothing(f"Expected string, {func} returned nothing.")
-                        else:
-                            asyncio.create_task(ctx.reply(result))
-                    if result and expectresult:
-                        logger.info("Uploading...")
-                        await updatestatus("Uploading...")
-                        if filename is not None:
-                            uploadtask = asyncio.create_task(ctx.reply(file=discord.File(result, spoiler=spoiler,
-                                                                                         filename=filename)))
-                        else:
-                            uploadtask = asyncio.create_task(ctx.reply(file=discord.File(result, spoiler=spoiler)))
-                        await uploadtask
-            else:
-                logger.warning("No media found.")
-                await ctx.reply(f"{config.emojis['x']} No file found.")
-        except Exception as e:
-            await msg.delete()
-            raise e
+    try:
+        if allowedtypes:
+            urls = await imagesearch(ctx, len(allowedtypes))
+            files = await saveurls(urls)
         else:
-            try:
-                await msg.delete()
-            except NameError:
-                pass
+            files = []
+        if files or not allowedtypes:
+            for i, file in enumerate(files):
+                if (imtype := await processing_ffprobe.mediatype(file)) not in allowedtypes[i]:
+                    await ctx.reply(
+                        f"{config.emojis['warning']} Media #{i + 1} is {imtype}, it must be: "
+                        f"{', '.join(allowedtypes[i])}")
+                    logger.warning(f"Media {i} type {imtype} is not in {allowedtypes[i]}")
+                    # for f in files:
+                    #     os.remove(f)
+                    break
+                else:
+                    if await processing_ffmpeg.is_apng(file):
+                        asyncio.create_task(ctx.reply(f"{config.emojis['warning']} Media #{i + 1} is an apng, w"
+                                                      f"hich FFmpeg and MediaForge have limited support for. Ex"
+                                                      f"pect errors.", delete_after=10))
+                    if resize:
+                        files[i] = await processing_ffmpeg.ensuresize(ctx, file, config.min_size, config.max_size)
+            else:
+                pt = "Processing... (this may take a while or, if a severe error occurs, may not finish)"
+                logger.info("Processing...")
+                if allowedtypes:
+                    await updatestatus(pt)
+                else:
+                    # Downloading message doesnt exist, create it
+                    msg = await ctx.reply(f"{config.emojis['working']} {pt}", mention_author=False)
+                if allowedtypes:
+                    if len(files) == 1:
+                        filesforcommand = files[0]
+                    else:
+                        filesforcommand = files.copy()
+                    if inspect.iscoroutinefunction(func):
+                        result = await func(filesforcommand, *args)
+                    else:
+                        logger.warning(f"{func} is not coroutine!")
+                        result = func(filesforcommand, *args)
+                else:
+                    result = await func(*args)
+                if expectresult:
+                    if not result:
+                        raise processing_common.ReturnedNothing(f"Expected image, {func} returned nothing.")
+                    result = await processing_ffmpeg.assurefilesize(result, ctx)
+                    await processing_other.watermark(result)
+                else:
+                    if not result:
+                        raise processing_common.ReturnedNothing(f"Expected string, {func} returned nothing.")
+                    else:
+                        asyncio.create_task(ctx.reply(result))
+                if result and expectresult:
+                    logger.info("Uploading...")
+                    await updatestatus("Uploading...")
+                    if filename is not None:
+                        uploadtask = asyncio.create_task(ctx.reply(file=discord.File(result, spoiler=spoiler,
+                                                                                     filename=filename)))
+                    else:
+                        uploadtask = asyncio.create_task(ctx.reply(file=discord.File(result, spoiler=spoiler)))
+                    await uploadtask
+        else:
+            logger.warning("No media found.")
+            await ctx.reply(f"{config.emojis['x']} No file found.")
+    except Exception as e:
+        await msg.delete()
+        raise e
+    else:
+        try:
+            await msg.delete()
+        except NameError:
+            pass
 
 
 number = typing.Union[float, int]

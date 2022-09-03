@@ -25,36 +25,26 @@ try:
     import emojis
     import humanize
     import discord
-    import pronouncing
     import psutil
     import regex as re
     import requests
-    import selenium.common.exceptions
     import yt_dlp as youtube_dl
 
     from discord.ext import commands, tasks
 
     # project files
-    import captionfunctions
-    import chromiumrender
     import config
     import heartbeat
-    import improcessing
     from mainutils import *
-    import renderpool as renderpoolmodule
-    import sus
-    import tempfiles
     from clogs import logger
-    from tempfiles import TempFileSession, get_random_string, temp_file
 
     # cogs
-    from cog_caption import Caption
-    from cog_conversion import Conversion
-    from cog_debug import Debug
-    from cog_image import Image
-    from cog_media import Media
-    from cog_other import Other
-    from cog_slashscript import Slashscript
+    from commands_caption import Caption
+    from commands_conversion import Conversion
+    from commands_debug import Debug
+    from commands_image import Image
+    from commands_media import Media
+    from commands_other import Other
 except ModuleNotFoundError as e:
     print("".join(traceback.format_exception(type(e), e, tb=e.__traceback__)), file=sys.stderr)
     sys.exit("MediaForge was unable to import the required libraries and files. Did you follow the self-hosting guide "
@@ -161,7 +151,6 @@ class MyBot(commands.AutoShardedBot):
             bot.add_cog(Image(bot)),
             bot.add_cog(Other(bot)),
             bot.add_cog(Debug(bot)),
-            bot.add_cog(Slashscript(bot)),
             bot.add_cog(StatusCog(bot)),
             bot.add_cog(ErrorHandlerCog(bot)),
             bot.add_cog(CommandChecksCog(bot)),
