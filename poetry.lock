@@ -274,6 +274,14 @@ docs = ["furo", "olefile", "sphinx (>=2.4)", "sphinx-copybutton", "sphinx-issues
 tests = ["check-manifest", "coverage", "defusedxml", "markdown2", "olefile", "packaging", "pyroma", "pytest", "pytest-cov", "pytest-timeout"]
 
 [[package]]
+name = "pkgconfig"
+version = "1.5.5"
+description = "Interface Python with pkg-config"
+category = "main"
+optional = false
+python-versions = ">=3.3,<4.0"
+
+[[package]]
 name = "psutil"
 version = "5.9.1"
 description = "Cross-platform lib for process and system monitoring in Python."
@@ -340,6 +348,22 @@ python-versions = "*"
 
 [package.dependencies]
 python-magic = "0.4.13"
+
+[[package]]
+name = "pyvips"
+version = "2.2.1"
+description = "binding for the libvips image processing library, API mode"
+category = "main"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+cffi = ">=1.0.0"
+pkgconfig = "*"
+
+[package.extras]
+doc = ["sphinx", "sphinx-rtd-theme"]
+test = ["cffi (>=1.0.0)", "pyperf", "pytest", "pytest-flake8", "pytest-runner"]
 
 [[package]]
 name = "regex"
@@ -427,7 +451,7 @@ websockets = "*"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.10"
-content-hash = "ab8f169f86ce30cf2c4e069f01ee7cd8251fe5ec1433bae66490499c0a3cab91"
+content-hash = "b7c8fb16efa73d2417c8c128d11aa4e6159ce25a51a3d4a2516bb57ad0e9f064"
 
 [metadata.files]
 aiodns = [
@@ -726,6 +750,7 @@ mutagen = [
 ]
 orjson = []
 pillow = []
+pkgconfig = []
 psutil = []
 pycares = []
 pycparser = [
@@ -744,6 +769,7 @@ python-magic = [
 python-magic-win64 = [
     {file = "python-magic-win64-0.4.13.tar.gz", hash = "sha256:9a4e749bfcfc54f1b8e6c4830640ff3e337a1c567298079ffd65b9e1fe229b7c"},
 ]
+pyvips = []
 regex = []
 requests = []
 typing-extensions = []

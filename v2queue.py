@@ -1,5 +1,8 @@
 import asyncio
+import concurrent.futures
 import os
+import random
+import time
 import typing
 
 import config
@@ -22,3 +25,28 @@ async def enqueue(task: typing.Coroutine):
         else:
             queued -= 1
             return res
+
+
+async def hehe(i):
+    for _ in range(16):
+        await asyncio.sleep(random.uniform(0, 1))
+
+
+def blocking():
+    time.sleep(1)
+
+
+async def test():
+    for i in range(16):
+        asyncio.create_task(enqueue(hehe(i)))
+    for _ in range(20):
+        begin = time.time()
+        with concurrent.futures.ProcessPoolExecutor(1) as pool:
+            result = await asyncio.get_running_loop().run_in_executor(
+                pool, blocking)
+        end = time.time()
+        print(f"pool overhead was {(end - begin)-1}s")
+
+
+if __name__ == "__main__":
+    asyncio.run(test())
