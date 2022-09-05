@@ -87,7 +87,6 @@ def ytdownload(vid, form):
     #     logger.debug(nfo)
     #     if "is_live" in nfo and nfo["is_live"]:
     #         raise youtube_dl.DownloadError("Livestreams cannot be downloaded.")
-    #     # TODO: YOU IDIOT THIS IS SYNC!!!
     #     ydl.download([vid])
     # filename = glob.glob(name + ".*")
     # if len(filename) > 0:

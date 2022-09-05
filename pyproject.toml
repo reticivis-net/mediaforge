@@ -23,6 +23,7 @@ python-magic = { version = "^0.4.13", markers = "sys_platform != 'win32'" }
 python-magic-win64 = { version = "^0.4.13", markers = "sys_platform == 'win32'" }
 requests = "^2.28.1"
 "discordlists.py" = "^1.1.1"
+pyvips = "^2.2.1"
 
 
 [build-system]
