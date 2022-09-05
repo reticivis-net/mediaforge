@@ -1,4 +1,4 @@
-## this branch is an experimental rewrite of the captioning system. use at your own discretion.
+# ⚠️ this branch is a major rewrite of the majority of MediaForge and is under constant development with no guarantee of functionality
 
 # ![MediaForge](media/banner.png)
 
