@@ -13,12 +13,12 @@ WORKDIR mediaforge
 # the static deb here makes me nervous but the alternative is Really Weird so no
 RUN dpkg -i $(curl -w "%{filename_effective}" -LO "https://www.deb-multimedia.org/pool/main/d/deb-multimedia-keyring/deb-multimedia-keyring_2016.8.1_all.deb")
 # experimental/testing/unstable for ffmpeg and non-free/contrib for mbrola
-RUN printf "\ndeb http://deb.debian.org/debian bullseye contrib non-free\ndeb http://deb.debian.org/debian experimental main\ndeb http://deb.debian.org/debian unstable main\n" >> "/etc/apt/sources.list.d/debian-extended.list"
+RUN printf "\ndeb https://deb.debian.org/debian bullseye contrib non-free\ndeb https://deb.debian.org/debian experimental main\ndeb https://deb.debian.org/debian unstable main\n" >> "/etc/apt/sources.list.d/debian-extended.list"
 
 # apt
 RUN apt-get -y update && apt-get -t experimental install -y ffmpeg
     # imagemagick, conflicts with ffmpeg so i have to do it after grrrrrrr
-RUN echo "deb http://www.deb-multimedia.org bullseye main" >> "/etc/apt/sources.list.d/imagemagick.list"
+RUN echo "deb https://www.deb-multimedia.org bullseye main" >> "/etc/apt/sources.list.d/imagemagick.list"
     # most packages
 RUN apt-get -y update && apt-get -t stable install -y pngquant exiftool apngasm nano google-chrome-stable imagemagick-7 nodejs
 
