@@ -7,7 +7,8 @@ from discord.ext import commands
 
 import config
 from processing.ffprobe import *
-from processing.common import compresspng, tts
+from processing.common import tts
+from utils.tempfiles import TempFile
 
 
 async def ffmpegsplit(media):
@@ -16,11 +17,12 @@ async def ffmpegsplit(media):
     :param media: file
     :return: [list of files, ffmpeg key to find files]
     """
-    logger.info("Splitting frames...")
-    await run_command("ffmpeg", "-hide_banner", "-i", media, "-vsync", "1", f"{media.split('.')[0]}_%09d.png")
-    files = glob.glob(f"{media.split('.')[0]}_*.png")
-
-    return [TempFile(file) for file in files], f"{media.split('.')[0]}_%09d.png"
+    raise NotImplementedError
+    # logger.info("Splitting frames...")
+    # await run_command("ffmpeg", "-hide_banner", "-i", media, "-vsync", "1", f"{media.split('.')[0]}_%09d.png")
+    # files = glob.glob(f"{media.split('.')[0]}_*.png")
+    #
+    # return [TempFile(file) for file in files], f"{media.split('.')[0]}_%09d.png"
 
 
 async def splitaudio(video):

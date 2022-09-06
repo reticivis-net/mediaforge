@@ -115,8 +115,8 @@ class ErrorHandlerCog(commands.Cog):
 
             is_hosting_issue = isinstance(commanderror, (aiohttp_client_exceptions.ClientOSError,
                                                          aiohttp_client_exceptions.ServerDisconnectedError,
-                                                         asyncio.exceptions.TimeoutError,
-                                                         concurrent.futures.process.BrokenProcessPool))
+                                                         asyncio.exceptions.TimeoutError))
+                                                         # concurrent.futures.process.BrokenProcessPool))
 
             if is_hosting_issue:
                 desc = "If this error keeps occurring, report this with the attached traceback file to the GitHub."
