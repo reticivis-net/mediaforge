@@ -3,6 +3,7 @@ import os
 import subprocess
 import sys
 import typing
+from utils.tempfiles import TempFile
 
 from src.clogs import logger
 
@@ -23,6 +24,7 @@ class ReturnedNothing(Exception):
     pass
 
 
+
 # https://fredrikaverpil.github.io/2017/06/20/async-and-await-with-subprocesses/
 async def run_command(*args):
     """
@@ -31,6 +33,7 @@ async def run_command(*args):
     :param args: the args of the command, what would normally be seperated by a space
     :return: the result of the command
     """
+
     # https://stackoverflow.com/a/56884806/9044183
     # set proccess priority low
     if sys.platform == "win32":
@@ -72,18 +75,6 @@ async def run_command(*args):
 
     # Return stdout
     return result
-
-
-async def compresspng(png):
-    """
-    compress a png file with pngquant
-    :param png: file
-    :return: filename of compressed png
-    """
-    # return png
-    outname = TempFile("png")
-    await run_command("pngquant", "--output", outname, png)  # "--quality=0-80",
-    return outname
 
 
 async def tts(text: str, model: typing.Literal["male", "female", "retro"] = "male"):

@@ -223,7 +223,6 @@ async def improcess(ctx: discord.ext.commands.Context, func: callable, allowedty
                     if not result:
                         raise processing.common.ReturnedNothing(f"Expected image, {func} returned nothing.")
                     result = await processing.ffmpeg.assurefilesize(result, ctx)
-                    await processing.other.watermark(result)
                 else:
                     if not result:
                         raise processing.common.ReturnedNothing(f"Expected string, {func} returned nothing.")
