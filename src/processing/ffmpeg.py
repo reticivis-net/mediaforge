@@ -17,12 +17,11 @@ async def ffmpegsplit(media):
     :param media: file
     :return: [list of files, ffmpeg key to find files]
     """
-    raise NotImplementedError
-    # logger.info("Splitting frames...")
-    # await run_command("ffmpeg", "-hide_banner", "-i", media, "-vsync", "1", f"{media.split('.')[0]}_%09d.png")
-    # files = glob.glob(f"{media.split('.')[0]}_*.png")
-    #
-    # return [TempFile(file) for file in files], f"{media.split('.')[0]}_%09d.png"
+    logger.info("Splitting frames...")
+    await run_command("ffmpeg", "-hide_banner", "-i", media, "-vsync", "1", f"{media.split('.')[0]}_%09d.png")
+    files = glob.glob(f"{media.split('.')[0]}_*.png")
+
+    return [TempFile(file) for file in files], f"{media.split('.')[0]}_%09d.png"
 
 
 async def splitaudio(video):

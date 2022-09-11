@@ -1,3 +1,4 @@
+import aiofiles
 import aiohttp
 import humanize
 
@@ -5,18 +6,28 @@ import config
 import processing.ffmpeg
 import processing.common
 from src.clogs import logger
+from utils.tempfiles import TempFile
 
 
-async def saveurl(url) -> bytes | None:
+async def saveurl(url) -> str:
     """
     save a url
 
     :param url: web url of a file
-    :return: bytes of file
+    :return: path to file
     """
     tenorgif = url.startswith("https://media.tenor.com") and url.endswith("/mp4")  # tenor >:(
+    extension = None
+    if tenorgif:
+        extension = "mp4"
+    if extension is None:
+        after_slash = url.split("/")[-1].split("?")[0]
+        if "." in after_slash:
+            extension = after_slash.split(".")[-1]
+        # extension will stay None if no extension detected.
+    name = TempFile(extension)
+
     # https://github.com/aio-libs/aiohttp/issues/3904#issuecomment-632661245
-    result = None
     async with aiohttp.ClientSession(headers={'Connection': 'keep-alive'}) as session:
         # i used to make a head request to check size first, but for some reason head requests can be super slow
         async with session.get(url) as resp:
@@ -30,16 +41,15 @@ async def saveurl(url) -> bytes | None:
                                                        f"I'm configured to only download files up to "
                                                         f"{humanize.naturalsize(config.max_file_size)}.")
                 logger.info(f"Saving url {url}")
-                result = await resp.read()
+                async with aiofiles.open(name, mode='wb') as f:
+                    await f.write(await resp.read())
             else:
                 logger.error(f"aiohttp status {resp.status}")
                 logger.error(f"aiohttp status {await resp.read()}")
                 resp.raise_for_status()
-    if tenorgif and result:
-        result = await processing.ffmpeg.mp4togif(result)
-    # if lottie:
-    #     name = await renderpool.submit(lottiestickers.lottiestickertogif, name)
-    return result
+    if tenorgif and name:
+        name = await processing.ffmpeg.mp4togif(name)
+    return name
 
 
 async def saveurls(urls: list):

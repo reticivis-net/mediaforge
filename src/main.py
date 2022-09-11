@@ -7,9 +7,6 @@ import os
 import sqlite3
 import sys
 import traceback
-
-import clogs
-
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 try:
