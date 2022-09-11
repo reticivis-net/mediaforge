@@ -6,6 +6,20 @@ import tempfile
 import config
 from clogs import logger
 
+if config.override_temp_dir is not None:
+    temp_dir = config.override_temp_dir
+else:
+    if os.path.isdir("/dev/shm"):  # in-memory fs
+        temp_dir = "/dev/shm/mediaforge"
+    else:
+        temp_dir = os.path.join(tempfile.gettempdir(), "mediaforge")
+
+if os.path.isdir(temp_dir):
+    os.rmdir(temp_dir)
+os.makedirs(temp_dir)
+
+logger.debug(f"temp dir is {temp_dir}")
+
 
 def get_random_string(length):
     return ''.join(random.choice(string.ascii_letters) for _ in range(length))
@@ -17,10 +31,9 @@ def is_named_used(name):
 
 def temp_file_name(extension=None):
     while True:
-        if extension is not None:
-            name = f"{tempfile.gettempdir()}{get_random_string(8)}.{extension}"
-        else:
-            name = f"{tempfile.gettempdir()}{get_random_string(8)}"
+        name = os.path.join(temp_dir, get_random_string(8))
+        if extension:
+            name += f".{extension}"
         if not is_named_used(name):
             return name
 
@@ -39,7 +52,7 @@ class TempFile(str):
 
     def __del__(self):
         if self.todelete:
-            logger.debug(f"Removing {self}")
+            logger.debug(f"Removing tempfile {self}")
             try:
                 os.remove(self)
             except Exception as e:
