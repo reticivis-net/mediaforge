@@ -131,8 +131,7 @@ class ErrorHandlerCog(commands.Cog):
             with io.BytesIO() as buf:
                 trheader = f"DATETIME:{datetime.datetime.now()}\nCOMMAND:{ctx.message.content}\nTRACEBACK:\n"
                 buf.write(bytes(trheader + ''.join(
-                    traceback.format_exception(etype=type(commanderror), value=commanderror,
-                                               tb=commanderror.__traceback__)), encoding='utf8'))
+                    traceback.format_exception(commanderror)), encoding='utf8'))
                 buf.seek(0)
                 if is_hosting_issue:
                     errtxt = f"{config.emojis['2exclamation']} Your command encountered an error due to limited " \
