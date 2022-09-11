@@ -8,6 +8,10 @@ import sqlite3
 import sys
 import traceback
 
+import clogs
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 try:
     # pip libs
     import aiofiles
@@ -91,25 +95,24 @@ discord.Message.reply = safe_reply
 def downloadttsvoices():
     # other misc init code (really need to organize this :p)
     if sys.platform != 'win32':
-        if not os.path.isfile("tts/mycroft_voice_4.0.flitevox"):
+        ttspath = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "tts")
+        femalevoice = os.path.join(ttspath, "mycroft_voice_4.0.flitevox")
+        malevoice = os.path.join(ttspath, "cmu_us_slt.flitevox")
+        if not os.path.isfile(malevoice):
             logger.log(25, "Downloading male TTS voice...")
             download_sync("https://github.com/MycroftAI/mimic1/raw/development/voices/mycroft_voice_4.0.flitevox",
-                          "tts/mycroft_voice_4.0.flitevox")
+                          malevoice)
             logger.log(35, "Male TTS voice downloaded!")
-        if not os.path.isfile("tts/cmu_us_slt.flitevox"):
+        if not os.path.isfile(femalevoice):
             logger.log(25, "Downloading female TTS voice...")
             download_sync("https://github.com/MycroftAI/mimic1/raw/development/voices/cmu_us_slt.flitevox",
-                          "tts/cmu_us_slt.flitevox")
+                          femalevoice)
             logger.log(35, "Female TTS voice downloaded!")
         # chmod +x (mark executable)
-        os.chmod('../tts/mimic', os.stat('tts/mimic').st_mode | 0o111)
+        mimicpath = os.path.join(ttspath, "mimic")
+        os.chmod(mimicpath, os.stat(mimicpath).st_mode | 0o111)
 
 
-def cleartempdir():
-    if not os.path.exists(config.temp_dir.rstrip("/")):
-        os.mkdir(config.temp_dir.rstrip("/"))
-    for f in glob.glob(f'{config.temp_dir}*'):
-        os.remove(f)
 
 
 def initdbsync():
@@ -133,7 +136,6 @@ def initdbsync():
 def init():
     initdbsync()
     downloadttsvoices()
-    cleartempdir()
     heartbeat.init()
 
 
@@ -181,4 +183,4 @@ if __name__ == "__main__":
                 intents=intents)
 
     logger.debug("running bot")
-    bot.run(config.bot_token)
+    bot.run(config.bot_token, log_handler=None)

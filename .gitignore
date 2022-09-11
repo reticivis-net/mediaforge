@@ -10,3 +10,4 @@ chromedriver
 chromedriver.exe
 discord.log
 config.txt
+tts/*.flitevox
