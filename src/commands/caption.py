@@ -22,7 +22,7 @@ class Caption(commands.Cog, name="Captioning"):
         if len(caption) == 1:
             caption.append("")
         raise NotImplementedError  # TODO: implement
-        # await improcess(ctx, captionfunctions.motivate, [["VIDEO", "GIF", "IMAGE"]], *caption,
+        # await process(ctx, captionfunctions.motivate, [["VIDEO", "GIF", "IMAGE"]], *caption,
         #                 handleanimated=True)
 
     @commands.command(aliases=["toptextbottomtext", "impact", "adviceanimal"])
@@ -38,7 +38,7 @@ class Caption(commands.Cog, name="Captioning"):
         if len(caption) == 1:
             caption.append("")
         raise NotImplementedError  # TODO: implement
-        # await improcess(ctx, captionfunctions.meme, [["VIDEO", "GIF", "IMAGE"]], *caption,
+        # await process(ctx, captionfunctions.meme, [["VIDEO", "GIF", "IMAGE"]], *caption,
         #                 handleanimated=True)
 
     @commands.command(aliases=["snapchat", "snap", "snapcap", "snapcaption", "snapchatcap", "classiccaption"])
@@ -51,7 +51,7 @@ class Caption(commands.Cog, name="Captioning"):
         :mediaparam media: A video, gif, or image.
         """
         raise NotImplementedError  # TODO: implement
-        # await improcess(ctx, captionfunctions.snapchat, [["VIDEO", "GIF", "IMAGE"]], caption, handleanimated=True)
+        # await process(ctx, captionfunctions.snapchat, [["VIDEO", "GIF", "IMAGE"]], caption, handleanimated=True)
 
     @commands.command(aliases=["whisper", "wcap", "wcaption"])
     async def whispercaption(self, ctx, *, caption):
@@ -63,7 +63,7 @@ class Caption(commands.Cog, name="Captioning"):
         :mediaparam media: A video, gif, or image.
         """
         raise NotImplementedError  # TODO: implement
-        # await improcess(ctx, captionfunctions.whisper, [["VIDEO", "GIF", "IMAGE"]], caption, handleanimated=True)
+        # await process(ctx, captionfunctions.whisper, [["VIDEO", "GIF", "IMAGE"]], caption, handleanimated=True)
 
     @commands.command(aliases=["news"])
     async def breakingnews(self, ctx, *, caption):
@@ -82,7 +82,7 @@ class Caption(commands.Cog, name="Captioning"):
         if len(caption) == 1:
             caption.append("")
         raise NotImplementedError  # TODO: implement
-        # await improcess(ctx, captionfunctions.breakingnews, [["VIDEO", "GIF", "IMAGE"]], *caption,
+        # await process(ctx, captionfunctions.breakingnews, [["VIDEO", "GIF", "IMAGE"]], *caption,
         #                 handleanimated=True)
 
     @commands.command(aliases=["tenor"])
@@ -98,7 +98,7 @@ class Caption(commands.Cog, name="Captioning"):
         if len(caption) == 1:
             caption.append("")
         raise NotImplementedError  # TODO: implement
-        # await improcess(ctx, captionfunctions.tenorcap, [["VIDEO", "GIF", "IMAGE"]], *caption,
+        # await process(ctx, captionfunctions.tenorcap, [["VIDEO", "GIF", "IMAGE"]], *caption,
         #                 handleanimated=True)
 
     @commands.command(name="caption", aliases=["cap"])
@@ -111,7 +111,7 @@ class Caption(commands.Cog, name="Captioning"):
         :mediaparam media: A video, gif, or image.
         """
         raise NotImplementedError  # TODO: implement
-        # await improcess(ctx, captionfunctions.caption, [["VIDEO", "GIF", "IMAGE"]], caption, handleanimated=True)
+        # await process(ctx, captionfunctions.caption, [["VIDEO", "GIF", "IMAGE"]], caption, handleanimated=True)
 
     @commands.command(aliases=["imstuff"])
     async def stuff(self, ctx, *, caption):
@@ -123,7 +123,7 @@ class Caption(commands.Cog, name="Captioning"):
         :mediaparam media: A video, gif, or image.
         """
         raise NotImplementedError  # TODO: implement
-        # await improcess(ctx, captionfunctions.stuff, [["VIDEO", "GIF", "IMAGE"]], caption, handleanimated=True)
+        # await process(ctx, captionfunctions.stuff, [["VIDEO", "GIF", "IMAGE"]], caption, handleanimated=True)
 
     @commands.command(aliases=["eminemcaption", "eminemcap"])
     async def eminem(self, ctx, *, caption):
@@ -135,7 +135,7 @@ class Caption(commands.Cog, name="Captioning"):
         :mediaparam media: A video, gif, or image.
         """
         raise NotImplementedError  # TODO: implement
-        # await improcess(ctx, captionfunctions.eminemcap, [["VIDEO", "GIF", "IMAGE"]], caption, handleanimated=True)
+        # await process(ctx, captionfunctions.eminemcap, [["VIDEO", "GIF", "IMAGE"]], caption, handleanimated=True)
 
     @commands.command(aliases=["peter", "peterexplain", "petersay", "petergriffinexplain", "petergriffinsay"])
     async def petergriffin(self, ctx, *, caption):
@@ -147,7 +147,7 @@ class Caption(commands.Cog, name="Captioning"):
         :mediaparam media: A video, gif, or image.
         """
         raise NotImplementedError  # TODO: implement
-        # await improcess(ctx, captionfunctions.petergriffincap, [["VIDEO", "GIF", "IMAGE"]], caption,
+        # await process(ctx, captionfunctions.petergriffincap, [["VIDEO", "GIF", "IMAGE"]], caption,
         #                 handleanimated=True)
 
     @commands.command(aliases=["stretchstuff"])
@@ -163,7 +163,7 @@ class Caption(commands.Cog, name="Captioning"):
         :mediaparam media: A video, gif, or image.
         """
         raise NotImplementedError  # TODO: implement
-        # await improcess(ctx, captionfunctions.stuffstretch, [["VIDEO", "GIF", "IMAGE"]], caption,
+        # await process(ctx, captionfunctions.stuffstretch, [["VIDEO", "GIF", "IMAGE"]], caption,
         #                 handleanimated=True)
 
     @commands.command(aliases=["bottomcap", "botcap"])
@@ -176,7 +176,7 @@ class Caption(commands.Cog, name="Captioning"):
         :mediaparam media: A video, gif, or image.
         """
         raise NotImplementedError  # TODO: implement
-        # await improcess(ctx, captionfunctions.bottomcaption, [["VIDEO", "GIF", "IMAGE"]], caption,
+        # await process(ctx, captionfunctions.bottomcaption, [["VIDEO", "GIF", "IMAGE"]], caption,
         #                 handleanimated=True)
 
     @commands.command(aliases=["esm", "&caption", "essemcaption", "esmbotcaption", "esmcap"])
@@ -189,7 +189,7 @@ class Caption(commands.Cog, name="Captioning"):
         :mediaparam media: A video, gif, or image.
         """
         raise NotImplementedError  # TODO: implement
-        # await improcess(ctx, captionfunctions.esmcaption, [["VIDEO", "GIF", "IMAGE"]], caption, handleanimated=True)
+        # await process(ctx, captionfunctions.esmcaption, [["VIDEO", "GIF", "IMAGE"]], caption, handleanimated=True)
 
     @commands.command(aliases=["twitter", "twitcap", "twittercap"])
     async def twittercaption(self, ctx, *, caption):
@@ -201,7 +201,7 @@ class Caption(commands.Cog, name="Captioning"):
         :mediaparam media: A video, gif, or image.
         """
         raise NotImplementedError  # TODO: implement
-        # await improcess(ctx, captionfunctions.twittercap, [["VIDEO", "GIF", "IMAGE"]], caption, handleanimated=True)
+        # await process(ctx, captionfunctions.twittercap, [["VIDEO", "GIF", "IMAGE"]], caption, handleanimated=True)
 
     @commands.command(aliases=["twitterdark", "twitcapdark", "twittercapdark"])
     async def twittercaptiondark(self, ctx, *, caption):
@@ -213,7 +213,7 @@ class Caption(commands.Cog, name="Captioning"):
         :mediaparam media: A video, gif, or image.
         """
         raise NotImplementedError  # TODO: implement
-        # await improcess(ctx, captionfunctions.twittercapdark, [["VIDEO", "GIF", "IMAGE"]], caption,
+        # await process(ctx, captionfunctions.twittercapdark, [["VIDEO", "GIF", "IMAGE"]], caption,
         #                 handleanimated=True)
 
     @commands.command()
@@ -229,7 +229,7 @@ class Caption(commands.Cog, name="Captioning"):
         if len(caption) == 1:
             caption.append("")
         raise NotImplementedError  # TODO: implement
-        # await improcess(ctx, improcessing.freezemotivate, [["VIDEO", "GIF"]], *caption)
+        # await process(ctx, processing.freezemotivate, [["VIDEO", "GIF"]], *caption)
 
     @commands.command()
     async def freezemotivateaudio(self, ctx, *, caption):
@@ -246,4 +246,4 @@ class Caption(commands.Cog, name="Captioning"):
         if len(caption) == 1:
             caption.append("")
         raise NotImplementedError  # TODO: implement
-        # await improcess(ctx, improcessing.freezemotivate, [["VIDEO", "GIF"], ["AUDIO"]], *caption)
+        # await process(ctx, processing.freezemotivate, [["VIDEO", "GIF"], ["AUDIO"]], *caption)

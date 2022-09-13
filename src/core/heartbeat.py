@@ -6,7 +6,7 @@ from multiprocessing import Process
 import psutil
 
 import config
-from src.clogs import logger
+from core.clogs import logger
 from utils.common import fetch
 
 

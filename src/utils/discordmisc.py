@@ -3,7 +3,7 @@ import os
 import discord
 
 import config
-from src.clogs import logger
+from core.clogs import logger
 from processing.ffprobe import mediatype
 
 

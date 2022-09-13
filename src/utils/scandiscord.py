@@ -2,8 +2,6 @@
 Miscellaneous helper functions for commands
 """
 # TODO: reddit moment caption
-import asyncio
-import inspect
 import json
 
 import discord
@@ -11,13 +9,9 @@ import regex as re
 from discord.ext import commands
 
 import config
-import processing.other
-import processing.ffprobe
-import processing.ffmpeg
-import processing.common
-from src.clogs import logger
+from core.clogs import logger
 from utils.common import fetch
-from utils.web import saveurls, contentlength
+from utils.web import contentlength
 
 tenor_url_regex = re.compile(r"https?://tenor\.com/view/([\w\d]+-)*(\d+)/?")
 
@@ -57,7 +51,7 @@ async def handlemessagesave(m: discord.Message):
             if sticker.format != discord.StickerFormatType.lottie:
                 detectedfiles.append(str(sticker.url))
             else:
-                logger.warning("lottie sticker ignored.")
+                logger.info("lottie sticker ignored.")
             # this is commented out due to the lottie render code being buggy
             # if sticker.format == discord.StickerType.lottie:
             #     detectedfiles.append("LOTTIE|" + lottiestickers.stickerurl(sticker))
@@ -146,107 +140,5 @@ async def tenorsearch(ctx, gif=False):
             if hm is not None:
                 return hm
     return False
-
-
-async def improcess(ctx: discord.ext.commands.Context, func: callable, allowedtypes: list, *args,
-                    resize=True, expectresult=True, filename=None, spoiler=False):
-    """
-    The core function of the bot. Gathers media and sends it to the proper function.
-
-    :param ctx: discord context. media is gathered using imagesearch() with this.
-    :param func: function to process input media with
-    :param allowedtypes: list of lists of strings. each inner list is an argument, the strings it contains are the
-    types that arg must be. or just False/[] if no media needed
-    :param args: any non-media arguments, passed into func()
-    :param expectresult: is func() supposed to return a result? if true, it expects an image. if false, can use a
-    string.
-    :param filename: filename of the uploaded file. if None, not passed.
-    :param spoiler: wether to spoil the uploaded file or not.
-    :return: nothing, all processing and uploading is done in this function
-    """
-    if allowedtypes:
-        # nothing to download sometimes
-        msg = await ctx.reply(f"{config.emojis['working']} Downloading...", mention_author=False)
-
-    async def updatestatus(st):
-        nonlocal msg
-        try:
-            msg = await msg.edit(content=f"{config.emojis['working']} {st}",
-                                 allowed_mentions=discord.AllowedMentions.none())
-        except discord.NotFound:
-            msg = await ctx.reply(f"{config.emojis['working']} {st}", mention_author=False)
-
-    try:
-        if allowedtypes:
-            urls = await imagesearch(ctx, len(allowedtypes))
-            files = await saveurls(urls)
-        else:
-            files = []
-        if files or not allowedtypes:
-            for i, file in enumerate(files):
-                if (imtype := await processing.ffprobe.mediatype(file)) not in allowedtypes[i]:
-                    await ctx.reply(
-                        f"{config.emojis['warning']} Media #{i + 1} is {imtype}, it must be: "
-                        f"{', '.join(allowedtypes[i])}")
-                    logger.warning(f"Media {i} type {imtype} is not in {allowedtypes[i]}")
-                    # for f in files:
-                    #     os.remove(f)
-                    break
-                else:
-                    if await processing.ffmpeg.is_apng(file):
-                        asyncio.create_task(ctx.reply(f"{config.emojis['warning']} Media #{i + 1} is an apng, w"
-                                                      f"hich FFmpeg and MediaForge have limited support for. Ex"
-                                                      f"pect errors.", delete_after=10))
-                    if resize:
-                        files[i] = await processing.ffmpeg.ensuresize(ctx, file, config.min_size, config.max_size)
-            else:
-                pt = "Processing... (this may take a while or, if a severe error occurs, may not finish)"
-                logger.info("Processing...")
-                if allowedtypes:
-                    await updatestatus(pt)
-                else:
-                    # Downloading message doesnt exist, create it
-                    msg = await ctx.reply(f"{config.emojis['working']} {pt}", mention_author=False)
-                if allowedtypes:
-                    if len(files) == 1:
-                        filesforcommand = files[0]
-                    else:
-                        filesforcommand = files.copy()
-                    if inspect.iscoroutinefunction(func):
-                        result = await func(filesforcommand, *args)
-                    else:
-                        logger.warning(f"{func} is not coroutine!")
-                        result = func(filesforcommand, *args)
-                else:
-                    result = await func(*args)
-                if expectresult:
-                    if not result:
-                        raise processing.common.ReturnedNothing(f"Expected image, {func} returned nothing.")
-                    result = await processing.ffmpeg.assurefilesize(result, ctx)
-                else:
-                    if not result:
-                        raise processing.common.ReturnedNothing(f"Expected string, {func} returned nothing.")
-                    else:
-                        asyncio.create_task(ctx.reply(result))
-                if result and expectresult:
-                    logger.info("Uploading...")
-                    await updatestatus("Uploading...")
-                    if filename is not None:
-                        uploadtask = asyncio.create_task(ctx.reply(file=discord.File(result, spoiler=spoiler,
-                                                                                     filename=filename)))
-                    else:
-                        uploadtask = asyncio.create_task(ctx.reply(file=discord.File(result, spoiler=spoiler)))
-                    await uploadtask
-        else:
-            logger.warning("No media found.")
-            await ctx.reply(f"{config.emojis['x']} No file found.")
-    except Exception as e:
-        await msg.delete()
-        raise e
-    else:
-        try:
-            await msg.delete()
-        except NameError:
-            pass
 
 

@@ -33,9 +33,9 @@ except ModuleNotFoundError as e:
              "on the GitHub? https://github.com/HexCodeFFF/mediaforge#to-self-host")
 
 # project files
-import heartbeat
+from core import heartbeat
 from utils.common import *
-from clogs import logger
+from core.clogs import logger
 import config
 
 # cogs

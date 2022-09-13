@@ -1,8 +1,8 @@
 from discord.ext import commands
 
 import config
-import database
-from clogs import logger
+from core import database
+from core.clogs import logger
 from utils.common import quote
 
 

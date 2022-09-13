@@ -4,7 +4,7 @@ import string
 import tempfile
 
 import config
-from clogs import logger
+from core.clogs import logger
 
 if config.override_temp_dir is not None:
     temp_dir = config.override_temp_dir

@@ -5,7 +5,7 @@ import humanize
 import config
 import processing.ffmpeg
 import processing.common
-from src.clogs import logger
+from core.clogs import logger
 from utils.tempfiles import TempFile
 
 

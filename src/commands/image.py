@@ -4,7 +4,7 @@ from discord.ext import commands
 
 import processing.common
 import processing.ffmpeg
-from utils.scandiscord import improcess
+from core.process import process
 
 
 class Image(commands.Cog, name="Creation"):
@@ -28,7 +28,7 @@ class Image(commands.Cog, name="Creation"):
         if len(caption) == 1:
             caption.append("JANUARY 1984")
         raise NotImplementedError  # TODO: implement
-        # await improcess(ctx, captionfunctions.f1984, [], caption)
+        # await process(ctx, captionfunctions.f1984, [], caption)
 
     @commands.command(aliases=["ltg", "now", "lowtiergod", "youshould"])
     async def yskysn(self, ctx, *, caption):
@@ -43,7 +43,7 @@ class Image(commands.Cog, name="Creation"):
         if len(caption) == 1:
             caption.append("NOW!")
         raise NotImplementedError  # TODO: implement
-        # await improcess(ctx, captionfunctions.yskysn, [], caption)
+        # await process(ctx, captionfunctions.yskysn, [], caption)
 
     @commands.command(aliases=["shes12"])
     async def zamn(self, ctx, *, caption):
@@ -59,7 +59,7 @@ class Image(commands.Cog, name="Creation"):
         if len(caption) == 1:
             caption.append("ZAMN😍")
         raise NotImplementedError  # TODO: implement
-        # await improcess(ctx, captionfunctions.zamn, [["IMAGE", "VIDEO", "GIF"]], *caption, handleanimated=True)
+        # await process(ctx, captionfunctions.zamn, [["IMAGE", "VIDEO", "GIF"]], *caption, handleanimated=True)
 
     @commands.command(aliases=["troll"])
     async def trollface(self, ctx):
@@ -70,7 +70,7 @@ class Image(commands.Cog, name="Creation"):
         :mediaparam media: A video, gif, or image.
         """
         raise NotImplementedError  # TODO: implement
-        # await improcess(ctx, captionfunctions.trollface, [["VIDEO", "GIF", "IMAGE"]], handleanimated=True)
+        # await process(ctx, captionfunctions.trollface, [["VIDEO", "GIF", "IMAGE"]], handleanimated=True)
 
     @commands.command(aliases=["emsay"])
     async def eminemsay(self, ctx, *, text):
@@ -81,7 +81,7 @@ class Image(commands.Cog, name="Creation"):
         :param text: The text to put next to eminem.
         """
         raise NotImplementedError  # TODO: implement
-        # await improcess(ctx, captionfunctions.eminem, [], [text])
+        # await process(ctx, captionfunctions.eminem, [], [text])
 
     @commands.command(aliases=["customsay"])
     async def imagesay(self, ctx, *, text):
@@ -94,7 +94,7 @@ class Image(commands.Cog, name="Creation"):
         :mediaparam media: An image, video, or gif
         """
         raise NotImplementedError  # TODO: implement
-        # await improcess(ctx, captionfunctions.imagesay, [["IMAGE", "VIDEO", "GIF"]], text, handleanimated=True)
+        # await process(ctx, captionfunctions.imagesay, [["IMAGE", "VIDEO", "GIF"]], text, handleanimated=True)
 
     @commands.command(aliases=["customcap", "imagesaycap", "imagesaycaption", "imagecap", "customsaycap",
                                "imagecaptionright"])
@@ -109,7 +109,7 @@ class Image(commands.Cog, name="Creation"):
         :mediaparam image: An image to sit next to the caption text
         """
         raise NotImplementedError  # TODO: implement
-        # await improcess(ctx, captionfunctions.imagesaycap, [["IMAGE", "VIDEO", "GIF"], ["IMAGE"]], text,
+        # await process(ctx, captionfunctions.imagesaycap, [["IMAGE", "VIDEO", "GIF"], ["IMAGE"]], text,
         #                 handleanimated=True)
 
     @commands.command(aliases=["customcapleft", "imagesaycapleft", "imagesaycaptionleft", "imagecapleft",
@@ -124,7 +124,7 @@ class Image(commands.Cog, name="Creation"):
         :mediaparam image: An image to sit next to the caption text
         """
         raise NotImplementedError  # TODO: implement
-        # await improcess(ctx, captionfunctions.imagesaycapleft, [["IMAGE", "VIDEO", "GIF"], ["IMAGE"]], text,
+        # await process(ctx, captionfunctions.imagesaycapleft, [["IMAGE", "VIDEO", "GIF"], ["IMAGE"]], text,
         #                 handleanimated=True)
 
     @commands.command(aliases=["handitover", "takeit", "giveme"])
@@ -137,7 +137,7 @@ class Image(commands.Cog, name="Creation"):
         :mediaparam media: The media to be overlayed over his hand.
         """
         raise NotImplementedError  # TODO: implement
-        # await improcess(ctx, captionfunctions.givemeyourphone, [["IMAGE", "VIDEO", "GIF"]], handleanimated=True)
+        # await process(ctx, captionfunctions.givemeyourphone, [["IMAGE", "VIDEO", "GIF"]], handleanimated=True)
 
     @commands.command(aliases=["donald", "donalttrump", "trump", "trumptweet", "donaldtrumptweet", "dontweet",
                                "donal", "donaltweet"])
@@ -149,7 +149,7 @@ class Image(commands.Cog, name="Creation"):
         :param text: The text to put in the fake tweet.
         """
         raise NotImplementedError  # TODO: implement
-        # await improcess(ctx, captionfunctions.dontweet, [], [text])
+        # await process(ctx, captionfunctions.dontweet, [], [text])
 
     @commands.command(aliases=["texttospeak", "speak", "talk", "speech", "espeak"])
     async def tts(self, ctx: commands.Context,
@@ -168,7 +168,7 @@ class Image(commands.Cog, name="Creation"):
         # shouldnt happen but sanity check
         if not voice:
             voice = "male"
-        await improcess(ctx, processing.common.tts, [], text, voice)
+        await process(ctx, processing.common.tts, [], text, voice)
 
     # WIP
     @commands.command()
@@ -181,4 +181,4 @@ class Image(commands.Cog, name="Creation"):
         :param text: who you want to wish an epic birthday to
         :return: a custom made song just for you!
         """
-        await improcess(ctx, processing.ffmpeg.epicbirthday, [], text)
+        await process(ctx, processing.ffmpeg.epicbirthday, [], text)
