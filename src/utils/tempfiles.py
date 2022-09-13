@@ -1,7 +1,10 @@
+import asyncio
 import os
 import random
 import string
 import tempfile
+
+import aiofiles.os
 
 import config
 from core.clogs import logger
@@ -53,9 +56,19 @@ class TempFile(str):
     def __del__(self):
         if self.todelete:
             logger.debug(f"Removing tempfile {self}")
+            # https://stackoverflow.com/a/67577364/9044183
+            # deletes without blocking loop
             try:
-                os.remove(self)
+                loop = asyncio.get_event_loop()
+                if loop.is_running():
+                    loop.create_task(self.delete())
+                else:
+                    loop.run_until_complete(self.delete())
             except Exception as e:
                 logger.debug(e, exc_info=1)
+
         else:
             logger.debug(f"{self} was garbage collected but was requested to not be deleted.")
+
+    async def delete(self):
+        await aiofiles.os.remove(self)
