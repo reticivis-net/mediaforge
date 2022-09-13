@@ -3,22 +3,22 @@ import io
 import time
 import typing
 
-import docstring_parser
 import discord
+import docstring_parser
 import regex as re
 from discord.ext import commands
 
 import config
-import database
-import processing.ffmpeg
 import processing.common
+import processing.ffmpeg
 import utils.discordmisc
+from core import database
+from core.process import process
+from utils.common import prefix_function
 from utils.dpy import UnicodeEmojiConverter, showcog
-from utils.common import  prefix_function
-from utils.scandiscord import improcess, imagesearch
-from utils.web import saveurls
-
 from utils.dpy import add_long_field
+from utils.scandiscord import imagesearch
+from utils.web import saveurls
 
 
 class Other(commands.Cog, name="Other"):
@@ -78,8 +78,8 @@ class Other(commands.Cog, name="Other"):
         :param name: The emoji name. Must be at least 2 characters.
         :mediaparam media: A gif or image.
         """
-        await improcess(ctx, utils.discordmisc.add_emoji, [["GIF", "IMAGE"]], ctx.guild, name, expectresult=False,
-                        resize=False)
+        await process(ctx, utils.discordmisc.add_emoji, [["GIF", "IMAGE"]], ctx.guild, name, expectresult=False,
+                      resize=False)
 
     # TODO: fix?
     @commands.guild_only()
@@ -96,9 +96,8 @@ class Other(commands.Cog, name="Other"):
         :param name: The sticker name. Must be at least 2 characters.
         :mediaparam media: A gif or image.
         """
-        await improcess(ctx, utils.discordmisc.add_sticker, [["GIF", "IMAGE"]], ctx.guild, stickeremoji, name,
-                        expectresult=False, resize=False)
-
+        await process(ctx, utils.discordmisc.add_sticker, [["GIF", "IMAGE"]], ctx.guild, stickeremoji, name,
+                      expectresult=False, resize=False)
 
     @commands.guild_only()
     @commands.has_guild_permissions(manage_guild=True)
@@ -115,8 +114,8 @@ class Other(commands.Cog, name="Other"):
         if "BANNER" not in ctx.guild.features:
             await ctx.reply(f"{config.emojis['x']} This guild does not support banners.")
             return
-        await improcess(ctx, utils.discordmisc.set_banner, [["IMAGE"]], ctx.guild, expectresult=False,
-                        resize=False)
+        await process(ctx, utils.discordmisc.set_banner, [["IMAGE"]], ctx.guild, expectresult=False,
+                      resize=False)
 
     @commands.guild_only()
     @commands.has_guild_permissions(manage_guild=True)
@@ -130,8 +129,8 @@ class Other(commands.Cog, name="Other"):
         :param ctx: discord context
         :mediaparam media: An image or gif.
         """
-        await improcess(ctx, utils.discordmisc.set_icon, [["IMAGE", "GIF"]], ctx.guild, expectresult=False,
-                        resize=False)
+        await process(ctx, utils.discordmisc.set_icon, [["IMAGE", "GIF"]], ctx.guild, expectresult=False,
+                      resize=False)
 
     @commands.command(aliases=["statistics"])
     async def stats(self, ctx):

@@ -5,7 +5,7 @@ import sys
 import typing
 from utils.tempfiles import TempFile
 
-from src.clogs import logger
+from core.clogs import logger
 
 
 class NonBugError(Exception):
@@ -20,7 +20,7 @@ class CMDError(Exception):
 
 
 class ReturnedNothing(Exception):
-    """raised by improcess()"""
+    """raised by process()"""
     pass
 
 

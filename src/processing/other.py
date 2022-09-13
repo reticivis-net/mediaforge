@@ -1,21 +1,4 @@
-from fractions import Fraction
-
-from processing.ffmpeg import ffmpegsplit
 from processing.ffprobe import *
-
-
-async def toapng(video):
-    frames, name = await ffmpegsplit(video)
-    fps = await get_frame_rate(video)
-    fps = Fraction(1 / fps).limit_denominator()
-    outname = TempFile("png")
-    # apngasm input is strange
-    await run_command("apngasm", outname, name.replace('%09d', '000000001'), str(fps.numerator), str(fps.denominator),
-                      "-i1")
-    return outname
-    # ffmpeg method, removes dependence on apngasm but bigger and worse quality
-    # outname = TempFile("png")
-    # await run_command("ffmpeg", "-i", video, "-f", "apng", "-plays", "0", outname)
 
 
 async def freezemotivate(files, *caption):

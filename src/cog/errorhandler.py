@@ -1,5 +1,4 @@
 import asyncio
-import concurrent.futures
 import datetime
 import difflib
 import io
@@ -12,7 +11,7 @@ from discord.ext import commands
 
 import config
 import processing.common
-from clogs import logger
+from core.clogs import logger
 from utils.common import now, prefix_function, get_full_class_name
 
 
@@ -27,7 +26,7 @@ class ErrorHandlerCog(commands.Cog):
             try:
                 return await ctx.reply(*args, **kwargs)
             except discord.Forbidden:
-                logger.warning(f"Reply to {ctx.message.id} and dm to {ctx.author.id} failed. Aborting.")
+                logger.info(f"Reply to {ctx.message.id} and dm to {ctx.author.id} failed. Aborting.")
 
         async def reply(*args, **kwargs):
             try:
@@ -44,7 +43,7 @@ class ErrorHandlerCog(commands.Cog):
                 ch = f"channel #{ctx.channel.name} ({ctx.channel.id}) in server {ctx.guild} ({ctx.guild.id})"
             else:
                 ch = "DMs"
-            logger.warning(f"Command '{ctx.message.content}' by "
+            logger.info(f"Command '{ctx.message.content}' by "
                            f"@{ctx.message.author.name}#{ctx.message.author.discriminator} ({ctx.message.author.id}) "
                            f"in {ch} failed due to {message}.")
             await reply(message)
@@ -52,7 +51,7 @@ class ErrorHandlerCog(commands.Cog):
         errorstring = str(commanderror)
         if isinstance(commanderror, discord.Forbidden):
             await dmauthor(f"{config.emojis['x']} I don't have permissions to send messages in that channel.")
-            logger.warning(commanderror)
+            logger.info(commanderror)
         if isinstance(commanderror, discord.ext.commands.errors.CommandNotFound):
             # to prevent funny 429s, error cooldowns are only sent once before the cooldown is over.
             if ctx.author.id in self.antispambucket.keys():

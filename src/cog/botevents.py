@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
 
-from clogs import logger
+from core.clogs import logger
 from utils.common import prefix_function
 
 

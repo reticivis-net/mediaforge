@@ -2,19 +2,21 @@ import asyncio
 import os
 import typing
 
-import emojis
 import discord
+import emojis
 import regex as re
 import yt_dlp as youtube_dl
 from discord.ext import commands
 
 import config
 import processing.ffmpeg
+import processing.ffprobe
 import utils.discordmisc
-from clogs import logger
+from core.clogs import logger
+from core.process import process
 from utils.common import prefix_function
-from utils.scandiscord import improcess, tenorsearch
 from utils.dpy import UnicodeEmojiConverter
+from utils.scandiscord import tenorsearch
 
 
 class Conversion(commands.Cog, name="Conversion"):
@@ -36,7 +38,8 @@ class Conversion(commands.Cog, name="Conversion"):
         :param filename: the new name of the file
         :mediaparam media: Any valid media.
         """
-        await improcess(ctx, lambda x: x, [["VIDEO", "GIF", "IMAGE", "AUDIO"]], filename=filename)
+        file = await process(ctx, lambda x: x, [["VIDEO", "GIF", "IMAGE", "AUDIO"]])
+        await ctx.reply(file=discord.File(file, filename=filename))
 
     @commands.command(aliases=["spoil", "censor", "cw", "tw"])
     async def spoiler(self, ctx):
@@ -46,7 +49,8 @@ class Conversion(commands.Cog, name="Conversion"):
         :param ctx: discord context
         :mediaparam media: Any valid media.
         """
-        await improcess(ctx, lambda x: x, [["VIDEO", "GIF", "IMAGE", "AUDIO"]], spoiler=True)
+        file = await process(ctx, lambda x: x, [["VIDEO", "GIF", "IMAGE", "AUDIO"]])
+        await ctx.reply(file=discord.File(file, spoiler=True))
 
     @commands.command(aliases=["avatar", "pfp", "profilepicture", "profilepic", "ayowhothismf", "av"])
     async def icon(self, ctx, *, body=None):
@@ -88,15 +92,15 @@ class Conversion(commands.Cog, name="Conversion"):
         :param videoformat: download audio or video.
         """
         raise NotImplementedError  # TODO: implement
-        # await improcessing.ytdl(url, form)
+        # await processing.ytdl(url, form)
         # logger.info(url)
         msg = await ctx.reply(f"{config.emojis['working']} Downloading from site...", mention_author=False)
         try:
 
-            # r = await improcessing.run_in_exec(ytdownload, videourl, videoformat)
+            # r = await processing.run_in_exec(ytdownload, videourl, videoformat)
             if r:
                 [TempFile(f) for f in r]
-                r = await improcessing.assurefilesize(r, ctx, re_encode=False)
+                r = await processing.ffmpeg.assurefilesize(r, re_encode=False)
                 if not r:
                     return
                 txt = ""
@@ -133,7 +137,7 @@ class Conversion(commands.Cog, name="Conversion"):
         :param ctx: discord context
         :mediaparam video: A video.
         """
-        await improcess(ctx, processing.ffmpeg.mp4togif, [["VIDEO"]])
+        await process(ctx, processing.ffmpeg.mp4togif, [["VIDEO"]])
 
     @commands.command(aliases=["apng", "videotoapng", "giftoapng"])
     async def toapng(self, ctx):
@@ -143,7 +147,7 @@ class Conversion(commands.Cog, name="Conversion"):
         :param ctx: discord context
         :mediaparam video: A video or gif.
         """
-        await improcess(ctx, processing.ffmpeg.toapng, [["VIDEO", "GIF"]], resize=False)
+        await process(ctx, processing.ffmpeg.toapng, [["VIDEO", "GIF"]], resize=False)
 
     @commands.command(aliases=["audio", "mp3", "tomp3", "aac", "toaac"])
     async def toaudio(self, ctx):
@@ -153,7 +157,7 @@ class Conversion(commands.Cog, name="Conversion"):
         :param ctx: discord context
         :mediaparam video: A video.
         """
-        await improcess(ctx, processing.ffmpeg.toaudio, [["VIDEO", "AUDIO"]])
+        await process(ctx, processing.ffmpeg.toaudio, [["VIDEO", "AUDIO"]])
 
     @commands.command()
     async def tenorgif(self, ctx):
@@ -182,7 +186,7 @@ class Conversion(commands.Cog, name="Conversion"):
         :param ctx: discord context
         :mediaparam gif: A gif.
         """
-        await improcess(ctx, processing.ffmpeg.giftomp4, [["GIF"]])
+        await process(ctx, processing.ffmpeg.giftomp4, [["GIF"]])
 
     @commands.command(aliases=["png", "mediatopng"])
     async def topng(self, ctx):
@@ -192,7 +196,7 @@ class Conversion(commands.Cog, name="Conversion"):
         :param ctx: discord context
         :mediaparam media: A video, gif, or image.
         """
-        await improcess(ctx, processing.ffmpeg.mediatopng, [["VIDEO", "GIF", "IMAGE"]])
+        await process(ctx, processing.ffmpeg.mediatopng, [["VIDEO", "GIF", "IMAGE"]])
 
     @commands.command(aliases=["emoji", "emojiimage", "emote", "emoteurl"])
     async def emojiurl(self, ctx, *custom_emojis: discord.PartialEmoji):

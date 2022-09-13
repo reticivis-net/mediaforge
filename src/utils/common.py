@@ -8,7 +8,7 @@ import requests
 from discord.ext import commands
 
 import config
-import database
+from core import database
 
 
 async def fetch(url):

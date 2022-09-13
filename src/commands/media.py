@@ -5,8 +5,8 @@ from discord.ext import commands
 
 import config
 import processing.ffmpeg
+from core.process import process
 from utils.common import number_range, prefix_function
-from utils.scandiscord import improcess
 
 
 class Media(commands.Cog, name="Editing"):
@@ -25,7 +25,7 @@ class Media(commands.Cog, name="Editing"):
         :param ctx: discord context
         :mediaparam media: Any valid media.
         """
-        await improcess(ctx, lambda x: x, [["VIDEO", "GIF", "IMAGE", "AUDIO"]])
+        await process(ctx, lambda x: x, [["VIDEO", "GIF", "IMAGE", "AUDIO"]])
 
     @commands.command(aliases=["clean", "remake"])
     async def reencode(self, ctx):
@@ -36,7 +36,7 @@ class Media(commands.Cog, name="Editing"):
         :param ctx: discord context
         :mediaparam media: A video, image, or audio file.
         """
-        await improcess(ctx, processing.ffmpeg.allreencode, [["VIDEO", "IMAGE", "AUDIO"]])
+        await process(ctx, processing.ffmpeg.allreencode, [["VIDEO", "IMAGE", "AUDIO"]])
 
     @commands.command(aliases=["audioadd", "dub"])
     async def addaudio(self, ctx, loops: number_range(-1, 100, num_type='int') = -1):
@@ -48,7 +48,7 @@ class Media(commands.Cog, name="Editing"):
         :mediaparam media: Any valid media file.
         :mediaparam audio: An audio file.
         """
-        await improcess(ctx, processing.ffmpeg.addaudio, [["IMAGE", "GIF", "VIDEO", "AUDIO"], ["AUDIO"]], loops)
+        await process(ctx, processing.ffmpeg.addaudio, [["IMAGE", "GIF", "VIDEO", "AUDIO"], ["AUDIO"]], loops)
 
     @commands.command()
     async def jpeg(self, ctx, strength: number_range(0, 100, False, True, 'int') = 30,
@@ -65,7 +65,7 @@ class Media(commands.Cog, name="Editing"):
         :mediaparam media: A video, gif, or image.
         """
         raise NotImplementedError  # TODO: implement
-        # await improcess(ctx, captionfunctions.jpeg, [["VIDEO", "GIF", "IMAGE"]], strength, stretch, quality, handleanimated=True)
+        # await process(ctx, captionfunctions.jpeg, [["VIDEO", "GIF", "IMAGE"]], strength, stretch, quality, handleanimated=True)
 
     @commands.command()
     async def deepfry(self, ctx, brightness: number_range(0, 5) = 1.5,
@@ -101,7 +101,7 @@ class Media(commands.Cog, name="Editing"):
         if not 0 < jpegstrength <= 100:
             raise commands.BadArgument(f"JPEG strength must be between 0 and 100.")
         raise NotImplementedError  # TODO: implement
-        # await improcess(ctx, captionfunctions.deepfry, [["VIDEO", "GIF", "IMAGE"]], brightness, contrast, sharpness,
+        # await process(ctx, captionfunctions.deepfry, [["VIDEO", "GIF", "IMAGE"]], brightness, contrast, sharpness,
         #                 saturation, noise, jpegstrength, handleanimated=True)
 
     @commands.command()
@@ -117,7 +117,7 @@ class Media(commands.Cog, name="Editing"):
         if not 0 <= strength <= 0.5:
             raise commands.BadArgument(f"Strength must be between 0% and 0.5%.")
         raise NotImplementedError  # TODO: implement
-        # await improcess(ctx, captionfunctions.jpegcorrupt, [["VIDEO", "GIF", "IMAGE"]], strength,
+        # await process(ctx, captionfunctions.jpegcorrupt, [["VIDEO", "GIF", "IMAGE"]], strength,
         #                 handleanimated=True)
 
     @commands.command(aliases=["pad"])
@@ -128,7 +128,7 @@ class Media(commands.Cog, name="Editing"):
         :param ctx: discord context
         :mediaparam media: A video, gif, or image.
         """
-        await improcess(ctx, processing.ffmpeg.pad, [["VIDEO", "GIF", "IMAGE"]])
+        await process(ctx, processing.ffmpeg.pad, [["VIDEO", "GIF", "IMAGE"]])
 
     @commands.command(aliases=["size"])
     async def resize(self, ctx, width: int, height: int):
@@ -146,7 +146,7 @@ class Media(commands.Cog, name="Editing"):
         if not (1 <= height <= config.max_size or height == -1):
             raise commands.BadArgument(f"Height must be between 1 and "
                                        f"{config.max_size} or be -1.")
-        await improcess(ctx, processing.ffmpeg.resize, [["VIDEO", "GIF", "IMAGE"]], width, height, resize=False)
+        await process(ctx, processing.ffmpeg.resize, [["VIDEO", "GIF", "IMAGE"]], width, height, resize=False)
 
     @commands.command(aliases=["short", "kyle"])
     async def wide(self, ctx):
@@ -156,7 +156,7 @@ class Media(commands.Cog, name="Editing"):
         :param ctx: discord context
         :mediaparam media: A video, gif, or image.
         """
-        await improcess(ctx, processing.ffmpeg.resize, [["VIDEO", "GIF", "IMAGE"]], "iw*2", "ih")
+        await process(ctx, processing.ffmpeg.resize, [["VIDEO", "GIF", "IMAGE"]], "iw*2", "ih")
 
     @commands.command(aliases=["tall", "long", "antikyle"])
     async def squish(self, ctx):
@@ -165,7 +165,7 @@ class Media(commands.Cog, name="Editing"):
 
 
         """
-        await improcess(ctx, processing.ffmpeg.resize, [["VIDEO", "GIF", "IMAGE"]], "iw", "ih*2")
+        await process(ctx, processing.ffmpeg.resize, [["VIDEO", "GIF", "IMAGE"]], "iw", "ih*2")
 
     @commands.command(aliases=["magic", "magik", "contentawarescale", "liquidrescale"])
     async def magick(self, ctx, strength: number_range(1, 99, num_type='int') = 50):
@@ -180,7 +180,7 @@ class Media(commands.Cog, name="Editing"):
         :mediaparam media: A video, gif, or image.
         """
         raise NotImplementedError  # TODO: implement
-        # await improcess(ctx, captionfunctions.magick, [["VIDEO", "GIF", "IMAGE"]], strength, handleanimated=True)
+        # await process(ctx, captionfunctions.magick, [["VIDEO", "GIF", "IMAGE"]], strength, handleanimated=True)
 
     @commands.command(aliases=["repeat"], hidden=True)
     async def loop(self, ctx):
@@ -201,7 +201,7 @@ class Media(commands.Cog, name="Editing"):
         """
         if not -1 <= loop:
             raise commands.BadArgument(f"Loop must be -1 or more.")
-        await improcess(ctx, processing.ffmpeg.gifloop, [["GIF"]], loop)
+        await process(ctx, processing.ffmpeg.gifloop, [["GIF"]], loop)
 
     @commands.command(aliases=["vloop"])
     async def videoloop(self, ctx, loop: number_range(1, 15, num_type='int') = 1):
@@ -217,7 +217,7 @@ class Media(commands.Cog, name="Editing"):
         """
         if not 1 <= loop <= 15:
             raise commands.BadArgument(f"Loop must be between 1 and 15.")
-        await improcess(ctx, processing.ffmpeg.videoloop, [["VIDEO", "GIF"]], loop)
+        await process(ctx, processing.ffmpeg.videoloop, [["VIDEO", "GIF"]], loop)
 
     @commands.command(aliases=["flip", "rot"])
     async def rotate(self, ctx, rottype: typing.Literal["90", "90ccw", "180", "vflip", "hflip"]):
@@ -229,7 +229,7 @@ class Media(commands.Cog, name="Editing"):
         horizontal flip
         :mediaparam media: A video, gif, or image.
         """
-        await improcess(ctx, processing.ffmpeg.rotate, [["GIF", "IMAGE", "VIDEO"]], rottype)
+        await process(ctx, processing.ffmpeg.rotate, [["GIF", "IMAGE", "VIDEO"]], rottype)
 
     @commands.command()
     async def hue(self, ctx, h: float):
@@ -241,7 +241,7 @@ class Media(commands.Cog, name="Editing"):
         :param h: The hue angle as a number of degrees.
         :mediaparam media: A video, gif, or image.
         """
-        await improcess(ctx, processing.ffmpeg.hue, [["GIF", "IMAGE", "VIDEO"]], h)
+        await process(ctx, processing.ffmpeg.hue, [["GIF", "IMAGE", "VIDEO"]], h)
 
     @commands.command(aliases=["color", "recolor"])
     async def tint(self, ctx, color: discord.Color):
@@ -254,7 +254,7 @@ class Media(commands.Cog, name="Editing"):
         :param color: The hex or RGB color to tint to.
         :mediaparam media: A video, gif, or image.
         """
-        await improcess(ctx, processing.ffmpeg.tint, [["GIF", "IMAGE", "VIDEO"]], color)
+        await process(ctx, processing.ffmpeg.tint, [["GIF", "IMAGE", "VIDEO"]], color)
 
     @commands.command(aliases=["round", "circlecrop", "roundcrop", "circle", "roundedcorners"])
     async def roundcorners(self, ctx, radiuspercent: number_range(0, 50) = 50.0):
@@ -269,7 +269,7 @@ class Media(commands.Cog, name="Editing"):
         if not 0 <= radiuspercent <= 50:
             raise commands.BadArgument(f"Border radius percent must be between 0 and 50.")
         raise NotImplementedError  # TODO: implement
-        # await improcess(ctx, captionfunctions.roundcorners, [["GIF", "IMAGE", "VIDEO"]], str(radiuspercent),
+        # await process(ctx, captionfunctions.roundcorners, [["GIF", "IMAGE", "VIDEO"]], str(radiuspercent),
         #                 handleanimated=True)
 
     @commands.command()
@@ -286,7 +286,7 @@ class Media(commands.Cog, name="Editing"):
         """
         if not 0 <= volume <= 32:
             raise commands.BadArgument(f"{config.emojis['warning']} Volume must be between 0 and 32.")
-        await improcess(ctx, processing.ffmpeg.volume, [["VIDEO", "AUDIO"]], volume)
+        await process(ctx, processing.ffmpeg.volume, [["VIDEO", "AUDIO"]], volume)
 
     @commands.command()
     async def mute(self, ctx):
@@ -296,7 +296,7 @@ class Media(commands.Cog, name="Editing"):
         :param ctx: discord context
         :mediaparam media: A video or audio file.
         """
-        await improcess(ctx, processing.ffmpeg.volume, [["VIDEO", "AUDIO"]], 0)
+        await process(ctx, processing.ffmpeg.volume, [["VIDEO", "AUDIO"]], 0)
 
     @commands.command()
     async def vibrato(self, ctx, frequency: number_range(0.1, 20000) = 5,
@@ -311,7 +311,7 @@ class Media(commands.Cog, name="Editing"):
         :param depth: Depth of modulation as a percentage. must be between 0 and 1.
         :mediaparam media: A video or audio file.
         """
-        await improcess(ctx, processing.ffmpeg.vibrato, [["VIDEO", "AUDIO"]], frequency, depth)
+        await process(ctx, processing.ffmpeg.vibrato, [["VIDEO", "AUDIO"]], frequency, depth)
 
     @commands.command()
     async def pitch(self, ctx, numofhalfsteps: number_range(-12, 12) = 12):
@@ -325,7 +325,7 @@ class Media(commands.Cog, name="Editing"):
         """
         if not -12 <= numofhalfsteps <= 12:
             raise commands.BadArgument(f"numofhalfsteps must be between -12 and 12.")
-        await improcess(ctx, processing.ffmpeg.pitch, [["VIDEO", "AUDIO"]], numofhalfsteps)
+        await process(ctx, processing.ffmpeg.pitch, [["VIDEO", "AUDIO"]], numofhalfsteps)
 
     @commands.command(aliases=["concat", "combinev"])
     async def concatv(self, ctx):
@@ -338,7 +338,7 @@ class Media(commands.Cog, name="Editing"):
         :mediaparam video1: A video or gif.
         :mediaparam video2: A video or gif.
         """
-        await improcess(ctx, processing.ffmpeg.concatv, [["VIDEO", "GIF"], ["VIDEO", "GIF"]])
+        await process(ctx, processing.ffmpeg.concatv, [["VIDEO", "GIF"], ["VIDEO", "GIF"]])
 
     @commands.command()
     async def hstack(self, ctx):
@@ -349,8 +349,8 @@ class Media(commands.Cog, name="Editing"):
         :mediaparam video1: A video, image, or gif.
         :mediaparam video2: A video, image, or gif.
         """
-        await improcess(ctx, processing.ffmpeg.stack, [["VIDEO", "GIF", "IMAGE"], ["VIDEO", "GIF", "IMAGE"]],
-                        "hstack")
+        await process(ctx, processing.ffmpeg.stack, [["VIDEO", "GIF", "IMAGE"], ["VIDEO", "GIF", "IMAGE"]],
+                      "hstack")
 
     @commands.command()
     async def vstack(self, ctx):
@@ -361,8 +361,8 @@ class Media(commands.Cog, name="Editing"):
         :mediaparam video1: A video, image, or gif.
         :mediaparam video2: A video, image, or gif.
         """
-        await improcess(ctx, processing.ffmpeg.stack, [["VIDEO", "GIF", "IMAGE"], ["VIDEO", "GIF", "IMAGE"]],
-                        "vstack")
+        await process(ctx, processing.ffmpeg.stack, [["VIDEO", "GIF", "IMAGE"], ["VIDEO", "GIF", "IMAGE"]],
+                      "vstack")
 
     @commands.command(aliases=["blend"])
     async def overlay(self, ctx, alpha: number_range(0, 1) = 0.5):
@@ -374,8 +374,8 @@ class Media(commands.Cog, name="Editing"):
         :mediaparam video1: A video or gif.
         :mediaparam video2: A video or gif.
         """
-        await improcess(ctx, processing.ffmpeg.overlay, [["VIDEO", "GIF", "IMAGE"], ["VIDEO", "GIF", "IMAGE"]], alpha,
-                        "overlay")
+        await process(ctx, processing.ffmpeg.overlay, [["VIDEO", "GIF", "IMAGE"], ["VIDEO", "GIF", "IMAGE"]], alpha,
+                      "overlay")
 
     @commands.command(aliases=["overlayadd", "addition"])
     async def add(self, ctx):
@@ -386,8 +386,8 @@ class Media(commands.Cog, name="Editing"):
         :mediaparam video1: A video or gif.
         :mediaparam video2: A video or gif.
         """
-        await improcess(ctx, processing.ffmpeg.overlay, [["VIDEO", "GIF", "IMAGE"], ["VIDEO", "GIF", "IMAGE"]], 1,
-                        "add")
+        await process(ctx, processing.ffmpeg.overlay, [["VIDEO", "GIF", "IMAGE"], ["VIDEO", "GIF", "IMAGE"]], 1,
+                      "add")
 
     @commands.command(name="speed")
     async def spcommand(self, ctx, speed: number_range(0.25, 100) = 2):
@@ -401,7 +401,7 @@ class Media(commands.Cog, name="Editing"):
         """
         if not 0.25 <= speed <= 100:
             raise commands.BadArgument(f"Speed must be between 0.25 and 100")
-        await improcess(ctx, processing.ffmpeg.speed, [["VIDEO", "GIF", "AUDIO"]], speed)
+        await process(ctx, processing.ffmpeg.speed, [["VIDEO", "GIF", "AUDIO"]], speed)
 
     @commands.command(aliases=["shuffle", "stutter", "nervous"])
     async def random(self, ctx, frames: number_range(2, 512, num_type='int') = 30):
@@ -416,7 +416,7 @@ class Media(commands.Cog, name="Editing"):
         """
         if not 2 <= frames <= 512:
             raise commands.BadArgument(f"Frames must be between 2 and 512")
-        await improcess(ctx, processing.ffmpeg.random, [["VIDEO", "GIF"]], frames)
+        await process(ctx, processing.ffmpeg.random, [["VIDEO", "GIF"]], frames)
 
     @commands.command()
     async def reverse(self, ctx):
@@ -426,7 +426,7 @@ class Media(commands.Cog, name="Editing"):
         :param ctx: discord context
         :mediaparam video: A video or gif.
         """
-        await improcess(ctx, processing.ffmpeg.reverse, [["VIDEO", "GIF"]])
+        await process(ctx, processing.ffmpeg.reverse, [["VIDEO", "GIF"]])
 
     @commands.command(aliases=["compress", "quality", "lowerquality", "crf", "qa"])
     async def compressv(self, ctx, crf: number_range(28, 51) = 51, qa: number_range(10, 112) = 20):
@@ -441,7 +441,7 @@ class Media(commands.Cog, name="Editing"):
         :param qa: Audio bitrate in kbps. Lower is worse quality. Must be between 10 and 112.
         :mediaparam video: A video or gif.
         """
-        await improcess(ctx, processing.ffmpeg.quality, [["VIDEO", "GIF"]], crf, qa)
+        await process(ctx, processing.ffmpeg.quality, [["VIDEO", "GIF"]], crf, qa)
 
     @commands.command(name="fps")
     async def fpschange(self, ctx, fps: number_range(1, 60)):
@@ -457,7 +457,7 @@ class Media(commands.Cog, name="Editing"):
         :param fps: Frames per second of the output. must be between 1 and 60.
         :mediaparam video: A video or gif.
         """
-        await improcess(ctx, processing.ffmpeg.changefps, [["VIDEO", "GIF"]], fps)
+        await process(ctx, processing.ffmpeg.changefps, [["VIDEO", "GIF"]], fps)
 
     @commands.command(aliases=["negate", "opposite"])
     async def invert(self, ctx):
@@ -467,7 +467,7 @@ class Media(commands.Cog, name="Editing"):
         :param ctx: discord context
         :mediaparam video: A video or gif.
         """
-        await improcess(ctx, processing.ffmpeg.invert, [["VIDEO", "GIF", "IMAGE"]])
+        await process(ctx, processing.ffmpeg.invert, [["VIDEO", "GIF", "IMAGE"]])
 
     @commands.command()
     async def trim(self, ctx, length: number_range(0, lower_incl=False), start: number_range(0) = 0):
@@ -483,7 +483,7 @@ class Media(commands.Cog, name="Editing"):
             raise commands.BadArgument(f"Length must be more than 0.")
         if not 0 <= start:
             raise commands.BadArgument(f"Start must be equal to or more than 0.")
-        await improcess(ctx, processing.ffmpeg.trim, [["VIDEO", "GIF", "AUDIO"]], length, start)
+        await process(ctx, processing.ffmpeg.trim, [["VIDEO", "GIF", "AUDIO"]], length, start)
 
     @commands.command()
     async def autotune(self, ctx, CONCERT_A: float = 440, FIXED_PITCH: float = 0.0,
@@ -520,9 +520,9 @@ class Media(commands.Cog, name="Editing"):
         """
         # TODO: flag command thing
 
-        await improcess(ctx, processing.ffmpeg.handleautotune, [["VIDEO", "AUDIO"]],
-                        CONCERT_A, FIXED_PITCH, FIXED_PULL, KEY, CORR_STR, CORR_SMOOTH, PITCH_SHIFT, SCALE_ROTATE,
-                        LFO_DEPTH, LFO_RATE, LFO_SHAPE, LFO_SYMM, LFO_QUANT, FORM_CORR, FORM_WARP, MIX)
+        await process(ctx, processing.ffmpeg.handleautotune, [["VIDEO", "AUDIO"]],
+                      CONCERT_A, FIXED_PITCH, FIXED_PULL, KEY, CORR_STR, CORR_SMOOTH, PITCH_SHIFT, SCALE_ROTATE,
+                      LFO_DEPTH, LFO_RATE, LFO_SHAPE, LFO_SYMM, LFO_QUANT, FORM_CORR, FORM_WARP, MIX)
 
     @commands.command(aliases=["uncap", "nocaption", "nocap", "rmcap", "removecaption", "delcap", "delcaption",
                                "deletecaption", "trimcap", "trimcaption"])
@@ -536,4 +536,4 @@ class Media(commands.Cog, name="Editing"):
         :param tolerance: in % how close to white the color must be to count as caption
         :mediaparam media: A video, image, or GIF file
         """
-        await improcess(ctx, processing.ffmpeg.uncaption, [["VIDEO", "IMAGE", "GIF"]], frame_to_try, tolerance)
+        await process(ctx, processing.ffmpeg.uncaption, [["VIDEO", "IMAGE", "GIF"]], frame_to_try, tolerance)
