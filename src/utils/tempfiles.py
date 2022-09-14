@@ -1,6 +1,7 @@
 import asyncio
 import os
 import random
+import shutil
 import string
 import tempfile
 
@@ -18,7 +19,7 @@ else:
         temp_dir = os.path.join(tempfile.gettempdir(), "mediaforge")
 
 if os.path.isdir(temp_dir):
-    os.rmdir(temp_dir)
+    shutil.rmtree(temp_dir)
 os.makedirs(temp_dir)
 
 logger.debug(f"temp dir is {temp_dir}")

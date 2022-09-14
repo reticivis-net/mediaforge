@@ -1,3 +1,4 @@
+import asyncio
 import glob
 import math
 
@@ -8,6 +9,7 @@ import config
 from processing.ffprobe import *
 from processing.common import tts, run_command
 from utils.tempfiles import TempFile
+import processing.vips
 
 
 async def ffmpegsplit(media):
@@ -510,6 +512,18 @@ async def concatv(files):
     # for file in [video0, video1, fixedvideo1, fixedvideo0, fixedfixedvideo1, concatdemuxer]:
     #     os.remove(file)
     return outname
+
+async def naive_vstack(file0, file1):
+    """
+    stacks media assuming files are same width
+    :param file1:
+    :param file2:
+    :return:
+    """
+    mts = await asyncio.gather(mediatype(file0), mediatype(file1))
+    if mts[0] == "IMAGE" and mts[1] == "IMAGE":
+        raise NotImplementedError
+        # return await processing.vips.vstack(file0, file1)
 
 
 async def stack(files, style):
