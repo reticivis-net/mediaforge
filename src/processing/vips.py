@@ -5,6 +5,8 @@ import typing
 
 import pyvips
 
+from utils.tempfiles import TempFile
+
 
 async def run_parallel(syncfunc: typing.Callable, *args: tuple, **kwargs: dict):
     """
@@ -24,4 +26,22 @@ def text():
     out.pngsave("out.png")
 
 
-text()
+def esmcaption(caption: str, width: int):
+    # https://github.com/esmBot/esmBot/blob/121615df63bdcff8ee42330d8a67a33a18bb463b/natives/caption.cc#L28-L50
+    # constants used by esmbot
+    fontsize = width / 10
+    textwidth = width - (width / 12.5)
+    # technically redundant but adds twemoji font
+    out = pyvips.Image.text(".", fontfile="rendering/fonts/TwemojiCOLR0.ttf")
+    # generate text
+    out = pyvips.Image.text(caption, font=f"Twemoji Color Emoji, Futura Extra Black Condensed {fontsize}", rgba=True,
+                            fontfile="rendering/fonts/caption.otf", align=pyvips.Align.CENTRE, width=textwidth)
+    # pad text to image width
+    out = out.gravity(pyvips.CompassDirection.CENTRE, width, out.height, pyvips.Extend.WHITE)
+    # save and return
+    outfile = TempFile("png")
+    out.pngsave(outfile)
+    return outfile
+
+def stack(file0, file1):
+    raise NotImplementedError

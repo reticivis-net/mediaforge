@@ -8,8 +8,8 @@ import config
 import processing.common
 import processing.ffmpeg
 import processing.ffprobe
-from core.clogs import logger
 from core import v2queue
+from core.clogs import logger
 from utils.scandiscord import imagesearch
 from utils.web import saveurls
 
@@ -35,19 +35,23 @@ async def process(ctx: commands.Context, func: callable, inputs: list, *args,
     result = None
     msg = None
 
+    async def reply(st):
+        return await ctx.reply(f"{config.emojis['working']} {st}", mention_author=False)
+
     async def updatestatus(st):
         nonlocal msg
         try:
             if msg is None:
-                raise discord.NotFound
-            msg = await msg.edit(content=f"{config.emojis['working']} {st}",
-                                 allowed_mentions=discord.AllowedMentions.none())
+                msg = await reply(st)
+            else:
+                msg = await msg.edit(content=f"{config.emojis['working']} {st}",
+                                     allowed_mentions=discord.AllowedMentions.none())
         except discord.NotFound:
-            msg = await ctx.reply(f"{config.emojis['working']} {st}", mention_author=False)
+            msg = await reply(st)
 
     if inputs:
         # nothing to download sometimes
-        msg = await updatestatus(f"{config.emojis['working']} Downloading...")
+        await updatestatus(f"Downloading...")
 
     try:
         # get media from channel
