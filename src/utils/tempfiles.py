@@ -1,4 +1,5 @@
 import asyncio
+import multiprocessing
 import os
 import random
 import shutil
@@ -10,6 +11,14 @@ import aiofiles.os
 import config
 from core.clogs import logger
 
+
+def init():
+    global temp_dir
+    if os.path.isdir(temp_dir):
+        shutil.rmtree(temp_dir)
+    os.makedirs(temp_dir)
+
+
 if config.override_temp_dir is not None:
     temp_dir = config.override_temp_dir
 else:
@@ -17,10 +26,6 @@ else:
         temp_dir = "/dev/shm/mediaforge"
     else:
         temp_dir = os.path.join(tempfile.gettempdir(), "mediaforge")
-
-if os.path.isdir(temp_dir):
-    shutil.rmtree(temp_dir)
-os.makedirs(temp_dir)
 
 logger.debug(f"temp dir is {temp_dir}")
 
@@ -44,15 +49,21 @@ def temp_file_name(extension=None):
 
 class TempFile(str):
     todelete: bool = True
+    only_delete_in_main_process: bool = False
 
     # literally just a path but it removes itself on garbage collection
-    def __new__(cls, arg: str | None):
+    def __new__(cls, arg: str | None, *, todelete=True, only_delete_in_main_process=False):
         if arg is None:  # default
-            return str.__new__(cls, temp_file_name())
+            arg = temp_file_name()
         elif "." not in arg:  # just extension
-            return str.__new__(cls, temp_file_name(arg))
-        else:  # full filename
-            return str.__new__(cls, arg)
+            arg = temp_file_name(arg)
+        # full filename otherwise
+        logger.debug(f"Reserved new tempfile {arg}")
+        return str.__new__(cls, arg)
+
+    def __init__(self, arg: str | None, todelete=True, only_delete_in_main_process=False):
+        self.todelete = todelete
+        self.only_delete_in_main_process = only_delete_in_main_process
 
     def __del__(self):
         if self.todelete:
@@ -67,9 +78,15 @@ class TempFile(str):
                     loop.run_until_complete(self.delete())
             except Exception as e:
                 logger.debug(e, exc_info=1)
-
         else:
             logger.debug(f"{self} was garbage collected but was requested to not be deleted.")
 
     async def delete(self):
-        await aiofiles.os.remove(self)
+        try:
+            if multiprocessing.current_process().name != "MainProcess" and self.only_delete_in_main_process:
+                logger.debug(f"deletion of {self} was requested by {multiprocessing.current_process().name}, "
+                             f"but specified to only be deleted in the main process, ignoring.")
+            else:
+                await aiofiles.os.remove(self)
+        except FileNotFoundError:
+            logger.debug(f"Tried to delete {self} but it does not exist")

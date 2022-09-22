@@ -7,6 +7,9 @@ import os
 import sqlite3
 import sys
 import traceback
+
+from utils import tempfiles
+
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 try:
@@ -134,6 +137,7 @@ def init():
     initdbsync()
     downloadttsvoices()
     heartbeat.init()
+    tempfiles.init()
 
 
 class MyBot(commands.AutoShardedBot):
