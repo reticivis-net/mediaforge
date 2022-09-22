@@ -178,7 +178,7 @@ class Conversion(commands.Cog, name="Conversion"):
         else:
             await ctx.send(f"{config.emojis['x']} No tenor gif found.")
 
-    @commands.command(aliases=["video", "giftovideo", "tomp4"])
+    @commands.command(aliases=["video", "giftovideo", "tomp4", "mp4"])
     async def tovideo(self, ctx):
         """
         Converts a GIF to a video.

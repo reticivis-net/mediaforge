@@ -1,4 +1,3 @@
-import asyncio
 import glob
 import math
 
@@ -6,10 +5,10 @@ import discord
 import humanize
 
 import config
-from processing.ffprobe import *
-from processing.common import tts, run_command
-from utils.tempfiles import TempFile
 import processing.vips
+from processing.common import tts, run_command
+from processing.ffprobe import *
+from utils.tempfiles import TempFile
 
 
 async def ffmpegsplit(media):
@@ -513,6 +512,7 @@ async def concatv(files):
     #     os.remove(file)
     return outname
 
+
 async def naive_vstack(file0, file1):
     """
     stacks media assuming files are same width
@@ -522,7 +522,17 @@ async def naive_vstack(file0, file1):
     """
     mts = await asyncio.gather(mediatype(file0), mediatype(file1))
     if mts[0] == "IMAGE" and mts[1] == "IMAGE":
-        raise NotImplementedError
+        return await processing.vips.run_parallel(processing.vips.stack, file0, file1)
+    else:
+        out = TempFile("mp4")
+        await run_command("ffmpeg", "-i", file0, "-i", file1, "-filter_complex",
+                          "[0]format=pix_fmts=yuva420p[0f];"
+                          "[1]format=pix_fmts=yuva420p[1f];"
+                          "[0f][1f]vstack=inputs=2", "-c:v", "png", out)
+        if "VIDEO" in mts:
+            return out
+        else:  # gif and image only
+            return await mp4togif(out)
         # return await processing.vips.vstack(file0, file1)
 
 
@@ -535,8 +545,8 @@ async def stack(files, style):
     """
     mts = [await mediatype(files[0]), await mediatype(files[1])]
     # TODO: update
-    # if mts[0] == "IMAGE" and mts[1] == "IMAGE":  # easier to just make this an edge case
-    #     return await imagestack(files, style)
+    if mts[0] == "IMAGE" and mts[1] == "IMAGE":  # easier to just make this an edge case
+        return await processing.vips.run_parallel(processing.vips.stack, files[0], files[1])
     video0 = await forceaudio(files[0])
     fixedvideo0 = TempFile("mp4")
     await run_command("ffmpeg", "-hide_banner", "-i", video0, "-c:v", "png", "-c:a", "copy", "-ar", "48000",

@@ -1,5 +1,8 @@
 from discord.ext import commands
 
+import processing.vips
+from core.process import process
+
 
 class Caption(commands.Cog, name="Captioning"):
     """
@@ -188,8 +191,8 @@ class Caption(commands.Cog, name="Captioning"):
         :param caption: The caption text.
         :mediaparam media: A video, gif, or image.
         """
-        raise NotImplementedError  # TODO: implement
-        # await process(ctx, captionfunctions.esmcaption, [["VIDEO", "GIF", "IMAGE"]], caption, handleanimated=True)
+        await process(ctx, processing.vips.generic_caption_stack, [["VIDEO", "GIF", "IMAGE"]],
+                      processing.vips.esmcaption, [caption])
 
     @commands.command(aliases=["twitter", "twitcap", "twittercap"])
     async def twittercaption(self, ctx, *, caption):
