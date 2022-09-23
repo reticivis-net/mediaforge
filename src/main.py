@@ -8,9 +8,8 @@ import sqlite3
 import sys
 import traceback
 
+sys.path.append(os.getcwd())
 from utils import tempfiles
-
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 try:
     # pip libs

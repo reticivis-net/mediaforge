@@ -83,7 +83,9 @@ async def process(ctx: commands.Context, func: callable, inputs: list, *args,
                         files[i] = await processing.ffmpeg.ensuresize(ctx, file, config.min_size, config.max_size)
             # files are of correcte type, begin to process
             else:
-                await updatestatus("Your command is in the queue...")
+                # only update with queue message if there is a queue
+                if queue and v2queue.sem.locked():
+                    await updatestatus("Your command is in the queue...")
                 # prepare args
                 if inputs:
                     args = files + list(args)
