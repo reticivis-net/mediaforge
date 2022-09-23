@@ -5,8 +5,8 @@ import discord
 import humanize
 
 import config
+import processing.common
 import processing.vips
-from processing.common import tts, run_command
 from processing.ffprobe import *
 from utils.tempfiles import TempFile
 
@@ -522,7 +522,7 @@ async def naive_vstack(file0, file1):
     """
     mts = await asyncio.gather(mediatype(file0), mediatype(file1))
     if mts[0] == "IMAGE" and mts[1] == "IMAGE":
-        return await processing.vips.run_parallel(processing.vips.stack, file0, file1)
+        return await processing.common.run_parallel(processing.vips.stack, file0, file1)
     else:
         out = TempFile("mp4")
         await run_command("ffmpeg", "-i", file0, "-i", file1, "-filter_complex",
@@ -546,7 +546,7 @@ async def stack(files, style):
     mts = [await mediatype(files[0]), await mediatype(files[1])]
     # TODO: update
     if mts[0] == "IMAGE" and mts[1] == "IMAGE":  # easier to just make this an edge case
-        return await processing.vips.run_parallel(processing.vips.stack, files[0], files[1])
+        return await processing.common.run_parallel(processing.vips.stack, files[0], files[1])
     video0 = await forceaudio(files[0])
     fixedvideo0 = TempFile("mp4")
     await run_command("ffmpeg", "-hide_banner", "-i", video0, "-c:v", "png", "-c:a", "copy", "-ar", "48000",
@@ -906,3 +906,25 @@ async def toapng(video):
     # ffmpeg method, removes dependence on apngasm but bigger and worse quality
     # outname = TempFile("png")
     # await run_command("ffmpeg", "-i", video, "-f", "apng", "-plays", "0", outname)
+
+
+async def motivate(media: str, captions: typing.Sequence[str]):
+    width, height = await get_resolution(media)
+    text = await processing.common.run_parallel(processing.vips.motivate_text, captions, width)
+    mt = await mediatype(media)
+    exts = {
+        "VIDEO": "mp4",
+        "GIF": "mp4",
+        "IMAGE": "png"
+    }
+    outfile = TempFile(exts[mt])
+    await run_command("ffmpeg", "-i", media, "-i", text, "-filter_complex",
+                      "[0]pad=w=iw+(iw/60):h=ih+(iw/60):x=(iw/120):y=(iw/120):color=black[0p0];"
+                      "[0p0]pad=w=iw+(iw/30):h=ih+(iw/30):x=(iw/60):y=(iw/60):color=white[0p1];"
+                      "[0p1][1]vstack=inputs=2[s];"
+                      "[s]pad=w=iw+(iw/5):h=ih+(iw/10):x=(iw/10):y=(iw/10):color=black",
+                      "-c:v", "png",
+                      outfile)
+    if mt == "GIF":
+        outfile = await mp4togif(outfile)
+    return outfile

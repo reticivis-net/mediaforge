@@ -1,6 +1,7 @@
 from discord.ext import commands
 
 import processing.vips
+import processing.ffmpeg
 from core.process import process
 
 
@@ -24,9 +25,7 @@ class Caption(commands.Cog, name="Captioning"):
         caption = caption.split("|")
         if len(caption) == 1:
             caption.append("")
-        raise NotImplementedError  # TODO: implement
-        # await process(ctx, captionfunctions.motivate, [["VIDEO", "GIF", "IMAGE"]], *caption,
-        #                 handleanimated=True)
+        await process(ctx, processing.ffmpeg.motivate, [["VIDEO", "GIF", "IMAGE"]], caption)
 
     @commands.command(aliases=["toptextbottomtext", "impact", "adviceanimal"])
     async def meme(self, ctx, *, caption):
