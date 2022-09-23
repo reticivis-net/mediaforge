@@ -34,28 +34,34 @@ def esmcaption(captions: typing.Sequence[str], width: int):
     fontsize = width / 10
     textwidth = width - (width / 12.5)
     # technically redundant but adds twemoji font
-    out = pyvips.Image.text(".", fontfile="rendering/fonts/TwemojiCOLR0.ttf")
+    # DOESNT WORK ON WINDOWS IDK WHY
+    out = pyvips.Image.text(".", fontfile="rendering/fonts/TwemojiCOLR0.otf")
     # generate text
-    # TODO: emojis fucking broke again waaha
     out = pyvips.Image.text(f"{captions[0]}",
-                            font=f"Twemoji Color Emoji, Futura Extra Black Condensed {fontsize}",
-                            rgba=True, fontfile="rendering/fonts/caption.otf", align=pyvips.Align.CENTRE,
-                            width=textwidth)
+                            font=f"Twemoji Color Emoji,FuturaExtraBlackCondensed {fontsize}px",
+                            rgba=True,
+                            fontfile="rendering/fonts/caption.otf",
+                            align=pyvips.Align.CENTRE,
+                            width=textwidth
+                            )
     # overlay white background
-    out2 = out.composite((255, 255, 255, 255), mode=pyvips.BlendMode.DEST_OVER)
+    out = out.composite((255, 255, 255, 255), mode=pyvips.BlendMode.DEST_OVER)
     # pad text to image width
-    out2 = out2.gravity(pyvips.CompassDirection.CENTRE, width, out.height + fontsize, extend=pyvips.Extend.WHITE)
+    out = out.gravity(pyvips.CompassDirection.CENTRE, width, out.height + fontsize, extend=pyvips.Extend.WHITE)
     # save and return
     # because it's run in executor, tempfiles
-    outfile = TempFile("png", only_delete_in_main_process=True)
-    out2.pngsave(outfile)
+    outfile = TempFile("png", only_delete_in_main_process=True, todelete=False)
+    out.pngsave(outfile)
     return outfile
 
 
 def stack(file0, file1):
     file0 = pyvips.Image.new_from_file(file0)
     file1 = pyvips.Image.new_from_file(file1)
-    out = file0.join(file1, direction=pyvips.Direction.VERTICAL, expand=True, background=0xffffff)
-    outfile = TempFile("png", False)
+    out = file0.join(file1, pyvips.Direction.VERTICAL, expand=True, background=0xffffff)
+    outfile = TempFile("png", only_delete_in_main_process=True)
     out.pngsave(outfile)
     return outfile
+
+
+# print(esmcaption(["h👍💜🏳️‍🌈🏳️‍⚧️i"], 1000))
