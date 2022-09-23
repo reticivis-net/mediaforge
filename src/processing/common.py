@@ -1,4 +1,6 @@
 import asyncio
+import concurrent.futures
+import functools
 import os
 import subprocess
 import sys
@@ -94,3 +96,14 @@ async def tts(text: str, model: typing.Literal["male", "female", "retro"] = "mal
                               "-o", ttswav, "-t", text)
     await run_command("ffmpeg", "-hide_banner", "-i", ttswav, "-c:a", "libmp3lame", outname)
     return outname
+
+
+async def run_parallel(syncfunc: typing.Callable, *args, **kwargs):
+    """
+    uses concurrent.futures.ProcessPoolExecutor to run CPU-bound functions in their own process
+
+    :param syncfunc: the blocking function
+    :return: the result of the blocking function
+    """
+    with concurrent.futures.ProcessPoolExecutor(1) as pool:
+        return await asyncio.get_running_loop().run_in_executor(pool, functools.partial(syncfunc, *args, **kwargs))
