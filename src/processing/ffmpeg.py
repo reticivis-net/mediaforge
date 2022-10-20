@@ -928,3 +928,15 @@ async def motivate(media: str, captions: typing.Sequence[str]):
     if mt == "GIF":
         outfile = await mp4togif(outfile)
     return outfile
+
+
+async def naive_overlay(im1: str, im2: str):
+    mts = [await mediatype(im1), await mediatype(im2)]
+    outname = TempFile("mp4")
+    await run_command("ffmpeg", "-i", im1, "-i", im2, "-filter_complex", "overlay", "-c:v", "png", outname)
+    if mts[0] == "IMAGE" and mts[1] == "IMAGE":
+        outname = await mediatopng(outname)
+    # one or more gifs and no videos
+    elif mts[0] != "VIDEO" and mts[1] != "VIDEO":
+        outname = await mp4togif(outname)
+    return outname

@@ -5,9 +5,9 @@ import os
 import subprocess
 import sys
 import typing
-from utils.tempfiles import TempFile
 
 from core.clogs import logger
+from utils.tempfiles import TempFile
 
 
 class NonBugError(Exception):
@@ -26,9 +26,8 @@ class ReturnedNothing(Exception):
     pass
 
 
-
 # https://fredrikaverpil.github.io/2017/06/20/async-and-await-with-subprocesses/
-async def run_command(*args):
+async def run_command(*args: str):
     """
     run a cli command
 
@@ -105,5 +104,6 @@ async def run_parallel(syncfunc: typing.Callable, *args, **kwargs):
     :param syncfunc: the blocking function
     :return: the result of the blocking function
     """
+    # creating a new process pool doesnt appear to have much overhead but re-using an existing one causes PAin
     with concurrent.futures.ProcessPoolExecutor(1) as pool:
         return await asyncio.get_running_loop().run_in_executor(pool, functools.partial(syncfunc, *args, **kwargs))
