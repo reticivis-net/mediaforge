@@ -1,7 +1,7 @@
 from discord.ext import commands
 
-import processing.vips
 import processing.ffmpeg
+import processing.vips
 from core.process import process
 
 
@@ -39,9 +39,8 @@ class Caption(commands.Cog, name="Captioning"):
         caption = caption.split("|")
         if len(caption) == 1:
             caption.append("")
-        raise NotImplementedError  # TODO: implement
-        # await process(ctx, captionfunctions.meme, [["VIDEO", "GIF", "IMAGE"]], *caption,
-        #                 handleanimated=True)
+        await process(ctx, processing.vips.generic_caption_overlay, [["VIDEO", "GIF", "IMAGE"]],
+                      processing.vips.meme_text, caption)
 
     @commands.command(aliases=["snapchat", "snap", "snapcap", "snapcaption", "snapchatcap", "classiccaption"])
     async def snapchatcaption(self, ctx, *, caption):

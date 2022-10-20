@@ -9,7 +9,7 @@ from core.clogs import logger
 from utils.tempfiles import TempFile
 
 
-async def saveurl(url) -> str:
+async def saveurl(url: str) -> str:
     """
     save a url
 
@@ -38,7 +38,7 @@ async def saveurl(url) -> str:
                 logger.info(f"Url is {humanize.naturalsize(size)}")
                 if config.max_file_size < size:  # file size to download must be under max configured size.
                     raise processing.common.NonBugError(f"Your file is too big ({humanize.naturalsize(size)}). "
-                                                       f"I'm configured to only download files up to "
+                                                        f"I'm configured to only download files up to "
                                                         f"{humanize.naturalsize(config.max_file_size)}.")
                 logger.info(f"Saving url {url}")
                 async with aiofiles.open(name, mode='wb') as f:
