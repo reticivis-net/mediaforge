@@ -37,6 +37,37 @@ def escape(arg: str | typing.Sequence[str]):
         return [html.escape(s) for s in arg]
 
 
+def outline(image: pyvips.Image, radius: int | None = None, color: typing.Sequence[int] | None = None) -> pyvips.Image:
+    if color is None:
+        color = [0, 0, 0]
+    if radius is None:
+        radius = image.width // 1000
+    # wee bit of aliasing
+    scaling_factor = 2
+    # we need to make the text image large enough to hold the extra edges
+    text = image.embed(radius, radius, image.width + 2 * radius, image.height + 2 * radius)
+    # only care about alpha channel
+    text_shadow = text[3]
+    if scaling_factor > 1:
+        # resize bigger
+        text_shadow = text[3].resize(scaling_factor, kernel=pyvips.Kernel.LINEAR)
+    # dilate the text mask, this step does no antialiasing hence done at scaled resolution
+    circle_mask = pyvips.Image.black(radius * scaling_factor * 2 + 1, radius * scaling_factor * 2 + 1) \
+        .add(128) \
+        .draw_circle(255, radius * scaling_factor, radius * scaling_factor, radius * scaling_factor, fill=True)
+    text_shadow = text_shadow.dilate(circle_mask)
+    if scaling_factor > 1:
+        # resize back to 1x
+        text_shadow = text_shadow.resize(1 / scaling_factor, kernel=pyvips.Kernel.LANCZOS3)
+    # paint black
+    text_shadow = text_shadow.new_from_image(color) \
+        .bandjoin(text_shadow) \
+        .copy(interpretation="srgb")
+    # composite
+    text = text_shadow.composite(text, "over")
+    return text
+
+
 def esmcaption(captions: typing.Sequence[str], size: ImageSize):
     captions = escape(captions)
     # https://github.com/esmBot/esmBot/blob/121615df63bdcff8ee42330d8a67a33a18bb463b/natives/caption.cc#L28-L50
@@ -161,16 +192,8 @@ def meme_text(captions: typing.Sequence[str], size: ImageSize):
         overlay = overlay.composite2(bottomtext, pyvips.BlendMode.OVER,
                                      x=((size.width - bottomtext.width) / 2),
                                      y=int(size.height / 3 * 2))
-    # make black image of same size
-    shadow = overlay.new_from_image([0, 0, 0])
-    # copy transparency
-    shadow = shadow.bandjoin(overlay[3])
-    # fix bandjoin
-    shadow = shadow.copy(interpretation=pyvips.enums.Interpretation.RGB)
-    # blur
-    shadow = shadow.gaussblur(0.5, min_ampl=0.1)
-    # shadow.interpretation = pyvips.enums.Interpretation.RGB
-    overlay = overlay.composite2(shadow, pyvips.BlendMode.DEST_OVER)
+
+    overlay = outline(overlay, overlay.width // 200)
     outfile = TempFile("png", todelete=False)
     overlay.pngsave(outfile)
     return outfile
@@ -184,6 +207,5 @@ def stack(file0, file1):
     out.pngsave(outfile)
     return outfile
 
-
 # print(esmcaption(["h👍💜🏳️‍🌈🏳️‍⚧️i"], 1000))
-print(meme_text(["topto top topt otp otp top", "bottom"], ImageSize(1000, 1000)))
+# print(meme_text(["topto top topt otp otp top", "bottom"], ImageSize(1000, 1000)))
