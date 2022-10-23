@@ -63,8 +63,8 @@ class Caption(commands.Cog, name="Captioning"):
         :param caption: The caption text.
         :mediaparam media: A video, gif, or image.
         """
-        raise NotImplementedError  # TODO: implement
-        # await process(ctx, captionfunctions.whisper, [["VIDEO", "GIF", "IMAGE"]], caption, handleanimated=True)
+        await process(ctx, processing.vips.generic_caption_overlay, [["VIDEO", "GIF", "IMAGE"]],
+                      processing.vips.whisper_text, [caption])
 
     @commands.command(aliases=["news"])
     async def breakingnews(self, ctx, *, caption):
