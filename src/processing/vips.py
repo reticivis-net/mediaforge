@@ -42,29 +42,16 @@ def outline(image: pyvips.Image, radius: int | None = None, color: typing.Sequen
         color = [0, 0, 0]
     if radius is None:
         radius = image.width // 1000
-    # wee bit of aliasing
-    scaling_factor = 2
-    # we need to make the text image large enough to hold the extra edges
-    text = image.embed(radius, radius, image.width + 2 * radius, image.height + 2 * radius)
-    # only care about alpha channel
-    text_shadow = text[3]
-    if scaling_factor > 1:
-        # resize bigger
-        text_shadow = text[3].resize(scaling_factor, kernel=pyvips.Kernel.LINEAR)
-    # dilate the text mask, this step does no antialiasing hence done at scaled resolution
-    circle_mask = pyvips.Image.black(radius * scaling_factor * 2 + 1, radius * scaling_factor * 2 + 1) \
-        .add(128) \
-        .draw_circle(255, radius * scaling_factor, radius * scaling_factor, radius * scaling_factor, fill=True)
-    text_shadow = text_shadow.dilate(circle_mask)
-    if scaling_factor > 1:
-        # resize back to 1x
-        text_shadow = text_shadow.resize(1 / scaling_factor, kernel=pyvips.Kernel.LANCZOS3)
-    # paint black
-    text_shadow = text_shadow.new_from_image(color) \
-        .bandjoin(text_shadow) \
+    # blur the alpha layer
+    shadow = image[3].gaussblur(radius)
+    # saturate it but not 100% so there is some anti aliasing
+    shadow = shadow * 64
+    # recolor shadow
+    shadow = shadow.new_from_image(color) \
+        .bandjoin(shadow) \
         .copy(interpretation="srgb")
     # composite
-    text = text_shadow.composite(text, "over")
+    text = shadow.composite(image, "over")
     return text
 
 
