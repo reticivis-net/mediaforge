@@ -186,6 +186,34 @@ def meme_text(captions: typing.Sequence[str], size: ImageSize):
     return outfile
 
 
+def whisper_text(captions: typing.Sequence[str], size: ImageSize):
+    captions = escape(captions)
+    # blank image
+    overlay = pyvips.Image.black(size.width, size.height).new_from_image([0, 0, 0, 0]).copy(
+        interpretation=pyvips.enums.Interpretation.RGB)
+
+    # technically redundant but adds twemoji font
+    text = pyvips.Image.text(".", fontfile="rendering/fonts/TwemojiCOLR0.otf")
+    # generate text
+    text = pyvips.Image.text(
+        f"<span foreground=\"white\">{captions[0].upper()}</span>",
+        font=f"Twemoji Color Emoji,Upright {size.width // 6}px",
+        rgba=True,
+        fontfile="rendering/fonts/whisper.otf",
+        align=pyvips.Align.CENTRE,
+        width=int(size.width * .95),
+        height=int(size.height * .95)
+    )
+    overlay = overlay.composite2(text, pyvips.BlendMode.OVER,
+                                 x=((size.width - text.width) // 2),
+                                 y=((size.height - text.height) // 2))
+
+    overlay = outline(overlay, overlay.width // 175)
+    outfile = TempFile("png", todelete=False)
+    overlay.pngsave(outfile)
+    return outfile
+
+
 def stack(file0, file1):
     file0 = pyvips.Image.new_from_file(file0)
     file1 = pyvips.Image.new_from_file(file1)
