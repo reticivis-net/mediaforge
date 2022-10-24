@@ -126,7 +126,7 @@ def meme(captions: typing.Sequence[str], size: ImageSize):
     captions = escape(captions)
     # blank image
     overlay = pyvips.Image.black(size.width, size.height).new_from_image([0, 0, 0, 0]).copy(
-        interpretation=pyvips.enums.Interpretation.RGB)
+        interpretation=pyvips.enums.Interpretation.SRGB)
 
     if captions[0]:
         # technically redundant but adds twemoji font
@@ -171,7 +171,7 @@ def whisper(captions: typing.Sequence[str], size: ImageSize):
     captions = escape(captions)
     # blank image
     overlay = pyvips.Image.black(size.width, size.height).new_from_image([0, 0, 0, 0]).copy(
-        interpretation=pyvips.enums.Interpretation.RGB)
+        interpretation=pyvips.enums.Interpretation.SRGB)
 
     # technically redundant but adds twemoji font
     text = pyvips.Image.text(".", fontfile="rendering/fonts/TwemojiCOLR0.otf")
@@ -208,12 +208,12 @@ def snapchat(captions: typing.Sequence[str], size: ImageSize):
     )
     # background
     bg = pyvips.Image.black(size.width, text.height + size.width // 25).new_from_image([0, 0, 0, 178]).copy(
-        interpretation=pyvips.enums.Interpretation.RGB)
+        interpretation=pyvips.enums.Interpretation.SRGB)
     # overlay
     text = overlay_in_middle(bg, text)
     # pad to image size
     blank_bg = pyvips.Image.black(size.width, size.height).new_from_image([0, 0, 0, 0]).copy(
-        interpretation=pyvips.enums.Interpretation.RGB)
+        interpretation=pyvips.enums.Interpretation.SRGB)
     # overlay
     out = overlay_in_middle(blank_bg, text)
     # save

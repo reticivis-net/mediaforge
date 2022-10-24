@@ -112,8 +112,6 @@ def downloadttsvoices():
         os.chmod(mimicpath, os.stat(mimicpath).st_mode | 0o111)
 
 
-
-
 def initdbsync():
     # create table if it doesnt exist
     # this isnt done with aiosqlite because its easier to just not do things asyncly during startup.
@@ -142,7 +140,7 @@ def init():
 class MyBot(commands.AutoShardedBot):
     async def setup_hook(self):
         logger.debug(f"initializing cogs")
-        await database.create_db()
+        await bot.load_extension("core.database")
         if config.bot_list_data:
             logger.info("bot list data found. botblock will start when bot is ready.")
             await bot.add_cog(DiscordListsPost(bot))
@@ -183,4 +181,6 @@ if __name__ == "__main__":
                 intents=intents)
 
     logger.debug("running bot")
+    if sys.platform == "win32":
+        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
     bot.run(config.bot_token, log_handler=None)
