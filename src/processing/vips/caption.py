@@ -113,7 +113,7 @@ def motivate_text(captions: typing.Sequence[str], size: ImageSize):
             raise Exception("missing toptext and bottomtext")
             # out = pyvips.Image.new_from_list([[0, 0, 0, 255]])
     # overlay black background
-    out = out.composite2((0, 0, 0, 255), mode=pyvips.BlendMode.DEST_OVER)
+    out = out.composite2((0, 0, 0, 255), pyvips.BlendMode.DEST_OVER)
     # pad text to target width
     out = out.gravity(pyvips.CompassDirection.CENTRE, width, out.height, extend=pyvips.Extend.BACKGROUND,
                       background=[0, 0, 0, 255])

@@ -230,8 +230,7 @@ class Caption(commands.Cog, name="Captioning"):
         caption = caption.split("|")
         if len(caption) == 1:
             caption.append("")
-        raise NotImplementedError  # TODO: implement
-        # await process(ctx, processing.freezemotivate, [["VIDEO", "GIF"]], *caption)
+        await process(ctx, processing.ffmpeg.freezemotivate, [["VIDEO", "GIF"]], *caption)
 
     @commands.command()
     async def freezemotivateaudio(self, ctx, *, caption):
@@ -247,5 +246,4 @@ class Caption(commands.Cog, name="Captioning"):
         caption = caption.split("|")
         if len(caption) == 1:
             caption.append("")
-        raise NotImplementedError  # TODO: implement
-        # await process(ctx, processing.freezemotivate, [["VIDEO", "GIF"], ["AUDIO"]], *caption)
+        await process(ctx, processing.ffmpeg.freezemotivate, [["VIDEO", "GIF"], ["AUDIO"]], *caption)
