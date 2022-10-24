@@ -6,9 +6,9 @@ import humanize
 
 import config
 import processing.common
-import processing.vips.vips
+import processing.vips.vipsutils
+import processing.vips.caption
 
-import processing.vips.utils
 from processing.ffprobe import *
 from utils.tempfiles import TempFile
 
@@ -524,7 +524,7 @@ async def naive_vstack(file0, file1):
     """
     mts = await asyncio.gather(mediatype(file0), mediatype(file1))
     if mts[0] == "IMAGE" and mts[1] == "IMAGE":
-        return await processing.common.run_parallel(processing.vips.utils.stack, file0, file1)
+        return await processing.common.run_parallel(processing.vips.vipsutils.stack, file0, file1)
     else:
         out = TempFile("mp4")
         await run_command("ffmpeg", "-i", file0, "-i", file1, "-filter_complex",
@@ -912,7 +912,7 @@ async def toapng(video):
 
 async def motivate(media: str, captions: typing.Sequence[str]):
     width, height = await get_resolution(media)
-    text = await processing.common.run_parallel(processing.vips.vips.motivate_text, captions, width)
+    text = await processing.common.run_parallel(processing.vips.caption.motivate_text, captions, width)
     mt = await mediatype(media)
     exts = {
         "VIDEO": "mp4",

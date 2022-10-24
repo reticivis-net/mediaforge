@@ -3,7 +3,7 @@ from discord.ext import commands
 import processing.ffmpeg
 import processing.vips.caption
 
-import processing.vips.utils
+import processing.vips.vipsutils
 from core.process import process
 
 
@@ -41,8 +41,8 @@ class Caption(commands.Cog, name="Captioning"):
         caption = caption.split("|")
         if len(caption) == 1:
             caption.append("")
-        await process(ctx, processing.vips.utils.generic_caption_overlay, [["VIDEO", "GIF", "IMAGE"]],
-                      processing.vips.caption.meme_text, caption)
+        await process(ctx, processing.vips.vipsutils.generic_caption_overlay, [["VIDEO", "GIF", "IMAGE"]],
+                      processing.vips.caption.meme, caption)
 
     @commands.command(aliases=["snapchat", "snap", "snapcap", "snapcaption", "snapchatcap", "classiccaption"])
     async def snapchatcaption(self, ctx, *, caption):
@@ -53,8 +53,8 @@ class Caption(commands.Cog, name="Captioning"):
         :param caption: The caption text.
         :mediaparam media: A video, gif, or image.
         """
-        raise NotImplementedError  # TODO: implement
-        # await process(ctx, captionfunctions.snapchat, [["VIDEO", "GIF", "IMAGE"]], caption, handleanimated=True)
+        await process(ctx, processing.vips.vipsutils.generic_caption_overlay, [["VIDEO", "GIF", "IMAGE"]],
+                      processing.vips.caption.snapchat, [caption])
 
     @commands.command(aliases=["whisper", "wcap", "wcaption"])
     async def whispercaption(self, ctx, *, caption):
@@ -65,8 +65,8 @@ class Caption(commands.Cog, name="Captioning"):
         :param caption: The caption text.
         :mediaparam media: A video, gif, or image.
         """
-        await process(ctx, processing.vips.utils.generic_caption_overlay, [["VIDEO", "GIF", "IMAGE"]],
-                      processing.vips.caption.whisper_text, [caption])
+        await process(ctx, processing.vips.vipsutils.generic_caption_overlay, [["VIDEO", "GIF", "IMAGE"]],
+                      processing.vips.caption.whisper, [caption])
 
     @commands.command(aliases=["news"])
     async def breakingnews(self, ctx, *, caption):
@@ -113,8 +113,8 @@ class Caption(commands.Cog, name="Captioning"):
         :param caption: The caption text.
         :mediaparam media: A video, gif, or image.
         """
-        raise NotImplementedError  # TODO: implement
-        # await process(ctx, captionfunctions.caption, [["VIDEO", "GIF", "IMAGE"]], caption, handleanimated=True)
+        await process(ctx, processing.vips.vipsutils.generic_caption_stack, [["VIDEO", "GIF", "IMAGE"]],
+                      processing.vips.caption.mediaforge_caption, [caption])
 
     @commands.command(aliases=["imstuff"])
     async def stuff(self, ctx, *, caption):
@@ -178,9 +178,8 @@ class Caption(commands.Cog, name="Captioning"):
         :param caption: The caption text.
         :mediaparam media: A video, gif, or image.
         """
-        raise NotImplementedError  # TODO: implement
-        # await process(ctx, captionfunctions.bottomcaption, [["VIDEO", "GIF", "IMAGE"]], caption,
-        #                 handleanimated=True)
+        await process(ctx, processing.vips.vipsutils.generic_caption_stack, [["VIDEO", "GIF", "IMAGE"]],
+                      processing.vips.caption.mediaforge_caption, [caption], reverse=True)
 
     @commands.command(aliases=["esm", "&caption", "essemcaption", "esmbotcaption", "esmcap"])
     async def esmcaption(self, ctx, *, caption):
@@ -191,7 +190,7 @@ class Caption(commands.Cog, name="Captioning"):
         :param caption: The caption text.
         :mediaparam media: A video, gif, or image.
         """
-        await process(ctx, processing.vips.utils.generic_caption_stack, [["VIDEO", "GIF", "IMAGE"]],
+        await process(ctx, processing.vips.vipsutils.generic_caption_stack, [["VIDEO", "GIF", "IMAGE"]],
                       processing.vips.caption.esmcaption, [caption])
 
     @commands.command(aliases=["twitter", "twitcap", "twittercap"])

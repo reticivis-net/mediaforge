@@ -3,7 +3,7 @@ import typing
 
 import pyvips
 
-from processing.vips.utils import ImageSize, escape, outline, overlay_in_middle
+from processing.vips.vipsutils import ImageSize, escape, outline, overlay_in_middle
 from utils.tempfiles import TempFile
 
 
@@ -12,7 +12,7 @@ def esmcaption(captions: typing.Sequence[str], size: ImageSize):
     # https://github.com/esmBot/esmBot/blob/121615df63bdcff8ee42330d8a67a33a18bb463b/natives/caption.cc#L28-L50
     # constants used by esmbot
     fontsize = size.width / 10
-    textwidth = size.width - (size.width / 12.5)
+    textwidth = size.width * .92
     # technically redundant but adds twemoji font
     # DOESNT WORK ON WINDOWS IDK WHY
     out = pyvips.Image.text(".", fontfile="rendering/fonts/TwemojiCOLR0.otf")
@@ -22,6 +22,35 @@ def esmcaption(captions: typing.Sequence[str], size: ImageSize):
         font=f"Twemoji Color Emoji,FuturaExtraBlackCondensed {fontsize}px",
         rgba=True,
         fontfile="rendering/fonts/caption.otf",
+        align=pyvips.Align.CENTRE,
+        width=textwidth
+    )
+    # overlay white background
+    out = out.composite((255, 255, 255, 255), mode=pyvips.BlendMode.DEST_OVER)
+    # pad text to image width
+    out = out.gravity(pyvips.CompassDirection.CENTRE, size.width, out.height + fontsize, extend=pyvips.Extend.WHITE)
+    # save and return
+    # because it's run in executor, tempfiles
+    outfile = TempFile("png", only_delete_in_main_process=True, todelete=False)
+    out.pngsave(outfile)
+    return outfile
+
+
+def mediaforge_caption(captions: typing.Sequence[str], size: ImageSize):
+    captions = escape(captions)
+    # https://github.com/esmBot/esmBot/blob/121615df63bdcff8ee42330d8a67a33a18bb463b/natives/caption.cc#L28-L50
+    # constants used by esmbot
+    fontsize = size.width / 10
+    textwidth = size.width * .92
+    # technically redundant but adds twemoji font
+    # DOESNT WORK ON WINDOWS IDK WHY
+    out = pyvips.Image.text(".", fontfile="rendering/fonts/TwemojiCOLR0.otf")
+    # generate text
+    out = pyvips.Image.text(
+        captions[0],
+        font=f"Twemoji Color Emoji,Atkinson Hyperlegible Bold {fontsize}px",
+        rgba=True,
+        fontfile="rendering/fonts/AtkinsonHyperlegible-Bold.ttf",
         align=pyvips.Align.CENTRE,
         width=textwidth
     )
@@ -178,7 +207,7 @@ def snapchat(captions: typing.Sequence[str], size: ImageSize):
         height=size.height // 3
     )
     # background
-    bg = pyvips.Image.black(size.width, text.height + text.height * .04).new_from_image([0, 0, 0, 178]).copy(
+    bg = pyvips.Image.black(size.width, text.height + size.width // 25).new_from_image([0, 0, 0, 178]).copy(
         interpretation=pyvips.enums.Interpretation.RGB)
     # overlay
     text = overlay_in_middle(bg, text)

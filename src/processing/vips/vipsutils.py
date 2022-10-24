@@ -45,7 +45,7 @@ def outline(image: pyvips.Image, radius: int | None = None, color: typing.Sequen
     # https://github.com/libvips/libvips/discussions/2123#discussioncomment-3950916
     mask = pyvips.Image.gaussmat(radius / 2, 0.1, separable=True)
     mask *= 64
-    shadow = image.convsep(mask).cast("uchar")
+    shadow = image[3].convsep(mask).cast("uchar")
     # recolor shadow
     shadow = shadow.new_from_image(color) \
         .bandjoin(shadow) \
