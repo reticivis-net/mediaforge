@@ -517,9 +517,6 @@ async def concatv(files):
 async def naive_vstack(file0, file1):
     """
     stacks media assuming files are same width
-    :param file1:
-    :param file2:
-    :return:
     """
     mts = await asyncio.gather(mediatype(file0), mediatype(file1))
     if mts[0] == "IMAGE" and mts[1] == "IMAGE":
@@ -547,7 +544,7 @@ async def stack(files, style):
     mts = [await mediatype(files[0]), await mediatype(files[1])]
     # TODO: update
     if mts[0] == "IMAGE" and mts[1] == "IMAGE":  # easier to just make this an edge case
-        return await processing.common.run_parallel(processing.vips.utils.stack, files[0], files[1])
+        return await processing.common.run_parallel(processing.vips.vipsutils.stack, files[0], files[1])
     video0 = await forceaudio(files[0])
     fixedvideo0 = TempFile("mp4")
     await run_command("ffmpeg", "-hide_banner", "-i", video0, "-c:v", "png", "-c:a", "copy", "-ar", "48000",

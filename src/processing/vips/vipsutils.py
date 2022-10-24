@@ -43,13 +43,13 @@ def outline(image: pyvips.Image, radius: int | None = None, color: typing.Sequen
         radius = image.width // 1000
     # dilate the text with a squared-off gaussian mask
     # https://github.com/libvips/libvips/discussions/2123#discussioncomment-3950916
-    mask = pyvips.Image.gaussmat(radius / 2, 0.1, separable=True)
-    mask *= 64
-    shadow = image[3].convsep(mask).cast("uchar")
+    mask = pyvips.Image.gaussmat(radius / 2, 0.0001, separable=True)
+    mask *= 10
+    shadow = image[3].convsep(mask).cast(pyvips.BandFormat.UCHAR)
     # recolor shadow
     shadow = shadow.new_from_image(color) \
         .bandjoin(shadow) \
-        .copy(interpretation="srgb")
+        .copy(interpretation=pyvips.Interpretation.SRGB)
     # composite
     text = shadow.composite2(image, pyvips.BlendMode.OVER)
     return text
