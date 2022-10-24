@@ -6,9 +6,8 @@ import humanize
 
 import config
 import processing.common
-import processing.vips.vipsutils
 import processing.vips.caption
-
+import processing.vips.vipsutils
 from processing.ffprobe import *
 from utils.tempfiles import TempFile
 
@@ -506,8 +505,8 @@ async def concatv(files):
     with open(concatdemuxer, "w+") as f:
         f.write(f"file '{fixedvideo0}'\nfile '{fixedfixedvideo1}'")
     outname = TempFile("mp4")
-    await run_command("ffmpeg", "-hide_banner", "-f", "concat", "-i", concatdemuxer, "-c:v", "png", "-c:a", "copy",
-                      outname)
+    await run_command("ffmpeg", "-hide_banner", "-safe", "0", "-f", "concat", "-i", concatdemuxer, "-c:v", "png",
+                      "-c:a", "copy", outname)
     if (await mediatype(files[0])) == "GIF" and (await mediatype(files[1])) == "GIF":
         outname = await mp4togif(outname)
     # for file in [video0, video1, fixedvideo1, fixedvideo0, fixedfixedvideo1, concatdemuxer]:
@@ -911,8 +910,8 @@ async def toapng(video):
 
 
 async def motivate(media: str, captions: typing.Sequence[str]):
-    width, height = await get_resolution(media)
-    text = await processing.common.run_parallel(processing.vips.caption.motivate_text, captions, width)
+    text = await processing.common.run_parallel(processing.vips.caption.motivate_text, captions,
+                                                processing.vips.vipsutils.ImageSize(*await get_resolution(media)))
     mt = await mediatype(media)
     exts = {
         "VIDEO": "mp4",
@@ -942,3 +941,23 @@ async def naive_overlay(im1: str, im2: str):
     elif mts[0] != "VIDEO" and mts[1] != "VIDEO":
         outname = await mp4togif(outname)
     return outname
+
+
+async def freezemotivate(files, *caption):
+    """
+    ends video with motivate caption
+    :param files: media
+    :param caption: caption to pass to motivate()
+    :return: processed media
+    """
+    if isinstance(files, list):  # audio specified
+        video = files[0]
+        audio = files[1]
+    else:  # just default to song lol!
+        video = files
+        audio = "rendering/what.mp3"
+    lastframe = await frame_n(video, -1)
+    clastframe = await motivate(lastframe, caption)
+    freezeframe = await imageaudio([clastframe, audio])
+    final = await concatv([video, freezeframe])
+    return final
