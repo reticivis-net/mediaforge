@@ -15,7 +15,7 @@ from utils.web import saveurls
 
 
 async def process(ctx: commands.Context, func: callable, inputs: list, *args,
-                  resize=True, expectimage=True, uploadresult=True, queue=True):
+                  resize=True, expectimage=True, uploadresult=True, queue=True, **kwargs):
     """
     The core function of the bot. Gathers media and sends it to the proper function.
 
@@ -96,10 +96,10 @@ async def process(ctx: commands.Context, func: callable, inputs: list, *args,
                     asyncio.create_task(updatestatus("Processing..."))
                     # some commands arent coros (usually no-ops) so this is a good check to make
                     if inspect.iscoroutinefunction(func):
-                        return await func(*args)
+                        return await func(*args, **kwargs)
                     else:
                         logger.warning(f"{func} is not coroutine!")
-                        return func(*args)
+                        return func(*args, **kwargs)
 
                 # only queue if needed
                 if queue:
