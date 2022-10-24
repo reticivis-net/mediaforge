@@ -6,7 +6,9 @@ import humanize
 
 import config
 import processing.common
-import processing.vips
+import processing.vips.vips
+
+import processing.vips.utils
 from processing.ffprobe import *
 from utils.tempfiles import TempFile
 
@@ -522,7 +524,7 @@ async def naive_vstack(file0, file1):
     """
     mts = await asyncio.gather(mediatype(file0), mediatype(file1))
     if mts[0] == "IMAGE" and mts[1] == "IMAGE":
-        return await processing.common.run_parallel(processing.vips.stack, file0, file1)
+        return await processing.common.run_parallel(processing.vips.utils.stack, file0, file1)
     else:
         out = TempFile("mp4")
         await run_command("ffmpeg", "-i", file0, "-i", file1, "-filter_complex",
@@ -546,7 +548,7 @@ async def stack(files, style):
     mts = [await mediatype(files[0]), await mediatype(files[1])]
     # TODO: update
     if mts[0] == "IMAGE" and mts[1] == "IMAGE":  # easier to just make this an edge case
-        return await processing.common.run_parallel(processing.vips.stack, files[0], files[1])
+        return await processing.common.run_parallel(processing.vips.utils.stack, files[0], files[1])
     video0 = await forceaudio(files[0])
     fixedvideo0 = TempFile("mp4")
     await run_command("ffmpeg", "-hide_banner", "-i", video0, "-c:v", "png", "-c:a", "copy", "-ar", "48000",
@@ -910,7 +912,7 @@ async def toapng(video):
 
 async def motivate(media: str, captions: typing.Sequence[str]):
     width, height = await get_resolution(media)
-    text = await processing.common.run_parallel(processing.vips.motivate_text, captions, width)
+    text = await processing.common.run_parallel(processing.vips.vips.motivate_text, captions, width)
     mt = await mediatype(media)
     exts = {
         "VIDEO": "mp4",
