@@ -8,6 +8,8 @@ import sqlite3
 import sys
 import traceback
 
+import core.database
+
 sys.path.append(os.getcwd())
 from utils import tempfiles
 
@@ -140,7 +142,7 @@ def init():
 class MyBot(commands.AutoShardedBot):
     async def setup_hook(self):
         logger.debug(f"initializing cogs")
-        await bot.load_extension("core.database")
+        await core.database.init_database()
         if config.bot_list_data:
             logger.info("bot list data found. botblock will start when bot is ready.")
             await bot.add_cog(DiscordListsPost(bot))
@@ -156,7 +158,8 @@ class MyBot(commands.AutoShardedBot):
             bot.add_cog(StatusCog(bot)),
             bot.add_cog(ErrorHandlerCog(bot)),
             bot.add_cog(CommandChecksCog(bot)),
-            bot.add_cog(BotEventsCog(bot))
+            bot.add_cog(BotEventsCog(bot)),
+
         )
 
 
@@ -168,10 +171,11 @@ if __name__ == "__main__":
         shard_count = config.shard_count
     else:
         shard_count = None
-    # if on_ready is firing before guild count is collected, increase guild_ready_timeout
+    # init intents
     intents = discord.Intents.all()
     intents.presences = False
     intents.members = False
+    # init bot
     bot = MyBot(command_prefix=prefix_function,
                 help_command=None,
                 case_insensitive=True,
@@ -181,6 +185,10 @@ if __name__ == "__main__":
                 intents=intents)
 
     logger.debug("running bot")
-    if sys.platform == "win32":
-        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+    # weird windows bug
+    # if sys.platform == "win32":
+    #     asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+    # run bot
     bot.run(config.bot_token, log_handler=None)
+    # close db
+    asyncio.run(core.database.close_database())

@@ -100,9 +100,8 @@ class Caption(commands.Cog, name="Captioning"):
         caption = caption.split("|")
         if len(caption) == 1:
             caption.append("")
-        raise NotImplementedError  # TODO: implement
-        # await process(ctx, captionfunctions.tenorcap, [["VIDEO", "GIF", "IMAGE"]], *caption,
-        #                 handleanimated=True)
+        await process(ctx, processing.vips.vipsutils.generic_caption_overlay, [["VIDEO", "GIF", "IMAGE"]],
+                      processing.vips.caption.tenor, caption)
 
     @commands.command(name="caption", aliases=["cap"])
     async def captioncommand(self, ctx, *, caption):

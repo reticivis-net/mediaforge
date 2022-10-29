@@ -167,6 +167,51 @@ def meme(captions: typing.Sequence[str], size: ImageSize):
     return outfile
 
 
+def tenor(captions: typing.Sequence[str], size: ImageSize):
+    captions = escape(captions)
+    # blank image
+    overlay = pyvips.Image.black(size.width, size.height).new_from_image([0, 0, 0, 0]).copy(
+        interpretation=pyvips.enums.Interpretation.SRGB)
+    textsize = size.width // 10
+    if captions[0]:
+        # technically redundant but adds twemoji font
+        toptext = pyvips.Image.text(".", fontfile="rendering/fonts/TwemojiCOLR0.otf")
+        # generate text
+        toptext = pyvips.Image.text(
+            f"<span foreground=\"white\">{captions[0]}</span>",
+            font=f"Twemoji Color Emoji,Ubuntu {textsize}px",
+            rgba=True,
+            fontfile="rendering/fonts/Ubuntu-R.ttf",
+            align=pyvips.Align.CENTRE,
+            width=int(size.width * .95),
+            height=int((size.height * .95) / 3)
+        )
+        overlay = overlay.composite2(toptext, pyvips.BlendMode.OVER,
+                                     x=((size.width - toptext.width) / 2),
+                                     y=int(size.height * .025))
+    if captions[1]:
+        # technically redundant but adds twemoji font
+        bottomtext = pyvips.Image.text(".", fontfile="rendering/fonts/TwemojiCOLR0.otf")
+        # generate text
+        bottomtext = pyvips.Image.text(
+            f"<span foreground=\"white\">{captions[1].upper()}</span>",
+            font=f"Twemoji Color Emoji,Ubuntu {textsize}px",
+            rgba=True,
+            fontfile="rendering/fonts/Ubuntu-R.ttf",
+            align=pyvips.Align.CENTRE,
+            width=int(size.width * .95),
+            height=int((size.height * .95) / 3)
+        )
+        overlay = overlay.composite2(bottomtext, pyvips.BlendMode.OVER,
+                                     x=((size.width - bottomtext.width) / 2),
+                                     y=int((size.height * .975) - bottomtext.height))
+
+    overlay = outline(overlay, overlay.width // 250)
+    outfile = TempFile("png", todelete=False)
+    overlay.pngsave(outfile)
+    return outfile
+
+
 def whisper(captions: typing.Sequence[str], size: ImageSize):
     captions = escape(captions)
     # blank image
