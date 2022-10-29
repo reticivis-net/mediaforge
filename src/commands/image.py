@@ -4,6 +4,7 @@ from discord.ext import commands
 
 import processing.common
 import processing.ffmpeg
+import processing.vips
 from core.process import process
 
 
@@ -80,8 +81,10 @@ class Image(commands.Cog, name="Creation"):
         :param ctx: discord context
         :param text: The text to put next to eminem.
         """
-        raise NotImplementedError  # TODO: implement
-        # await process(ctx, captionfunctions.eminem, [], [text])
+        await process(ctx, processing.common.run_parallel, [],
+                      processing.vips.caption.generic_image_caption, [text],
+                      processing.vips.vipsutils.ImageSize(1000, 1000),
+                      "rendering/eminem.png")
 
     @commands.command(aliases=["customsay"])
     async def imagesay(self, ctx, *, text):
