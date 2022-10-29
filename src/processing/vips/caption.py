@@ -266,5 +266,44 @@ def snapchat(captions: typing.Sequence[str], size: ImageSize):
     out.pngsave(outfile)
     return outfile
 
+
+def generic_image_caption(captions: typing.Sequence[str], size: ImageSize, image: str):
+    # constants used by esmbot
+    fontsize = size.width / 10
+    textwidth = size.width * (2 / 3) * .92
+    # technically redundant but adds twemoji font
+    out = pyvips.Image.text(".", fontfile="rendering/fonts/TwemojiCOLR0.otf")
+    # generate text
+    out = pyvips.Image.text(
+        captions[0],
+        font=f"Twemoji Color Emoji,Atkinson Hyperlegible Bold {fontsize}px",
+        rgba=True,
+        fontfile="rendering/fonts/AtkinsonHyperlegible-Bold.ttf",
+        align=pyvips.Align.CENTRE,
+        width=textwidth
+    )
+    # load stuff
+    im = pyvips.Image.new_from_file(image)
+
+    # the hell is wrong with the stuff png??
+    if im.bands == 2:
+        im = im[0].bandjoin(im[0]).bandjoin(im[0]).bandjoin(im[1]).copy(interpretation=pyvips.Interpretation.SRGB)
+
+    # resize
+    im = im.resize((size.width / 3) / im.width)
+    # pad text to image width
+    padded = out.gravity(pyvips.CompassDirection.CENTRE, size.width * (2 / 3), max(out.height + fontsize, im.height),
+                         extend=pyvips.Extend.WHITE)
+
+    # join
+    final = padded.join(im, pyvips.Direction.HORIZONTAL, expand=True, background=0xffffff)
+
+    # overlay white background
+    final = final.composite((255, 255, 255, 255), mode=pyvips.BlendMode.DEST_OVER)
+    # save
+    outfile = TempFile("png", only_delete_in_main_process=True)
+    final.pngsave(outfile)
+    return outfile
+
 # print(esmcaption(["h👍💜🏳️‍🌈🏳️‍⚧️i"], 1000))
 # print(meme_text(["topto top topt otp otp top", "bottom"], ImageSize(1000, 1000)))

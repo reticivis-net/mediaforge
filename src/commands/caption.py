@@ -124,8 +124,8 @@ class Caption(commands.Cog, name="Captioning"):
         :param caption: The caption text.
         :mediaparam media: A video, gif, or image.
         """
-        raise NotImplementedError  # TODO: implement
-        # await process(ctx, captionfunctions.stuff, [["VIDEO", "GIF", "IMAGE"]], caption, handleanimated=True)
+        await process(ctx, processing.vips.vipsutils.generic_caption_stack, [["VIDEO", "GIF", "IMAGE"]],
+                      processing.vips.caption.generic_image_caption, [caption], "rendering/Stuff.PNG", reverse=True)
 
     @commands.command(aliases=["eminemcaption", "eminemcap"])
     async def eminem(self, ctx, *, caption):
@@ -136,8 +136,8 @@ class Caption(commands.Cog, name="Captioning"):
         :param caption: The caption text.
         :mediaparam media: A video, gif, or image.
         """
-        raise NotImplementedError  # TODO: implement
-        # await process(ctx, captionfunctions.eminemcap, [["VIDEO", "GIF", "IMAGE"]], caption, handleanimated=True)
+        await process(ctx, processing.vips.vipsutils.generic_caption_stack, [["VIDEO", "GIF", "IMAGE"]],
+                      processing.vips.caption.generic_image_caption, [caption], "rendering/eminem.png", reverse=True)
 
     @commands.command(aliases=["peter", "peterexplain", "petersay", "petergriffinexplain", "petergriffinsay"])
     async def petergriffin(self, ctx, *, caption):
@@ -148,9 +148,8 @@ class Caption(commands.Cog, name="Captioning"):
         :param caption: The caption text.
         :mediaparam media: A video, gif, or image.
         """
-        raise NotImplementedError  # TODO: implement
-        # await process(ctx, captionfunctions.petergriffincap, [["VIDEO", "GIF", "IMAGE"]], caption,
-        #                 handleanimated=True)
+        await process(ctx, processing.vips.vipsutils.generic_caption_stack, [["VIDEO", "GIF", "IMAGE"]],
+                      processing.vips.caption.generic_image_caption, [caption], "rendering/Peter_Griffin.png", reverse=True)
 
     @commands.command(aliases=["stretchstuff"])
     async def stuffstretch(self, ctx, *, caption):
