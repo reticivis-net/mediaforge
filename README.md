@@ -1,6 +1,6 @@
 # ⚠️ this branch is a major rewrite of the majority of MediaForge and is under constant development with no guarantee of functionality
 
-# ![MediaForge](media/banner.png)
+# ![MediaForge](media/external/banner.png)
 
 [![MediaForge Discord](https://discordapp.com/api/guilds/803788965215338546/widget.png)](https://discord.gg/xwWjgyVqBz)
 [![Discord Bots](https://top.gg/api/widget/status/780570413767983122.svg)](https://top.gg/bot/780570413767983122)

@@ -1,4 +1,4 @@
-FROM python:3.8 AS builder
+FROM python:3.10 AS builder
 
 # automode
 ARG AUTOMODE="OFF"
@@ -20,7 +20,7 @@ RUN apt-get -y update && apt-get -t experimental install -y ffmpeg
     # imagemagick, conflicts with ffmpeg so i have to do it after grrrrrrr
 RUN echo "deb https://www.deb-multimedia.org bullseye main" >> "/etc/apt/sources.list.d/imagemagick.list"
     # most packages
-RUN apt-get -y update && apt-get -t stable install -y pngquant exiftool apngasm nano google-chrome-stable imagemagick-7 nodejs
+RUN apt-get -y update && apt-get -t stable install -y pngquant apngasm nano imagemagick-7 nodejs libvips-dev build-essential pkg-config libglib2.0-dev libexpat1-dev libc6-dev binutils-dev
 
 # gifski isnt on an actual repo, use this shit i found on github to install the latest deb off github
 RUN dpkg -i $(curl -w "%{filename_effective}" -LO $(curl -s https://api.github.com/repos/ImageOptim/gifski/releases | grep browser_download_url | grep '64[.]deb' | head -n 1 | cut -d '"' -f 4))

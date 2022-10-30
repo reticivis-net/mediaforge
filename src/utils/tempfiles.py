@@ -71,11 +71,14 @@ class TempFile(str):
             # https://stackoverflow.com/a/67577364/9044183
             # deletes without blocking loop
             try:
-                loop = asyncio.get_event_loop()
-                if loop.is_running():
-                    loop.create_task(self.delete())
-                else:
-                    loop.run_until_complete(self.delete())
+                try:
+                    loop = asyncio.get_event_loop()
+                    if loop.is_running():
+                        loop.create_task(self.delete())
+                    else:
+                        loop.run_until_complete(self.delete())
+                except RuntimeError:  # no loop
+                    asyncio.run(self.delete())
             except Exception as e:
                 logger.debug(e, exc_info=1)
         else:

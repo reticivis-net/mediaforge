@@ -11,6 +11,7 @@ from discord.ext import commands
 import config
 import processing.common
 import processing.ffmpeg
+import processing.ffprobe
 import utils.discordmisc
 from core import database
 from core.process import process
@@ -415,7 +416,7 @@ class Other(commands.Cog, name="Other"):
 
         :param ctx: discord context
         """
-        with open("../../media/attributions.txt", "r") as f:
+        with open("../../media/active/attributions.txt", "r") as f:
             await ctx.send(f.read())
 
     @commands.command(aliases=["pong"])
