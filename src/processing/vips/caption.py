@@ -6,6 +6,8 @@ import pyvips
 from processing.vips.vipsutils import ImageSize, escape, outline, overlay_in_middle
 from utils.tempfiles import TempFile
 
+twemoji = "rendering/fonts/TwemojiCOLR0.otf"
+
 
 def esmcaption(captions: typing.Sequence[str], size: ImageSize):
     captions = escape(captions)
@@ -15,7 +17,7 @@ def esmcaption(captions: typing.Sequence[str], size: ImageSize):
     textwidth = size.width * .92
     # technically redundant but adds twemoji font
     # DOESNT WORK ON WINDOWS IDK WHY
-    out = pyvips.Image.text(".", fontfile="rendering/fonts/TwemojiCOLR0.otf")
+    out = pyvips.Image.text(".", fontfile=twemoji)
     # generate text
     out = pyvips.Image.text(
         captions[0],
@@ -44,7 +46,7 @@ def mediaforge_caption(captions: typing.Sequence[str], size: ImageSize):
     textwidth = size.width * .92
     # technically redundant but adds twemoji font
     # DOESNT WORK ON WINDOWS IDK WHY
-    out = pyvips.Image.text(".", fontfile="rendering/fonts/TwemojiCOLR0.otf")
+    out = pyvips.Image.text(".", fontfile=twemoji)
     # generate text
     out = pyvips.Image.text(
         captions[0],
@@ -74,7 +76,7 @@ def motivate_text(captions: typing.Sequence[str], size: ImageSize):
     bottomtext = None
     if captions[0]:
         # technically redundant but adds twemoji font
-        toptext = pyvips.Image.text(".", fontfile="rendering/fonts/TwemojiCOLR0.otf")
+        toptext = pyvips.Image.text(".", fontfile=twemoji)
         # generate text
         toptext = pyvips.Image.text(
             f"<span foreground=\"white\">{captions[0]}</span>",
@@ -88,7 +90,7 @@ def motivate_text(captions: typing.Sequence[str], size: ImageSize):
                                   extend=pyvips.Extend.BLACK)
     if captions[1]:
         # technically redundant but adds twemoji font
-        bottomtext = pyvips.Image.text(".", fontfile="rendering/fonts/TwemojiCOLR0.otf")
+        bottomtext = pyvips.Image.text(".", fontfile=twemoji)
         # generate text
         bottomtext = pyvips.Image.text(
             f"<span foreground=\"white\">{captions[1]}</span>",
@@ -130,7 +132,7 @@ def meme(captions: typing.Sequence[str], size: ImageSize):
 
     if captions[0]:
         # technically redundant but adds twemoji font
-        toptext = pyvips.Image.text(".", fontfile="rendering/fonts/TwemojiCOLR0.otf")
+        toptext = pyvips.Image.text(".", fontfile=twemoji)
         # generate text
         toptext = pyvips.Image.text(
             f"<span foreground=\"white\">{captions[0].upper()}</span>",
@@ -146,7 +148,7 @@ def meme(captions: typing.Sequence[str], size: ImageSize):
                                      y=int(size.height * .025))
     if captions[1]:
         # technically redundant but adds twemoji font
-        bottomtext = pyvips.Image.text(".", fontfile="rendering/fonts/TwemojiCOLR0.otf")
+        bottomtext = pyvips.Image.text(".", fontfile=twemoji)
         # generate text
         bottomtext = pyvips.Image.text(
             f"<span foreground=\"white\">{captions[1].upper()}</span>",
@@ -175,7 +177,7 @@ def tenor(captions: typing.Sequence[str], size: ImageSize):
     textsize = size.width // 10
     if captions[0]:
         # technically redundant but adds twemoji font
-        toptext = pyvips.Image.text(".", fontfile="rendering/fonts/TwemojiCOLR0.otf")
+        toptext = pyvips.Image.text(".", fontfile=twemoji)
         # generate text
         toptext = pyvips.Image.text(
             f"<span foreground=\"white\">{captions[0]}</span>",
@@ -191,7 +193,7 @@ def tenor(captions: typing.Sequence[str], size: ImageSize):
                                      y=int(size.height * .025))
     if captions[1]:
         # technically redundant but adds twemoji font
-        bottomtext = pyvips.Image.text(".", fontfile="rendering/fonts/TwemojiCOLR0.otf")
+        bottomtext = pyvips.Image.text(".", fontfile=twemoji)
         # generate text
         bottomtext = pyvips.Image.text(
             f"<span foreground=\"white\">{captions[1].upper()}</span>",
@@ -219,7 +221,7 @@ def whisper(captions: typing.Sequence[str], size: ImageSize):
         interpretation=pyvips.enums.Interpretation.SRGB)
 
     # technically redundant but adds twemoji font
-    text = pyvips.Image.text(".", fontfile="rendering/fonts/TwemojiCOLR0.otf")
+    text = pyvips.Image.text(".", fontfile=twemoji)
     # generate text
     text = pyvips.Image.text(
         f"<span foreground=\"white\">{captions[0].upper()}</span>",
@@ -240,7 +242,7 @@ def whisper(captions: typing.Sequence[str], size: ImageSize):
 
 def snapchat(captions: typing.Sequence[str], size: ImageSize):
     # technically redundant but adds twemoji font
-    text = pyvips.Image.text(".", fontfile="rendering/fonts/TwemojiCOLR0.otf")
+    text = pyvips.Image.text(".", fontfile=twemoji)
     # generate text
     text = pyvips.Image.text(
         f"<span foreground=\"white\">{captions[0].upper()}</span>",
@@ -272,7 +274,7 @@ def generic_image_caption(captions: typing.Sequence[str], size: ImageSize, image
     fontsize = size.width / 10
     textwidth = size.width * (2 / 3) * .92
     # technically redundant but adds twemoji font
-    out = pyvips.Image.text(".", fontfile="rendering/fonts/TwemojiCOLR0.otf")
+    out = pyvips.Image.text(".", fontfile=twemoji)
     # generate text
     out = pyvips.Image.text(
         captions[0],

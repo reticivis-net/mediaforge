@@ -6,6 +6,7 @@ import processing.common
 import processing.ffmpeg
 import processing.vips
 from core.process import process
+from processing import sus
 
 
 class Image(commands.Cog, name="Creation"):
@@ -84,7 +85,7 @@ class Image(commands.Cog, name="Creation"):
         await process(ctx, processing.common.run_parallel, [],
                       processing.vips.caption.generic_image_caption, [text],
                       processing.vips.vipsutils.ImageSize(1000, 1000),
-                      "rendering/eminem.png")
+                      "rendering/images/eminem.png")
 
     @commands.command(aliases=["customsay"])
     async def imagesay(self, ctx, *, text):
@@ -185,3 +186,14 @@ class Image(commands.Cog, name="Creation"):
         :return: a custom made song just for you!
         """
         await process(ctx, processing.ffmpeg.epicbirthday, [], text)
+
+    @commands.command(aliases=['sus', 'imposter'])
+    async def jermatext(self, ctx, *, text="when the imposter is sus!😳"):
+        """
+        Cut and slice the popular Jerma sus meme to any message
+        For any letter not in the original meme, a random slice of the face is selected.
+        Based on https://github.com/aechaechaech/Jerma-Imposter-Message-Generator
+        :param ctx: discord context
+        :param text: The text to cut and splice.
+        """
+        await process(ctx, processing.common.run_parallel, [], sus.sus, text)

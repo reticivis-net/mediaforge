@@ -225,6 +225,7 @@ class Conversion(commands.Cog, name="Conversion"):
         :param ctx: discord context
         :param twemojis: Up to 5 default discord/unicode emojis
         """
+        raise NotImplementedError
         if ctx.message.reference:
             msg = ctx.message.reference.resolved.content
         if twemojis:
