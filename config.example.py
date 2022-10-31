@@ -10,10 +10,11 @@ bot_list_data = None
 #             "token": "exampletoken"
 #         },
 # }
-
-# the number of instances of chromedriver to run for caption processing.
-# more means faster processing of videos and better under heavy load but also uses more PC resources!
-chrome_driver_instances = 20
+# number of commands that can be processed at once. set to None to automatically use OS cpu core count
+workers = None
+# manually specify tempdir rather than using OS's default
+# temp dir defaults to /dev/shm (in-memory) if available and this var is None
+override_temp_dir = None
 # NOTICE is recommended, INFO prints more information about what bot is doing, WARNING only prints errors.
 log_level = "NOTICE"
 # maximum number of frames for an input file.
@@ -25,10 +26,10 @@ min_size = 100
 # maximum height/width that media will be downsized to if above
 max_size = 2000
 # maximum size, in bytes, to download. see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Length
-max_file_size = 25000000
+max_file_size = 25_000_000
 # maximum file size, in bytes, that a file can be. if resulting file is bigger than this, mediaforge instantly gives
 # up and does not try to upload nor resize the file.
-way_too_big_size = 100000000
+way_too_big_size = 100_000_000
 # the text to use for different messages, can be custom emojis or just any text
 emojis = {
     "x": "<:xmark:803792052932444180>",
@@ -46,16 +47,17 @@ emojis = {
 }
 # up to 25 tips that can show when using $help tips. type \n for a newline
 tips = {
-    "Media Searching": "MediaForge automatically searches for any media in a channel. Reply to a message with the command to search that message first.",
-    "File Formats": "MediaForge supports static image formats like PNG, animated image formats like GIF, and video formats like MP4.",
-    "Self-Hosting": "MediaForge is completely open source and anyone can host a clone themself!\nhttps://github.com/HexCodeFFF/mediaforge"
+    "Media Searching": "MediaForge automatically searches for any media in a channel. Reply to a message with the "
+                       "command to search that message first.",
+    "File Formats": "MediaForge supports static image formats like PNG, animated image formats like GIF, and video "
+                    "formats like MP4.",
+    "Self-Hosting": "MediaForge is completely open source and anyone can host a clone "
+                    "themself!\nhttps://github.com/HexCodeFFF/mediaforge "
 }
-# the directory to store temporary files in. must end with a slash.
-temp_dir = "temp/"
 # https://www.reddit.com/r/discordapp/comments/aflp3p/the_truth_about_discord_file_upload_limits/
 # configured upload limit, in bytes, for files.
 # dont change this unless you have a really good reason to. i dont have error handling for overly large files
-file_upload_limit = 8388119
+file_upload_limit = 8_388_119
 # this applies to every command. if any string arguments contain any of these words, the command will instantly
 # fail. this is intended to block hateful language like slurs. not case sensitive.
 # its in the config so i dont have to upload slurs to github...
