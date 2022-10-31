@@ -1,5 +1,4 @@
 import asyncio
-import os
 import typing
 
 import discord
@@ -225,18 +224,21 @@ class Conversion(commands.Cog, name="Conversion"):
         :param ctx: discord context
         :param twemojis: Up to 5 default discord/unicode emojis
         """
-        raise NotImplementedError
         if ctx.message.reference:
             msg = ctx.message.reference.resolved.content
+        urls = []
         if twemojis:
-            for e in twemojis[:5]:
+            for emoj in twemojis[:5]:
                 chars = []
-                for char in e:
+                for char in emoj:
                     chars.append(f"{ord(char):x}")  # get hex code of char
                 chars = "-".join(chars).replace("/", "")
-                fpath = f"rendering/twemoji/72x72/{chars}.png"
-                logger.debug(f"trying twemoji {fpath}")
-                if os.path.exists(fpath):
-                    await ctx.reply(file=discord.File(fpath))
+                urls.append(f"https://raw.githubusercontent.com/twitter/twemoji/master/assets/72x72/{chars}.png")
         else:
             raise commands.BadArgument(f"No default emojis found!")
+
+        async def upload_url(url: str):
+            raise NotImplementedError
+
+        if urls:
+            await asyncio.gather(*[upload_url(url) for url in urls])
