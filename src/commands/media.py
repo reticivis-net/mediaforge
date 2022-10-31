@@ -257,20 +257,18 @@ class Media(commands.Cog, name="Editing"):
         await process(ctx, processing.ffmpeg.tint, [["GIF", "IMAGE", "VIDEO"]], color)
 
     @commands.command(aliases=["round", "circlecrop", "roundcrop", "circle", "roundedcorners"])
-    async def roundcorners(self, ctx, radiuspercent: number_range(0, 50) = 50.0):
+    async def roundcorners(self, ctx, radius: int = 10):
         """
         Round corners of media
         see https://developer.mozilla.org/en-US/docs/Web/CSS/border-radius
 
         :param ctx: discord context
-        :param radiuspercent: How rounded the corners will be. 0 is rectangle, 50 is ellipse.
+        :param radius: the size of the rounded corners in pixels
         :mediaparam media: A video, gif, or image.
         """
-        if not 0 <= radiuspercent <= 50:
-            raise commands.BadArgument(f"Border radius percent must be between 0 and 50.")
-        raise NotImplementedError  # TODO: implement
-        # await process(ctx, captionfunctions.roundcorners, [["GIF", "IMAGE", "VIDEO"]], str(radiuspercent),
-        #                 handleanimated=True)
+        if not 0 <= radius:
+            raise commands.BadArgument(f"Border radius percent must be above 0")
+        await process(ctx, processing.ffmpeg.round_corners, [["GIF", "IMAGE", "VIDEO"]], radius)
 
     @commands.command()
     async def volume(self, ctx, volume: number_range(0, 32)):
@@ -485,45 +483,6 @@ class Media(commands.Cog, name="Editing"):
             raise commands.BadArgument(f"Start must be equal to or more than 0.")
         await process(ctx, processing.ffmpeg.trim, [["VIDEO", "GIF", "AUDIO"]], length, start)
 
-    @commands.command()
-    async def autotune(self, ctx, CONCERT_A: float = 440, FIXED_PITCH: float = 0.0,
-                       FIXED_PULL: float = 0.1, KEY: str = "c", CORR_STR: float = 1.0, CORR_SMOOTH: float = 0.0,
-                       PITCH_SHIFT: float = 0.0, SCALE_ROTATE: int = 0, LFO_DEPTH: float = 0.0,
-                       LFO_RATE: float = 1.0, LFO_SHAPE: float = 0.0, LFO_SYMM: float = 0.0, LFO_QUANT: int = 0,
-                       FORM_CORR: int = 0, FORM_WARP: float = 0.0, MIX: float = 1.0):
-        """
-        Autotunes media.
-        :param ctx: discord context
-        :param CONCERT_A: CONCERT A: Value in Hz of middle A, used to tune the entire algorithm.
-        :param FIXED_PITCH: FIXED PITCH: Pitch (semitones) toward which pitch is pulled when PULL TO FIXED PITCH is
-         engaged. FIXED PITCH = O: middle A. FIXED PITCH = MIDI pitch - 69.
-        :param FIXED_PULL: PULL TO FIXED PITCH: Degree to which pitch Is pulled toward FIXED PITCH. O: use original
-         pitch. 1: use FIXED PITCH.
-        :param KEY: the key it is tuned to. can be any letter a-g, A-G, or X (chromatic scale).
-        :param CORR_STR: CORRECTION STRENGTH: Strength of pitch correction. O: no correction. 1: full correction.
-        :param CORR_SMOOTH: CORRECTION SMOOTHNESS: Smoothness of transitions between notes when pitch correction is
-        used. O: abrupt transitions. 1: smooth transitions.
-        :param PITCH_SHIFT: PITCH SHIFT: Number of notes in scale by which output pitch Is shifted.
-        :param SCALE_ROTATE: OUTPUT SCALE ROTATE: Number of notes by which the output scale Is rotated In the
-        conversion back to semitones from scale notes. Can be used to change the scale between major and minor or
-        to change the musical mode.
-        :param LFO_DEPTH: LFO DEPTH: Degree to which low frequency oscillator (LFO) Is applied.
-        :param LFO_RATE: LFO RATE: Rate (In Hz) of LFO.
-        :param LFO_SHAPE: LFO SHAPE: Shape of LFO waveform. -1: square. 0: sine. 1: triangle.
-        :param LFO_SYMM: LFO SYMMETRY: Adjusts the rise/fall characteristic of the LFO waveform.
-        :param LFO_QUANT: LFO QUANTIZATION: Quantizes the LFO waveform, resulting in chiptune-like effects.
-        :param FORM_CORR: FORMANT CORRECTION: Enables formant correction, reducing the "chipmunk effect"
-        in pitch shifting.
-        :param FORM_WARP: FORMANT WARP: Warps the formant frequencies. Can be used to change gender/age.
-        :param MIX: Blends between the modified signal and the delay-compensated Input signal. 1: wet. O: dry.
-        :mediaparam media: A video or audio file.
-        """
-        # TODO: flag command thing
-
-        await process(ctx, processing.ffmpeg.handleautotune, [["VIDEO", "AUDIO"]],
-                      CONCERT_A, FIXED_PITCH, FIXED_PULL, KEY, CORR_STR, CORR_SMOOTH, PITCH_SHIFT, SCALE_ROTATE,
-                      LFO_DEPTH, LFO_RATE, LFO_SHAPE, LFO_SYMM, LFO_QUANT, FORM_CORR, FORM_WARP, MIX)
-
     @commands.command(aliases=["uncap", "nocaption", "nocap", "rmcap", "removecaption", "delcap", "delcaption",
                                "deletecaption", "trimcap", "trimcaption"])
     async def uncaption(self, ctx, frame_to_try: int = 0, tolerance: number_range(0, 100, False) = 95):
@@ -536,4 +495,5 @@ class Media(commands.Cog, name="Editing"):
         :param tolerance: in % how close to white the color must be to count as caption
         :mediaparam media: A video, image, or GIF file
         """
+        raise NotImplementedError  # TODO: implement
         await process(ctx, processing.ffmpeg.uncaption, [["VIDEO", "IMAGE", "GIF"]], frame_to_try, tolerance)

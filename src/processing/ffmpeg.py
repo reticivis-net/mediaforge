@@ -958,3 +958,25 @@ async def freezemotivate(files, *caption):
     freezeframe = await imageaudio([clastframe, audio])
     final = await concatv([video, freezeframe])
     return final
+
+
+async def round_corners(media, border_radius=10):
+    mt = await mediatype(media)
+    exts = {
+        "VIDEO": "mp4",
+        "GIF": "mp4",
+        "IMAGE": "png"
+    }
+    outfile = TempFile(exts[mt])
+    # https://stackoverflow.com/a/62400465/9044183
+    await run_command("ffmpeg", "-i", media, "-filter_complex",
+                      f"[1]format=yuva420p,"
+                      f"geq=lum='p(X,Y)':a='"
+                      f"if(gt(abs(W/2-X),W/2-{border_radius})*gt(abs(H/2-Y),"
+                      f"H/2-{border_radius}),"
+                      f"if(lte(hypot({border_radius}-(W/2-abs(W/2-X)),"
+                      f"{border_radius}-(H/2-abs(H/2-Y))),"
+                      f"{border_radius}),255,0),255)'[rounded];"
+                      f"[0][rounded]overlay=x=(W-w)/2:y=(H-h)/2",
+                      outfile)
+    return outfile
