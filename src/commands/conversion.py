@@ -1,6 +1,7 @@
 import asyncio
 import typing
 
+import aiohttp
 import discord
 import emojis
 import regex as re
@@ -11,10 +12,11 @@ import config
 import processing.ffmpeg
 import processing.ffprobe
 import utils.discordmisc
+import utils.web
 from core.clogs import logger
 from core.process import process
 from utils.common import prefix_function
-from utils.dpy import UnicodeEmojiConverter
+from utils.dpy import UnicodeEmojiConverter, UnicodeEmojisConverter
 from utils.scandiscord import tenorsearch
 
 
@@ -216,7 +218,7 @@ class Conversion(commands.Cog, name="Conversion"):
             raise commands.BadArgument(f"Your message doesn't contain any custom emojis!")
 
     @commands.command()
-    async def twemoji(self, ctx, *twemojis: UnicodeEmojiConverter):
+    async def twemoji(self, ctx: commands.Context, *, twemojis: UnicodeEmojisConverter):
         """
         Sends the twemoji image for an emoji.
         Twemoji is the open source emoji set that discord desktop and twitter use. https://twemoji.twitter.com/
@@ -238,7 +240,10 @@ class Conversion(commands.Cog, name="Conversion"):
             raise commands.BadArgument(f"No default emojis found!")
 
         async def upload_url(url: str):
-            raise NotImplementedError
+            try:
+                await ctx.reply(file=discord.File(await utils.web.saveurl(url)))
+            except aiohttp.ClientResponseError as e:
+                await ctx.reply(f"Failed to upload {url}: Code {e.status}: {e.message}")
 
         if urls:
             await asyncio.gather(*[upload_url(url) for url in urls])
