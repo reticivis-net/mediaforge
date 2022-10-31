@@ -39,6 +39,13 @@ class UnicodeEmojiConverter(commands.Converter):
             raise UnicodeEmojiNotFound(argument)
         return list(emoji)[0]
 
+class UnicodeEmojisConverter(commands.Converter):
+    async def convert(self, ctx, argument):
+        emoji = emojis.get(argument)
+        if not emoji:
+            raise UnicodeEmojiNotFound(argument)
+        return list(emoji)
+
 
 class UnicodeEmojiNotFound(commands.BadArgument):
     def __init__(self, argument):
