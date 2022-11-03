@@ -263,7 +263,7 @@ python-versions = ">=3.7"
 
 [[package]]
 name = "pillow"
-version = "9.2.0"
+version = "9.3.0"
 description = "Python Imaging Library (Fork)"
 category = "main"
 optional = false
@@ -367,7 +367,7 @@ test = ["cffi (>=1.0.0)", "pyperf", "pytest", "pytest-flake8", "pytest-runner"]
 
 [[package]]
 name = "regex"
-version = "2022.9.13"
+version = "2022.10.31"
 description = "Alternative regular expression module, to replace re."
 category = "main"
 optional = false
@@ -450,8 +450,8 @@ websockets = "*"
 
 [metadata]
 lock-version = "1.1"
-python-versions = "^3.10"
-content-hash = "7888312c90799ef29193ac78cbf91ad940b4da0e28928c08886973172a2412be"
+python-versions = "^3.11"
+content-hash = "1902a3cca1ab804fafdaa228b478729fafb009212bed322b8610e53f88b57e1a"
 
 [metadata.files]
 aiodns = [

@@ -1,4 +1,4 @@
-FROM python:3.10 AS builder
+FROM python:3.11 AS builder
 
 # automode
 ARG AUTOMODE="OFF"
