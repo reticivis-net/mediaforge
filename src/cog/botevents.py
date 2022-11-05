@@ -61,7 +61,7 @@ class BotEventsCog(commands.Cog):
 
 '''
 Steps to convert:
-@bot.command() -> @commands.command()
+@bot.command() -> @commands.hybrid_command()
 @bot.listen() -> @commands.Cog.listener()
 function(ctx, ...): -> function(self, ctx, ...)
 bot -> self.bot

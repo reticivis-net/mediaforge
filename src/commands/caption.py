@@ -15,7 +15,7 @@ class Caption(commands.Cog, name="Captioning"):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(aliases=["demotivate", "motivational", "demotivational", "inspire", "uninspire"])
+    @commands.hybrid_command(aliases=["demotivate", "motivational", "demotivational", "inspire", "uninspire"])
     async def motivate(self, ctx, *, caption):
         """
         Captions media in the style of demotivational posters.
@@ -29,7 +29,7 @@ class Caption(commands.Cog, name="Captioning"):
             caption.append("")
         await process(ctx, processing.ffmpeg.motivate, [["VIDEO", "GIF", "IMAGE"]], caption)
 
-    @commands.command(aliases=["toptextbottomtext", "impact", "adviceanimal"])
+    @commands.hybrid_command(aliases=["toptextbottomtext", "impact", "adviceanimal"])
     async def meme(self, ctx, *, caption):
         """
         Captions media in the style of top text + bottom text memes.
@@ -44,7 +44,7 @@ class Caption(commands.Cog, name="Captioning"):
         await process(ctx, processing.vips.vipsutils.generic_caption_overlay, [["VIDEO", "GIF", "IMAGE"]],
                       processing.vips.caption.meme, caption)
 
-    @commands.command(aliases=["snapchat", "snap", "snapcap", "snapcaption", "snapchatcap", "classiccaption"])
+    @commands.hybrid_command(aliases=["snapchat", "snap", "snapcap", "snapcaption", "snapchatcap", "classiccaption"])
     async def snapchatcaption(self, ctx, *, caption):
         """
         Captions media in the style of the classic Snapchat caption.
@@ -56,7 +56,7 @@ class Caption(commands.Cog, name="Captioning"):
         await process(ctx, processing.vips.vipsutils.generic_caption_overlay, [["VIDEO", "GIF", "IMAGE"]],
                       processing.vips.caption.snapchat, [caption])
 
-    @commands.command(aliases=["whisper", "wcap", "wcaption"])
+    @commands.hybrid_command(aliases=["whisper", "wcap", "wcaption"])
     async def whispercaption(self, ctx, *, caption):
         """
         Captions media in the style of the confession website Whisper.
@@ -68,7 +68,7 @@ class Caption(commands.Cog, name="Captioning"):
         await process(ctx, processing.vips.vipsutils.generic_caption_overlay, [["VIDEO", "GIF", "IMAGE"]],
                       processing.vips.caption.whisper, [caption])
 
-    @commands.command(aliases=["news"])
+    @commands.hybrid_command(aliases=["news"])
     async def breakingnews(self, ctx, *, caption):
         """
         Create a fake "Breaking News" screencap.
@@ -88,7 +88,7 @@ class Caption(commands.Cog, name="Captioning"):
         # await process(ctx, captionfunctions.breakingnews, [["VIDEO", "GIF", "IMAGE"]], *caption,
         #                 handleanimated=True)
 
-    @commands.command(aliases=["tenor"])
+    @commands.hybrid_command(aliases=["tenor"])
     async def tenorcap(self, ctx, *, caption):
         """
         Captions media in the style of tenor.
@@ -103,7 +103,7 @@ class Caption(commands.Cog, name="Captioning"):
         await process(ctx, processing.vips.vipsutils.generic_caption_overlay, [["VIDEO", "GIF", "IMAGE"]],
                       processing.vips.caption.tenor, caption)
 
-    @commands.command(name="caption", aliases=["cap"])
+    @commands.hybrid_command(name="caption", aliases=["cap"])
     async def captioncommand(self, ctx, *, caption):
         """
         Captions media.
@@ -115,7 +115,7 @@ class Caption(commands.Cog, name="Captioning"):
         await process(ctx, processing.vips.vipsutils.generic_caption_stack, [["VIDEO", "GIF", "IMAGE"]],
                       processing.vips.caption.mediaforge_caption, [caption])
 
-    @commands.command(aliases=["imstuff"])
+    @commands.hybrid_command(aliases=["imstuff"])
     async def stuff(self, ctx, *, caption):
         """
         Captions media in the style of the "i'm stuff" meme
@@ -127,7 +127,7 @@ class Caption(commands.Cog, name="Captioning"):
         await process(ctx, processing.vips.vipsutils.generic_caption_stack, [["VIDEO", "GIF", "IMAGE"]],
                       processing.vips.caption.generic_image_caption, [caption], "rendering/Stuff.PNG", reverse=True)
 
-    @commands.command(aliases=["eminemcaption", "eminemcap"])
+    @commands.hybrid_command(aliases=["eminemcaption", "eminemcap"])
     async def eminem(self, ctx, *, caption):
         """
         Eminem says something below your media.
@@ -139,7 +139,7 @@ class Caption(commands.Cog, name="Captioning"):
         await process(ctx, processing.vips.vipsutils.generic_caption_stack, [["VIDEO", "GIF", "IMAGE"]],
                       processing.vips.caption.generic_image_caption, [caption], "rendering/eminem.png", reverse=True)
 
-    @commands.command(aliases=["peter", "peterexplain", "petersay", "petergriffinexplain", "petergriffinsay"])
+    @commands.hybrid_command(aliases=["peter", "peterexplain", "petersay", "petergriffinexplain", "petergriffinsay"])
     async def petergriffin(self, ctx, *, caption):
         """
         Peter Griffin says something below your media.
@@ -151,7 +151,7 @@ class Caption(commands.Cog, name="Captioning"):
         await process(ctx, processing.vips.vipsutils.generic_caption_stack, [["VIDEO", "GIF", "IMAGE"]],
                       processing.vips.caption.generic_image_caption, [caption], "rendering/Peter_Griffin.png", reverse=True)
 
-    @commands.command(aliases=["stretchstuff"])
+    @commands.hybrid_command(aliases=["stretchstuff"])
     async def stuffstretch(self, ctx, *, caption):
         """
         Alternate version of $stuff where RDJ stretches
@@ -167,7 +167,7 @@ class Caption(commands.Cog, name="Captioning"):
         # await process(ctx, captionfunctions.stuffstretch, [["VIDEO", "GIF", "IMAGE"]], caption,
         #                 handleanimated=True)
 
-    @commands.command(aliases=["bottomcap", "botcap"])
+    @commands.hybrid_command(aliases=["bottomcap", "botcap"])
     async def bottomcaption(self, ctx, *, caption):
         """
         Captions underneath media.
@@ -179,7 +179,7 @@ class Caption(commands.Cog, name="Captioning"):
         await process(ctx, processing.vips.vipsutils.generic_caption_stack, [["VIDEO", "GIF", "IMAGE"]],
                       processing.vips.caption.mediaforge_caption, [caption], reverse=True)
 
-    @commands.command(aliases=["esm", "&caption", "essemcaption", "esmbotcaption", "esmcap"])
+    @commands.hybrid_command(aliases=["esm", "&caption", "essemcaption", "esmbotcaption", "esmcap"])
     async def esmcaption(self, ctx, *, caption):
         """
         Captions media in the style of Essem's esmBot.
@@ -191,7 +191,7 @@ class Caption(commands.Cog, name="Captioning"):
         await process(ctx, processing.vips.vipsutils.generic_caption_stack, [["VIDEO", "GIF", "IMAGE"]],
                       processing.vips.caption.esmcaption, [caption])
 
-    @commands.command(aliases=["twitter", "twitcap", "twittercap"])
+    @commands.hybrid_command(aliases=["twitter", "twitcap", "twittercap"])
     async def twittercaption(self, ctx, *, caption):
         """
         Captions media in the style of a Twitter screenshot.
@@ -203,7 +203,7 @@ class Caption(commands.Cog, name="Captioning"):
         raise NotImplementedError  # TODO: implement
         # await process(ctx, captionfunctions.twittercap, [["VIDEO", "GIF", "IMAGE"]], caption, handleanimated=True)
 
-    @commands.command(aliases=["twitterdark", "twitcapdark", "twittercapdark"])
+    @commands.hybrid_command(aliases=["twitterdark", "twitcapdark", "twittercapdark"])
     async def twittercaptiondark(self, ctx, *, caption):
         """
         Captions media in the style of a dark mode Twitter screenshot.
@@ -216,7 +216,7 @@ class Caption(commands.Cog, name="Captioning"):
         # await process(ctx, captionfunctions.twittercapdark, [["VIDEO", "GIF", "IMAGE"]], caption,
         #                 handleanimated=True)
 
-    @commands.command()
+    @commands.hybrid_command()
     async def freezemotivate(self, ctx, *, caption):
         """
         Ends video with a freeze frame from $motivate.
@@ -230,7 +230,7 @@ class Caption(commands.Cog, name="Captioning"):
             caption.append("")
         await process(ctx, processing.ffmpeg.freezemotivate, [["VIDEO", "GIF"]], *caption)
 
-    @commands.command()
+    @commands.hybrid_command()
     async def freezemotivateaudio(self, ctx, *, caption):
         # TODO: merge this into freezemotivate
         """

@@ -33,7 +33,7 @@ class Other(commands.Cog, name="Other"):
     @commands.cooldown(60, config.cooldown, commands.BucketType.guild)
     @commands.guild_only()
     @commands.has_guild_permissions(manage_guild=True)
-    @commands.command(aliases=["pfx", "setprefix", "changeprefix", "botprefix", "commandprefix"])
+    @commands.hybrid_command(aliases=["pfx", "setprefix", "changeprefix", "botprefix", "commandprefix"])
     async def prefix(self, ctx, prefix=None):
         """
         Changes the bot's prefix for this guild.
@@ -68,7 +68,7 @@ class Other(commands.Cog, name="Other"):
     @commands.guild_only()
     @commands.has_guild_permissions(manage_emojis=True)
     @commands.bot_has_guild_permissions(manage_emojis=True)
-    @commands.command(aliases=["createemoji"])
+    @commands.hybrid_command(aliases=["createemoji"])
     async def addemoji(self, ctx, name):
         """
         Adds a file as an emoji to a server.
@@ -86,11 +86,12 @@ class Other(commands.Cog, name="Other"):
     @commands.guild_only()
     @commands.has_guild_permissions(manage_emojis=True)
     @commands.bot_has_guild_permissions(manage_emojis=True)
-    @commands.command(aliases=["createsticker"])
+    @commands.hybrid_command(aliases=["createsticker"])
     async def addsticker(self, ctx, stickeremoji: UnicodeEmojiConverter, *, name: str):
         """
-        Adds a file as a sticker to a server. Both MediaForge and the command caller must have the Manage Emojis
-        and Stickers permission.
+        Adds a file as a sticker to a server.
+
+        Both MediaForge and the command caller must have the Manage Emojis and Stickers permission.
 
         :param ctx: discord context
         :param stickeremoji: The related emoji. Must be a single default emoji.
@@ -103,7 +104,7 @@ class Other(commands.Cog, name="Other"):
     @commands.guild_only()
     @commands.has_guild_permissions(manage_guild=True)
     @commands.bot_has_guild_permissions(manage_guild=True)
-    @commands.command(aliases=["guildatabase.dbanner", "serverbanner", "banner"])
+    @commands.hybrid_command(aliases=["guildatabase.dbanner", "serverbanner", "banner"])
     async def setbanner(self, ctx):
         """
         Sets a file as the server banner.
@@ -121,7 +122,7 @@ class Other(commands.Cog, name="Other"):
     @commands.guild_only()
     @commands.has_guild_permissions(manage_guild=True)
     @commands.bot_has_guild_permissions(manage_guild=True)
-    @commands.command(aliases=["setguildicon", "guildicon", "servericon", "seticon"])
+    @commands.hybrid_command(aliases=["setguildicon", "guildicon", "servericon", "seticon"])
     async def setservericon(self, ctx):
         """
         Sets a file as the server icon.
@@ -133,7 +134,7 @@ class Other(commands.Cog, name="Other"):
         await process(ctx, utils.discordmisc.set_icon, [["IMAGE", "GIF"]], ctx.guild, expectresult=False,
                       resize=False)
 
-    @commands.command(aliases=["statistics"])
+    @commands.hybrid_command(aliases=["statistics"])
     async def stats(self, ctx):
         """
         Displays some stats about what the bot is currently doing.
@@ -153,7 +154,7 @@ class Other(commands.Cog, name="Other"):
             embed.add_field(name="Total Bot Shards", value=f"{len(self.bot.shards)}")
         await ctx.reply(embed=embed)
 
-    @commands.command(aliases=["shard", "shardstats", "shardinfo"])
+    @commands.hybrid_command(aliases=["shard", "shardstats", "shardinfo"])
     async def shards(self, ctx):
         """
         Displays info about bot shards
@@ -168,7 +169,7 @@ class Other(commands.Cog, name="Other"):
             embed.add_field(name=f"Shard #{shard.id}", value=f"{round(shard.latency * 1000)}ms latency")
         await ctx.reply(embed=embed)
 
-    @commands.command(aliases=["discord", "invite", "botinfo"])
+    @commands.hybrid_command(aliases=["discord", "invite", "botinfo"])
     async def about(self, ctx):
         """
         Lists important links related to MediaForge such as the official server.
@@ -185,7 +186,7 @@ class Other(commands.Cog, name="Other"):
         embed.add_field(name="MediaForge GitHub", value=f"https://github.com/HexCodeFFF/mediaforge")
         await ctx.reply(embed=embed)
 
-    @commands.command(aliases=["privacypolicy"])
+    @commands.hybrid_command(aliases=["privacypolicy"])
     async def privacy(self, ctx):
         """
         Shows MediaForge's privacy policy
@@ -207,7 +208,7 @@ class Other(commands.Cog, name="Other"):
                                                          f"https://github.com/HexCodeFFF/mediaforge).")
         await ctx.reply(embed=embed)
 
-    @commands.command(aliases=["github", "git"])
+    @commands.hybrid_command(aliases=["github", "git"])
     async def version(self, ctx):
         """
         Shows information on how this copy of MediaForge compares to the latest code on github.
@@ -224,7 +225,7 @@ class Other(commands.Cog, name="Other"):
             await ctx.reply("Output of `git status` (the differences between this copy of MediaForge and the latest"
                             " code on GitHub)", file=discord.File(buf, filename="gitstatus.txt"))
 
-    @commands.command(aliases=["ffmpeginfo"])
+    @commands.hybrid_command(aliases=["ffmpeginfo"])
     async def ffmpegversion(self, ctx):
         """
         Shows version information of FFmpeg running on this copy.
@@ -238,7 +239,7 @@ class Other(commands.Cog, name="Other"):
             buf.seek(0)
             await ctx.reply("Output of `ffmpeg -version`", file=discord.File(buf, filename="ffmpegversion.txt"))
 
-    @commands.command()
+    @commands.hybrid_command()
     async def help(self, ctx, *, inquiry: typing.Optional[str] = None):
         """
         Shows help on bot commands.
@@ -361,7 +362,7 @@ class Other(commands.Cog, name="Other"):
 
             await ctx.reply(embed=embed)
 
-    @commands.command(aliases=["ffprobe"])
+    @commands.hybrid_command(aliases=["ffprobe"])
     async def info(self, ctx):
         """
         Provides info on a media file.
@@ -379,7 +380,7 @@ class Other(commands.Cog, name="Other"):
         else:
             await ctx.send(f"{config.emojis['x']} No file found.")
 
-    @commands.command()
+    @commands.hybrid_command()
     async def feedback(self, ctx):
         """
         Give feedatabase.dback for the bot.
@@ -409,17 +410,17 @@ class Other(commands.Cog, name="Other"):
                               "ssues and to implement them into the bot's code.")
         await ctx.reply(embed=embed)
 
-    @commands.command()
+    @commands.hybrid_command()
     async def attributions(self, ctx):
         """
         Lists most libraries and programs this bot uses.
 
         :param ctx: discord context
         """
-        with open("../../media/active/attributions.txt", "r") as f:
+        with open("media/active/attributions.txt", "r") as f:
             await ctx.send(f.read())
 
-    @commands.command(aliases=["pong"])
+    @commands.hybrid_command(aliases=["pong"])
     async def ping(self, ctx):
         """
         Pong!

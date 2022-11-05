@@ -14,7 +14,7 @@ class DiscordListsPost(commands.Cog):
                     self.api.set_auth(k, v["token"])
         self.api.start_loop()  # Posts the server count automatically every 30 minutes
 
-    @commands.command(hidden=True)
+    @commands.hybrid_command(hidden=True)
     @commands.is_owner()
     async def post(self, ctx: commands.Context):
         """
