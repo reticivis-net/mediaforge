@@ -17,7 +17,7 @@ class Image(commands.Cog, name="Creation"):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(name="1984", aliases=["nineteeneightyfour", "georgeorwell"])
+    @commands.hybrid_command(name="1984", aliases=["nineteeneightyfour", "georgeorwell"])
     async def f1984(self, ctx, *, caption):
         """
         Creates a custom meme based off of the "living in 1984" comic.
@@ -32,7 +32,7 @@ class Image(commands.Cog, name="Creation"):
         raise NotImplementedError  # TODO: implement
         # await process(ctx, captionfunctions.f1984, [], caption)
 
-    @commands.command(aliases=["ltg", "now", "lowtiergod", "youshould"])
+    @commands.hybrid_command(aliases=["ltg", "now", "lowtiergod", "youshould"])
     async def yskysn(self, ctx, *, caption):
         """
         Creates a custom meme based off of the popular Low Tier God "You Should... NOW!" edit.
@@ -47,7 +47,7 @@ class Image(commands.Cog, name="Creation"):
         raise NotImplementedError  # TODO: implement
         # await process(ctx, captionfunctions.yskysn, [], caption)
 
-    @commands.command(aliases=["shes12"])
+    @commands.hybrid_command(aliases=["shes12"])
     async def zamn(self, ctx, *, caption):
         """
         Creates a custom meme based off of the popular "ZAMN😍 SHE'S 12?" meme.
@@ -63,7 +63,7 @@ class Image(commands.Cog, name="Creation"):
         raise NotImplementedError  # TODO: implement
         # await process(ctx, captionfunctions.zamn, [["IMAGE", "VIDEO", "GIF"]], *caption, handleanimated=True)
 
-    @commands.command(aliases=["troll"])
+    @commands.hybrid_command(aliases=["troll"])
     async def trollface(self, ctx):
         """
         Colors a trollface with an image.
@@ -74,7 +74,7 @@ class Image(commands.Cog, name="Creation"):
         raise NotImplementedError  # TODO: implement
         # await process(ctx, captionfunctions.trollface, [["VIDEO", "GIF", "IMAGE"]], handleanimated=True)
 
-    @commands.command(aliases=["emsay"])
+    @commands.hybrid_command(aliases=["emsay"])
     async def eminemsay(self, ctx, *, text):
         """
         Eminem says something.
@@ -87,7 +87,7 @@ class Image(commands.Cog, name="Creation"):
                       processing.vips.vipsutils.ImageSize(1000, 1000),
                       "rendering/images/eminem.png")
 
-    @commands.command(aliases=["customsay"])
+    @commands.hybrid_command(aliases=["customsay"])
     async def imagesay(self, ctx, *, text):
         """
         An image of your choice says something.
@@ -100,7 +100,7 @@ class Image(commands.Cog, name="Creation"):
         raise NotImplementedError  # TODO: implement
         # await process(ctx, captionfunctions.imagesay, [["IMAGE", "VIDEO", "GIF"]], text, handleanimated=True)
 
-    @commands.command(aliases=["customcap", "imagesaycap", "imagesaycaption", "imagecap", "customsaycap",
+    @commands.hybrid_command(aliases=["customcap", "imagesaycap", "imagesaycaption", "imagecap", "customsaycap",
                                "imagecaptionright"])
     async def imagecaption(self, ctx, *, text):
         """
@@ -116,7 +116,7 @@ class Image(commands.Cog, name="Creation"):
         # await process(ctx, captionfunctions.imagesaycap, [["IMAGE", "VIDEO", "GIF"], ["IMAGE"]], text,
         #                 handleanimated=True)
 
-    @commands.command(aliases=["customcapleft", "imagesaycapleft", "imagesaycaptionleft", "imagecapleft",
+    @commands.hybrid_command(aliases=["customcapleft", "imagesaycapleft", "imagesaycaptionleft", "imagecapleft",
                                "customsaycapleft"])
     async def imagecaptionleft(self, ctx, *, text):
         """
@@ -131,7 +131,7 @@ class Image(commands.Cog, name="Creation"):
         # await process(ctx, captionfunctions.imagesaycapleft, [["IMAGE", "VIDEO", "GIF"], ["IMAGE"]], text,
         #                 handleanimated=True)
 
-    @commands.command(aliases=["handitover", "takeit", "giveme"])
+    @commands.hybrid_command(aliases=["handitover", "takeit", "giveme"])
     async def givemeyourphone(self, ctx):
         """
         Overlays an image over the hand of the boy in the "give me your phone" meme.
@@ -143,7 +143,7 @@ class Image(commands.Cog, name="Creation"):
         raise NotImplementedError  # TODO: implement
         # await process(ctx, captionfunctions.givemeyourphone, [["IMAGE", "VIDEO", "GIF"]], handleanimated=True)
 
-    @commands.command(aliases=["donald", "donalttrump", "trump", "trumptweet", "donaldtrumptweet", "dontweet",
+    @commands.hybrid_command(aliases=["donald", "donalttrump", "trump", "trumptweet", "donaldtrumptweet", "dontweet",
                                "donal", "donaltweet"])
     async def donaldtweet(self, ctx, *, text):
         """
@@ -155,7 +155,7 @@ class Image(commands.Cog, name="Creation"):
         raise NotImplementedError  # TODO: implement
         # await process(ctx, captionfunctions.dontweet, [], [text])
 
-    @commands.command(aliases=["texttospeak", "speak", "talk", "speech", "espeak"])
+    @commands.hybrid_command(aliases=["texttospeak", "speak", "talk", "speech", "espeak"])
     async def tts(self, ctx: commands.Context,
                   voice: typing.Optional[typing.Literal["male", "female", "retro"]] = "male", *, text):
         """
@@ -175,7 +175,7 @@ class Image(commands.Cog, name="Creation"):
         await process(ctx, processing.common.tts, [], text, voice)
 
     # WIP
-    @commands.command()
+    @commands.hybrid_command()
     async def epicbirthday(self, ctx: commands.Context, *, text):
         """
         let mediaforge wish someone a very epic birthday!!!
@@ -187,7 +187,7 @@ class Image(commands.Cog, name="Creation"):
         """
         await process(ctx, processing.ffmpeg.epicbirthday, [], text)
 
-    @commands.command(aliases=['sus', 'imposter'])
+    @commands.hybrid_command(aliases=['sus', 'imposter'])
     async def jermatext(self, ctx, *, text="when the imposter is sus!😳"):
         """
         Cut and slice the popular Jerma sus meme to any message

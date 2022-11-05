@@ -28,7 +28,7 @@ class Conversion(commands.Cog, name="Conversion"):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(aliases=["filename", "name", "setname"])
+    @commands.hybrid_command(aliases=["filename", "name", "setname"])
     async def rename(self, ctx, filename: str):
         """
         Renames media.
@@ -42,7 +42,7 @@ class Conversion(commands.Cog, name="Conversion"):
         file = await process(ctx, lambda x: x, [["VIDEO", "GIF", "IMAGE", "AUDIO"]])
         await ctx.reply(file=discord.File(file, filename=filename))
 
-    @commands.command(aliases=["spoil", "censor", "cw", "tw"])
+    @commands.hybrid_command(aliases=["spoil", "censor", "cw", "tw"])
     async def spoiler(self, ctx):
         """
         Spoilers media.
@@ -53,7 +53,7 @@ class Conversion(commands.Cog, name="Conversion"):
         file = await process(ctx, lambda x: x, [["VIDEO", "GIF", "IMAGE", "AUDIO"]])
         await ctx.reply(file=discord.File(file, spoiler=True))
 
-    @commands.command(aliases=["avatar", "pfp", "profilepicture", "profilepic", "ayowhothismf", "av"])
+    @commands.hybrid_command(aliases=["avatar", "pfp", "profilepicture", "profilepic", "ayowhothismf", "av"])
     async def icon(self, ctx, *, body=None):
         """
         Grabs the icon url of a Discord user or server.
@@ -82,7 +82,7 @@ class Conversion(commands.Cog, name="Conversion"):
         else:
             await ctx.send(f"{config.emojis['warning']} No valid user, guild, or message ID found.")
 
-    @commands.command(aliases=["youtube", "youtubedownload", "youtubedl", "ytdownload", "download", "dl", "ytdl"])
+    @commands.hybrid_command(aliases=["youtube", "youtubedownload", "youtubedl", "ytdownload", "download", "dl", "ytdl"])
     async def videodl(self, ctx, videourl, videoformat: typing.Literal["video", "audio"] = "video"):
         """
         Downloads a web hosted video from sites like youtube.
@@ -130,7 +130,7 @@ class Conversion(commands.Cog, name="Conversion"):
         except youtube_dl.DownloadError as e:
             await ctx.reply(f"{config.emojis['2exclamation']} {e}")
 
-    @commands.command(aliases=["gif", "videotogif"])
+    @commands.hybrid_command(aliases=["gif", "videotogif"])
     async def togif(self, ctx):
         """
         Converts a video to a GIF.
@@ -140,7 +140,7 @@ class Conversion(commands.Cog, name="Conversion"):
         """
         await process(ctx, processing.ffmpeg.mp4togif, [["VIDEO"]])
 
-    @commands.command(aliases=["apng", "videotoapng", "giftoapng"])
+    @commands.hybrid_command(aliases=["apng", "videotoapng", "giftoapng"])
     async def toapng(self, ctx):
         """
         Converts a video or gif to an animated png.
@@ -150,7 +150,7 @@ class Conversion(commands.Cog, name="Conversion"):
         """
         await process(ctx, processing.ffmpeg.toapng, [["VIDEO", "GIF"]], resize=False)
 
-    @commands.command(aliases=["audio", "mp3", "tomp3", "aac", "toaac"])
+    @commands.hybrid_command(aliases=["audio", "mp3", "tomp3", "aac", "toaac"])
     async def toaudio(self, ctx):
         """
         Converts a video to only audio.
@@ -160,7 +160,7 @@ class Conversion(commands.Cog, name="Conversion"):
         """
         await process(ctx, processing.ffmpeg.toaudio, [["VIDEO", "AUDIO"]])
 
-    @commands.command()
+    @commands.hybrid_command()
     async def tenorgif(self, ctx):
         """
         Sends the GIF url for a tenor gif.
@@ -179,7 +179,7 @@ class Conversion(commands.Cog, name="Conversion"):
         else:
             await ctx.send(f"{config.emojis['x']} No tenor gif found.")
 
-    @commands.command(aliases=["video", "giftovideo", "tomp4", "mp4"])
+    @commands.hybrid_command(aliases=["video", "giftovideo", "tomp4", "mp4"])
     async def tovideo(self, ctx):
         """
         Converts a GIF to a video.
@@ -189,7 +189,7 @@ class Conversion(commands.Cog, name="Conversion"):
         """
         await process(ctx, processing.ffmpeg.giftomp4, [["GIF"]])
 
-    @commands.command(aliases=["png", "mediatopng"])
+    @commands.hybrid_command(aliases=["png", "mediatopng"])
     async def topng(self, ctx):
         """
         Converts media to PNG
@@ -199,7 +199,7 @@ class Conversion(commands.Cog, name="Conversion"):
         """
         await process(ctx, processing.ffmpeg.mediatopng, [["VIDEO", "GIF", "IMAGE"]])
 
-    @commands.command(aliases=["emoji", "emojiimage", "emote", "emoteurl"])
+    @commands.command(aliases=["emoji", "emojiimage", "emote", "emoteurl"])  # TODO: hybrid
     async def emojiurl(self, ctx, *custom_emojis: discord.PartialEmoji):
         """
         Sends the raw image for a custom Discord emoji.
@@ -217,7 +217,7 @@ class Conversion(commands.Cog, name="Conversion"):
         else:
             raise commands.BadArgument(f"Your message doesn't contain any custom emojis!")
 
-    @commands.command()
+    @commands.hybrid_command()
     async def twemoji(self, ctx: commands.Context, *, twemojis: UnicodeEmojisConverter):
         """
         Sends the twemoji image for an emoji.

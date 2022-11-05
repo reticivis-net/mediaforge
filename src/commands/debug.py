@@ -21,7 +21,7 @@ from utils.web import saveurls
 
 class Debug(commands.Cog, name="Owner Only", command_attrs=dict(hidden=True)):
     def __init__(self, bot):
-        self.bot = bot
+        self.bot:commands.Bot = bot
 
     @commands.command(aliases=["segfault", "segmentationfault"])
     @commands.is_owner()
@@ -192,3 +192,8 @@ class Debug(commands.Cog, name="Owner Only", command_attrs=dict(hidden=True)):
     @commands.is_owner()
     async def quote(self, ctx, *, string):
         await ctx.reply(quote(string))
+
+    @commands.command()
+    @commands.is_owner()
+    async def sync(self, ctx):
+        await ctx.reply(f"Synced {len(await self.bot.tree.sync())} command(s)")

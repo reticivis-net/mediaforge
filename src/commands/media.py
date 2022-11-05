@@ -17,7 +17,7 @@ class Media(commands.Cog, name="Editing"):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(aliases=["copy", "nothing", "noop"])
+    @commands.hybrid_command(aliases=["copy", "nothing", "noop"])
     async def repost(self, ctx):
         """
         Reposts media as-is.
@@ -27,7 +27,7 @@ class Media(commands.Cog, name="Editing"):
         """
         await process(ctx, lambda x: x, [["VIDEO", "GIF", "IMAGE", "AUDIO"]])
 
-    @commands.command(aliases=["clean", "remake"])
+    @commands.hybrid_command(aliases=["clean", "remake"])
     async def reencode(self, ctx):
         """
         Re-encodes media.
@@ -38,7 +38,7 @@ class Media(commands.Cog, name="Editing"):
         """
         await process(ctx, processing.ffmpeg.allreencode, [["VIDEO", "IMAGE", "AUDIO"]])
 
-    @commands.command(aliases=["audioadd", "dub"])
+    @commands.hybrid_command(aliases=["audioadd", "dub"])
     async def addaudio(self, ctx, loops: number_range(-1, 100, num_type='int') = -1):
         """
         Adds audio to media.
@@ -50,7 +50,7 @@ class Media(commands.Cog, name="Editing"):
         """
         await process(ctx, processing.ffmpeg.addaudio, [["IMAGE", "GIF", "VIDEO", "AUDIO"], ["AUDIO"]], loops)
 
-    @commands.command()
+    @commands.hybrid_command()
     async def jpeg(self, ctx, strength: number_range(0, 100, False, True, 'int') = 30,
                    stretch: number_range(0, 40, num_type='int') = 20,
                    quality: number_range(1, 95, num_type='int') = 10):
@@ -67,7 +67,7 @@ class Media(commands.Cog, name="Editing"):
         raise NotImplementedError  # TODO: implement
         # await process(ctx, captionfunctions.jpeg, [["VIDEO", "GIF", "IMAGE"]], strength, stretch, quality, handleanimated=True)
 
-    @commands.command()
+    @commands.hybrid_command()
     async def deepfry(self, ctx, brightness: number_range(0, 5) = 1.5,
                       contrast: number_range(0, 5) = 1.5,
                       sharpness: number_range(0, 5) = 1.5,
@@ -75,9 +75,9 @@ class Media(commands.Cog, name="Editing"):
                       noise: number_range(0, 255) = 40,
                       jpegstrength: number_range(0, 100, False, True, 'int') = 20):
         """
-        Applies several filters to the input media to make it appear "deep fried" in the style of deep fried memes.
-        See https://pillow.readthedocs.io/en/3.0.x/reference/ImageEnhance.html
+        Applies many filters to the input to make it appear "deep fried" in the style of deep fried memes.
 
+        See https://pillow.readthedocs.io/en/3.0.x/reference/ImageEnhance.html
 
         :param ctx: discord context
         :param brightness: value of 1 makes no change to the image. must be between 0 and 5.
@@ -104,7 +104,7 @@ class Media(commands.Cog, name="Editing"):
         # await process(ctx, captionfunctions.deepfry, [["VIDEO", "GIF", "IMAGE"]], brightness, contrast, sharpness,
         #                 saturation, noise, jpegstrength, handleanimated=True)
 
-    @commands.command()
+    @commands.hybrid_command()
     async def corrupt(self, ctx, strength: number_range(0, 0.5) = 0.05):
         """
         Intentionally glitches media
@@ -120,7 +120,7 @@ class Media(commands.Cog, name="Editing"):
         # await process(ctx, captionfunctions.jpegcorrupt, [["VIDEO", "GIF", "IMAGE"]], strength,
         #                 handleanimated=True)
 
-    @commands.command(aliases=["pad"])
+    @commands.hybrid_command(aliases=["pad"])
     async def square(self, ctx):
         """
         Pads media into a square shape.
@@ -130,7 +130,7 @@ class Media(commands.Cog, name="Editing"):
         """
         await process(ctx, processing.ffmpeg.pad, [["VIDEO", "GIF", "IMAGE"]])
 
-    @commands.command(aliases=["size"])
+    @commands.hybrid_command(aliases=["size"])
     async def resize(self, ctx, width: int, height: int):
         """
         Resizes an image.
@@ -148,7 +148,7 @@ class Media(commands.Cog, name="Editing"):
                                        f"{config.max_size} or be -1.")
         await process(ctx, processing.ffmpeg.resize, [["VIDEO", "GIF", "IMAGE"]], width, height, resize=False)
 
-    @commands.command(aliases=["short", "kyle"])
+    @commands.hybrid_command(aliases=["short", "kyle"])
     async def wide(self, ctx):
         """
         makes media twice as wide
@@ -158,7 +158,7 @@ class Media(commands.Cog, name="Editing"):
         """
         await process(ctx, processing.ffmpeg.resize, [["VIDEO", "GIF", "IMAGE"]], "iw*2", "ih")
 
-    @commands.command(aliases=["tall", "long", "antikyle"])
+    @commands.hybrid_command(aliases=["tall", "long", "antikyle"])
     async def squish(self, ctx):
         """
         makes media twice as tall
@@ -167,7 +167,7 @@ class Media(commands.Cog, name="Editing"):
         """
         await process(ctx, processing.ffmpeg.resize, [["VIDEO", "GIF", "IMAGE"]], "iw", "ih*2")
 
-    @commands.command(aliases=["magic", "magik", "contentawarescale", "liquidrescale"])
+    @commands.hybrid_command(aliases=["magic", "magik", "contentawarescale", "liquidrescale"])
     async def magick(self, ctx, strength: number_range(1, 99, num_type='int') = 50):
         """
         Apply imagemagick's liquid/content aware scale to an image.
@@ -182,14 +182,15 @@ class Media(commands.Cog, name="Editing"):
         raise NotImplementedError  # TODO: implement
         # await process(ctx, captionfunctions.magick, [["VIDEO", "GIF", "IMAGE"]], strength, handleanimated=True)
 
-    @commands.command(aliases=["repeat"], hidden=True)
+    @commands.hybrid_command(aliases=["repeat"], hidden=True)
     async def loop(self, ctx):
+        """see $gifloop or $videoloop"""
         await ctx.reply("MediaForge has 2 loop commands.\nUse `$gifloop` to change/limit the amount of times a GIF "
                         "loops. This ONLY works on GIFs.\nUse `$videoloop` to loop a video. This command "
                         "duplicates the video contents."
                         .replace("$", await prefix_function(self.bot, ctx.message, True)))
 
-    @commands.command(aliases=["gloop"])
+    @commands.hybrid_command(aliases=["gloop"])
     async def gifloop(self, ctx, loop: number_range(-1, lower_incl=True, num_type='int') = 0):
         """
         Changes the amount of times a gif loops
@@ -203,7 +204,7 @@ class Media(commands.Cog, name="Editing"):
             raise commands.BadArgument(f"Loop must be -1 or more.")
         await process(ctx, processing.ffmpeg.gifloop, [["GIF"]], loop)
 
-    @commands.command(aliases=["vloop"])
+    @commands.hybrid_command(aliases=["vloop"])
     async def videoloop(self, ctx, loop: number_range(1, 15, num_type='int') = 1):
         """
         Loops a video
@@ -219,7 +220,7 @@ class Media(commands.Cog, name="Editing"):
             raise commands.BadArgument(f"Loop must be between 1 and 15.")
         await process(ctx, processing.ffmpeg.videoloop, [["VIDEO", "GIF"]], loop)
 
-    @commands.command(aliases=["flip", "rot"])
+    @commands.hybrid_command(aliases=["flip", "rot"])
     async def rotate(self, ctx, rottype: typing.Literal["90", "90ccw", "180", "vflip", "hflip"]):
         """
         Rotates and/or flips media
@@ -231,7 +232,7 @@ class Media(commands.Cog, name="Editing"):
         """
         await process(ctx, processing.ffmpeg.rotate, [["GIF", "IMAGE", "VIDEO"]], rottype)
 
-    @commands.command()
+    @commands.hybrid_command()
     async def hue(self, ctx, h: float):
         """
         Change the hue of media.
@@ -243,7 +244,7 @@ class Media(commands.Cog, name="Editing"):
         """
         await process(ctx, processing.ffmpeg.hue, [["GIF", "IMAGE", "VIDEO"]], h)
 
-    @commands.command(aliases=["color", "recolor"])
+    @commands.hybrid_command(aliases=["color", "recolor"])
     async def tint(self, ctx, color: discord.Color):
         """
         Tint media to a color.
@@ -256,7 +257,7 @@ class Media(commands.Cog, name="Editing"):
         """
         await process(ctx, processing.ffmpeg.tint, [["GIF", "IMAGE", "VIDEO"]], color)
 
-    @commands.command(aliases=["round", "circlecrop", "roundcrop", "circle", "roundedcorners"])
+    @commands.hybrid_command(aliases=["round", "circlecrop", "roundcrop", "circle", "roundedcorners"])
     async def roundcorners(self, ctx, radius: int = 10):
         """
         Round corners of media
@@ -270,7 +271,7 @@ class Media(commands.Cog, name="Editing"):
             raise commands.BadArgument(f"Border radius percent must be above 0")
         await process(ctx, processing.ffmpeg.round_corners, [["GIF", "IMAGE", "VIDEO"]], radius)
 
-    @commands.command()
+    @commands.hybrid_command()
     async def volume(self, ctx, volume: number_range(0, 32)):
         """
         Changes the volume of media.
@@ -286,7 +287,7 @@ class Media(commands.Cog, name="Editing"):
             raise commands.BadArgument(f"{config.emojis['warning']} Volume must be between 0 and 32.")
         await process(ctx, processing.ffmpeg.volume, [["VIDEO", "AUDIO"]], volume)
 
-    @commands.command()
+    @commands.hybrid_command()
     async def mute(self, ctx):
         """
         alias for $volume 0
@@ -296,7 +297,7 @@ class Media(commands.Cog, name="Editing"):
         """
         await process(ctx, processing.ffmpeg.volume, [["VIDEO", "AUDIO"]], 0)
 
-    @commands.command()
+    @commands.hybrid_command()
     async def vibrato(self, ctx, frequency: number_range(0.1, 20000) = 5,
                       depth: number_range(0, 1) = 1):
         """
@@ -311,7 +312,7 @@ class Media(commands.Cog, name="Editing"):
         """
         await process(ctx, processing.ffmpeg.vibrato, [["VIDEO", "AUDIO"]], frequency, depth)
 
-    @commands.command()
+    @commands.hybrid_command()
     async def pitch(self, ctx, numofhalfsteps: number_range(-12, 12) = 12):
         """
         Changes pitch of audio
@@ -325,7 +326,7 @@ class Media(commands.Cog, name="Editing"):
             raise commands.BadArgument(f"numofhalfsteps must be between -12 and 12.")
         await process(ctx, processing.ffmpeg.pitch, [["VIDEO", "AUDIO"]], numofhalfsteps)
 
-    @commands.command(aliases=["concat", "combinev"])
+    @commands.hybrid_command(aliases=["concat", "combinev"])
     async def concatv(self, ctx):
         """
         Makes one video file play right after another.
@@ -338,7 +339,7 @@ class Media(commands.Cog, name="Editing"):
         """
         await process(ctx, processing.ffmpeg.concatv, [["VIDEO", "GIF"], ["VIDEO", "GIF"]])
 
-    @commands.command()
+    @commands.hybrid_command()
     async def hstack(self, ctx):
         """
         Stacks 2 videos horizontally
@@ -350,7 +351,7 @@ class Media(commands.Cog, name="Editing"):
         await process(ctx, processing.ffmpeg.stack, [["VIDEO", "GIF", "IMAGE"], ["VIDEO", "GIF", "IMAGE"]],
                       "hstack")
 
-    @commands.command()
+    @commands.hybrid_command()
     async def vstack(self, ctx):
         """
         Stacks 2 videos horizontally
@@ -362,7 +363,7 @@ class Media(commands.Cog, name="Editing"):
         await process(ctx, processing.ffmpeg.stack, [["VIDEO", "GIF", "IMAGE"], ["VIDEO", "GIF", "IMAGE"]],
                       "vstack")
 
-    @commands.command(aliases=["blend"])
+    @commands.hybrid_command(aliases=["blend"])
     async def overlay(self, ctx, alpha: number_range(0, 1) = 0.5):
         """
         Overlays the second input over the first
@@ -375,7 +376,7 @@ class Media(commands.Cog, name="Editing"):
         await process(ctx, processing.ffmpeg.overlay, [["VIDEO", "GIF", "IMAGE"], ["VIDEO", "GIF", "IMAGE"]], alpha,
                       "overlay")
 
-    @commands.command(aliases=["overlayadd", "addition"])
+    @commands.hybrid_command(aliases=["overlayadd", "addition"])
     async def add(self, ctx):
         """
         Adds the pixel values of the second video to the first.
@@ -387,7 +388,7 @@ class Media(commands.Cog, name="Editing"):
         await process(ctx, processing.ffmpeg.overlay, [["VIDEO", "GIF", "IMAGE"], ["VIDEO", "GIF", "IMAGE"]], 1,
                       "add")
 
-    @commands.command(name="speed")
+    @commands.hybrid_command(name="speed")
     async def spcommand(self, ctx, speed: number_range(0.25, 100) = 2):
         """
         Changes the speed of media.
@@ -401,7 +402,7 @@ class Media(commands.Cog, name="Editing"):
             raise commands.BadArgument(f"Speed must be between 0.25 and 100")
         await process(ctx, processing.ffmpeg.speed, [["VIDEO", "GIF", "AUDIO"]], speed)
 
-    @commands.command(aliases=["shuffle", "stutter", "nervous"])
+    @commands.hybrid_command(aliases=["shuffle", "stutter", "nervous"])
     async def random(self, ctx, frames: number_range(2, 512, num_type='int') = 30):
         """
         Shuffles the frames of a video around.
@@ -416,7 +417,7 @@ class Media(commands.Cog, name="Editing"):
             raise commands.BadArgument(f"Frames must be between 2 and 512")
         await process(ctx, processing.ffmpeg.random, [["VIDEO", "GIF"]], frames)
 
-    @commands.command()
+    @commands.hybrid_command()
     async def reverse(self, ctx):
         """
         Reverses media.
@@ -426,7 +427,7 @@ class Media(commands.Cog, name="Editing"):
         """
         await process(ctx, processing.ffmpeg.reverse, [["VIDEO", "GIF"]])
 
-    @commands.command(aliases=["compress", "quality", "lowerquality", "crf", "qa"])
+    @commands.hybrid_command(aliases=["compress", "quality", "lowerquality", "crf", "qa"])
     async def compressv(self, ctx, crf: number_range(28, 51) = 51, qa: number_range(10, 112) = 20):
         """
         Makes videos terrible quality.
@@ -441,7 +442,7 @@ class Media(commands.Cog, name="Editing"):
         """
         await process(ctx, processing.ffmpeg.quality, [["VIDEO", "GIF"]], crf, qa)
 
-    @commands.command(name="fps")
+    @commands.hybrid_command(name="fps")
     async def fpschange(self, ctx, fps: number_range(1, 60)):
         """
         Changes the FPS of media.
@@ -457,7 +458,7 @@ class Media(commands.Cog, name="Editing"):
         """
         await process(ctx, processing.ffmpeg.changefps, [["VIDEO", "GIF"]], fps)
 
-    @commands.command(aliases=["negate", "opposite"])
+    @commands.hybrid_command(aliases=["negate", "opposite"])
     async def invert(self, ctx):
         """
         Inverts colors of media
@@ -467,7 +468,7 @@ class Media(commands.Cog, name="Editing"):
         """
         await process(ctx, processing.ffmpeg.invert, [["VIDEO", "GIF", "IMAGE"]])
 
-    @commands.command()
+    @commands.hybrid_command()
     async def trim(self, ctx, length: number_range(0, lower_incl=False), start: number_range(0) = 0):
         """
         Trims media.
@@ -483,7 +484,7 @@ class Media(commands.Cog, name="Editing"):
             raise commands.BadArgument(f"Start must be equal to or more than 0.")
         await process(ctx, processing.ffmpeg.trim, [["VIDEO", "GIF", "AUDIO"]], length, start)
 
-    @commands.command(aliases=["uncap", "nocaption", "nocap", "rmcap", "removecaption", "delcap", "delcaption",
+    @commands.hybrid_command(aliases=["uncap", "nocaption", "nocap", "rmcap", "removecaption", "delcap", "delcaption",
                                "deletecaption", "trimcap", "trimcaption"])
     async def uncaption(self, ctx, frame_to_try: int = 0, tolerance: number_range(0, 100, False) = 95):
         """
