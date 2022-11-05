@@ -1,12 +1,13 @@
 import typing
 
 import discord
+from discord import app_commands
 from discord.ext import commands
 
 import config
 import processing.ffmpeg
 from core.process import process
-from utils.common import number_range, prefix_function
+from utils.common import prefix_function
 
 
 class Media(commands.Cog, name="Editing"):
@@ -39,7 +40,7 @@ class Media(commands.Cog, name="Editing"):
         await process(ctx, processing.ffmpeg.allreencode, [["VIDEO", "IMAGE", "AUDIO"]])
 
     @commands.hybrid_command(aliases=["audioadd", "dub"])
-    async def addaudio(self, ctx, loops: number_range(-1, 100, num_type='int') = -1):
+    async def addaudio(self, ctx, loops: app_commands.Range[int, -1, 100] = -1):
         """
         Adds audio to media.
 
@@ -51,9 +52,9 @@ class Media(commands.Cog, name="Editing"):
         await process(ctx, processing.ffmpeg.addaudio, [["IMAGE", "GIF", "VIDEO", "AUDIO"], ["AUDIO"]], loops)
 
     @commands.hybrid_command()
-    async def jpeg(self, ctx, strength: number_range(0, 100, False, True, 'int') = 30,
-                   stretch: number_range(0, 40, num_type='int') = 20,
-                   quality: number_range(1, 95, num_type='int') = 10):
+    async def jpeg(self, ctx, strength: app_commands.Range[int, 0, 100] = 30,
+                   stretch: app_commands.Range[int, 0, 40] = 20,
+                   quality: app_commands.Range[int, 1, 95] = 10):
         """
         Makes media into a low quality jpeg
 
@@ -68,12 +69,12 @@ class Media(commands.Cog, name="Editing"):
         # await process(ctx, captionfunctions.jpeg, [["VIDEO", "GIF", "IMAGE"]], strength, stretch, quality, handleanimated=True)
 
     @commands.hybrid_command()
-    async def deepfry(self, ctx, brightness: number_range(0, 5) = 1.5,
-                      contrast: number_range(0, 5) = 1.5,
-                      sharpness: number_range(0, 5) = 1.5,
-                      saturation: number_range(0, 5) = 1.5,
-                      noise: number_range(0, 255) = 40,
-                      jpegstrength: number_range(0, 100, False, True, 'int') = 20):
+    async def deepfry(self, ctx, brightness: app_commands.Range[float, 0, 5] = 1.5,
+                      contrast: app_commands.Range[float, 0, 5] = 1.5,
+                      sharpness: app_commands.Range[float, 0, 5] = 1.5,
+                      saturation: app_commands.Range[float, 0, 5] = 1.5,
+                      noise: app_commands.Range[float, 0, 255] = 40,
+                      jpegstrength: app_commands.Range[int, 0, 100] = 20):
         """
         Applies many filters to the input to make it appear "deep fried" in the style of deep fried memes.
 
@@ -105,7 +106,7 @@ class Media(commands.Cog, name="Editing"):
         #                 saturation, noise, jpegstrength, handleanimated=True)
 
     @commands.hybrid_command()
-    async def corrupt(self, ctx, strength: number_range(0, 0.5) = 0.05):
+    async def corrupt(self, ctx, strength: app_commands.Range[float, 0, 0.5] = 0.05):
         """
         Intentionally glitches media
         Effect is achieved through randomly changing a % of bytes in a jpeg image.
@@ -168,7 +169,7 @@ class Media(commands.Cog, name="Editing"):
         await process(ctx, processing.ffmpeg.resize, [["VIDEO", "GIF", "IMAGE"]], "iw", "ih*2")
 
     @commands.hybrid_command(aliases=["magic", "magik", "contentawarescale", "liquidrescale"])
-    async def magick(self, ctx, strength: number_range(1, 99, num_type='int') = 50):
+    async def magick(self, ctx, strength: app_commands.Range[int, 1, 99] = 50):
         """
         Apply imagemagick's liquid/content aware scale to an image.
         This command is a bit slow.
@@ -191,7 +192,7 @@ class Media(commands.Cog, name="Editing"):
                         .replace("$", await prefix_function(self.bot, ctx.message, True)))
 
     @commands.hybrid_command(aliases=["gloop"])
-    async def gifloop(self, ctx, loop: number_range(-1, lower_incl=True, num_type='int') = 0):
+    async def gifloop(self, ctx, loop: app_commands.Range[int, -1] = 0):
         """
         Changes the amount of times a gif loops
         See $videoloop for videos.
@@ -205,7 +206,7 @@ class Media(commands.Cog, name="Editing"):
         await process(ctx, processing.ffmpeg.gifloop, [["GIF"]], loop)
 
     @commands.hybrid_command(aliases=["vloop"])
-    async def videoloop(self, ctx, loop: number_range(1, 15, num_type='int') = 1):
+    async def videoloop(self, ctx, loop: app_commands.Range[int, 1, 15] = 1):
         """
         Loops a video
         This command technically works on GIFs but its better to use `$gifloop` which takes advantage of GIFs'
@@ -272,7 +273,7 @@ class Media(commands.Cog, name="Editing"):
         await process(ctx, processing.ffmpeg.round_corners, [["GIF", "IMAGE", "VIDEO"]], radius)
 
     @commands.hybrid_command()
-    async def volume(self, ctx, volume: number_range(0, 32)):
+    async def volume(self, ctx, volume: app_commands.Range[float, 0, 32]):
         """
         Changes the volume of media.
         To make 2x as loud, use `$volume 2`.
@@ -298,8 +299,8 @@ class Media(commands.Cog, name="Editing"):
         await process(ctx, processing.ffmpeg.volume, [["VIDEO", "AUDIO"]], 0)
 
     @commands.hybrid_command()
-    async def vibrato(self, ctx, frequency: number_range(0.1, 20000) = 5,
-                      depth: number_range(0, 1) = 1):
+    async def vibrato(self, ctx, frequency: app_commands.Range[float, 0.1, 20000] = 5,
+                      depth: app_commands.Range[float, 0, 1] = 1):
         """
         Applies a "wavy pitch"/vibrato effect to audio.
         officially described as "Sinusoidal phase modulation"
@@ -313,7 +314,7 @@ class Media(commands.Cog, name="Editing"):
         await process(ctx, processing.ffmpeg.vibrato, [["VIDEO", "AUDIO"]], frequency, depth)
 
     @commands.hybrid_command()
-    async def pitch(self, ctx, numofhalfsteps: number_range(-12, 12) = 12):
+    async def pitch(self, ctx, numofhalfsteps: app_commands.Range[float,-12, 12] = 12):
         """
         Changes pitch of audio
 
@@ -364,7 +365,7 @@ class Media(commands.Cog, name="Editing"):
                       "vstack")
 
     @commands.hybrid_command(aliases=["blend"])
-    async def overlay(self, ctx, alpha: number_range(0, 1) = 0.5):
+    async def overlay(self, ctx, alpha: app_commands.Range[float, 0, 1] = 0.5):
         """
         Overlays the second input over the first
 
@@ -389,7 +390,7 @@ class Media(commands.Cog, name="Editing"):
                       "add")
 
     @commands.hybrid_command(name="speed")
-    async def spcommand(self, ctx, speed: number_range(0.25, 100) = 2):
+    async def spcommand(self, ctx, speed: app_commands.Range[float, 0.25, 100] = 2):
         """
         Changes the speed of media.
         This command preserves the original FPS, which means speeding up will drop frames. See $fps.
@@ -403,7 +404,7 @@ class Media(commands.Cog, name="Editing"):
         await process(ctx, processing.ffmpeg.speed, [["VIDEO", "GIF", "AUDIO"]], speed)
 
     @commands.hybrid_command(aliases=["shuffle", "stutter", "nervous"])
-    async def random(self, ctx, frames: number_range(2, 512, num_type='int') = 30):
+    async def random(self, ctx, frames: app_commands.Range[int, 2, 512] = 30):
         """
         Shuffles the frames of a video around.
         Currently, this command does NOT apply to audio. This is an FFmpeg limitation.
@@ -428,7 +429,8 @@ class Media(commands.Cog, name="Editing"):
         await process(ctx, processing.ffmpeg.reverse, [["VIDEO", "GIF"]])
 
     @commands.hybrid_command(aliases=["compress", "quality", "lowerquality", "crf", "qa"])
-    async def compressv(self, ctx, crf: number_range(28, 51) = 51, qa: number_range(10, 112) = 20):
+    async def compressv(self, ctx, crf: app_commands.Range[float, 28, 51] = 51,
+                        qa: app_commands.Range[float, 10, 112] = 20):
         """
         Makes videos terrible quality.
         The strange ranges on the numbers are because they are quality settings in FFmpeg's encoding.
@@ -443,7 +445,7 @@ class Media(commands.Cog, name="Editing"):
         await process(ctx, processing.ffmpeg.quality, [["VIDEO", "GIF"]], crf, qa)
 
     @commands.hybrid_command(name="fps")
-    async def fpschange(self, ctx, fps: number_range(1, 60)):
+    async def fpschange(self, ctx, fps: app_commands.Range[float, 1, 60]):
         """
         Changes the FPS of media.
         This command keeps the speed the same.
@@ -469,7 +471,8 @@ class Media(commands.Cog, name="Editing"):
         await process(ctx, processing.ffmpeg.invert, [["VIDEO", "GIF", "IMAGE"]])
 
     @commands.hybrid_command()
-    async def trim(self, ctx, length: number_range(0, lower_incl=False), start: number_range(0) = 0):
+    async def trim(self, ctx, length: app_commands.Range[float, 0, None],
+                   start: app_commands.Range[float, 0, None] = 0):
         """
         Trims media.
 
@@ -485,8 +488,8 @@ class Media(commands.Cog, name="Editing"):
         await process(ctx, processing.ffmpeg.trim, [["VIDEO", "GIF", "AUDIO"]], length, start)
 
     @commands.hybrid_command(aliases=["uncap", "nocaption", "nocap", "rmcap", "removecaption", "delcap", "delcaption",
-                               "deletecaption", "trimcap", "trimcaption"])
-    async def uncaption(self, ctx, frame_to_try: int = 0, tolerance: number_range(0, 100, False) = 95):
+                                      "deletecaption", "trimcap", "trimcaption"])
+    async def uncaption(self, ctx, frame_to_try: int = 0, tolerance: app_commands.Range[float, 0, 100] = 95):
         """
         try to remove esm/default style captions from media
         scans the leftmost column of pixels on one frame to attempt to determine where the caption is.
