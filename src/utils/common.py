@@ -40,54 +40,6 @@ def download_sync(url, filename):
 number = typing.Union[float, int]
 
 
-def number_range(lower_bound: typing.Optional[number] = None, upper_bound: typing.Optional[number] = None,
-                 lower_incl: bool = True, upper_incl: bool = True,
-                 num_type: typing.Literal['float', 'int'] = 'float') -> object:
-    """
-    type hint a discord.py parameter to be within a specific number range.
-    :param lower_bound: lower bound of arg
-    :param upper_bound: upper bound of arg
-    :param lower_incl: should the lower bound be included
-    :param upper_incl: should the upper bound be included
-    :param num_type: float or int
-    :return: callable that converts string to num within range or raises commands.BadArgument if not
-    """
-    numfunc = float if num_type == "float" else int
-
-    def inner(argument):
-        try:
-            argument = numfunc(argument)
-        except ValueError:
-            raise commands.BadArgument(
-                f"`{argument}` is not a valid number."
-                f"{' This argument only accepts whole numbers. ' if numfunc == int else ''}"
-            )
-
-        def error():
-            raise commands.BadArgument(f"`{argument}` is not between `{lower_bound}` "
-                                       f"({'included' if lower_incl else 'excluded'}) "
-                                       f"and `{upper_bound}` "
-                                       f"({'included' if upper_incl else 'excluded'}).")
-
-        if lower_bound is not None:
-            if lower_incl:
-                if not lower_bound <= argument:
-                    error()
-            else:
-                if not lower_bound < argument:
-                    error()
-        if upper_bound is not None:
-            if upper_incl:
-                if not argument <= upper_bound:
-                    error()
-            else:
-                if not argument < upper_bound:
-                    error()
-        return argument
-
-    return inner
-
-
 def quote(string: str) -> str:
     """
     (tries to) discord quote a string

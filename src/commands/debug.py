@@ -5,6 +5,7 @@ import os
 import typing
 
 import discord
+from discord import app_commands
 from discord.ext import commands
 
 import config
@@ -13,7 +14,7 @@ import processing.other
 from core import database, heartbeat
 from core.clogs import logger
 # from main import renderpool, bot, database.db, quote
-from utils.common import number_range, fetch, quote
+from utils.common import fetch, quote
 from utils.dpy import showcog
 from utils.scandiscord import imagesearch
 from utils.web import saveurls
@@ -21,7 +22,7 @@ from utils.web import saveurls
 
 class Debug(commands.Cog, name="Owner Only", command_attrs=dict(hidden=True)):
     def __init__(self, bot):
-        self.bot:commands.Bot = bot
+        self.bot: commands.Bot = bot
 
     @commands.command(aliases=["segfault", "segmentationfault"])
     @commands.is_owner()
@@ -39,11 +40,6 @@ class Debug(commands.Cog, name="Owner Only", command_attrs=dict(hidden=True)):
             ctypes.string_at(0)
         else:
             await ctx.reply("unknown segfault causer.")
-
-    @commands.command()
-    @commands.is_owner()
-    async def rangetest(self, ctx, arg: number_range(-1.5, 1.5)):
-        await ctx.reply(arg)
 
     @commands.command()
     @commands.is_owner()
@@ -197,3 +193,8 @@ class Debug(commands.Cog, name="Owner Only", command_attrs=dict(hidden=True)):
     @commands.is_owner()
     async def sync(self, ctx):
         await ctx.reply(f"Synced {len(await self.bot.tree.sync())} command(s)")
+
+    @commands.hybrid_command()
+    @commands.is_owner()
+    async def test(self, ctx, strength: app_commands.Range[str, 1, 5]):
+        print(strength)
