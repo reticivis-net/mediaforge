@@ -15,9 +15,12 @@ import utils.discordmisc
 import utils.web
 from core.clogs import logger
 from core.process import process
+from processing.common import run_parallel
+from processing.other import ytdownload
 from utils.common import prefix_function
 from utils.dpy import UnicodeEmojiConverter, UnicodeEmojisConverter
 from utils.scandiscord import tenorsearch
+from utils.tempfiles import TempFile
 
 
 class Conversion(commands.Cog, name="Conversion"):
@@ -92,15 +95,10 @@ class Conversion(commands.Cog, name="Conversion"):
         :param videourl: the URL of a video or the title of a youtube video.
         :param videoformat: download audio or video.
         """
-        raise NotImplementedError  # TODO: implement
-        # await processing.ytdl(url, form)
-        # logger.info(url)
         msg = await ctx.reply(f"{config.emojis['working']} Downloading from site...", mention_author=False)
         try:
-
-            # r = await processing.run_in_exec(ytdownload, videourl, videoformat)
+            r = await run_parallel(ytdownload, videourl, videoformat)
             if r:
-                [TempFile(f) for f in r]
                 r = await processing.ffmpeg.assurefilesize(r, re_encode=False)
                 if not r:
                     return
