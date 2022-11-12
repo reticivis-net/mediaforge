@@ -44,8 +44,7 @@ class Image(commands.Cog, name="Creation"):
         caption = caption.split("|")
         if len(caption) == 1:
             caption.append("NOW!")
-        raise NotImplementedError  # TODO: implement
-        # await process(ctx, captionfunctions.yskysn, [], caption)
+        await process(ctx, processing.common.run_parallel, [], processing.vips.caption.yskysn, caption)
 
     @commands.hybrid_command(aliases=["shes12"])
     async def zamn(self, ctx, *, caption):

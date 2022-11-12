@@ -295,7 +295,7 @@ def generic_image_caption(captions: typing.Sequence[str], size: ImageSize, image
     im = im.resize((size.width / 3) / im.width)
     # pad text to image width
     padded = out.gravity(pyvips.CompassDirection.CENTRE, size.width * (2 / 3), max(out.height + fontsize, im.height),
-                         extend=pyvips.Extend.WHITE)
+                         extend=pyvips.Extend.BLACK)
 
     # join
     final = padded.join(im, pyvips.Direction.HORIZONTAL, expand=True, background=0xffffff)
@@ -312,7 +312,6 @@ def twitter_text(captions: typing.Sequence[str], size: ImageSize, dark: bool):
     captions = escape(captions)
     fontsize = size.width / 20
     # technically redundant but adds twemoji font
-    # DOESNT WORK ON WINDOWS IDK WHY
     out = pyvips.Image.text(".", fontfile=twemoji)
     # generate text
     out = pyvips.Image.text(
@@ -333,7 +332,46 @@ def twitter_text(captions: typing.Sequence[str], size: ImageSize, dark: bool):
 
     # save and return
     # because it's run in executor, tempfiles
-    outfile = TempFile("png", only_delete_in_main_process=True, todelete=False)
+    outfile = TempFile("png", only_delete_in_main_process=True)
+    out.pngsave(outfile)
+    return outfile
+
+
+def yskysn(captions: typing.Sequence[str]):
+    captions = escape(captions)
+    # load stuff
+    im = pyvips.Image.new_from_file("rendering/images/yskysn.png")
+    # here for my sanity, dimensions of text area
+    w = 500
+    h = 582
+    # technically redundant but adds twemoji font
+    text = pyvips.Image.text(".", fontfile=twemoji)
+    # generate text
+    text = pyvips.Image.text(
+        f"<span foreground='white'>"
+        f"{captions[0]}\n<span size='150%'>{captions[1]}</span>"
+        f"</span>",
+        font=f"Twemoji Color Emoji,Tahoma Bold 56px",
+        rgba=True,
+        fontfile="rendering/fonts/TAHOMABD.TTF",
+        align=pyvips.Align.CENTRE,
+        width=w,
+        height=h
+    )
+    # pad to expected size, 48 is margin
+    text = text.gravity(pyvips.CompassDirection.CENTRE, w + 48, h + 48, extend=pyvips.Extend.BLACK)
+    # add glow, similar technique to shadow
+    mask = pyvips.Image.gaussmat(5 / 2, 0.0001, separable=True)
+    glow = text[3].convsep(mask).cast(pyvips.BandFormat.UCHAR)
+    glow = glow.new_from_image((255, 255, 255)) \
+        .bandjoin(glow) \
+        .copy(interpretation=pyvips.Interpretation.SRGB)
+
+    text = glow.composite2(text, pyvips.BlendMode.OVER)
+
+    out = im.composite2(text, pyvips.BlendMode.OVER)
+    # save and return
+    outfile = TempFile("png", only_delete_in_main_process=True)
     out.pngsave(outfile)
     return outfile
 
