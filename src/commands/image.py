@@ -71,8 +71,7 @@ class Image(commands.Cog, name="Creation"):
         :param ctx: discord context
         :mediaparam media: A video, gif, or image.
         """
-        raise NotImplementedError  # TODO: implement
-        # await process(ctx, captionfunctions.trollface, [["VIDEO", "GIF", "IMAGE"]], handleanimated=True)
+        await process(ctx, processing.ffmpeg.trollface, [["VIDEO", "GIF", "IMAGE"]])
 
     @commands.hybrid_command(aliases=["emsay"])
     async def eminemsay(self, ctx, *, text):

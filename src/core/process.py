@@ -96,10 +96,16 @@ async def process(ctx: commands.Context, func: callable, inputs: list, *args,
                     asyncio.create_task(updatestatus("Processing..."))
                     # some commands arent coros (usually no-ops) so this is a good check to make
                     if inspect.iscoroutinefunction(func):
-                        return await func(*args, **kwargs)
+                        command_result = await func(*args, **kwargs)
                     else:
                         logger.warning(f"{func} is not coroutine!")
-                        return func(*args, **kwargs)
+                        command_result = func(*args, **kwargs)
+                    if expectimage and command_result:
+                        mt = await processing.ffmpeg.mediatype(command_result)
+                        if mt == "VIDEO":
+                            command_result = await processing.ffmpeg.reencode(command_result)
+                        command_result = await processing.ffmpeg.assurefilesize(command_result)
+                    return command_result
 
                 # only queue if needed
                 if queue:
@@ -111,8 +117,6 @@ async def process(ctx: commands.Context, func: callable, inputs: list, *args,
                 if expectimage:  # file expected
                     if not result:
                         raise processing.common.ReturnedNothing(f"Expected image, {func} returned nothing.")
-                    # fit within discord limit
-                    result = await processing.ffmpeg.assurefilesize(result, ctx)
                 else:  # status string expected
                     if not result:
                         raise processing.common.ReturnedNothing(f"Expected string, {func} returned nothing.")

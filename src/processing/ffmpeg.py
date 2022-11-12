@@ -131,12 +131,6 @@ async def assurefilesize(media: str, re_encode=True):
     if not media:
         raise ReturnedNothing(f"assurefilesize() was passed no media.")
     mt = await mediatype(media)
-    if mt == "VIDEO":
-        # this is in assurefilesize since all output media gets sent through here
-        # it removes transparency if its an actual video and not a gif, since like nothing can play transparent videos
-        # also forces audio to aac since audio recoding is a lot more noticable so i have to use copy for some reason
-        if re_encode:
-            media = await reencode(media)
     size = os.path.getsize(media)
     if size > config.way_too_big_size:
         raise NonBugError(f"Resulting file is {humanize.naturalsize(size)}. "
@@ -921,7 +915,7 @@ async def motivate(media: str, captions: typing.Sequence[str]):
                       "[0p0]pad=w=iw+(iw/30):h=ih+(iw/30):x=(iw/60):y=(iw/60):color=white[0p1];"
                       "[0p1][1]vstack=inputs=2[s];"
                       "[s]pad=w=iw+(iw/5):h=ih+(iw/10):x=(iw/10):y=(iw/10):color=black",
-                      "-c:v", "png",
+                      "-c:v", "png", "-c:a", "copy",
                       outfile)
     if mt == "GIF":
         outfile = await mp4togif(outfile)
@@ -977,6 +971,7 @@ async def round_corners(media, border_radius=10):
                       f"if(lte(hypot({border_radius}-(W/2-abs(W/2-X)),"
                       f"{border_radius}-(H/2-abs(H/2-Y))),"
                       f"{border_radius}),255,0),255)'",
+                      "-c:v", "png", "-c:a", "copy",
                       outfile)
     return outfile
 
@@ -1017,8 +1012,37 @@ async def twitter_caption(media, captions, dark=True):
                       f"[stacked]split=2[bg][fg];"
                       f"[bg]drawbox=c={'#15202b' if dark else '#ffffff'}:replace=1:t=fill[bg];"
                       f"[bg][fg]overlay=format=auto",
+                      "-c:v", "png", "-c:a", "copy",
                       outfile)
 
+    if mt == "GIF":
+        outfile = await mp4togif(outfile)
+    return outfile
+
+
+async def trollface(media):
+    mt = await mediatype(media)
+    exts = {
+        "VIDEO": "mp4",
+        "GIF": "mp4",
+        "IMAGE": "png"
+    }
+    outfile = TempFile(exts[mt])
+    await run_command("ffmpeg", "-i", media,
+                      "-i", "rendering/images/trollface/bottom.png",
+                      "-loop", "1", "-i", "rendering/images/trollface/mask.png",
+                      "-i", "rendering/images/trollface/top.png",
+                      "-filter_complex",
+                      # resize input media
+                      "[0]scale=500:407[media];"
+                      # mask input media
+                      "[2:v]alphaextract[mask];"
+                      "[media][mask]alphamerge[media];"
+                      # overlay bottom and top
+                      "[1:v][media]overlay[media];"
+                      "[media][3:v]overlay",
+                      "-c:v", "png", "-c:a", "copy",
+                      outfile)
     if mt == "GIF":
         outfile = await mp4togif(outfile)
     return outfile
