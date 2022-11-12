@@ -970,13 +970,55 @@ async def round_corners(media, border_radius=10):
     outfile = TempFile(exts[mt])
     # https://stackoverflow.com/a/62400465/9044183
     await run_command("ffmpeg", "-i", media, "-filter_complex",
-                      f"[1]format=yuva420p,"
+                      f"format=yuva420p,"
                       f"geq=lum='p(X,Y)':a='"
                       f"if(gt(abs(W/2-X),W/2-{border_radius})*gt(abs(H/2-Y),"
                       f"H/2-{border_radius}),"
                       f"if(lte(hypot({border_radius}-(W/2-abs(W/2-X)),"
                       f"{border_radius}-(H/2-abs(H/2-Y))),"
-                      f"{border_radius}),255,0),255)'[rounded];"
-                      f"[0][rounded]overlay=x=(W-w)/2:y=(H-h)/2",
+                      f"{border_radius}),255,0),255)'",
                       outfile)
+    return outfile
+
+
+async def twitter_caption(media, captions, dark=True):
+    mt = await mediatype(media)
+    # get_resolution call is separate so we can use for border radius
+    width, height = await get_resolution(media)
+    # get text
+    text = await processing.common.run_parallel(processing.vips.caption.twitter_text, captions,
+                                                processing.vips.vipsutils.ImageSize(width, height), dark)
+    border_radius = width * (16 / 500)
+    exts = {
+        "VIDEO": "mp4",
+        "GIF": "mp4",
+        "IMAGE": "png"
+    }
+    outfile = TempFile(exts[mt])
+    await run_command("ffmpeg", "-i", media, "-i", text, "-filter_complex",
+                      # round corners
+                      # https://stackoverflow.com/a/62400465/9044183
+                      # copied from round_corners here for efficiency as 1 ffmpeg stream
+                      f"[0]format=yuva420p,"
+                      f"geq=lum='p(X,Y)':a='"
+                      f"if(gt(abs(W/2-X),W/2-{border_radius})*gt(abs(H/2-Y),"
+                      f"H/2-{border_radius}),"
+                      f"if(lte(hypot({border_radius}-(W/2-abs(W/2-X)),"
+                      f"{border_radius}-(H/2-abs(H/2-Y))),"
+                      f"{border_radius}),255,0),255)'[media];"
+                      # add padding around media
+                      f"[media]pad=w=iw+(iw*(12/500)*2):"
+                      f"h=ih+(iw*(12/500)):"
+                      f"x=(iw*(12/500)):"
+                      f"y=0:color=#00000000[media];"
+                      # stack
+                      f"[1][media]vstack=inputs=2[stacked];"
+                      # add background
+                      f"[stacked]split=2[bg][fg];"
+                      f"[bg]drawbox=c={'#15202b' if dark else '#ffffff'}:replace=1:t=fill[bg];"
+                      f"[bg][fg]overlay=format=auto",
+                      outfile)
+
+    if mt == "GIF":
+        outfile = await mp4togif(outfile)
     return outfile
