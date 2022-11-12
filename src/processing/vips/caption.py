@@ -307,5 +307,35 @@ def generic_image_caption(captions: typing.Sequence[str], size: ImageSize, image
     final.pngsave(outfile)
     return outfile
 
+
+def twitter_text(captions: typing.Sequence[str], size: ImageSize, dark: bool):
+    captions = escape(captions)
+    fontsize = size.width / 20
+    # technically redundant but adds twemoji font
+    # DOESNT WORK ON WINDOWS IDK WHY
+    out = pyvips.Image.text(".", fontfile=twemoji)
+    # generate text
+    out = pyvips.Image.text(
+        f"<span foreground=\"{'white' if dark else 'black'}\">{captions[0]}</span>",
+        font=f"Twemoji Color Emoji,TwitterChirp {fontsize}px",
+        rgba=True,
+        fontfile="rendering/fonts/chirp-regular-web.woff2",
+        align=pyvips.Align.LOW,
+        width=size.width
+    )
+    # pad text to image width left aligned
+    out = out.gravity(pyvips.CompassDirection.WEST, size.width, out.height + fontsize,
+                      extend=pyvips.Extend.BLACK)
+    # add padding
+    out = out.gravity(pyvips.CompassDirection.CENTRE, size.width + math.floor(size.width * (12 / 500) * 2),
+                      out.height,
+                      extend=pyvips.Extend.BLACK)
+
+    # save and return
+    # because it's run in executor, tempfiles
+    outfile = TempFile("png", only_delete_in_main_process=True, todelete=False)
+    out.pngsave(outfile)
+    return outfile
+
 # print(esmcaption(["h👍💜🏳️‍🌈🏳️‍⚧️i"], 1000))
 # print(meme_text(["topto top topt otp otp top", "bottom"], ImageSize(1000, 1000)))

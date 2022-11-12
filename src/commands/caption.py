@@ -151,22 +151,6 @@ class Caption(commands.Cog, name="Captioning"):
         await process(ctx, processing.vips.vipsutils.generic_caption_stack, [["VIDEO", "GIF", "IMAGE"]],
                       processing.vips.caption.generic_image_caption, [caption], "rendering/Peter_Griffin.png", reverse=True)
 
-    @commands.hybrid_command(aliases=["stretchstuff"])
-    async def stuffstretch(self, ctx, *, caption):
-        """
-        Alternate version of $stuff where RDJ stretches
-        in this version, RDJ stretches vertically to the size of whatever text he says
-        it's not a bug... its a feature™! (this command exists due to a former bug in $stuff)
-
-
-        :param ctx: discord context
-        :param caption: The caption text.
-        :mediaparam media: A video, gif, or image.
-        """
-        raise NotImplementedError  # TODO: implement
-        # await process(ctx, captionfunctions.stuffstretch, [["VIDEO", "GIF", "IMAGE"]], caption,
-        #                 handleanimated=True)
-
     @commands.hybrid_command(aliases=["bottomcap", "botcap"])
     async def bottomcaption(self, ctx, *, caption):
         """
@@ -200,8 +184,7 @@ class Caption(commands.Cog, name="Captioning"):
         :param caption: The caption text.
         :mediaparam media: A video, gif, or image.
         """
-        raise NotImplementedError  # TODO: implement
-        # await process(ctx, captionfunctions.twittercap, [["VIDEO", "GIF", "IMAGE"]], caption, handleanimated=True)
+        await process(ctx, processing.ffmpeg.twitter_caption, [["VIDEO", "GIF", "IMAGE"]], caption, False)
 
     @commands.hybrid_command(aliases=["twitterdark", "twitcapdark", "twittercapdark"])
     async def twittercaptiondark(self, ctx, *, caption):
@@ -212,9 +195,7 @@ class Caption(commands.Cog, name="Captioning"):
         :param caption: The caption text.
         :mediaparam media: A video, gif, or image.
         """
-        raise NotImplementedError  # TODO: implement
-        # await process(ctx, captionfunctions.twittercapdark, [["VIDEO", "GIF", "IMAGE"]], caption,
-        #                 handleanimated=True)
+        await process(ctx, processing.ffmpeg.twitter_caption, [["VIDEO", "GIF", "IMAGE"]], caption, True)
 
     @commands.hybrid_command()
     async def freezemotivate(self, ctx, *, caption):
