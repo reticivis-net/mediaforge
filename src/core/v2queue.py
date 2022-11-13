@@ -4,7 +4,8 @@ import typing
 
 import config
 
-sem = asyncio.Semaphore(config.workers or os.cpu_count() or 1)
+workers = config.workers or os.cpu_count() or 1
+sem = asyncio.Semaphore(workers)
 queued = 0
 
 

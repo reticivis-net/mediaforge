@@ -9,6 +9,7 @@ import regex as re
 from discord.ext import commands
 
 import config
+import core.v2queue
 import processing.common
 import processing.ffmpeg
 import processing.ffprobe
@@ -141,15 +142,9 @@ class Other(commands.Cog, name="Other"):
 
         :param ctx: discord context
         """
-        raise NotImplementedError  # TODO: implement
-        stats = renderpool.renderpool.stats()
-        embed = discord.Embed(color=discord.Color(0xD262BA), title="Statistics",
-                              description="A 'task' is typically processing a single image/frame of a video. Not "
-                                          "all commands will use tasks.")
-        embed.add_field(name="Queued Tasks", value=f"{stats[0]}")
-        embed.add_field(name="Currently Executing Tasks", value=f"{stats[1]}")
-        embed.add_field(name="Available Workers", value=f"{config.chrome_driver_instances - stats[1]}")
-        embed.add_field(name="Total Workers", value=f"{config.chrome_driver_instances}")
+        embed = discord.Embed(color=discord.Color(0xD262BA), title="Statistics")
+        embed.add_field(name="Queued Tasks", value=f"{core.v2queue.queued}")
+        embed.add_field(name="Number of tasks this instance can run at once", value=f"{core.v2queue.workers}")
         if isinstance(self.bot, discord.AutoShardedClient):
             embed.add_field(name="Total Bot Shards", value=f"{len(self.bot.shards)}")
         await ctx.reply(embed=embed)
