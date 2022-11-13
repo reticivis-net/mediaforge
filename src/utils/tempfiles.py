@@ -78,7 +78,7 @@ class TempFile(str):
                     else:
                         loop.run_until_complete(self.delete())
                 except RuntimeError:  # no loop
-                    asyncio.run(self.delete())
+                    os.remove(self)
             except Exception as e:
                 logger.debug(e, exc_info=1)
         else:
