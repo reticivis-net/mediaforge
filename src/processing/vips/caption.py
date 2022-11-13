@@ -375,5 +375,59 @@ def yskysn(captions: typing.Sequence[str]):
     out.pngsave(outfile)
     return outfile
 
+
+def f1984(captions: typing.Sequence[str]):
+    captions = escape(captions)
+
+    originaldate = captions[1].lower() == "january 1984"
+
+    if originaldate:
+        im = pyvips.Image.new_from_file("rendering/images/1984/1984originaldate.png")
+    else:
+        im = pyvips.Image.new_from_file("rendering/images/1984/1984.png")
+
+    # technically redundant but adds twemoji font
+    speech_bubble = pyvips.Image.text(".", fontfile=twemoji)
+    # generate text
+    speech_bubble = pyvips.Image.text(
+        captions[0],
+        font=f"Twemoji Color Emoji,Atkinson Hyperlegible Bold",
+        rgba=True,
+        fontfile="rendering/fonts/AtkinsonHyperlegible-Bold.ttf",
+        align=pyvips.Align.CENTRE,
+        width=290,
+        height=90
+    )
+    # pad to expected size
+    speech_bubble = speech_bubble.gravity(pyvips.CompassDirection.CENTRE, 290, 90, extend=pyvips.Extend.BLACK)
+    # add speech bubble
+    im = im.composite2(speech_bubble, pyvips.BlendMode.OVER, x=60, y=20)
+
+    if not originaldate:
+        # technically redundant but adds twemoji font
+        date = pyvips.Image.text(".", fontfile=twemoji)
+        # generate text
+        date = pyvips.Image.text(
+            captions[1],
+            font=f"Twemoji Color Emoji,Impact",
+            rgba=True,
+            fontfile="rendering/fonts/ImpactMix.ttf",
+            align=pyvips.Align.CENTRE,
+            width=124,
+            height=34
+        )
+        # pad to expected size
+        date = date.gravity(pyvips.CompassDirection.CENTRE, 124, 34, extend=pyvips.Extend.BLACK)
+        # equivelant to skewY(10deg)
+        date = date.affine([1, 0, 0.176327, 1])
+        # add date
+        im = im.composite2(date, pyvips.BlendMode.OVER, x=454, y=138)
+        # add cover
+        im = im.composite2(pyvips.Image.new_from_file("rendering/images/1984/1984cover.png"), pyvips.BlendMode.OVER)
+
+    outfile = TempFile("png", only_delete_in_main_process=True)
+    im.pngsave(outfile)
+    return outfile
+
 # print(esmcaption(["h👍💜🏳️‍🌈🏳️‍⚧️i"], 1000))
 # print(meme_text(["topto top topt otp otp top", "bottom"], ImageSize(1000, 1000)))

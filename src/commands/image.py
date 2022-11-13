@@ -29,8 +29,7 @@ class Image(commands.Cog, name="Creation"):
         caption = caption.split("|")
         if len(caption) == 1:
             caption.append("JANUARY 1984")
-        raise NotImplementedError  # TODO: implement
-        # await process(ctx, captionfunctions.f1984, [], caption)
+        await process(ctx, processing.vips.caption.f1984, [], caption)
 
     @commands.hybrid_command(aliases=["ltg", "now", "lowtiergod", "youshould"])
     async def yskysn(self, ctx, *, caption):
