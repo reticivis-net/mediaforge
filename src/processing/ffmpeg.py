@@ -890,6 +890,19 @@ async def crop(file, w, h, x, y):
         outname = await mp4togif(outname)
     return outname
 
+async def trim_top(file, trim_size):
+    mt = await mediatype(file)
+    exts = {
+        "VIDEO": "mp4",
+        "GIF": "mp4",
+        "IMAGE": "png"
+    }
+    outname = TempFile(exts[mt])
+    await run_command('ffmpeg', '-i', file, '-filter:v', f'crop=out_h=ih-{trim_size}:y={trim_size}', "-c:v", "png", outname)
+    if mt == "GIF":
+        outname = await mp4togif(outname)
+    return outname
+
 
 async def toapng(video):
     outname = TempFile("png")
@@ -1046,3 +1059,16 @@ async def trollface(media):
     if mt == "GIF":
         outfile = await mp4togif(outfile)
     return outfile
+
+def rgb_to_lightness(r, g, b):
+    """
+    adapted from colorsys.rgb_to_hls()
+    :param r: red from 0-1
+    :param g: green from 0-1
+    :param b: blue from 0-1
+    :return: lightness from 0-1
+    """
+    maxc = max(r, g, b)
+    minc = min(r, g, b)
+    return (minc + maxc) / 2.0
+

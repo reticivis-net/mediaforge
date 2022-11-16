@@ -8,6 +8,7 @@ import config
 import processing.ffmpeg
 from core.process import process
 from utils.common import prefix_function
+import processing.vips.other
 
 
 class Media(commands.Cog, name="Editing"):
@@ -105,21 +106,6 @@ class Media(commands.Cog, name="Editing"):
         # await process(ctx, captionfunctions.deepfry, [["VIDEO", "GIF", "IMAGE"]], brightness, contrast, sharpness,
         #                 saturation, noise, jpegstrength, handleanimated=True)
 
-    @commands.hybrid_command()
-    async def corrupt(self, ctx, strength: app_commands.Range[float, 0, 0.5] = 0.05):
-        """
-        Intentionally glitches media
-        Effect is achieved through randomly changing a % of bytes in a jpeg image.
-
-        :param ctx: discord context
-        :param strength: % chance to randomly change a byte of the input image.
-        :mediaparam media: A video, gif, or image.
-        """
-        if not 0 <= strength <= 0.5:
-            raise commands.BadArgument(f"Strength must be between 0% and 0.5%.")
-        raise NotImplementedError  # TODO: implement
-        # await process(ctx, captionfunctions.jpegcorrupt, [["VIDEO", "GIF", "IMAGE"]], strength,
-        #                 handleanimated=True)
 
     @commands.hybrid_command(aliases=["pad"])
     async def square(self, ctx):
@@ -489,15 +475,14 @@ class Media(commands.Cog, name="Editing"):
 
     @commands.hybrid_command(aliases=["uncap", "nocaption", "nocap", "rmcap", "removecaption", "delcap", "delcaption",
                                       "deletecaption", "trimcap", "trimcaption"])
-    async def uncaption(self, ctx, frame_to_try: int = 0, tolerance: app_commands.Range[float, 0, 100] = 95):
+    async def uncaption(self, ctx, frame_to_try: int = 0, threshold: app_commands.Range[float, 0, 255] = 10):
         """
         try to remove esm/default style captions from media
         scans the leftmost column of pixels on one frame to attempt to determine where the caption is.
 
         :param ctx:
         :param frame_to_try: which frame to run caption detection on. -1 uses the last frame.
-        :param tolerance: in % how close to white the color must be to count as caption
+        :param threshold: a number 0-255 how similar the caption background must be to white
         :mediaparam media: A video, image, or GIF file
         """
-        raise NotImplementedError  # TODO: implement
-        await process(ctx, processing.ffmpeg.uncaption, [["VIDEO", "IMAGE", "GIF"]], frame_to_try, tolerance)
+        await process(ctx, processing.vips.other.uncaption, [["VIDEO", "IMAGE", "GIF"]], frame_to_try, threshold)
