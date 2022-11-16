@@ -65,6 +65,18 @@ class ErrorHandlerCog(commands.Cog):
                 # https://mudae.fandom.com/wiki/List_of_Commands#.24waifu_.28.24w.29
                 logger.debug(f"Ignoring {ctx.message.content}")
                 return
+
+            # remove money
+            is_decimal = True
+            for char in ctx.message.content.strip().split(" ")[0]:
+                # if non-decimal character found, we're ok to reply with an error
+                if not (char.isdecimal() or char in ",.$"):
+                    is_decimal = False
+                    break
+            if is_decimal:
+                logger.debug(f"Ignoring {ctx.message.content}")
+                return
+
             # remove prefix, remove excess args
             cmd = ctx.message.content[len(ctx.prefix):].split(' ')[0]
             allcmds = []
@@ -76,10 +88,8 @@ class ErrorHandlerCog(commands.Cog):
             match = difflib.get_close_matches(cmd, allcmds, n=1, cutoff=0)[0]
             err = f"{config.emojis['exclamation_question']} Command `{prefix}{cmd}` does not exist. " \
                   f"Did you mean **{prefix}{match}**?"
-            if not (cmd.startswith("$") and all([i.isdecimal() or i in ".," for i in cmd.replace("$", "")])):
-                # exclude just numbers/decimals, it annoys people
-                await logandreply(err)
-                self.antispambucket[ctx.author.id] = now() + config.cooldown
+            await logandreply(err)
+            self.antispambucket[ctx.author.id] = now() + config.cooldown
         elif isinstance(commanderror, discord.ext.commands.errors.NotOwner):
             err = f"{config.emojis['x']} You are not authorized to use this command."
             await logandreply(err)
