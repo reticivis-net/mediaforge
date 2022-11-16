@@ -125,7 +125,7 @@ class Caption(commands.Cog, name="Captioning"):
         :mediaparam media: A video, gif, or image.
         """
         await process(ctx, processing.vips.vipsutils.generic_caption_stack, [["VIDEO", "GIF", "IMAGE"]],
-                      processing.vips.caption.generic_image_caption, [caption], "rendering/Stuff.PNG", reverse=True)
+                      processing.vips.caption.generic_image_caption, [caption], "rendering/images/Stuff.PNG", reverse=True)
 
     @commands.hybrid_command(aliases=["eminemcaption", "eminemcap"])
     async def eminem(self, ctx, *, caption):
@@ -137,7 +137,7 @@ class Caption(commands.Cog, name="Captioning"):
         :mediaparam media: A video, gif, or image.
         """
         await process(ctx, processing.vips.vipsutils.generic_caption_stack, [["VIDEO", "GIF", "IMAGE"]],
-                      processing.vips.caption.generic_image_caption, [caption], "rendering/eminem.png", reverse=True)
+                      processing.vips.caption.generic_image_caption, [caption], "rendering/images/eminem.png", reverse=True)
 
     @commands.hybrid_command(aliases=["peter", "peterexplain", "petersay", "petergriffinexplain", "petergriffinsay"])
     async def petergriffin(self, ctx, *, caption):
@@ -149,7 +149,7 @@ class Caption(commands.Cog, name="Captioning"):
         :mediaparam media: A video, gif, or image.
         """
         await process(ctx, processing.vips.vipsutils.generic_caption_stack, [["VIDEO", "GIF", "IMAGE"]],
-                      processing.vips.caption.generic_image_caption, [caption], "rendering/Peter_Griffin.png", reverse=True)
+                      processing.vips.caption.generic_image_caption, [caption], "rendering/images/Peter_Griffin.png", reverse=True)
 
     @commands.hybrid_command(aliases=["bottomcap", "botcap"])
     async def bottomcaption(self, ctx, *, caption):
