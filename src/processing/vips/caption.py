@@ -269,7 +269,7 @@ def snapchat(captions: typing.Sequence[str], size: ImageSize):
     return outfile
 
 
-def generic_image_caption(captions: typing.Sequence[str], size: ImageSize, image: str):
+def generic_image_caption(image: str, captions: typing.Sequence[str], size: ImageSize):
     # constants used by esmbot
     fontsize = size.width / 10
     textwidth = size.width * (2 / 3) * .92

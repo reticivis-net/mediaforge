@@ -43,7 +43,7 @@ class Image(commands.Cog, name="Creation"):
         caption = caption.split("|")
         if len(caption) == 1:
             caption.append("NOW!")
-        await process(ctx, processing.common.run_parallel, [], processing.vips.caption.yskysn, caption)
+        await process(ctx, processing.vips.caption.yskysn, [], caption, run_paralell=True)
 
     @commands.hybrid_command(aliases=["shes12"])
     async def zamn(self, ctx, *, caption):
@@ -79,10 +79,11 @@ class Image(commands.Cog, name="Creation"):
         :param ctx: discord context
         :param text: The text to put next to eminem.
         """
-        await process(ctx, processing.common.run_parallel, [],
-                      processing.vips.caption.generic_image_caption, [text],
+        await process(ctx, processing.vips.caption.generic_image_caption, [],
+                      "rendering/images/eminem.png",
+                      [text],
                       processing.vips.vipsutils.ImageSize(1000, 1000),
-                      "rendering/images/eminem.png")
+                      run_paralell=True)
 
     @commands.hybrid_command(aliases=["customsay"])
     async def imagesay(self, ctx, *, text):
@@ -94,39 +95,9 @@ class Image(commands.Cog, name="Creation"):
         :param text: The text to put next to your image.
         :mediaparam media: An image, video, or gif
         """
-        raise NotImplementedError  # TODO: implement
-        # await process(ctx, captionfunctions.imagesay, [["IMAGE", "VIDEO", "GIF"]], text, handleanimated=True)
-
-    @commands.hybrid_command(aliases=["customcap", "imagesaycap", "imagesaycaption", "imagecap", "customsaycap",
-                               "imagecaptionright"])
-    async def imagecaption(self, ctx, *, text):
-        """
-        An image of your choice says something below another image.
-        Like `$stuff`, `$eminem` or `$petergriffin` but for a custom image.
-
-        :param ctx: discord context
-        :param text: The text to put next to your image.
-        :mediaparam media: An image, video, or gif to caption
-        :mediaparam image: An image to sit next to the caption text
-        """
-        raise NotImplementedError  # TODO: implement
-        # await process(ctx, captionfunctions.imagesaycap, [["IMAGE", "VIDEO", "GIF"], ["IMAGE"]], text,
-        #                 handleanimated=True)
-
-    @commands.hybrid_command(aliases=["customcapleft", "imagesaycapleft", "imagesaycaptionleft", "imagecapleft",
-                               "customsaycapleft"])
-    async def imagecaptionleft(self, ctx, *, text):
-        """
-        like $imagecaption but the image is on the left.
-
-        :param ctx: discord context
-        :param text: The text to put next to your image.
-        :mediaparam media: An image, video, or gif to caption
-        :mediaparam image: An image to sit next to the caption text
-        """
-        raise NotImplementedError  # TODO: implement
-        # await process(ctx, captionfunctions.imagesaycapleft, [["IMAGE", "VIDEO", "GIF"], ["IMAGE"]], text,
-        #                 handleanimated=True)
+        await process(ctx, processing.vips.caption.generic_image_caption, [["IMAGE"]],
+                      [text],
+                      processing.vips.vipsutils.ImageSize(1000, 1000), run_paralell=True)
 
     @commands.hybrid_command(aliases=["handitover", "takeit", "giveme"])
     async def givemeyourphone(self, ctx):
@@ -141,7 +112,7 @@ class Image(commands.Cog, name="Creation"):
         # await process(ctx, captionfunctions.givemeyourphone, [["IMAGE", "VIDEO", "GIF"]], handleanimated=True)
 
     @commands.hybrid_command(aliases=["donald", "donalttrump", "trump", "trumptweet", "donaldtrumptweet", "dontweet",
-                               "donal", "donaltweet"])
+                                      "donal", "donaltweet"])
     async def donaldtweet(self, ctx, *, text):
         """
         Makes a fake Donald Trump tweet.
@@ -193,4 +164,4 @@ class Image(commands.Cog, name="Creation"):
         :param ctx: discord context
         :param text: The text to cut and splice.
         """
-        await process(ctx, processing.common.run_parallel, [], sus.sus, text)
+        await process(ctx, sus.sus, [], text, run_paralell=True)

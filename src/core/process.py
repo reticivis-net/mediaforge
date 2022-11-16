@@ -15,7 +15,7 @@ from utils.web import saveurls
 
 
 async def process(ctx: commands.Context, func: callable, inputs: list, *args,
-                  resize=True, expectimage=True, uploadresult=True, queue=True, **kwargs):
+                  resize=True, expectimage=True, uploadresult=True, queue=True, run_paralell=False, **kwargs):
     """
     The core function of the bot. Gathers media and sends it to the proper function.
 
@@ -29,6 +29,7 @@ async def process(ctx: commands.Context, func: callable, inputs: list, *args,
         string.
     :param uploadresult: if true, uploads the result automatically.
     :param queue: if true, command must wait for open slot in queue to process.
+    :param run_paralell: for sync functions only, run without blocking
     :return: filename of processed media
     """
 
@@ -98,8 +99,11 @@ async def process(ctx: commands.Context, func: callable, inputs: list, *args,
                     if inspect.iscoroutinefunction(func):
                         command_result = await func(*args, **kwargs)
                     else:
-                        logger.warning(f"{func} is not coroutine!")
-                        command_result = func(*args, **kwargs)
+                        if run_paralell:
+                            command_result = await processing.common.run_parallel(func, *args, **kwargs)
+                        else:
+                            logger.warning(f"{func} is not coroutine")
+                            command_result = func(*args, **kwargs)
                     if expectimage and command_result:
                         mt = await processing.ffmpeg.mediatype(command_result)
                         if mt == "VIDEO":
