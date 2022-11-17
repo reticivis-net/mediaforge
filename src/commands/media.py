@@ -9,7 +9,7 @@ import processing.ffmpeg
 from core.process import process
 from utils.common import prefix_function
 import processing.vips.other
-from utils.discordmisc import HybridRange
+from utils.dpy import HybridRange
 
 
 class Media(commands.Cog, name="Editing"):
