@@ -890,6 +890,7 @@ async def crop(file, w, h, x, y):
         outname = await mp4togif(outname)
     return outname
 
+
 async def trim_top(file, trim_size):
     mt = await mediatype(file)
     exts = {
@@ -898,7 +899,8 @@ async def trim_top(file, trim_size):
         "IMAGE": "png"
     }
     outname = TempFile(exts[mt])
-    await run_command('ffmpeg', '-i', file, '-filter:v', f'crop=out_h=ih-{trim_size}:y={trim_size}', "-c:v", "png", outname)
+    await run_command('ffmpeg', '-i', file, '-filter:v', f'crop=out_h=ih-{trim_size}:y={trim_size}', "-c:v", "png",
+                      outname)
     if mt == "GIF":
         outname = await mp4togif(outname)
     return outname
@@ -1060,6 +1062,7 @@ async def trollface(media):
         outfile = await mp4togif(outfile)
     return outfile
 
+
 def rgb_to_lightness(r, g, b):
     """
     adapted from colorsys.rgb_to_hls()
@@ -1072,3 +1075,21 @@ def rgb_to_lightness(r, g, b):
     minc = min(r, g, b)
     return (minc + maxc) / 2.0
 
+
+async def deepfry(media, brightness, contrast, sharpness, saturation, noise):
+    mt = await mediatype(media)
+    exts = {
+        "VIDEO": "mp4",
+        "GIF": "mp4",
+        "IMAGE": "png"
+    }
+    outfile = TempFile(exts[mt])
+
+    await run_command("ffmpeg", "-i", media, "-vf",
+                      f"eq=contrast={contrast}:brightness={brightness}:saturation={saturation},"
+                      f"unsharp=luma_msize_x=7:luma_msize_y=7:luma_amount={sharpness},"
+                      f"noise=alls={noise}", outfile)
+
+    if mt == "GIF":
+        outfile = await mp4togif(outfile)
+    return outfile
