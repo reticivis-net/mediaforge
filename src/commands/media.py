@@ -90,18 +90,6 @@ class Media(commands.Cog, name="Editing"):
         :param jpegstrength: value of 0 makes no change to the image. must be between 0 and 100.
         :mediaparam media: A video, gif, or image.
         """
-        if not 0 <= brightness <= 5:
-            raise commands.BadArgument(f"Brightness must be between 0 and 5.")
-        if not 0 <= contrast <= 5:
-            raise commands.BadArgument(f"Contrast must be between 0 and 5.")
-        if not 0 <= sharpness <= 5:
-            raise commands.BadArgument(f"Sharpness must be between 0 and 5.")
-        if not 0 <= saturation <= 5:
-            raise commands.BadArgument(f"Saturation must be between 0 and 5.")
-        if not 0 <= noise <= 255:
-            raise commands.BadArgument(f"Noise must be between 0 and 255.")
-        if not 0 < jpegstrength <= 100:
-            raise commands.BadArgument(f"JPEG strength must be between 0 and 100.")
         raise NotImplementedError  # TODO: implement
         # await process(ctx, captionfunctions.deepfry, [["VIDEO", "GIF", "IMAGE"]], brightness, contrast, sharpness,
         #                 saturation, noise, jpegstrength, handleanimated=True)
@@ -186,8 +174,7 @@ class Media(commands.Cog, name="Editing"):
         :param loop: number of times to loop. -1 for no loop, 0 for infinite loop.
         :mediaparam media: A gif.
         """
-        if not -1 <= loop:
-            raise commands.BadArgument(f"Loop must be -1 or more.")
+
         await process(ctx, processing.ffmpeg.gifloop, [["GIF"]], loop)
 
     @commands.hybrid_command(aliases=["vloop"])
@@ -200,8 +187,6 @@ class Media(commands.Cog, name="Editing"):
         :param loop: number of times to loop.
         :mediaparam media: A video.
         """
-        if not 1 <= loop <= 15:
-            raise commands.BadArgument(f"Loop must be between 1 and 15.")
         await process(ctx, processing.ffmpeg.videoloop, [["VIDEO"]], loop)
 
     @commands.hybrid_command(aliases=["flip", "rot"])
@@ -382,8 +367,6 @@ class Media(commands.Cog, name="Editing"):
         :param speed: Multiplies input video speed by this number. must be between 0.25 and 100.
         :mediaparam media: A video, gif, or audio.
         """
-        if not 0.25 <= speed <= 100:
-            raise commands.BadArgument(f"Speed must be between 0.25 and 100")
         await process(ctx, processing.ffmpeg.speed, [["VIDEO", "GIF", "AUDIO"]], speed)
 
     @commands.hybrid_command(aliases=["shuffle", "stutter", "nervous"])
@@ -397,8 +380,6 @@ class Media(commands.Cog, name="Editing"):
         :param frames: Set size in number of frames of internal cache. must be between 2 and 512. default is 30.
         :mediaparam video: A video or gif.
         """
-        if not 2 <= frames <= 512:
-            raise commands.BadArgument(f"Frames must be between 2 and 512")
         await process(ctx, processing.ffmpeg.random, [["VIDEO", "GIF"]], frames)
 
     @commands.hybrid_command()
@@ -464,10 +445,6 @@ class Media(commands.Cog, name="Editing"):
         :param start: Time in seconds to start the trimmed media at.
         :mediaparam media: A video, gif, or audio file.
         """
-        if not 0 < length:
-            raise commands.BadArgument(f"Length must be more than 0.")
-        if not 0 <= start:
-            raise commands.BadArgument(f"Start must be equal to or more than 0.")
         await process(ctx, processing.ffmpeg.trim, [["VIDEO", "GIF", "AUDIO"]], length, start)
 
     @commands.hybrid_command(aliases=["uncap", "nocaption", "nocap", "rmcap", "removecaption", "delcap", "delcaption",
