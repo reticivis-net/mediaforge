@@ -9,6 +9,7 @@ import processing.ffmpeg
 from core.process import process
 from utils.common import prefix_function
 import processing.vips.other
+import processing.other
 from utils.dpy import HybridRange
 
 
@@ -147,10 +148,10 @@ class Media(commands.Cog, name="Editing"):
         :param ctx: discord context
         :param strength: how strongly to compress the image. smaller is stronger. output image will be strength% of
         the original size. must be between 1 and 99.
-        :mediaparam media: A video, gif, or image.
+        :mediaparam media: An image.
         """
-        raise NotImplementedError  # TODO: implement
-        # await process(ctx, captionfunctions.magick, [["VIDEO", "GIF", "IMAGE"]], strength, handleanimated=True)
+        # TODO: add support for gifs/videos
+        await process(ctx, processing.other.magickone, [["IMAGE"]], strength)
 
     @commands.hybrid_command(aliases=["repeat"], hidden=True)
     async def loop(self, ctx):

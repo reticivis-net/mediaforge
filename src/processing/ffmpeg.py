@@ -12,7 +12,7 @@ from processing.ffprobe import *
 from utils.tempfiles import TempFile
 
 
-async def ffmpegsplit(media):
+async def split_frames(media):
     """
     splits the input file into frames
     :param media: file
@@ -172,7 +172,7 @@ async def mp4togif(mp4):
     :param mp4: mp4
     :return: gif
     """
-    frames, name = await ffmpegsplit(mp4)
+    frames, name = await split_frames(mp4)
     fps = await get_frame_rate(mp4)
     outname = TempFile("gif")
     n = glob.glob(name.replace('%09d', '*'))

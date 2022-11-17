@@ -3,8 +3,8 @@ import glob
 import yt_dlp as youtube_dl
 
 import config
-from processing.ffprobe import *
 import utils.tempfiles
+from processing.ffprobe import *
 
 
 async def freezemotivate(files, *caption):
@@ -84,3 +84,9 @@ def ytdownload(vid, form):
         return TempFile(filename[0], only_delete_in_main_process=True)
     else:
         return None
+
+
+async def magickone(media, strength):
+    tosave = TempFile("png")
+    await run_command("magick", media, "-liquid-rescale", f"{strength}%x{strength}%", tosave)
+    return tosave
