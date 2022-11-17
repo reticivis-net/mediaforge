@@ -43,7 +43,7 @@ class Image(commands.Cog, name="Creation"):
         caption = caption.split("|")
         if len(caption) == 1:
             caption.append("NOW!")
-        await process(ctx, processing.vips.caption.yskysn, [], caption, run_paralell=True)
+        await process(ctx, processing.vips.caption.yskysn, [], caption, run_parallel=True)
 
     @commands.hybrid_command(aliases=["shes12"])
     async def zamn(self, ctx, *, caption):
@@ -83,7 +83,7 @@ class Image(commands.Cog, name="Creation"):
                       "rendering/images/eminem.png",
                       [text],
                       processing.vips.vipsutils.ImageSize(1000, 1000),
-                      run_paralell=True)
+                      run_parallel=True)
 
     @commands.hybrid_command(aliases=["customsay"])
     async def imagesay(self, ctx, *, text):
@@ -97,7 +97,7 @@ class Image(commands.Cog, name="Creation"):
         """
         await process(ctx, processing.vips.caption.generic_image_caption, [["IMAGE"]],
                       [text],
-                      processing.vips.vipsutils.ImageSize(1000, 1000), run_paralell=True)
+                      processing.vips.vipsutils.ImageSize(1000, 1000), run_parallel=True)
 
     @commands.hybrid_command(aliases=["handitover", "takeit", "giveme"])
     async def givemeyourphone(self, ctx):
@@ -164,4 +164,4 @@ class Image(commands.Cog, name="Creation"):
         :param ctx: discord context
         :param text: The text to cut and splice.
         """
-        await process(ctx, sus.sus, [], text, run_paralell=True)
+        await process(ctx, sus.sus, [], text, run_parallel=True)

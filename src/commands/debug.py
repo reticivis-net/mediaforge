@@ -15,6 +15,7 @@ from core import database, heartbeat
 from core.clogs import logger
 # from main import renderpool, bot, database.db, quote
 from utils.common import fetch, quote
+from utils.discordmisc import HybridRange
 from utils.dpy import showcog
 from utils.scandiscord import imagesearch
 from utils.web import saveurls
@@ -196,5 +197,5 @@ class Debug(commands.Cog, name="Owner Only", command_attrs=dict(hidden=True)):
 
     @commands.hybrid_command()
     @commands.is_owner()
-    async def test(self, ctx, strength: app_commands.Range[str, 1, 5]):
+    async def test(self, ctx, strength: HybridRange[str, 1, 5]):
         print(strength)
