@@ -7,6 +7,7 @@ import processing.ffmpeg
 import processing.ffprobe
 from processing.common import run_parallel, NonBugError
 from utils.tempfiles import TempFile
+import processing.vips.vipsutils
 
 
 def get_caption_height(file, tolerance: float):
@@ -23,9 +24,7 @@ def get_caption_height(file, tolerance: float):
 
 async def uncaption(file, frame_to_try: int, tolerance: float):
     frame_to_try = await processing.ffmpeg.frame_n(file, frame_to_try)
-    w, h = await processing.ffprobe.get_resolution(file)
     cap_height = await run_parallel(get_caption_height, frame_to_try, tolerance)
-
     return await processing.ffmpeg.trim_top(file, cap_height)
 
 
@@ -38,7 +37,7 @@ def jpeg(file, strength, stretch, quality):
             # resize to anywhere between (original image width ± stretch, original image height ± stretch)
             w_add = random.randint(-stretch, stretch)
             h_add = random.randint(-stretch, stretch)
-            im = im.resize((orig_w + w_add) / im.width, (orig_h + h_add) / im.height)
+            im = processing.vips.vipsutils.resize(im, orig_w + w_add, orig_h + h_add)
         # save to jpeg and read back to image
         im = pyvips.Image.new_from_buffer(im.write_to_buffer(".jpg", Q=quality), ".jpg")
     # save

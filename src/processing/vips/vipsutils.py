@@ -71,3 +71,7 @@ def stack(file0, file1):
     outfile = TempFile("png", only_delete_in_main_process=True)
     out.pngsave(outfile)
     return outfile
+
+
+def resize(img: pyvips.Image, width: int, height: int) -> pyvips.Image:
+    return img.resize(width / img.width, vscale=height / img.height)
