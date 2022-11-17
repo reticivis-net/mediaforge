@@ -15,8 +15,7 @@ from core import database, heartbeat
 from core.clogs import logger
 # from main import renderpool, bot, database.db, quote
 from utils.common import fetch, quote
-from utils.discordmisc import HybridRange
-from utils.dpy import showcog
+from utils.dpy import showcog, HybridRange
 from utils.scandiscord import imagesearch
 from utils.web import saveurls
 
