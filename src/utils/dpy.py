@@ -88,11 +88,13 @@ class HybridRangeTransformer(IdentityTransformer):
         if self._opt_type == AppCommandOptionType.string:
             if self._min and len(argument) < self._min:
                 raise BadArgument(
-                    f'Parameter "{ctx.current_parameter.name}" must be longer than {self._min} character{"s" if self._min == 1 else ""}.'
+                    f'Parameter "{ctx.current_parameter.name}" must be longer than {self._min} '
+                    f'character{"s" if self._min == 1 else ""}.'
                 )
             if self._max and len(argument) > self._max:
                 raise BadArgument(
-                    f'Parameter "{ctx.current_parameter.name}" must be shorter than {self._min} character{"s" if self._min == 1 else ""}.'
+                    f'Parameter "{ctx.current_parameter.name}" must be shorter than {self._min} '
+                    f'character{"s" if self._min == 1 else ""}.'
                 )
         else:
             converterfunc = int if self._opt_type == AppCommandOptionType.integer else float
@@ -100,7 +102,8 @@ class HybridRangeTransformer(IdentityTransformer):
                 argument = converterfunc(argument)
             except ValueError:
                 raise BadArgument(
-                    f'Converting to "{converterfunc.annotation.__name__}" failed for parameter "{ctx.current_parameter.name}".'
+                    f'Converting to "{"int" if self._opt_type == AppCommandOptionType.integer else "float"}" '
+                    f'failed for parameter "{ctx.current_parameter.name}".'
                 )
             if self._min and argument < self._min:
                 raise BadArgument(
