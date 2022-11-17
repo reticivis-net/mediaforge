@@ -1,7 +1,7 @@
 """
 Miscellaneous helper functions for commands
 """
-# TODO: reddit moment caption
+
 import json
 
 import discord
@@ -140,5 +140,3 @@ async def tenorsearch(ctx, gif=False):
             if hm is not None:
                 return hm
     return False
-
-
