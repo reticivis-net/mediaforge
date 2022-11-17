@@ -536,7 +536,6 @@ async def stack(files, style):
     :return: processed media
     """
     mts = [await mediatype(files[0]), await mediatype(files[1])]
-    # TODO: update
     if mts[0] == "IMAGE" and mts[1] == "IMAGE":  # easier to just make this an edge case
         return await processing.common.run_parallel(processing.vips.vipsutils.stack, files[0], files[1])
     video0 = await forceaudio(files[0])

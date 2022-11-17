@@ -7,27 +7,6 @@ import utils.tempfiles
 from processing.ffprobe import *
 
 
-async def freezemotivate(files, *caption):
-    """
-    ends video with motivate caption
-    :param files: media
-    :param caption: caption to pass to motivate()
-    :return: processed media
-    """
-    if isinstance(files, list):  # audio specified
-        video = files[0]
-        audio = files[1]
-    else:  # just default to song lol!
-        video = files
-        audio = "rendering/what.mp3"
-    lastframe = await frame_n(video, -1)
-    # TODO: update to modern
-    # clastframe = await handleanimated(lastframe, captionfunctions.motivate, None, *caption)
-    # freezeframe = await imageaudio([clastframe, audio])
-    # final = await concatv([video, freezeframe])
-    # return final
-
-
 async def checkwatermark(file):
     # see watermark()
     etdata = await run_command("exiftool", "-artist", "-json", file)
