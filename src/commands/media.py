@@ -70,30 +70,25 @@ class Media(commands.Cog, name="Editing"):
         await process(ctx, processing.vips.other.jpeg, [["IMAGE"]], strength, stretch, quality, run_parallel=True)
 
     @commands.hybrid_command()
-    async def deepfry(self, ctx, brightness: HybridRange[float, 0, 5] = 1.5,
+    async def deepfry(self, ctx, brightness: HybridRange[float, -1, 1] = 0.5,
                       contrast: HybridRange[float, 0, 5] = 1.5,
                       sharpness: HybridRange[float, 0, 5] = 1.5,
-                      saturation: HybridRange[float, 0, 5] = 1.5,
-                      noise: HybridRange[float, 0, 255] = 40,
-                      jpegstrength: HybridRange[int, 0, 100] = 20):
+                      saturation: HybridRange[float, 0, 3] = 1.5,
+                      noise: HybridRange[float, 0, 100] = 20):
         """
-        Applies many filters to the input to make it appear "deep fried" in the style of deep fried memes.
+        Applies many filters to the input to make it appear "deep-fried" in the style of deep-fried memes.
 
-        See https://pillow.readthedocs.io/en/3.0.x/reference/ImageEnhance.html
 
         :param ctx: discord context
-        :param brightness: value of 1 makes no change to the image. must be between 0 and 5.
+        :param brightness: value of 0 makes no change to the image. must be between -1 and 1.
         :param contrast: value of 1 makes no change to the image. must be between 0 and 5.
-        :param sharpness: value of 1 makes no change to the image. must be between 0 and 5.
-        :param saturation: value of 1 makes no change to the image. must be between 0 and 5.
-        :param noise: value of 0 makes no change to the image. must be between 0 and 255.
-        :param jpegstrength: value of 0 makes no change to the image. must be between 0 and 100.
+        :param sharpness: value of 0 makes no change to the image. must be between 0 and 5.
+        :param saturation: value of 1 makes no change to the image. must be between 0 and 3.
+        :param noise: value of 0 makes no change to the image. must be between 0 and 100.
         :mediaparam media: A video, gif, or image.
         """
-        raise NotImplementedError  # TODO: implement
-        # await process(ctx, captionfunctions.deepfry, [["VIDEO", "GIF", "IMAGE"]], brightness, contrast, sharpness,
-        #                 saturation, noise, jpegstrength, handleanimated=True)
-
+        await process(ctx, processing.ffmpeg.deepfry, [["VIDEO", "GIF", "IMAGE"]], brightness, contrast, sharpness,
+                      saturation, noise)
 
     @commands.hybrid_command(aliases=["pad"])
     async def square(self, ctx):
@@ -282,7 +277,7 @@ class Media(commands.Cog, name="Editing"):
         await process(ctx, processing.ffmpeg.vibrato, [["VIDEO", "AUDIO"]], frequency, depth)
 
     @commands.hybrid_command()
-    async def pitch(self, ctx, numofhalfsteps: HybridRange[float,-12, 12] = 12):
+    async def pitch(self, ctx, numofhalfsteps: HybridRange[float, -12, 12] = 12):
         """
         Changes pitch of audio
 
