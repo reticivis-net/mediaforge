@@ -1,6 +1,11 @@
-# ![MediaForge](media/banner.png)
+# ⚠️ this branch is a major rewrite of the majority of MediaForge and is under constant development with no guarantee of functionality
+
+# ![MediaForge](media/external/banner.png)
 
 [![MediaForge Discord](https://discordapp.com/api/guilds/803788965215338546/widget.png)](https://discord.gg/xwWjgyVqBz)
+[![Discord Bots](https://top.gg/api/widget/status/780570413767983122.svg)](https://top.gg/bot/780570413767983122)
+[![Discord Bots](https://top.gg/api/widget/servers/780570413767983122.svg)](https://top.gg/bot/780570413767983122)
+[![Discord Bots](https://top.gg/api/widget/upvotes/780570413767983122.svg)](https://top.gg/bot/780570413767983122/vote)
 [![uptime](https://app.statuscake.com/button/index.php?Track=6022597&Design=6)](https://uptime.statuscake.com/?TestID=JyWrfGfIjT)
 
 ![Total Lines](https://img.shields.io/tokei/lines/github/HexCodeFFF/mediaforge)
@@ -18,10 +23,9 @@
 ## general technical info about the bot
 
 - inspired by [esmBot](https://github.com/esmBot/esmBot)
-- uses nextcord, a fork of discord.py
-- uses FFmpeg for most media functions
-- uses selenium and ChromeDriver to render captions in html with Chrome
-    - although not the fastest approach, it is very simple and very powerful
+- uses discord.py 2
+- uses libvips for captioning
+- uses FFmpeg for media processing
 
 ## self-host with docker
 
@@ -145,12 +149,13 @@ officially supported.
 will _probably_ work on macos and other linux/unix distros if the below libraries are available but theyre untested and
 unsupported. just replace `apt-get` with your system's preferred package manager ([`brew`](https://brew.sh/) for macos)
 
+on Windows, color emojis won't work. no idea why, just is a windows pango bug.
+
 ### python libraries
 
 - This project uses [`poetry`](https://python-poetry.org/), run `poetry install` to install the required dependencies.
     - install poetry with `pip install poetry`
-    - [`aubio`](https://pypi.org/project/aubio/) and [`PyAutoTune`](https://github.com/ederwander/PyAutoTune) are built
-      from source on installation.
+    - part of [`pyvips`](https://pypi.org/project/pyvips/) is built from source on installation.
         - on Windows this will require the MSVC compiler, which is an optional component
           of [Visual Studio](https://visualstudio.microsoft.com/downloads/)
         - on Linux this will require [`gcc`](https://packages.ubuntu.com/bionic/gcc), installable
@@ -161,17 +166,11 @@ unsupported. just replace `apt-get` with your system's preferred package manager
 the bot uses many external CLI programs for media processing.
 
 - FFmpeg - not included but [easily installable on windows and linux](https://ffmpeg.org/download.html)
-    - **Ensure that ffmpeg version >= 5**
+    - **If installing on ubuntu, ensure that ffmpeg version >= 5**
+- libvips - installable on linux with `sudo apt-get install libvips-dev`. [windows instructions here](https://www.libvips.org/install.html#installing-the-windows-binary)
 - gifski - windows executable is included. linux version [downloadable from the website](https://gif.ski/)
 - pngquant - windows executable is included. installable on linux with `sudo apt-get install pngquant`
-- ChromeDriver - ChromeDriver is automatically downloaded to match the chrome installation on your system when the bot
-  starts.
-    - if on linux, chrome must be in the system bin/path
-    - if on windows, chrome must be in [one of the default locations](https://stackoverflow.com/a/40674915/9044183)
-    - (specifically the win10 ones)
 - ImageMagick - **not included** but [downloadable here](https://imagemagick.org/script/download.php)
-- ExifTool - windows executable is included. installable on linux
-  with `sudo apt-get install exiftool` https://exiftool.org/
 - apngasm - windows executable is included. installable on linux with `sudo apt-get install apngasm`
 - TTS
     - on linux, this uses [`mimic`](https://github.com/MycroftAI/mimic1). a pre-compiled binary is included.
@@ -184,11 +183,6 @@ the bot uses many external CLI programs for media processing.
       requires [node.js](https://nodejs.org/) to be installed and added to the system path
         - pretty sure both the windows & linux installers add it to path on installation but cant hurt to check
 
-[//]: # (- glaxnimate - [downloadable on its website]&#40;https://glaxnimate.mattbas.org/download&#41;)
-
-[//]: # (    - this library is not yet used. it is needed to render lottie stickers, but)
-
-[//]: # (      [I am currently having issues installing the python bindings on windows.]&#40;https://gitlab.com/mattbas/glaxnimate/-/issues/398&#41;)
 
 ### config
 

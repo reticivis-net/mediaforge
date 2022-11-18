@@ -1,4 +1,4 @@
-# used by improcessing.tts() on windows becuse espeak sucks on windows
+# used by processing.tts() on windows becuse espeak sucks on windows
 Add-Type -AssemblyName System.Speech;
 $synth = (New-Object System.Speech.Synthesis.SpeechSynthesizer);
 $synth.SelectVoiceByHints($args[2])
