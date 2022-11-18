@@ -87,14 +87,19 @@ async def process(ctx: commands.Context, func: callable, inputs: list, *args,
                 # only update with queue message if there is a queue
                 if queue and v2queue.sem.locked():
                     await updatestatus("Your command is in the queue...")
-                # prepare args
-                if inputs:
-                    args = files + list(args)
 
                 # run func
                 async def run():
+                    nonlocal args
+                    nonlocal files
                     logger.info("Processing...")
                     asyncio.create_task(updatestatus("Processing..."))
+                    # remove too long videossss
+                    for i, f in enumerate(files):
+                        files[i] = await processing.ffmpeg.ensureduration(f, ctx)
+                    # prepare args
+                    if inputs:
+                        args = files + list(args)
                     # some commands arent coros (usually no-ops) so this is a good check to make
                     if inspect.iscoroutinefunction(func):
                         command_result = await func(*args, **kwargs)

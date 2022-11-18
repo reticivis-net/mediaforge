@@ -3,6 +3,7 @@ import math
 
 import discord
 import humanize
+from discord.ext import commands
 
 import config
 import processing.common
@@ -10,6 +11,33 @@ import processing.vips.caption
 import processing.vips.vipsutils
 from processing.ffprobe import *
 from utils.tempfiles import TempFile
+
+
+async def ensureduration(media, ctx: typing.Union[commands.Context, None]):
+    """
+    ensures that media is under or equal to the config minimum frame count
+    :param media: media to trim
+    :param ctx: discord context
+    :return: processed media or original media, within config.max_frames
+    """
+    # the function that splits frames actually has a vsync thing so this is more accurate to what's generated
+    max_frames = config.max_frames if hasattr(config, "max_frames") else None
+    fps = await get_frame_rate(media)
+    dur = await get_duration(media)
+    frames = int(fps * dur)
+    if max_frames is None or frames <= max_frames:
+        return media
+    else:
+        newdur = max_frames / fps
+        if ctx is not None:
+            tmsg = f"{config.emojis['warning']} input file is too long (~{frames} frames)! " \
+                   f"Trimming to {round(newdur, 1)}s (~{max_frames} frames)... "
+            logger.debug(tmsg)
+            msg = await ctx.reply(tmsg)
+        media = await trim(media, newdur)
+        if ctx is not None:
+            await msg.edit(content=tmsg + " Done!", delete_after=5)
+        return media
 
 
 async def forceaudio(video):
