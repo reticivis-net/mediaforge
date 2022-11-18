@@ -73,3 +73,5 @@ heartbeatfrequency = 60
 shard_count = None
 # maximum number of frames an input video can have, will be trimmed if it's too long
 max_frames = 1024
+# maximum temp file size from FFmpeg. reduce if ffmpeg eats into your disk/memory too much, increase if youre able
+max_temp_file_size = "1G"
