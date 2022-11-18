@@ -1092,3 +1092,24 @@ async def deepfry(media, brightness, contrast, sharpness, saturation, noise):
     if mt == "GIF":
         outfile = await mp4togif(outfile)
     return outfile
+
+
+async def give_me_your_phone_now(media: str):
+    mt = await mediatype(media)
+    exts = {
+        "VIDEO": "mp4",
+        "GIF": "mp4",
+        "IMAGE": "png"
+    }
+    outfile = TempFile(exts[mt])
+
+    await run_command("ffmpeg", "-i", media, "-i", "rendering/images/givemeyourphone.jpg", "-filter_complex",
+                      # fit insize 200x200 box
+                      "[0]scale=w=200:h=200:force_original_aspect_ratio=decrease[rescaled];"
+                      # overlay centered at expected position
+                      "[1][rescaled]overlay=x=150+((200-overlay_w)/2):y=350+((200-overlay_h)/2)",
+                      outfile)
+
+    if mt == "GIF":
+        outfile = await mp4togif(outfile)
+    return outfile
