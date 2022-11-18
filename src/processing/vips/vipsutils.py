@@ -63,10 +63,10 @@ def overlay_in_middle(background: pyvips.Image, foreground: pyvips.Image) -> pyv
 
 def stack(file0, file1):
     # load files
-    file0 = pyvips.Image.new_from_file(file0)
-    file1 = pyvips.Image.new_from_file(file1)
+    im0 = pyvips.Image.new_from_file(file0)
+    im1 = pyvips.Image.new_from_file(file1)
     # stack
-    out = file0.join(file1, pyvips.Direction.VERTICAL, expand=True, background=0xffffff, align=pyvips.Align.CENTRE)
+    out = im0.join(im1, pyvips.Direction.VERTICAL, expand=True, background=0xffffff, align=pyvips.Align.CENTRE)
     # save
     outfile = TempFile("png")
     out.pngsave(outfile)
