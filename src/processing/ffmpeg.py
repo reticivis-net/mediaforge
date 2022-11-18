@@ -148,24 +148,6 @@ async def assurefilesize(media: str, re_encode=True):
         raise NonBugError(f"File is too big to upload.")
 
 
-async def ensureduration(media):
-    """
-    ensures that media is under or equal to the config minimum frame count
-    :param media: media to trim
-    :return: processed media or original media, within config.max_frames
-    """
-    # the function that splits frames actually has a vsync thing so this is more accurate to what's generated
-    fps = await get_frame_rate(media)
-    dur = await get_duration(media)
-    frames = int(fps * dur)
-    if frames <= config.max_frames:
-        return media
-    else:
-        newdur = config.max_frames / fps
-        media = await trim(media, newdur)
-        return media
-
-
 async def mp4togif(mp4):
     """
     converts mp4 to gif
@@ -771,11 +753,10 @@ async def pitch(file, p=12):
     return out
 
 
-async def resize(image, width, height, ensure_duration=True):
+async def resize(image, width, height):
     """
     resizes image
 
-    :param ensure_duration: trim video/gif file if too long
     :param image: file
     :param width: new width, thrown directly into ffmpeg so it can be things like -1 or iw/2
     :param height: new height, same as width
@@ -789,8 +770,6 @@ async def resize(image, width, height, ensure_duration=True):
         "IMAGE": "png"
     }
     out = TempFile(exts[mt])
-    if ensure_duration and mt in ["VIDEO", "GIF"]:
-        image = await ensureduration(image)
     await run_command("ffmpeg", "-i", image, "-pix_fmt", "yuva420p", "-max_muxing_queue_size", "9999", "-sws_flags",
                       "spline+accurate_rnd+full_chroma_int+full_chroma_inp+bitexact",
                       "-vf", f"scale='{width}:{height}',setsar=1:1", "-c:v", "png", "-pix_fmt", "yuva420p", "-c:a",
