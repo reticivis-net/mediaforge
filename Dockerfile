@@ -34,7 +34,7 @@ RUN dpkg -i $(curl -w "%{filename_effective}" -LO $(curl -s https://api.github.c
 
 # python packages
 RUN pip install --upgrade pip --no-warn-script-location --root-user-action=ignore
-RUN pip install --user poetry multidict --no-warn-script-location --root-user-action=ignore
+RUN pip install --user poetry --no-warn-script-location --root-user-action=ignore
 RUN python -m poetry install
 
 RUN cp config.example.py config.py
