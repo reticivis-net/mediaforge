@@ -27,9 +27,6 @@ RUN apt-mark hold usrmerge usr-is-merged
 # if i dont do this there are weird errors trying to build pip packages
 RUN apt-get -y upgrade
 
-# gifski isnt on an actual repo, use this shit i found on github to install the latest deb off github
-RUN dpkg -i $(curl -w "%{filename_effective}" -LO $(curl -s https://api.github.com/repos/ImageOptim/gifski/releases | grep browser_download_url | grep '64[.]deb' | head -n 1 | cut -d '"' -f 4))
-
 # python packages
 RUN pip install --upgrade pip --no-warn-script-location --root-user-action=ignore
 RUN pip install --user poetry --no-warn-script-location --root-user-action=ignore
