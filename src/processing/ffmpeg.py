@@ -395,14 +395,14 @@ async def videoloop(file, loop):
     return outname
 
 
-async def imageaudio(files):
+async def imageaudio(file0, file1):
     """
     combines an image and an audio file into a video
     :param files: [image, audio]
     :return: video
     """
-    audio = files[1]
-    image = files[0]
+    audio = file1
+    image = file0
     outname = TempFile("mp4")
     duration = await get_duration(audio)  # it is a couple seconds too long without it :(
     await run_command("ffmpeg", "-hide_banner", "-i", audio, "-loop", "1", "-i", image, "-pix_fmt", "yuv420p", "-vf",
@@ -411,19 +411,19 @@ async def imageaudio(files):
     return outname
 
 
-async def addaudio(files, loops=0):
+async def addaudio(file0, file1, loops=0):
     """
     adds audio to media
     :param files: [media, audiotoadd]
     :return: video or audio
     """
     # TODO: this can trim media short? not sure why...
-    audio = files[1]
-    media = files[0]
+    audio = file1
+    media = file0
     mt = await mediatype(media)
     if mt == "IMAGE":
         # no use reinventing the wheel
-        return await imageaudio(files)
+        return await imageaudio(file0, file1)
     elif mt == "GIF":
         # GIF case is like imageaudio, but with stream_loop instead of loop.
         outname = TempFile("mp4")
@@ -456,17 +456,17 @@ async def addaudio(files, loops=0):
         return outname
 
 
-async def concatv(files):
+async def concatv(file0, file1):
     """
     concatenates 2 videos
     :param files: [video, video]
     :return: combined video
     """
-    video0 = await forceaudio(files[0])
+    video0 = await forceaudio(file0)
     fixedvideo0 = TempFile("mp4")
     await run_command("ffmpeg", "-hide_banner", "-i", video0, "-c:v", "png", "-c:a", "copy", "-ar", "48000",
                       "-max_muxing_queue_size", "4096", fixedvideo0)
-    video1 = await forceaudio(files[1])
+    video1 = await forceaudio(file1)
     w, h = await get_resolution(video0)
     fps = await get_frame_rate(video0)
     fixedvideo1 = TempFile("mp4")
@@ -483,7 +483,7 @@ async def concatv(files):
     outname = TempFile("mp4")
     await run_command("ffmpeg", "-hide_banner", "-safe", "0", "-f", "concat", "-i", concatdemuxer, "-c:v", "png",
                       "-c:a", "copy", outname)
-    if (await mediatype(files[0])) == "GIF" and (await mediatype(files[1])) == "GIF":
+    if (await mediatype(file0)) == "GIF" and (await mediatype(file1)) == "GIF":
         outname = await mp4togif(outname)
     # for file in [video0, video1, fixedvideo1, fixedvideo0, fixedfixedvideo1, concatdemuxer]:
     #     os.remove(file)
@@ -510,21 +510,21 @@ async def naive_vstack(file0, file1):
         # return await processing.vips.vstack(file0, file1)
 
 
-async def stack(files, style):
+async def stack(file0, file1, style):
     """
     stacks media
     :param files: [media, media]
     :param style: "hstack" or "vstack"
     :return: processed media
     """
-    mts = [await mediatype(files[0]), await mediatype(files[1])]
+    mts = [await mediatype(file0), await mediatype(file1)]
     if mts[0] == "IMAGE" and mts[1] == "IMAGE":  # easier to just make this an edge case
-        return await processing.common.run_parallel(processing.vips.vipsutils.stack, files[0], files[1])
-    video0 = await forceaudio(files[0])
+        return await processing.common.run_parallel(processing.vips.vipsutils.stack, file0, file1)
+    video0 = await forceaudio(file0)
     fixedvideo0 = TempFile("mp4")
     await run_command("ffmpeg", "-hide_banner", "-i", video0, "-c:v", "png", "-c:a", "copy", "-ar", "48000",
                       "-max_muxing_queue_size", "4096", fixedvideo0)
-    video1 = await forceaudio(files[1])
+    video1 = await forceaudio(file1)
     w, h = await get_resolution(video0)
     fps = await get_frame_rate(video0)
     fixedvideo1 = TempFile("mp4")
@@ -547,22 +547,23 @@ async def stack(files, style):
     return outname
 
 
-async def overlay(files, alpha: float, mode: str = 'overlay'):
+async def overlay(file0, file1, alpha: float, mode: str = 'overlay'):
     """
     stacks media
-    :param files: [media, media]
+    :param file0: file 0
+    :param file1: file 1
     :param alpha: opacity of top media, 0-1
     :param mode: blend mode
     :return: processed media
     """
     assert mode in ['overlay', 'add']
     assert 0 <= alpha <= 1
-    mts = [await mediatype(files[0]), await mediatype(files[1])]
-    video0 = await forceaudio(files[0])
+    mts = [await mediatype(file0), await mediatype(file1)]
+    video0 = await forceaudio(file0)
     fixedvideo0 = TempFile("mp4")
     await run_command("ffmpeg", "-hide_banner", "-i", video0, "-c:v", "png", "-c:a", "copy", "-ar", "48000",
                       "-max_muxing_queue_size", "4096", fixedvideo0)
-    video1 = await forceaudio(files[1])
+    video1 = await forceaudio(file1)
     w, h = await get_resolution(video0)
     fps = await get_frame_rate(video0)
     fixedvideo1 = TempFile("mp4")
@@ -927,7 +928,7 @@ async def naive_overlay(im1: str, im2: str):
     return outname
 
 
-async def freezemotivate(files, *caption):
+async def freezemotivate(files, *caption):  # TODO: fix
     """
     ends video with motivate caption
     :param files: media
@@ -942,8 +943,8 @@ async def freezemotivate(files, *caption):
         audio = "rendering/what.mp3"
     lastframe = await frame_n(video, -1)
     clastframe = await motivate(lastframe, caption)
-    freezeframe = await imageaudio([clastframe, audio])
-    final = await concatv([video, freezeframe])
+    freezeframe = await imageaudio(clastframe, audio)
+    final = await concatv(video, freezeframe)
     return final
 
 
