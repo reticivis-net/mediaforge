@@ -8,9 +8,7 @@ import sqlite3
 import sys
 import traceback
 
-import core.database
-
-sys.path.append(os.getcwd())
+sys.path.insert(0, os.getcwd())
 from utils import tempfiles
 
 try:
@@ -37,6 +35,7 @@ except ModuleNotFoundError as e:
              "on the GitHub? https://github.com/HexCodeFFF/mediaforge#to-self-host")
 
 # project files
+import core.database
 from core import heartbeat
 from utils.common import *
 from core.clogs import logger
