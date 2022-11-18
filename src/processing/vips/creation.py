@@ -41,7 +41,7 @@ def yskysn(captions: typing.Sequence[str]):
 
     out = im.composite2(text, pyvips.BlendMode.OVER)
     # save and return
-    outfile = TempFile("png", only_delete_in_main_process=True)
+    outfile = TempFile("png")
     out.pngsave(outfile)
     return outfile
 
@@ -95,6 +95,6 @@ def f1984(captions: typing.Sequence[str]):
         # add cover
         im = im.composite2(pyvips.Image.new_from_file("rendering/images/1984/1984cover.png"), pyvips.BlendMode.OVER)
 
-    outfile = TempFile("png", only_delete_in_main_process=True)
+    outfile = TempFile("png")
     im.pngsave(outfile)
     return outfile

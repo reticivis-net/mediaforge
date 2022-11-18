@@ -48,11 +48,9 @@ def temp_file_name(extension=None):
 
 
 class TempFile(str):
-    todelete: bool = True
-    only_delete_in_main_process: bool = False
+    _deleted = False
 
-    # literally just a path but it removes itself on garbage collection
-    def __new__(cls, arg: str | None, *, todelete=True, only_delete_in_main_process=False):
+    def __new__(cls, arg: str | None):
         if arg is None:  # default
             arg = temp_file_name()
         elif "." not in arg:  # just extension
@@ -61,35 +59,18 @@ class TempFile(str):
         logger.debug(f"Reserved new tempfile {arg}")
         return str.__new__(cls, arg)
 
-    def __init__(self, arg: str | None, todelete=True, only_delete_in_main_process=False):
-        self.todelete = todelete
-        self.only_delete_in_main_process = only_delete_in_main_process
-
     def __del__(self):
-        if self.todelete:
-            logger.debug(f"Removing tempfile {self}")
-            # https://stackoverflow.com/a/67577364/9044183
-            # deletes without blocking loop
-            try:
-                try:
-                    loop = asyncio.get_event_loop()
-                    if loop.is_running():
-                        loop.create_task(self.delete())
-                    else:
-                        loop.run_until_complete(self.delete())
-                except RuntimeError:  # no loop
-                    os.remove(self)
-            except Exception as e:
-                logger.debug(e, exc_info=1)
-        else:
-            logger.debug(f"{self} was garbage collected but was requested to not be deleted.")
+        if not self._deleted:
+            logger.debug(f"{self} was garbage collected but not deleted")
+
+    def deletesoon(self):
+        asyncio.create_task(self.delete())
 
     async def delete(self):
         try:
-            if multiprocessing.current_process().name != "MainProcess" and self.only_delete_in_main_process:
-                logger.debug(f"deletion of {self} was requested by {multiprocessing.current_process().name}, "
-                             f"but specified to only be deleted in the main process, ignoring.")
-            else:
-                await aiofiles.os.remove(self)
+            logger.debug(f"deleting {self}")
+            await aiofiles.os.remove(self)
+            self._deleted = True
         except FileNotFoundError:
             logger.debug(f"Tried to delete {self} but it does not exist")
+            self._deleted = True

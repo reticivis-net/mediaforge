@@ -33,7 +33,7 @@ def esmcaption(captions: typing.Sequence[str], size: ImageSize):
     out = out.gravity(pyvips.CompassDirection.CENTRE, size.width, out.height + fontsize, extend=pyvips.Extend.WHITE)
     # save and return
     # because it's run in executor, tempfiles
-    outfile = TempFile("png", only_delete_in_main_process=True, todelete=False)
+    outfile = TempFile("png")
     out.pngsave(outfile)
     return outfile
 
@@ -62,7 +62,7 @@ def mediaforge_caption(captions: typing.Sequence[str], size: ImageSize):
     out = out.gravity(pyvips.CompassDirection.CENTRE, size.width, out.height + fontsize, extend=pyvips.Extend.WHITE)
     # save and return
     # because it's run in executor, tempfiles
-    outfile = TempFile("png", only_delete_in_main_process=True, todelete=False)
+    outfile = TempFile("png")
     out.pngsave(outfile)
     return outfile
 
@@ -119,7 +119,7 @@ def motivate_text(captions: typing.Sequence[str], size: ImageSize):
     # pad text to target width
     out = out.gravity(pyvips.CompassDirection.CENTRE, width, out.height, extend=pyvips.Extend.BACKGROUND,
                       background=[0, 0, 0, 255])
-    outfile = TempFile("png", only_delete_in_main_process=True)
+    outfile = TempFile("png")
     out.pngsave(outfile)
     return outfile
 
@@ -164,7 +164,7 @@ def meme(captions: typing.Sequence[str], size: ImageSize):
                                      y=int(size.height / 3 * 2))
 
     overlay = outline(overlay, overlay.width // 200)
-    outfile = TempFile("png", todelete=False)
+    outfile = TempFile("png")
     overlay.pngsave(outfile)
     return outfile
 
@@ -209,7 +209,7 @@ def tenor(captions: typing.Sequence[str], size: ImageSize):
                                      y=int((size.height * .975) - bottomtext.height))
 
     overlay = outline(overlay, overlay.width // 250)
-    outfile = TempFile("png", todelete=False)
+    outfile = TempFile("png")
     overlay.pngsave(outfile)
     return outfile
 
@@ -235,7 +235,7 @@ def whisper(captions: typing.Sequence[str], size: ImageSize):
     overlay = overlay_in_middle(overlay, text)
 
     overlay = outline(overlay, overlay.width // 175)
-    outfile = TempFile("png", todelete=False)
+    outfile = TempFile("png")
     overlay.pngsave(outfile)
     return outfile
 
@@ -264,7 +264,7 @@ def snapchat(captions: typing.Sequence[str], size: ImageSize):
     # overlay
     out = overlay_in_middle(blank_bg, text)
     # save
-    outfile = TempFile("png", only_delete_in_main_process=True)
+    outfile = TempFile("png")
     out.pngsave(outfile)
     return outfile
 
@@ -303,7 +303,7 @@ def generic_image_caption(image: str, captions: typing.Sequence[str], size: Imag
     # overlay white background
     final = final.composite((255, 255, 255, 255), mode=pyvips.BlendMode.DEST_OVER)
     # save
-    outfile = TempFile("png", only_delete_in_main_process=True)
+    outfile = TempFile("png")
     final.pngsave(outfile)
     return outfile
 
@@ -332,7 +332,7 @@ def twitter_text(captions: typing.Sequence[str], size: ImageSize, dark: bool):
 
     # save and return
     # because it's run in executor, tempfiles
-    outfile = TempFile("png", only_delete_in_main_process=True)
+    outfile = TempFile("png")
     out.pngsave(outfile)
     return outfile
 
