@@ -139,8 +139,8 @@ and the [non-python libraries](#non-python-libraries), set up the [config](#conf
 
 ### supported OSes
 
-built and tested on windows 10/11 and ubuntu 18/20, and these 2 OSes (and their successors) will continue to be
-officially supported.
+built and tested on windows 10/11 and debian 10/buster (inside docker). these 2 OSes (and their successors) will
+continue to be officially supported.
 
 will _probably_ work on macos and other linux/unix distros if the below libraries are available but theyre untested and
 unsupported. just replace `apt-get` with your system's preferred package manager ([`brew`](https://brew.sh/) for macos)
@@ -162,12 +162,11 @@ on Windows, color emojis won't work. no idea why, just is a windows pango bug.
 the bot uses many external CLI programs for media processing.
 
 - FFmpeg - not included but [easily installable on windows and linux](https://ffmpeg.org/download.html)
-    - **If installing on ubuntu, ensure that ffmpeg version >= 5**
-- libvips - installable on linux with `sudo apt-get install libvips-dev`. [windows instructions here](https://www.libvips.org/install.html#installing-the-windows-binary)
+    - **If installing on linux, ensure that ffmpeg version >= 5**
+- libvips - installable on linux with `sudo apt-get install libvips-dev`
+  . [windows instructions here](https://www.libvips.org/install.html#installing-the-windows-binary)
 - gifski - windows executable is included. linux version [downloadable from the website](https://gif.ski/)
-- pngquant - windows executable is included. installable on linux with `sudo apt-get install pngquant`
 - ImageMagick - **not included** but [downloadable here](https://imagemagick.org/script/download.php)
-- apngasm - windows executable is included. installable on linux with `sudo apt-get install apngasm`
 - TTS
     - on linux, this uses [`mimic`](https://github.com/MycroftAI/mimic1). a pre-compiled binary is included.
         - the male and female voices are downloaded from mimic's repo on bot start if they are not detected. if you want
@@ -179,7 +178,6 @@ the bot uses many external CLI programs for media processing.
       requires [node.js](https://nodejs.org/) to be installed and added to the system path
         - pretty sure both the windows & linux installers add it to path on installation but cant hurt to check
 
-
 ### config
 
 - create a copy of [`config.example.py`](config.example.py) and name it `config.py`.
@@ -188,13 +186,13 @@ the bot uses many external CLI programs for media processing.
 
 ### python
 
-- developed and tested on python 3.8. use that or a later compatible version
-- **python 3.10 is NOT compatible** (yet) 3.9 should work
+- developed and tested on python 3.11. use that or a later compatible version
 
 ### to run
 
-- once you've set up all of the libraries, just run the program with `poetry run python main.py` (
-  or `poetry run python3.8 main.py` or whatever your python is named). make sure it can read and write to the directory
+- once you've set up all of the libraries, just run the program with `poetry run python src/main.py` (
+  or `poetry run python3.11 src/main.py` or whatever your python is named). make sure it can read and write to the
+  directory
   it lives in and also access/execute all the aforementioned libraries
     - if poetry isn't installing on the right python version, run `<yourpython> -m pip` instead of pip
       and `<yourpython> -m poetry` instead of `poetry`
