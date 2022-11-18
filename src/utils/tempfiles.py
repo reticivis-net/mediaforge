@@ -60,8 +60,9 @@ class TempFile(str):
         return str.__new__(cls, arg)
 
     def __del__(self):
-        if not self._deleted:
-            logger.debug(f"{self} was garbage collected but not deleted")
+        if not self._deleted and multiprocessing.current_process().name == 'MainProcess':
+            logger.debug(f"{self} was garbage collected... deleting")
+            self.deletesoon()
 
     def deletesoon(self):
         asyncio.create_task(self.delete())
