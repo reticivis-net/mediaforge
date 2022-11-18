@@ -71,3 +71,5 @@ heartbeatfrequency = 60
 # number of shards
 # set to None or remove and "the library will use the Bot Gateway endpoint call to figure out how many shards to use."
 shard_count = None
+# maximum number of frames an input video can have, will be trimmed if it's too long
+max_frames = 1024
