@@ -41,6 +41,6 @@ def jpeg(file, strength, stretch, quality):
         # save to jpeg and read back to image
         im = pyvips.Image.new_from_buffer(im.write_to_buffer(".jpg", Q=quality), ".jpg")
     # save
-    outfile = TempFile("png", only_delete_in_main_process=True)
+    outfile = TempFile("png")
     im.pngsave(outfile)
     return outfile

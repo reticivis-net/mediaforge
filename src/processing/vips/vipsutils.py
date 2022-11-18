@@ -68,8 +68,10 @@ def stack(file0, file1):
     # stack
     out = file0.join(file1, pyvips.Direction.VERTICAL, expand=True, background=0xffffff, align=pyvips.Align.CENTRE)
     # save
-    outfile = TempFile("png", only_delete_in_main_process=True)
+    outfile = TempFile("png")
     out.pngsave(outfile)
+    file0.deletesoon()
+    file1.deletesoon()
     return outfile
 
 

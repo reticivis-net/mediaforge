@@ -133,6 +133,7 @@ async def process(ctx: commands.Context, func: callable, inputs: list, *args,
                     await updatestatus("Uploading...")
                     if uploadresult:
                         await ctx.reply(file=discord.File(result))
+                        result.deletesoon()
         else:  # no media found but media expected
             logger.info("No media found.")
             await ctx.reply(f"{config.emojis['x']} No file found.")

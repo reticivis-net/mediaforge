@@ -80,7 +80,6 @@ async def run_command(*args: str):
 
 async def tts(text: str, model: typing.Literal["male", "female", "retro"] = "male"):
     ttswav = TempFile("wav")
-    outname = TempFile("mp3")
     if model == "retro":
         await run_command("node", "tts/sam.js", "--moderncmu", "--wav", ttswav, text)
     else:
@@ -93,7 +92,9 @@ async def tts(text: str, model: typing.Literal["male", "female", "retro"] = "mal
             await run_command("./tts/mimic", "-voice",
                               "tts/mycroft_voice_4.0.flitevox" if model == "male" else "tts/cmu_us_slt.flitevox",
                               "-o", ttswav, "-t", text)
+    outname = TempFile("mp3")
     await run_command("ffmpeg", "-hide_banner", "-i", ttswav, "-c:a", "libmp3lame", outname)
+    ttswav.deletesoon()
     return outname
 
 
