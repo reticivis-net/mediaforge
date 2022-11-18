@@ -1,4 +1,3 @@
-import glob
 import math
 
 import discord
@@ -513,7 +512,7 @@ async def naive_vstack(file0, file1):
         await run_command("ffmpeg", "-i", file0, "-i", file1, "-filter_complex",
                           "[0]format=pix_fmts=yuva420p[0f];"
                           "[1]format=pix_fmts=yuva420p[1f];"
-                          "[0f][1f]vstack=inputs=2", "-c:v", "png", out)
+                          "[0f][1f]vstack=inputs=2", "-c:v", "png", "-fs", config.max_temp_file_size, out)
         file0.deletesoon()
         file1.deletesoon()
         if "VIDEO" in mts:
@@ -954,7 +953,8 @@ async def motivate(media, captions: typing.Sequence[str]):
 async def naive_overlay(im1, im2):
     mts = [await mediatype(im1), await mediatype(im2)]
     outname = TempFile("mp4")
-    await run_command("ffmpeg", "-i", im1, "-i", im2, "-filter_complex", "overlay", "-c:v", "png", outname)
+    await run_command("ffmpeg", "-i", im1, "-i", im2, "-filter_complex", "overlay", "-c:v", "png", "-fs",
+                      config.max_temp_file_size, outname)
     if mts[0] == "IMAGE" and mts[1] == "IMAGE":
         outname = await mediatopng(outname)
     # one or more gifs and no videos
