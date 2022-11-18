@@ -136,7 +136,7 @@ def meme(captions: typing.Sequence[str], size: ImageSize):
         # generate text
         toptext = pyvips.Image.text(
             f"<span foreground=\"white\">{captions[0].upper()}</span>",
-            font=f"Twemoji Color Emoji,Impact",
+            font=f"Twemoji Color Emoji,ImpactMix",
             rgba=True,
             fontfile="rendering/fonts/ImpactMix.ttf",
             align=pyvips.Align.CENTRE,
