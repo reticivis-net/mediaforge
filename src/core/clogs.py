@@ -20,7 +20,10 @@ loglevel = 25 if config.log_level == "NOTICE" else config.log_level
 coloredlogs.install(level=loglevel, fmt='[%(asctime)s] [%(filename)s:%(funcName)s:%(lineno)d] '
                                         '%(levelname)s %(message)s',
                     datefmt='%m/%d/%Y %I:%M:%S %p', field_styles=field_styles, level_styles=level_styles, logger=logger)
-dpyloglevel = 25 if config.dpy_log_level == "NOTICE" else config.dpy_log_level
+if hasattr(config, "dpy_log_level"):
+    dpyloglevel = 25 if config.dpy_log_level == "NOTICE" else config.dpy_log_level
+else:
+    dpyloglevel = 25
 coloredlogs.install(level=dpyloglevel, fmt='[%(asctime)s] [DPY %(filename)s:%(funcName)s:%(lineno)d] '
                                         '%(levelname)s %(message)s',
                     datefmt='%m/%d/%Y %I:%M:%S %p', field_styles=field_styles, level_styles=level_styles,
