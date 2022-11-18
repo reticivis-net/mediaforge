@@ -1,0 +1,18 @@
+**ATTRIBUTIONS**
+discord.py - <https://pypi.org/project/discord.py/> - runs the discord bot
+FFmpeg - <https://ffmpeg.org/> - handles most conversion and video processing
+libvips - <https://www.libvips.org/> - captions media and processes static images
+gifski - <https://gif.ski/> - used to create high quality gifs
+python-magic - <https://github.com/ahupp/python-magic> - detects filetypes
+Pillow - <https://python-pillow.org/> - helps filetype detection
+Docker - <https://www.docker.com/> - containerizes MediaForge
+PyCharm - <https://www.jetbrains.com/pycharm/> - used for development
+<https://github.com/aechaechaech/Jerma-Imposter-Message-Generator> - jermatext uses a modified version of this code.
+Twemoji - <https://twemoji.twitter.com/> - Emoji font used for caption commands
+FontAwesome - <https://fontawesome.com/license> - Used for some emojis
+**Formerly used to render captions**
+wkhtmltoimage - <https://wkhtmltopdf.org/>
+PyQt - <https://pypi.org/project/PyQt5/>
+Selenium - <https://www.selenium.dev/>
+ChromeDriver - <https://chromedriver.chromium.org/>
+Chrome - <https://www.google.com/chrome/>
