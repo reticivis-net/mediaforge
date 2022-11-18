@@ -928,24 +928,23 @@ async def naive_overlay(im1: str, im2: str):
     return outname
 
 
-async def freezemotivate(files, *caption):  # TODO: fix
+async def freezemotivateaudio(video, audio, *caption):
     """
     ends video with motivate caption
-    :param files: media
+    :param video: video
+    :param audio: audio
     :param caption: caption to pass to motivate()
     :return: processed media
     """
-    if isinstance(files, list):  # audio specified
-        video = files[0]
-        audio = files[1]
-    else:  # just default to song lol!
-        video = files
-        audio = "rendering/what.mp3"
     lastframe = await frame_n(video, -1)
     clastframe = await motivate(lastframe, caption)
     freezeframe = await imageaudio(clastframe, audio)
     final = await concatv(video, freezeframe)
     return final
+
+
+async def freezemotivate(video, *caption):
+    return await freezemotivateaudio(video, "rendering/what.mp3", *caption)
 
 
 async def round_corners(media, border_radius=10):
