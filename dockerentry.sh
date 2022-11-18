@@ -27,7 +27,7 @@ updatepip() {
 run() {
   # remote isnt set up by default when container is set up
   echo "Running..."
-  python -m poetry run python main.py
+  python -m poetry run python src/main.py
 }
 
 # mediaforge ascii art :3
