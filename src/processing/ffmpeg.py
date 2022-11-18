@@ -12,20 +12,6 @@ from processing.ffprobe import *
 from utils.tempfiles import TempFile
 
 
-async def split_frames(media):
-    """
-    splits the input file into frames
-    :param media: file
-    :return: [list of files, ffmpeg key to find files]
-    """
-    logger.info("Splitting frames...")
-    await run_command("ffmpeg", "-hide_banner", "-i", media, "-vsync", "1", f"{media.split('.')[0]}_%09d.png")
-    media.deletesoon()
-    files = glob.glob(f"{media.split('.')[0]}_*.png")
-
-    return [TempFile(file) for file in files], f"{media.split('.')[0]}_%09d.png"
-
-
 async def forceaudio(video):
     """
     gives videos with no audio a silent audio stream
