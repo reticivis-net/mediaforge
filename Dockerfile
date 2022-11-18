@@ -16,18 +16,25 @@ RUN dpkg -i $(curl -w "%{filename_effective}" -LO "https://www.deb-multimedia.or
 RUN printf "\ndeb https://deb.debian.org/debian bullseye contrib non-free\ndeb https://deb.debian.org/debian testing main\ndeb https://www.deb-multimedia.org bullseye main\n" >> "/etc/apt/sources.list.d/debian-extended.list"
 
 # apt
+RUN apt -y update
+
+
 # ffmpeg 5 isnt on stable for some reason so it has to be installed separately
-RUN apt-get -y update && apt-get -t testing install -y ffmpeg
+RUN apt -t testing --no-install-recommends install -y ffmpeg
 # most packages
-RUN apt-get -y update && apt-get -t stable install -y pngquant apngasm nano imagemagick-7 nodejs build-essential pkg-config
-# the debian libvips package pulls in 800mb of unnecessary stuff without this
-RUN apt-get install -y --no-install-recommends -t stable libvips-dev
+RUN apt -t stable --no-install-recommends install -y apngasm nano imagemagick-7 nodejs libvips-dev
+
+# weird bugs here
+RUN apt-mark hold usrmerge usr-is-merged
+# if i dont do this there are weird errors trying to build pip packages
+RUN apt -y upgrade
 
 # gifski isnt on an actual repo, use this shit i found on github to install the latest deb off github
 RUN dpkg -i $(curl -w "%{filename_effective}" -LO $(curl -s https://api.github.com/repos/ImageOptim/gifski/releases | grep browser_download_url | grep '64[.]deb' | head -n 1 | cut -d '"' -f 4))
 
 # python packages
-RUN pip install --user poetry --no-warn-script-location
+RUN pip install --upgrade pip --no-warn-script-location --root-user-action=ignore
+RUN pip install --user poetry multidict --no-warn-script-location --root-user-action=ignore
 RUN python -m poetry install
 
 RUN cp config.example.py config.py
