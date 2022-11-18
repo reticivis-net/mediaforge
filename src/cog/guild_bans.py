@@ -1,10 +1,10 @@
-import nextcord as discord
-from nextcord.ext import commands
+import discord
+from discord.ext import commands
 
 import config
-import database
-from clogs import logger
-from mainutils import quote
+from core import database
+from core.clogs import logger
+from utils.common import quote
 
 
 class GuildBansCog(commands.Cog):
