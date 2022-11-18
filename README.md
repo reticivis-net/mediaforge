@@ -41,10 +41,12 @@ once that's installed, run these commands in your terminal of choice.
 
 ```shell
 docker build -t melodyflorum/mediaforge https://github.com/HexCodeFFF/mediaforge.git
-docker run -it --cap-add SYS_NICE melodyflorum/mediaforge
+docker run -it --cap-add SYS_NICE --shm-size 8G --name mediaforge melodyflorum/mediaforge
 ```
 
 on linux, you may need to run docker with `sudo`
+
+replace `8G` with how much free RAM your system has that you would like to give MediaForge (in gigabytes)
 
 if the installation succeeded, you should be prompted with some options. you'll need to select "Edit Config". this will
 open a text editor within your terminal. the 2 required config settings to change for proper functionality are the
@@ -61,10 +63,8 @@ which you'll need to run it.
 run in your favorite terminal:
 
 ```shell
-docker start -ia <ID>
+docker start -ia mediaforge
 ```
-
-replacing `<ID>` with the aforementioned ID. run this every time you want to start MediaForge.
 
 ### to stop
 
@@ -73,10 +73,8 @@ killing the terminal window/`CTRL+C` won't kill the bot, because docker runs in 
 to kill the bot, run
 
 ```shell
-docker stop <ID>
+docker stop mediaforge
 ```
-
-replacing `<ID>` with the ID from the previous step (you can always re-run the command to get it)
 
 ### to limit resource consumption
 
@@ -90,7 +88,7 @@ the most useful options are `--memory` and `--cpus`.
 for example, this is (as of writing) what the official MediaForge bot uses:
 
 ```shell
-docker update --memory 9000M --memory-swap -1 --cpus "3.9" <containerid>
+docker update --memory 9000M --memory-swap -1 --cpus "3.9" mediaforge
 ```
 
 - `--memory 9000M`: this limits it to 9gb (9000mb) of physical memory
