@@ -5,6 +5,7 @@ from discord.ext import commands
 import processing.common
 import processing.ffmpeg
 import processing.vips
+import processing.vips.creation
 from core.process import process
 from processing import sus
 
@@ -29,7 +30,7 @@ class Image(commands.Cog, name="Creation"):
         caption = caption.split("|")
         if len(caption) == 1:
             caption.append("JANUARY 1984")
-        await process(ctx, processing.vips.caption.f1984, [], caption)
+        await process(ctx, processing.vips.creation.f1984, [], caption)
 
     @commands.hybrid_command(aliases=["ltg", "now", "lowtiergod", "youshould"])
     async def yskysn(self, ctx, *, caption):
@@ -43,7 +44,7 @@ class Image(commands.Cog, name="Creation"):
         caption = caption.split("|")
         if len(caption) == 1:
             caption.append("NOW!")
-        await process(ctx, processing.vips.caption.yskysn, [], caption, run_parallel=True)
+        await process(ctx, processing.vips.creation.yskysn, [], caption, run_parallel=True)
 
     @commands.hybrid_command(aliases=["shes12"])
     async def zamn(self, ctx, *, caption):
