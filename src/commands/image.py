@@ -100,7 +100,7 @@ class Image(commands.Cog, name="Creation"):
                       [text],
                       processing.vips.vipsutils.ImageSize(1000, 1000), run_parallel=True)
 
-    @commands.hybrid_command(aliases=["handitover", "takeit", "giveme"])
+    @commands.hybrid_command(aliases=["handitover", "takeit", "giveme", "gmyp"])
     async def givemeyourphone(self, ctx):
         """
         Overlays an image over the hand of the boy in the "give me your phone" meme.
@@ -109,8 +109,7 @@ class Image(commands.Cog, name="Creation"):
         :param ctx: discord context
         :mediaparam media: The media to be overlayed over his hand.
         """
-        raise NotImplementedError  # TODO: implement
-        # await process(ctx, captionfunctions.givemeyourphone, [["IMAGE", "VIDEO", "GIF"]], handleanimated=True)
+        await process(ctx, processing.ffmpeg.give_me_your_phone_now, [["IMAGE", "VIDEO", "GIF"]])
 
     @commands.hybrid_command(aliases=["donald", "donalttrump", "trump", "trumptweet", "donaldtrumptweet", "dontweet",
                                       "donal", "donaltweet"])

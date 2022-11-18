@@ -103,24 +103,6 @@ class Debug(commands.Cog, name="Owner Only", command_attrs=dict(hidden=True)):
             os.remove(f)
         await ctx.send(f"✅ Removed {l} files.")
 
-    @commands.command(hidden=True, aliases=["verify", "check", "watermark", "integrity", "verifywatermark"])
-    @commands.is_owner()
-    async def checkwatermark(self, ctx):
-        """
-        searches for MediaForge metadata
-        """
-        file = await imagesearch(ctx, 1)
-        if file:
-            file = await saveurls(file)
-            result = await processing.other.checkwatermark(file[0])
-            if result:
-                await ctx.reply(f"{config.emojis['working']} This file was made by MediaForge.")
-            else:
-                await ctx.reply(
-                    f"{config.emojis['x']} This file does not appear to have been made by MediaForge.")
-        else:
-            await ctx.send(f"{config.emojis['x']} No file found.")
-
     @commands.command(hidden=True, aliases=["stop", "close", "die", "kill", "murder", "death"])
     @commands.is_owner()
     async def shutdown(self, ctx):

@@ -7,17 +7,6 @@ import utils.tempfiles
 from processing.ffprobe import *
 
 
-async def checkwatermark(file):
-    # see watermark()
-    etdata = await run_command("exiftool", "-artist", "-json", file)
-    logger.info(etdata)
-    etdata = json.loads(etdata)[0]
-    if "Artist" in etdata:
-        if etdata["Artist"] == "MediaForge":
-            return True
-    return False
-
-
 class MyLogger(object):
     def debug(self, msg: ""):
         logger.debug(msg.replace("\r", ""))
