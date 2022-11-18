@@ -46,22 +46,6 @@ class Image(commands.Cog, name="Creation"):
             caption.append("NOW!")
         await process(ctx, processing.vips.creation.yskysn, [], caption, run_parallel=True)
 
-    @commands.hybrid_command(aliases=["shes12"])
-    async def zamn(self, ctx, *, caption):
-        """
-        Creates a custom meme based off of the popular "ZAMN😍 SHE'S 12?" meme.
-
-        :param ctx: discord context
-        :param caption: The text above your custom image. Optionally change the "ZAMN😍" text by writing
-            something after a `|` character (or remove it by typing a `|` followed by nothing else).
-        :mediaparam media: An image, video, or gif that Damien will "ZAMN" at
-        """
-        caption = caption.split("|")
-        if len(caption) == 1:
-            caption.append("ZAMN😍")
-        raise NotImplementedError  # TODO: implement
-        # await process(ctx, captionfunctions.zamn, [["IMAGE", "VIDEO", "GIF"]], *caption, handleanimated=True)
-
     @commands.hybrid_command(aliases=["troll"])
     async def trollface(self, ctx):
         """
@@ -110,18 +94,6 @@ class Image(commands.Cog, name="Creation"):
         :mediaparam media: The media to be overlayed over his hand.
         """
         await process(ctx, processing.ffmpeg.give_me_your_phone_now, [["IMAGE", "VIDEO", "GIF"]])
-
-    @commands.hybrid_command(aliases=["donald", "donalttrump", "trump", "trumptweet", "donaldtrumptweet", "dontweet",
-                                      "donal", "donaltweet"])
-    async def donaldtweet(self, ctx, *, text):
-        """
-        Makes a fake Donald Trump tweet.
-
-        :param ctx: discord context
-        :param text: The text to put in the fake tweet.
-        """
-        raise NotImplementedError  # TODO: implement
-        # await process(ctx, captionfunctions.dontweet, [], [text])
 
     @commands.hybrid_command(aliases=["texttospeak", "speak", "talk", "speech", "espeak"])
     async def tts(self, ctx: commands.Context,
