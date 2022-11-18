@@ -225,4 +225,4 @@ class Caption(commands.Cog, name="Captioning"):
         caption = caption.split("|")
         if len(caption) == 1:
             caption.append("")
-        await process(ctx, processing.ffmpeg.freezemotivate, [["VIDEO", "GIF"], ["AUDIO"]], *caption)
+        await process(ctx, processing.ffmpeg.freezemotivateaudio, [["VIDEO", "GIF"], ["AUDIO"]], *caption)
