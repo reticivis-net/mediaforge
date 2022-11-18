@@ -99,7 +99,7 @@ async def intelligentdownsize(media, maxsize: int):
         new_w = math.floor(math.sqrt(reduction_ratio * (w ** 2)))
         new_h = math.floor(math.sqrt(reduction_ratio * (h ** 2)))
         logger.info(f"trying to resize from {w}x{h} to {new_w}x{new_h} (~{reduction_ratio} reduction)")
-        resized = await resize(media, new_w, new_h)
+        resized = await resize(media, new_w, new_h, delete_orig=False)
         if (size := os.path.getsize(resized)) < maxsize:
             logger.info(f"successfully created {humanize.naturalsize(size)} media!")
             return resized
@@ -136,29 +136,6 @@ async def assurefilesize(media, re_encode=True):
 
 
 async def mp4togif(mp4):
-    """
-    converts mp4 to gif
-    :param mp4: mp4
-    :return: gif
-    """
-    fps = await get_frame_rate(mp4)
-    frames, name = await split_frames(mp4)
-    outname = TempFile("gif")
-    n = glob.glob(name.replace('%09d', '*'))
-    if len(n) <= 1:
-        raise NonBugError(f"Output file only has {len(n)} frames, GIFs must have at least 2.")
-    else:
-        await run_command("gifski", "--quiet", "--fast", "--output", outname, "--fps", str(fps), *n)
-        for frame in frames:
-            frame.deletesoon()
-        # logger.info("Cleaning files...")
-        # for f in glob.glob(name.replace('%09d', '*')):
-        #     os.remove(f)
-        return outname
-
-
-async def mp4togif_ffmpeg(mp4):
-    # TODO: transparent frames are duplicated?
     outname = TempFile("gif")
     await run_command("ffmpeg", "-i", mp4,
                       # prevent partial frames, makes filesize worse but fixes issues with transparency
@@ -246,7 +223,6 @@ async def speed(file, sp):
     :param sp: speed to multiply media by
     :return: processed media
     """
-    # TODO: some weird bug here caused by 100fps gifski gifs that slows down gifs?
 
     mt = await mediatype(file)
     if mt == "AUDIO":
@@ -789,7 +765,7 @@ async def pitch(file, p=12):
     return out
 
 
-async def resize(image, width, height):
+async def resize(image, width, height, delete_orig=True):
     """
     resizes image
 
@@ -810,7 +786,9 @@ async def resize(image, width, height):
                       "spline+accurate_rnd+full_chroma_int+full_chroma_inp+bitexact",
                       "-vf", f"scale='{width}:{height}',setsar=1:1", "-c:v", "png", "-pix_fmt", "yuva420p", "-c:a",
                       "copy", out)
-    image.deletesoon()
+
+    if delete_orig:
+        image.deletesoon()
     if mt == "GIF":
         out = await mp4togif(out)
     elif mt == "VIDEO":

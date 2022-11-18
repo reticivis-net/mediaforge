@@ -2,7 +2,6 @@
 discord.py - <https://pypi.org/project/discord.py/> - runs the discord bot
 FFmpeg - <https://ffmpeg.org/> - handles most conversion and video processing
 libvips - <https://www.libvips.org/> - captions media and processes static images
-gifski - <https://gif.ski/> - used to create high quality gifs
 python-magic - <https://github.com/ahupp/python-magic> - detects filetypes
 Pillow - <https://python-pillow.org/> - helps filetype detection
 Docker - <https://www.docker.com/> - containerizes MediaForge

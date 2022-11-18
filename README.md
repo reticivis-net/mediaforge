@@ -165,7 +165,6 @@ the bot uses many external CLI programs for media processing.
     - **If installing on linux, ensure that ffmpeg version >= 5**
 - libvips - installable on linux with `sudo apt-get install libvips-dev`
   . [windows instructions here](https://www.libvips.org/install.html#installing-the-windows-binary)
-- gifski - windows executable is included. linux version [downloadable from the website](https://gif.ski/)
 - ImageMagick - **not included** but [downloadable here](https://imagemagick.org/script/download.php)
 - TTS
     - on linux, this uses [`mimic`](https://github.com/MycroftAI/mimic1). a pre-compiled binary is included.
