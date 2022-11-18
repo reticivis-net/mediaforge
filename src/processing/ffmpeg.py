@@ -22,7 +22,11 @@ async def ensureduration(media, ctx: typing.Union[commands.Context, None]):
     # the function that splits frames actually has a vsync thing so this is more accurate to what's generated
     max_frames = config.max_frames if hasattr(config, "max_frames") else None
     fps = await get_frame_rate(media)
-    dur = await get_duration(media)
+    try:
+        dur = await get_duration(media)
+    except Exception as e:
+        dur = 0
+        logger.debug(e)
     frames = int(fps * dur)
     if max_frames is None or frames <= max_frames:
         return media
