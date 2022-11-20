@@ -12,7 +12,7 @@ WORKDIR mediaforge
 # the static deb here makes me nervous but the alternative is Really Weird so no
 RUN dpkg -i $(curl -w "%{filename_effective}" -LO "https://www.deb-multimedia.org/pool/main/d/deb-multimedia-keyring/deb-multimedia-keyring_2016.8.1_all.deb")
 # experimental/testing/unstable for ffmpeg and non-free/contrib for mbrola
-RUN printf "\ndeb https://deb.debian.org/debian bullseye contrib non-free\ndeb https://deb.debian.org/debian testing main\ndeb https://www.deb-multimedia.org bullseye main\n" >> "/etc/apt/sources.list.d/debian-extended.list"
+RUN printf "\ndeb https://deb.debian.org/debian bullseye contrib non-free\ndeb https://deb.debian.org/debian bookworm main\ndeb https://www.deb-multimedia.org bookworm main\n" >> "/etc/apt/sources.list.d/debian-extended.list"
 
 # apt
 RUN apt-get -y update
@@ -26,6 +26,8 @@ RUN apt-get -t stable --no-install-recommends install -y apngasm nano imagemagic
 RUN apt-mark hold usrmerge usr-is-merged
 # if i dont do this there are weird errors trying to build pip packages
 RUN apt-get -y upgrade
+
+RUN apt-get -y autoremove
 
 # python packages
 RUN pip install --upgrade pip --no-warn-script-location --root-user-action=ignore
