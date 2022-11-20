@@ -5,12 +5,12 @@ import pyvips
 from processing.vips.caption import twemoji
 from processing.vips.vipsutils import escape
 from utils.tempfiles import TempFile
-
+from processing.vips.vipsutils import normalize
 
 def yskysn(captions: typing.Sequence[str]):
     captions = escape(captions)
     # load stuff
-    im = pyvips.Image.new_from_file("rendering/images/yskysn.png")
+    im = normalize(pyvips.Image.new_from_file("rendering/images/yskysn.png"))
     # here for my sanity, dimensions of text area
     w = 500
     h = 582
@@ -52,9 +52,9 @@ def f1984(captions: typing.Sequence[str]):
     originaldate = captions[1].lower() == "january 1984"
 
     if originaldate:
-        im = pyvips.Image.new_from_file("rendering/images/1984/1984originaldate.png")
+        im = normalize(pyvips.Image.new_from_file("rendering/images/1984/1984originaldate.png"))
     else:
-        im = pyvips.Image.new_from_file("rendering/images/1984/1984.png")
+        im = normalize(pyvips.Image.new_from_file("rendering/images/1984/1984.png"))
 
     # technically redundant but adds twemoji font
     speech_bubble = pyvips.Image.text(".", fontfile=twemoji)
@@ -93,7 +93,8 @@ def f1984(captions: typing.Sequence[str]):
         # add date
         im = im.composite2(date, pyvips.BlendMode.OVER, x=454, y=138)
         # add cover
-        im = im.composite2(pyvips.Image.new_from_file("rendering/images/1984/1984cover.png"), pyvips.BlendMode.OVER)
+        im = im.composite2(normalize(pyvips.Image.new_from_file("rendering/images/1984/1984cover.png")),
+                           pyvips.BlendMode.OVER)
 
     outfile = TempFile("png")
     im.pngsave(outfile)

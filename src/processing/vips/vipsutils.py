@@ -63,8 +63,8 @@ def overlay_in_middle(background: pyvips.Image, foreground: pyvips.Image) -> pyv
 
 def stack(file0, file1):
     # load files
-    im0 = pyvips.Image.new_from_file(file0)
-    im1 = pyvips.Image.new_from_file(file1)
+    im0 = normalize(pyvips.Image.new_from_file(file0))
+    im1 = normalize(pyvips.Image.new_from_file(file1))
     # stack
     out = im0.join(im1, pyvips.Direction.VERTICAL, expand=True, background=0xffffff, align=pyvips.Align.CENTRE)
     # save
@@ -77,3 +77,14 @@ def stack(file0, file1):
 
 def resize(img: pyvips.Image, width: int, height: int) -> pyvips.Image:
     return img.resize(width / img.width, vscale=height / img.height)
+
+
+def normalize(img: pyvips.Image) -> pyvips.Image:
+    # mono -> rgb
+    if img.bands < 3:
+        img = img.colourspace("srgb")
+    # make sure there's an alpha
+    if img.bands == 3:
+        img = img.bandjoin(255)
+
+    return img
