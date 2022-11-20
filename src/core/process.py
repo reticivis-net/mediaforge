@@ -34,21 +34,21 @@ async def process(ctx: commands.Context, func: callable, inputs: list, *args,
     """
 
     result = None
-    msg = None
+    msgs = []
 
     async def reply(st):
         return await ctx.reply(f"{config.emojis['working']} {st}", mention_author=False)
 
     async def updatestatus(st):
-        nonlocal msg
+        nonlocal msgs
         try:
-            if msg is None:
-                msg = await reply(st)
+            if not msgs:
+                msgs.append(await reply(st))
             else:
-                msg = await msg.edit(content=f"{config.emojis['working']} {st}",
-                                     allowed_mentions=discord.AllowedMentions.none())
+                msgs.append(await msgs[-1].edit(content=f"{config.emojis['working']} {st}",
+                                                allowed_mentions=discord.AllowedMentions.none()))
         except discord.NotFound:
-            msg = await reply(st)
+            msgs.append(await reply(st))
 
     if inputs:
         # nothing to download sometimes
@@ -143,11 +143,8 @@ async def process(ctx: commands.Context, func: callable, inputs: list, *args,
             logger.info("No media found.")
             await ctx.reply(f"{config.emojis['x']} No file found.")
     except Exception as e:
-        # delete message before raising exception
-        if isinstance(msg, discord.Message):
-            await msg.delete()
+        await asyncio.gather(*[msg.delete() for msg in msgs], return_exceptions=True)
         raise e
     # delete message
-    if isinstance(msg, discord.Message):
-        await msg.delete()
+    await asyncio.gather(*[msg.delete() for msg in msgs], return_exceptions=True)
     return result
