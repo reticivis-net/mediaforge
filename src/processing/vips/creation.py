@@ -15,19 +15,39 @@ def yskysn(captions: typing.Sequence[str]):
     w = 500
     h = 582
     # technically redundant but adds twemoji font
-    text = pyvips.Image.text(".", fontfile=twemoji)
+    text_prerender = pyvips.Image.text(".", fontfile=twemoji)
     # generate text
-    text = pyvips.Image.text(
+    text_prerender, autofit_dict = pyvips.Image.text(
         f"<span foreground='white'>"
         f"{captions[0]}\n<span size='150%'>{captions[1]}</span>"
         f"</span>",
-        font=f"Twemoji Color Emoji,Tahoma Bold 56px",
+        font=f"Twemoji Color Emoji,Tahoma Bold 56",
         rgba=True,
         fontfile="rendering/fonts/TAHOMABD.TTF",
         align=pyvips.Align.CENTRE,
         width=w,
-        height=h
+        height=h,
+        autofit_dpi=True
     )
+    autofit_dpi = autofit_dict["autofit_dpi"]
+    if autofit_dpi <= 72:
+        text = text_prerender
+    else:
+        # technically redundant but adds twemoji font
+        text = pyvips.Image.text(".", fontfile=twemoji)
+        # generate text
+        text = pyvips.Image.text(
+            f"<span foreground='white'>"
+            f"{captions[0]}\n<span size='150%'>{captions[1]}</span>"
+            f"</span>",
+            font=f"Twemoji Color Emoji,Tahoma Bold 56",
+            rgba=True,
+            fontfile="rendering/fonts/TAHOMABD.TTF",
+            align=pyvips.Align.CENTRE,
+            width=w,
+            height=h,
+            dpi=72
+        )
     # pad to expected size, 48 is margin
     text = text.gravity(pyvips.CompassDirection.CENTRE, w + 48, h + 48, extend=pyvips.Extend.BLACK)
     # add glow, similar technique to shadow
