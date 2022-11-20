@@ -65,7 +65,12 @@ class TempFile(str):
             self.deletesoon()
 
     def deletesoon(self):
-        asyncio.create_task(self.delete())
+        try:
+            asyncio.create_task(self.delete())
+        except RuntimeError as e:
+            logger.debug(e)
+            logger.debug(f"async deleting {self} failed due to {e}, trying sync delete")
+            os.remove(self)
 
     async def delete(self):
         try:
