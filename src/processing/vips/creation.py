@@ -99,7 +99,7 @@ def f1984(captions: typing.Sequence[str]):
         # generate text
         date = pyvips.Image.text(
             captions[1],
-            font=f"Twemoji Color Emoji,Impact",
+            font=f"Twemoji Color Emoji,ImpactMix",
             rgba=True,
             fontfile="rendering/fonts/ImpactMix.ttf",
             align=pyvips.Align.CENTRE,
