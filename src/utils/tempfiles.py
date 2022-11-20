@@ -69,8 +69,11 @@ class TempFile(str):
             asyncio.create_task(self.delete())
         except RuntimeError as e:
             logger.debug(e)
-            logger.debug(f"async deleting {self} failed due to {e}, trying sync delete")
-            os.remove(self)
+            logger.debug(f"async deleting {self} failed due to {e}, trying multiprocessing delete")
+            p1 = multiprocessing.Process(target=os.remove, args=(self,))
+            p1.start()
+            # we dont care when the process ends so no need for .join()
+            # os.remove(self)
 
     async def delete(self):
         try:
