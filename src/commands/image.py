@@ -30,7 +30,7 @@ class Image(commands.Cog, name="Creation"):
         caption = caption.split("|")
         if len(caption) == 1:
             caption.append("JANUARY 1984")
-        await process(ctx, processing.vips.creation.f1984, [], caption)
+        await process(ctx, processing.vips.creation.f1984, [], caption, run_parallel=True)
 
     @commands.hybrid_command(aliases=["ltg", "now", "lowtiergod", "youshould"])
     async def yskysn(self, ctx, *, caption):
