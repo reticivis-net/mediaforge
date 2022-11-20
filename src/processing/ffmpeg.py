@@ -20,7 +20,7 @@ async def ensureduration(media, ctx: typing.Union[commands.Context, None]):
     :return: processed media or original media, within config.max_frames
     """
     max_fps = config.max_fps if hasattr(config, "max_fps") else None
-    fps = get_frame_rate(media)
+    fps = await get_frame_rate(media)
     if fps > max_fps:
         logger.debug(f"Capping FPS of {media} from {fps} to {max_fps}")
         media = await changefps(media, max_fps)
