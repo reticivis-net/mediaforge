@@ -14,11 +14,16 @@ from utils.tempfiles import TempFile
 
 async def ensureduration(media, ctx: typing.Union[commands.Context, None]):
     """
-    ensures that media is under or equal to the config minimum frame count
+    ensures that media is under or equal to the config minimum frame count and fps
     :param media: media to trim
     :param ctx: discord context
     :return: processed media or original media, within config.max_frames
     """
+    max_fps = config.max_fps if hasattr(config, "max_fps") else None
+    fps = get_frame_rate(media)
+    if fps > max_fps:
+        logger.debug(f"Capping FPS of {media} from {fps} to {max_fps}")
+        media = await changefps(media, max_fps)
     # the function that splits frames actually has a vsync thing so this is more accurate to what's generated
     max_frames = config.max_frames if hasattr(config, "max_frames") else None
     fps = await get_frame_rate(media)

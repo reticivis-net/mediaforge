@@ -75,3 +75,5 @@ shard_count = None
 max_frames = 1024
 # maximum temp file size from FFmpeg. reduce if ffmpeg eats into your disk/memory too much, increase if youre able
 max_temp_file_size = "1G"
+# cap FPS for sanity
+max_fps = 100
