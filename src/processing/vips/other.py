@@ -8,10 +8,10 @@ import processing.ffprobe
 from processing.common import run_parallel, NonBugError
 from utils.tempfiles import TempFile
 import processing.vips.vipsutils
-
+from processing.vips.vipsutils import normalize
 
 def get_caption_height(file, tolerance: float):
-    im = pyvips.Image.new_from_file(file)
+    im = normalize(pyvips.Image.new_from_file(file))
     h = im.height  # height of image, fuckin weird name
     # based on old esmbot approach, the new one looks weird
     target = 255
@@ -29,7 +29,7 @@ async def uncaption(file, frame_to_try: int, tolerance: float):
 
 
 def jpeg(file, strength, stretch, quality):
-    im = pyvips.Image.new_from_file(file)
+    im = normalize(pyvips.Image.new_from_file(file))
     orig_w = im.width
     orig_h = im.height
     for i in range(strength):

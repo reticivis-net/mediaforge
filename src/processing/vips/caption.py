@@ -5,6 +5,7 @@ import pyvips
 
 from processing.vips.vipsutils import ImageSize, escape, outline, overlay_in_middle
 from utils.tempfiles import TempFile
+from processing.vips.vipsutils import normalize
 
 twemoji = "rendering/fonts/TwemojiCOLR0.otf"
 
@@ -285,7 +286,7 @@ def generic_image_caption(image: str, captions: typing.Sequence[str], size: Imag
         width=textwidth
     )
     # load stuff
-    im = pyvips.Image.new_from_file(image)
+    im = normalize(pyvips.Image.new_from_file(image))
 
     # the hell is wrong with the stuff png??
     if im.bands == 2:
