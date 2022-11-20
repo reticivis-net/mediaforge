@@ -89,12 +89,13 @@ async def twopasscapvideo(video, maxsize: int, audio_bitrate=128000):
         await run_command('ffmpeg', '-i', video, '-c:v', 'h264', '-b:v', str(target_video_bitrate), '-pass', '2',
                           '-passlogfile', pass1log, '-c:a', 'aac', '-b:a', str(audio_bitrate), "-f", "mp4", "-movflags",
                           "+faststart", outfile)
-        video.deletesoon()
         pass1log.deletesoon()
         if (size := os.path.getsize(outfile)) < maxsize:
+            video.deletesoon()
             logger.info(f"successfully created {humanize.naturalsize(size)} video!")
             return outfile
         else:
+            outfile.deletesoon()
             logger.info(f"tolerance {tolerance} failed. output is {humanize.naturalsize(size)}")
     raise NonBugError(f"Unable to fit {video} within {humanize.naturalsize(maxsize)}")
 
