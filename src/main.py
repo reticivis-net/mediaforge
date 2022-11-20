@@ -27,8 +27,11 @@ try:
     import requests
     import yt_dlp as youtube_dl
     import glob
-
     from discord.ext import commands, tasks
+    # make it so processes can raise errors and that works fine
+    from tblib import pickling_support
+
+    pickling_support.install()
 except ModuleNotFoundError as e:
     print("".join(traceback.format_exception(type(e), e, tb=e.__traceback__)), file=sys.stderr)
     sys.exit("MediaForge was unable to import the required libraries and files. Did you follow the self-hosting guide "
