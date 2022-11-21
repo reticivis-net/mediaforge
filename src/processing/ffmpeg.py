@@ -50,14 +50,18 @@ async def ensureduration(media, ctx: typing.Union[commands.Context, None]):
         return media
 
 
+async def hasaudio(video):
+    return bool(
+        await run_command("ffprobe", "-i", video, "-show_streams", "-select_streams", "a", "-loglevel", "panic"))
+
+
 async def forceaudio(video):
     """
     gives videos with no audio a silent audio stream
     :param video: file
     :return: video filename
     """
-    ifaudio = await run_command("ffprobe", "-i", video, "-show_streams", "-select_streams", "a", "-loglevel", "panic")
-    if ifaudio:
+    if await hasaudio(video):
         return video
     else:
         outname = TempFile("mp4")
@@ -551,30 +555,26 @@ async def stack(file0, file1, style):
     mts = [await mediatype(file0), await mediatype(file1)]
     if mts[0] == "IMAGE" and mts[1] == "IMAGE":  # easier to just make this an edge case
         return await processing.common.run_parallel(processing.vips.vipsutils.stack, file0, file1, style)
-    video0 = await forceaudio(file0)
-    fixedvideo0 = TempFile("mp4")
-    await run_command("ffmpeg", "-hide_banner", "-i", video0, "-c:v", "png", "-c:a", "copy", "-ar", "48000",
-                      "-max_muxing_queue_size", "4096", "-fps_mode", "vfr", fixedvideo0)
-    video0.deletesoon()
-    video1 = await forceaudio(file1)
-    w, h = await get_resolution(video0)
-    fps = await get_frame_rate(video0)
-    fixedvideo1 = TempFile("mp4")
-    if style == "hstack":
-        scale = f"scale=-2:{h}"
+    if style == 'hstack':
+        scaling_logic = "scale2ref=oh*mdar:ih"
     else:
-        scale = f"scale={w}:-2"
-    await run_command("ffmpeg", "-hide_banner", "-i", video1, "-sws_flags",
-                      "spline+accurate_rnd+full_chroma_int+full_chroma_inp", "-vf", scale, "-c:v",
-                      "png", "-c:a", "copy", "-ar", "48000", "-fps_mode", "vfr", fixedvideo1)
-    video1.deletesoon()
-    fixedfixedvideo1 = await changefps(fixedvideo1, fps)
+        scaling_logic = "scale2ref=iw:ow/mdar"
+
+    mixaudio = all(await asyncio.gather(hasaudio(file0), hasaudio(file1)))
     outname = TempFile("mp4")
-    await run_command("ffmpeg", "-hide_banner", "-i", fixedvideo0, "-i", fixedfixedvideo1, "-filter_complex",
-                      f"{'h' if style == 'hstack' else 'v'}stack=inputs=2;amix=inputs=2:dropout_transition=0", "-c:v",
-                      "png", "-c:a", "aac", "-q:a", "2", outname)
-    fixedvideo0.deletesoon()
-    fixedfixedvideo1.deletesoon()
+    await run_command("ffmpeg", "-hide_banner", "-i", file0, "-i", file1,
+                      "-filter_complex",
+                      f"[0]setpts=PTS-STARTPTS,format=yuva420p[0v];"
+                      f"[1]setpts=PTS-STARTPTS,format=yuva420p[1v];"
+                      # rescale stacked
+                      f"[1v][0v]{scaling_logic}[b][a];"
+                      # stack
+                      f"[a][b]{'h' if style == 'hstack' else 'v'}stack=inputs=2" + \
+                      # mix audio
+                      (f";amix=inputs=2:dropout_transition=0" if mixaudio else ""),
+                      "-c:v", "png", "-c:a", "aac", "-q:a", "2", "-fps_mode", "vfr", outname)
+    file0.deletesoon()
+    file1.deletesoon()
     # for file in [video0, video1, fixedvideo1, fixedvideo0, fixedfixedvideo1]:
     #     os.remove(file)
     if mts[0] != "VIDEO" and mts[1] != "VIDEO":  # one or more gifs and no videos
@@ -594,33 +594,31 @@ async def overlay(file0, file1, alpha: float, mode: str = 'overlay'):
     assert mode in ['overlay', 'add']
     assert 0 <= alpha <= 1
     mts = [await mediatype(file0), await mediatype(file1)]
-    video0 = await forceaudio(file0)
-    fixedvideo0 = TempFile("mp4")
-    await run_command("ffmpeg", "-hide_banner", "-i", video0, "-c:v", "png", "-c:a", "copy", "-ar", "48000",
-                      "-max_muxing_queue_size", "4096", "-fps_mode", "vfr", fixedvideo0)
-    video0.deletesoon()
-    video1 = await forceaudio(file1)
-    w, h = await get_resolution(video0)
-    fps = await get_frame_rate(video0)
-    fixedvideo1 = TempFile("mp4")
-    scale = f"scale={w}:{h}"
-    await run_command("ffmpeg", "-hide_banner", "-i", video1, "-sws_flags",
-                      "spline+accurate_rnd+full_chroma_int+full_chroma_inp", "-vf", scale, "-c:v",
-                      "png", "-c:a", "copy", "-ar", "48000", "-fps_mode", "vfr", fixedvideo1)
-    video1.deletesoon()
-    fixedfixedvideo1 = await changefps(fixedvideo1, fps)
+
     outname = TempFile("mp4")
     blendlogic = ""
     if mode == "overlay":
-        blendlogic = f"[0v][1v]overlay"
+        blendlogic = f"overlay"
     elif mode == "add":
-        blendlogic = f"[1v][0v]blend=all_mode='addition':eof_action=repeat:shortest=0:repeatlast=1"
-    await run_command("ffmpeg", "-hide_banner", "-i", fixedvideo0, "-i", fixedfixedvideo1, "-filter_complex",
-                      f"[0:v]setpts=PTS-STARTPTS[0v];[1:v]setpts=PTS-STARTPTS,colorchannelmixer=aa={alpha}[1v];"
-                      f"{blendlogic};amix=inputs=2:dropout_transition=0", "-c:v",
-                      "png", "-c:a", "aac", "-q:a", "2", outname)
-    fixedvideo0.deletesoon()
-    fixedvideo1.deletesoon()
+        blendlogic = f"blend=all_mode='addition'"
+
+    mixaudio = all(await asyncio.gather(hasaudio(file0), hasaudio(file1)))
+
+    await run_command("ffmpeg", "-hide_banner", "-i", file0, "-i", file1, "-filter_complex",
+                      # clean inputs
+                      f"[0]setpts=PTS-STARTPTS,format=yuva420p[0v];"
+                      f"[1]setpts=PTS-STARTPTS,format=yuva420p,"
+                      # set alpha
+                      f"colorchannelmixer=aa={alpha}[1v];"
+                      # rescale overlay
+                      f"[1v][0v]scale2ref[b][a];"
+                      # blend
+                      f"[a][b]{blendlogic}" + \
+                      # mix audio
+                      (f";amix=inputs=2:dropout_transition=0" if mixaudio else ""),
+                      "-c:v", "png", "-c:a", "aac", "-q:a", "2", "-fps_mode", "vfr", outname)
+    file0.deletesoon()
+    file1.deletesoon()
     # for file in [video0, video1, fixedvideo1, fixedvideo0, fixedfixedvideo1]:
     #     os.remove(file)
     if mts[0] == "IMAGE" and mts[1] == "IMAGE":
