@@ -93,7 +93,7 @@ async def process(ctx: commands.Context, func: callable, inputs: list, *args,
                     nonlocal args
                     nonlocal files
                     logger.info("Processing...")
-                    asyncio.create_task(updatestatus("Processing..."))
+                    await updatestatus("Processing...")
                     # remove too long videossss
                     for i, f in enumerate(files):
                         files[i] = await processing.ffmpeg.ensureduration(f, ctx)
