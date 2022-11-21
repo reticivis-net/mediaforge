@@ -61,12 +61,32 @@ def overlay_in_middle(background: pyvips.Image, foreground: pyvips.Image) -> pyv
                                  y=((background.height - foreground.height) // 2))
 
 
-def stack(file0, file1):
+def naive_stack(file0, file1):
     # load files
     im0 = normalize(pyvips.Image.new_from_file(file0))
     im1 = normalize(pyvips.Image.new_from_file(file1))
     # stack
-    out = im0.join(im1, pyvips.Direction.VERTICAL, expand=True, background=0xffffff, align=pyvips.Align.CENTRE)
+    out = im0.join(im1, pyvips.Direction.VERTICAL, expand=True, align=pyvips.Align.CENTRE)
+    # save
+    outfile = TempFile("png")
+    out.pngsave(outfile)
+    file0.deletesoon()
+    file1.deletesoon()
+    return outfile
+
+
+def stack(file0, file1, style):
+    # load files
+    im0 = normalize(pyvips.Image.new_from_file(file0))
+    im1 = normalize(pyvips.Image.new_from_file(file1))
+    # resize im1 to fit im2
+    if style == "vstack":
+        im1 = im1.resize(im0.width / im1.width)
+    else:
+        im1 = im1.resize(im0.height / im1.height)
+    # stack
+    out = im0.join(im1, pyvips.Direction.VERTICAL if style == "vstack" else pyvips.Direction.HORIZONTAL, expand=True,
+                   align=pyvips.Align.CENTRE)
     # save
     outfile = TempFile("png")
     out.pngsave(outfile)

@@ -516,7 +516,7 @@ async def naive_vstack(file0, file1):
     """
     mts = await asyncio.gather(mediatype(file0), mediatype(file1))
     if mts[0] == "IMAGE" and mts[1] == "IMAGE":
-        return await processing.common.run_parallel(processing.vips.vipsutils.stack, file0, file1)
+        return await processing.common.run_parallel(processing.vips.vipsutils.naive_stack, file0, file1)
     else:
         out = TempFile("mp4")
         await run_command("ffmpeg", "-i", file0, "-i", file1, "-filter_complex",
@@ -542,7 +542,7 @@ async def stack(file0, file1, style):
     """
     mts = [await mediatype(file0), await mediatype(file1)]
     if mts[0] == "IMAGE" and mts[1] == "IMAGE":  # easier to just make this an edge case
-        return await processing.common.run_parallel(processing.vips.vipsutils.stack, file0, file1)
+        return await processing.common.run_parallel(processing.vips.vipsutils.stack, file0, file1, style)
     video0 = await forceaudio(file0)
     fixedvideo0 = TempFile("mp4")
     await run_command("ffmpeg", "-hide_banner", "-i", video0, "-c:v", "png", "-c:a", "copy", "-ar", "48000",
