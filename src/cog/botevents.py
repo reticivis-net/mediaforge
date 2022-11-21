@@ -16,8 +16,8 @@ class BotEventsCog(commands.Cog):
         logger.log(25, f"{len(self.bot.shards)} shard(s)")
 
     @commands.Cog.listener()
-    async def on_shard_ready(self, shardid):
-        logger.info(f"Shard {shardid} ready")
+    async def on_shard_connect(self, shardid):
+        logger.info(f"Shard {shardid} connected")
 
     @commands.Cog.listener()
     async def on_disconnect(self):
@@ -25,19 +25,23 @@ class BotEventsCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_shard_disconnect(self, shardid):
-        logger.error(f"on_shard_disconnect {shardid}")
+        logger.error(f"Shard {shardid} disconnected")
 
     @commands.Cog.listener()
-    async def on_command(self, ctx):
+    async def on_command(self, ctx: commands.Context):
+        if ctx.interaction:
+            command = f"/{ctx.command} {ctx.kwargs}"
+        else:
+            command = ctx.message.content
         if isinstance(ctx.channel, discord.DMChannel):
             logger.log(25,
                        f"@{ctx.message.author.name}#{ctx.message.author.discriminator} ({ctx.message.author.id}) ran "
-                       f"'{ctx.message.content}' in DMs")
+                       f"'{command}' in DMs")
         else:
             logger.log(25,
                        f"@{ctx.message.author.name}#{ctx.message.author.discriminator}"
                        f" ({ctx.message.author.display_name}) ({ctx.message.author.id}) "
-                       f"ran '{ctx.message.content}' in channel "
+                       f"ran '{command}' in channel "
                        f"#{ctx.channel.name} ({ctx.channel.id}) in server {ctx.guild} ({ctx.guild.id})")
 
     @commands.Cog.listener()
@@ -52,8 +56,12 @@ class BotEventsCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_command_completion(self, ctx):
+        if ctx.interaction:
+            command = f"/{ctx.command} {ctx.kwargs}"
+        else:
+            command = ctx.message.content
         logger.log(35,
-                   f"Command '{ctx.message.content}' by "
+                   f"Command '{command}' by "
                    f"@{ctx.message.author.name}#{ctx.message.author.discriminator} ({ctx.message.author.id}) "
                    f"is complete!")
     # command here
