@@ -4,8 +4,9 @@ import pyvips
 
 from processing.vips.caption import twemoji
 from processing.vips.vipsutils import escape
-from utils.tempfiles import TempFile
 from processing.vips.vipsutils import normalize
+from utils.tempfiles import TempFile
+
 
 def yskysn(captions: typing.Sequence[str]):
     captions = escape(captions)

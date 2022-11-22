@@ -1,5 +1,6 @@
 import asyncio
 import inspect
+import typing
 
 import discord
 from discord.ext import commands
@@ -34,21 +35,22 @@ async def process(ctx: commands.Context, func: callable, inputs: list, *args,
     """
 
     result = None
-    msgs = []
+    msg: typing.Optional[discord.Message] = None
+    deferred = False
 
     async def reply(st):
         return await ctx.reply(f"{config.emojis['working']} {st}", mention_author=False)
 
     async def updatestatus(st):
-        nonlocal msgs
+        nonlocal msg
         try:
-            if not msgs:
-                msgs.append(await reply(st))
+            if msg is None:
+                msg = await reply(st)
             else:
-                msgs.append(await msgs[-1].edit(content=f"{config.emojis['working']} {st}",
-                                                allowed_mentions=discord.AllowedMentions.none()))
+                msg = await msg.edit(content=f"{config.emojis['working']} {st}",
+                                     allowed_mentions=discord.AllowedMentions.none())
         except discord.NotFound:
-            msgs.append(await reply(st))
+            msg = await reply(st)
 
     if inputs:
         # nothing to download sometimes
@@ -137,14 +139,22 @@ async def process(ctx: commands.Context, func: callable, inputs: list, *args,
                     logger.info("Uploading...")
                     await updatestatus("Uploading...")
                     if uploadresult:
-                        await ctx.reply(file=discord.File(result))
+                        if ctx.interaction:
+                            await msg.edit(attachments=[discord.File(result)])
+                        else:
+                            await ctx.reply(file=discord.File(result))
                         result.deletesoon()
         else:  # no media found but media expected
             logger.info("No media found.")
-            await ctx.reply(f"{config.emojis['x']} No file found.")
+            if ctx.interaction:
+                await msg.edit(content=f"{config.emojis['x']} No file found.")
+            else:
+                await ctx.reply(f"{config.emojis['x']} No file found.")
     except Exception as e:
-        await asyncio.gather(*[msg.delete() for msg in msgs], return_exceptions=True)
+        if msg is not None and not ctx.interaction:
+            await msg.delete()
         raise e
     # delete message
-    await asyncio.gather(*[msg.delete() for msg in msgs], return_exceptions=True)
+    if msg is not None and not ctx.interaction:
+        await msg.delete()
     return result
