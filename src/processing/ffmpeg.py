@@ -19,6 +19,9 @@ async def ensureduration(media, ctx: typing.Union[commands.Context, None]):
     :param ctx: discord context
     :return: processed media or original media, within config.max_frames
     """
+    if await ctx.bot.is_owner(ctx.author):
+        logger.debug(f"bot owner is exempt from duration checks.")
+        return media
     if await mediatype(media) != "VIDEO":
         return media
     max_fps = config.max_fps if hasattr(config, "max_fps") else None
@@ -681,6 +684,9 @@ async def ensuresize(ctx, file, minsize, maxsize):
         file = await resize(file, f"min(-1, {maxsize * 2})", minsize)
         w, h = await get_resolution(file)
         resized = True
+    if await ctx.bot.is_owner(ctx.author):
+        logger.debug(f"bot owner is exempt from downsize checks")
+        return file
     if w > maxsize:
         file = await resize(file, maxsize, "-1")
         w, h = await get_resolution(file)
