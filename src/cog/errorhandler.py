@@ -28,15 +28,23 @@ class ErrorHandlerCog(commands.Cog):
             except discord.Forbidden:
                 logger.info(f"Reply to {ctx.message.id} and dm to {ctx.author.id} failed. Aborting.")
 
-        async def reply(*args, **kwargs):
-            try:
-                if ctx.guild and not ctx.channel.permissions_for(ctx.me).send_messages:
-                    logger.debug(f"No permissions to reply to {ctx.message.id}, trying to DM author.")
-                    return await dmauthor(*args, **kwargs)
-                return await ctx.reply(*args, **kwargs)
-            except discord.Forbidden:
-                logger.debug(f"Forbidden to reply to {ctx.message.id}, trying to DM author")
-                return await dmauthor(*args, **kwargs)
+        async def reply(msg, file=None, embed=None):
+            if ctx.interaction:
+                if ctx.interaction.response.is_done():
+                    return await ctx.interaction.edit_original_response(content=msg,
+                                                                        attachments=[file] if file else None,
+                                                                        embed=embed)
+                else:
+                    return await ctx.reply(msg, file=file, embed=embed)
+            else:
+                try:
+                    if ctx.guild and not ctx.channel.permissions_for(ctx.me).send_messages:
+                        logger.debug(f"No permissions to reply to {ctx.message.id}, trying to DM author.")
+                        return await dmauthor(msg, file=file, embed=embed)
+                    return await ctx.reply(msg, file=file, embed=embed)
+                except discord.Forbidden:
+                    logger.debug(f"Forbidden to reply to {ctx.message.id}, trying to DM author")
+                    return await dmauthor(msg, file=file, embed=embed)
 
         async def logandreply(message):
             if ctx.guild:
@@ -44,8 +52,8 @@ class ErrorHandlerCog(commands.Cog):
             else:
                 ch = "DMs"
             logger.info(f"Command '{ctx.message.content}' by "
-                           f"@{ctx.message.author.name}#{ctx.message.author.discriminator} ({ctx.message.author.id}) "
-                           f"in {ch} failed due to {message}.")
+                        f"@{ctx.message.author.name}#{ctx.message.author.discriminator} ({ctx.message.author.id}) "
+                        f"in {ch} failed due to {message}.")
             await reply(message)
 
         errorstring = str(commanderror)
@@ -65,20 +73,6 @@ class ErrorHandlerCog(commands.Cog):
                 # https://mudae.fandom.com/wiki/List_of_Commands#.24waifu_.28.24w.29
                 logger.debug(f"Ignoring {ctx.message.content}")
                 return
-
-            # remove money
-            is_decimal = True
-            for char in ctx.message.content.strip().split(" ")[0]:
-                # if non-decimal character found, we're ok to reply with an error
-                if not (char.isdecimal() or char in ",.$"):
-                    is_decimal = False
-                    break
-            if is_decimal:
-                logger.debug(f"Ignoring {ctx.message.content}")
-                return
-
-            # remove prefix, remove excess args
-            cmd = ctx.message.content[len(ctx.prefix):].split(' ')[0]
 
             # remove money
             is_decimal = True
@@ -139,7 +133,7 @@ class ErrorHandlerCog(commands.Cog):
             is_hosting_issue = isinstance(commanderror, (aiohttp_client_exceptions.ClientOSError,
                                                          aiohttp_client_exceptions.ServerDisconnectedError,
                                                          asyncio.exceptions.TimeoutError))
-                                                         # concurrent.futures.process.BrokenProcessPool))
+            # concurrent.futures.process.BrokenProcessPool))
 
             if is_hosting_issue:
                 desc = "If this error keeps occurring, report this with the attached traceback file to the GitHub."
