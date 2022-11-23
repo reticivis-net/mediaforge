@@ -18,9 +18,10 @@ RUN printf "\ndeb https://deb.debian.org/debian bullseye contrib non-free\ndeb h
 RUN apt-get -y update
 
 # ffmpeg 5 isnt on stable for some reason so it has to be installed separately
-RUN apt-get -t testing --no-install-recommends install -y ffmpeg
+# libgif-dev is here because apt is weird
+RUN apt-get -t testing --no-install-recommends install -y ffmpeg libgif-dev
 # most packages
-RUN apt-get -t stable --no-install-recommends install -y apngasm nano imagemagick-7 nodejs libvips-dev
+RUN apt-get -t stable --no-install-recommends install -y nano imagemagick nodejs libvips-dev
 
 # weird bugs here
 RUN apt-mark hold usrmerge usr-is-merged
