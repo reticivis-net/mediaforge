@@ -36,7 +36,6 @@ async def process(ctx: commands.Context, func: callable, inputs: list, *args,
 
     result = None
     msg: typing.Optional[discord.Message] = None
-    deferred = False
 
     async def reply(st):
         return await ctx.reply(f"{config.emojis['working']} {st}", mention_author=False)
@@ -140,7 +139,7 @@ async def process(ctx: commands.Context, func: callable, inputs: list, *args,
                     await updatestatus("Uploading...")
                     if uploadresult:
                         if ctx.interaction:
-                            await msg.edit(attachments=[discord.File(result)])
+                            await msg.edit(content="", attachments=[discord.File(result)])
                         else:
                             await ctx.reply(file=discord.File(result))
                         result.deletesoon()
