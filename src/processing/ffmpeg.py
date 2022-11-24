@@ -12,6 +12,23 @@ from processing.ffprobe import *
 from utils.tempfiles import TempFile
 
 
+async def edit_msg_with_webhookmessage_polyfill(msg: typing.Union[discord.Message, discord.WebhookMessage],
+                                                delete_after=None, **kwargs):
+    """
+    helper function to add `delete_after` support to WebhookMessage
+    """
+    if isinstance(msg, discord.WebhookMessage):
+        async def wait_and_delete(msg):
+            await asyncio.sleep(delete_after)
+            await msg.delete()
+
+        await msg.edit(**kwargs)  # WebhookMessage doesn't have a delete_after attribute!
+        if delete_after:
+            asyncio.create_task(wait_and_delete(msg))
+    else:
+        await msg.edit(**kwargs, delete_after=delete_after)
+
+
 async def ensureduration(media, ctx: commands.Context):
     """
     ensures that media is under or equal to the config minimum frame count and fps
@@ -42,22 +59,13 @@ async def ensureduration(media, ctx: commands.Context):
         return media
     else:
         newdur = max_frames / fps
-        if ctx is not None:
-            tmsg = f"{config.emojis['warning']} input file is too long (~{frames} frames)! " \
-                   f"Trimming to {round(newdur, 1)}s (~{max_frames} frames)... "
-            logger.debug(tmsg)
-            msg = await ctx.reply(tmsg)
+        tmsg = f"{config.emojis['warning']} input file is too long (~{frames} frames)! " \
+               f"Trimming to {round(newdur, 1)}s (~{max_frames} frames)... "
+        logger.debug(tmsg)
+        msg = await ctx.reply(tmsg)
         media = await trim(media, newdur)
         try:
-            if ctx.interaction:
-                async def wait_and_delete(msg):
-                    await asyncio.sleep(5)
-                    await msg.delete()
-
-                await msg.edit(content=tmsg + " Done!")  # WebhookMessage doesn't have a delete_after attribute!
-                asyncio.create_task(wait_and_delete(msg))
-            else:
-                await msg.edit(content=tmsg + " Done!", delete_after=5)
+            await edit_msg_with_webhookmessage_polyfill(msg, delete_after=5, content=tmsg + "Done!")
         except discord.NotFound as e:
             logger.debug(e)
         return media
