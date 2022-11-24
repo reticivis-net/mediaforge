@@ -19,9 +19,9 @@ async def ensureduration(media, ctx: commands.Context):
     :param ctx: discord context
     :return: processed media or original media, within config.max_frames
     """
-    # if await ctx.bot.is_owner(ctx.author):
-    #     logger.debug(f"bot owner is exempt from duration checks.")
-    #     return media
+    if await ctx.bot.is_owner(ctx.author):
+        logger.debug(f"bot owner is exempt from duration checks.")
+        return media
     if await mediatype(media) != "VIDEO":
         return media
     max_fps = config.max_fps if hasattr(config, "max_fps") else None
