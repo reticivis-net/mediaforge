@@ -12,16 +12,16 @@ from processing.ffprobe import *
 from utils.tempfiles import TempFile
 
 
-async def ensureduration(media, ctx: typing.Union[commands.Context, discord.WebhookMessage, None]):
+async def ensureduration(media, ctx: commands.Context):
     """
     ensures that media is under or equal to the config minimum frame count and fps
     :param media: media to trim
     :param ctx: discord context
     :return: processed media or original media, within config.max_frames
     """
-    if await ctx.bot.is_owner(ctx.author):
-        logger.debug(f"bot owner is exempt from duration checks.")
-        return media
+    # if await ctx.bot.is_owner(ctx.author):
+    #     logger.debug(f"bot owner is exempt from duration checks.")
+    #     return media
     if await mediatype(media) != "VIDEO":
         return media
     max_fps = config.max_fps if hasattr(config, "max_fps") else None
@@ -48,11 +48,18 @@ async def ensureduration(media, ctx: typing.Union[commands.Context, discord.Webh
             logger.debug(tmsg)
             msg = await ctx.reply(tmsg)
         media = await trim(media, newdur)
-        if ctx is not None:
-            if isinstance(ctx, discord.WebhookMessage):
+        try:
+            if ctx.interaction:
+                async def wait_and_delete(msg):
+                    await asyncio.sleep(5)
+                    await msg.delete()
+
                 await msg.edit(content=tmsg + " Done!")  # WebhookMessage doesn't have a delete_after attribute!
+                asyncio.create_task(wait_and_delete(msg))
             else:
                 await msg.edit(content=tmsg + " Done!", delete_after=5)
+        except discord.NotFound as e:
+            logger.debug(e)
         return media
 
 
