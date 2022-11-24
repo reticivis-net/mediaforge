@@ -12,7 +12,7 @@ from processing.ffprobe import *
 from utils.tempfiles import TempFile
 
 
-async def ensureduration(media, ctx: typing.Union[commands.Context, None]):
+async def ensureduration(media, ctx: typing.Union[commands.Context, discord.WebhookMessage, None]):
     """
     ensures that media is under or equal to the config minimum frame count and fps
     :param media: media to trim
@@ -49,7 +49,10 @@ async def ensureduration(media, ctx: typing.Union[commands.Context, None]):
             msg = await ctx.reply(tmsg)
         media = await trim(media, newdur)
         if ctx is not None:
-            await msg.edit(content=tmsg + " Done!", delete_after=5)
+            if isinstance(ctx, discord.WebhookMessage):
+                await msg.edit(content=tmsg + " Done!")  # WebhookMessage doesn't have a delete_after attribute!
+            else:
+                await msg.edit(content=tmsg + " Done!", delete_after=5)
         return media
 
 
