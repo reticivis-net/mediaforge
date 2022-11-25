@@ -191,8 +191,13 @@ async def mp4togif(mp4):
     await run_command("ffmpeg", "-i", mp4,
                       # prevent partial frames, makes filesize worse but fixes issues with transparency
                       "-gifflags", "-transdiff",
+                      "-vf",
+                      # cap fps because gifs are wackyyyyyy
+                      "fps=fps='min(source_fps,50)',"
                       # make and use nice palette
-                      "-vf", "split[s0][s1];[s0]palettegen=reserve_transparent=1[p];[s1][p]paletteuse=bayer",
+                      "split[s0][s1];[s0]palettegen=reserve_transparent=1[p];[s1][p]paletteuse=bayer",
+                      # i fucking hate gifs so much man
+                      "-fps_mode", "vfr",
                       outname)
     mp4.deletesoon()
     return outname
