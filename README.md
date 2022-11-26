@@ -197,3 +197,8 @@ the bot uses many external CLI programs for media processing.
       and `<yourpython> -m poetry` instead of `poetry`
 - terminate the bot by running the `shutdown` command, this will _probably_ close better than a termination
 
+## legal stuff
+
+[terms of service](media/external/terms_of_service.md)
+
+[privacy policy](media/external/privacy_policy.md)
