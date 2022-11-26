@@ -27,14 +27,11 @@
 
 ## self-host with docker
 
-MediaForge inside docker is very
-new, [please report any issues or unintended behavior.](https://github.com/HexCodeFFF/mediaforge/issues)
-
 ### to install
 
 All you need to install yourself is [Docker Desktop](https://docs.docker.com/get-docker/)
 
-as of writing, a working docker copy of MediaForge takes up ~2.5GB. if this is a concern and you are using some of the
+as of writing, a working docker copy of MediaForge takes up ~3.46GB. if this is a concern and you are using some of the
 apt libraries MediaForge does, see [to self-host natively](#to-self-host-natively)
 
 once that's installed, run these commands in your terminal of choice.
@@ -46,7 +43,10 @@ docker run -it --cap-add SYS_NICE --shm-size 8G --name mediaforge melodyflorum/m
 
 on linux, you may need to run docker with `sudo`
 
-replace `8G` with how much free RAM your system has that you would like to give MediaForge (in gigabytes)
+replace `8G` with how much free RAM your system has that you would like to give MediaForge (in gigabytes). At least `1G`
+is suggested. Making this too small can make commands fail due to not enough space, as the `/dev/shm` in-memory
+filesystem is, by default, MediaForge's sole temporary directory. Override the `override_temp_dir` option in `config.py`
+if you can't allocate enough memory.
 
 if the installation succeeded, you should be prompted with some options. you'll need to select "Edit Config". this will
 open a text editor within your terminal. the 2 required config settings to change for proper functionality are the
