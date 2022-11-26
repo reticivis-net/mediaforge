@@ -162,7 +162,7 @@ def meme(captions: typing.Sequence[str], size: ImageSize):
         )
         overlay = overlay.composite2(bottomtext, pyvips.BlendMode.OVER,
                                      x=((size.width - bottomtext.width) / 2),
-                                     y=int(size.height / 3 * 2))
+                                     y=int((size.height * .975) - bottomtext.height))
 
     overlay = outline(overlay, overlay.width // 200)
     outfile = TempFile("png")
