@@ -6,7 +6,7 @@ import config
 import processing.ffmpeg
 import processing.common
 from core.clogs import logger
-from utils.tempfiles import TempFile
+from utils.tempfiles import reserve_tempfile
 
 
 async def saveurl(url: str) -> str:
@@ -25,7 +25,7 @@ async def saveurl(url: str) -> str:
         if "." in after_slash:
             extension = after_slash.split(".")[-1]
         # extension will stay None if no extension detected.
-    name = TempFile(extension)
+    name = reserve_tempfile(extension)
 
     # https://github.com/aio-libs/aiohttp/issues/3904#issuecomment-632661245
     async with aiohttp.ClientSession(headers={'Connection': 'keep-alive'}) as session:

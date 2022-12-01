@@ -1,4 +1,5 @@
 import asyncio
+import contextvars
 import multiprocessing
 import os
 import random
@@ -47,39 +48,38 @@ def temp_file_name(extension=None):
             return name
 
 
-class TempFile(str):
-    _deleted = False
+def reserve_tempfile(arg):
+    if arg is None:  # default
+        arg = temp_file_name()
+    elif "." not in arg:  # just extension
+        arg = temp_file_name(arg)
+    # full filename otherwise
 
-    def __new__(cls, arg: str | None):
-        if arg is None:  # default
-            arg = temp_file_name()
-        elif "." not in arg:  # just extension
-            arg = temp_file_name(arg)
-        # full filename otherwise
-        logger.debug(f"Reserved new tempfile {arg}")
-        return str.__new__(cls, arg)
+    tfs = session.get()
+    tfs.append(arg)
+    session.set(tfs)
+    logger.debug(f"Reserved new tempfile {arg}")
+    return arg
 
-    def __del__(self):
-        if not self._deleted and multiprocessing.current_process().name == 'MainProcess':
-            logger.debug(f"{self} was garbage collected... deleting")
-            self.deletesoon()
 
-    def deletesoon(self):
+class TempFileSession:
+    def __init__(self):
+        pass
+
+    async def __aenter__(self):
         try:
-            asyncio.create_task(self.delete())
-        except RuntimeError as e:
-            logger.debug(e)
-            logger.debug(f"async deleting {self} failed due to {e}, trying multiprocessing delete")
-            p1 = multiprocessing.Process(target=os.remove, args=(self,))
-            p1.start()
-            # we dont care when the process ends so no need for .join()
-            # os.remove(self)
+            session.get()
+            raise Exception("Cannot create new TempFileSession, one already exists in this context.")
+        except LookupError:
+            pass
+        logger.debug("Created new TempFileSession")
+        session.set([])
 
-    async def delete(self):
-        try:
-            logger.debug(f"deleting {self}")
-            await aiofiles.os.remove(self)
-            self._deleted = True
-        except FileNotFoundError:
-            logger.debug(f"Tried to delete {self} but it does not exist")
-            self._deleted = True
+    async def __aexit__(self, *_):
+        files = session.get()
+        logger.debug(f"TempFileSession exiting with {len(files)} files: {files}")
+        await asyncio.gather(*[aiofiles.os.remove(file) for file in files])
+        logger.debug(f"TempFileSession exited!")
+
+
+session: contextvars.ContextVar[list[str]] = contextvars.ContextVar("session")

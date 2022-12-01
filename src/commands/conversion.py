@@ -20,7 +20,7 @@ from processing.other import ytdownload
 from utils.common import prefix_function
 from utils.dpy import UnicodeEmojiConverter, UnicodeEmojisConverter
 from utils.scandiscord import tenorsearch
-from utils.tempfiles import TempFile
+from utils.tempfiles import reserve_tempfile
 
 
 class Conversion(commands.Cog, name="Conversion"):
@@ -97,34 +97,35 @@ class Conversion(commands.Cog, name="Conversion"):
         """
         msg = await ctx.reply(f"{config.emojis['working']} Downloading from site...", mention_author=False)
         try:
-            r = await run_parallel(ytdownload, videourl, videoformat)
-            if r:
-                r = await processing.ffmpeg.assurefilesize(r, re_encode=False)
-                if not r:
-                    return
-                txt = ""
-                vcodec = await processing.ffprobe.get_vcodec(r)
-                acodec = await processing.ffprobe.get_acodec(r)
-                # sometimes returns av1 codec
-                if vcodec and vcodec["codec_name"] not in ["h264", "gif", "webp", "png", "jpeg"]:
-                    txt += f"The returned video is in the `{vcodec['codec_name']}` " \
-                           f"({vcodec['codec_long_name']}) codec. Discord might not be able embed this " \
-                           f"format. You can use " \
-                           f"`{await prefix_function(self.bot, ctx.message, True)}reencode` to change the codec, " \
-                           f"though this may increase the filesize or decrease the quality.\n"
-                if acodec and acodec["codec_name"] not in ["aac", "mp3"]:
-                    txt += f"The returned video's audio is in the `{vcodec['codec_name']}` " \
-                           f"({vcodec['codec_long_name']}) codec. Some devices cannot play this. " \
-                           f"You can use `{await prefix_function(self.bot, ctx.message, True)}reencode` " \
-                           f"to change the codec, " \
-                           f"though this may increase the filesize or decrease the quality."
-                await msg.edit(content=f"{config.emojis['working']} Uploading to Discord...")
-                await ctx.reply(txt, file=discord.File(r))
-            else:
-                await ctx.reply(f"{config.emojis['warning']} No available downloads found within Discord's "
-                                f"file upload limit.")
-            # os.remove(r)
-            await msg.delete()
+            async with utils.tempfiles.TempFileSession():
+                r = await run_parallel(ytdownload, videourl, videoformat)
+                if r:
+                    r = await processing.ffmpeg.assurefilesize(r, re_encode=False)
+                    if not r:
+                        return
+                    txt = ""
+                    vcodec = await processing.ffprobe.get_vcodec(r)
+                    acodec = await processing.ffprobe.get_acodec(r)
+                    # sometimes returns av1 codec
+                    if vcodec and vcodec["codec_name"] not in ["h264", "gif", "webp", "png", "jpeg"]:
+                        txt += f"The returned video is in the `{vcodec['codec_name']}` " \
+                               f"({vcodec['codec_long_name']}) codec. Discord might not be able embed this " \
+                               f"format. You can use " \
+                               f"`{await prefix_function(self.bot, ctx.message, True)}reencode` to change the codec, " \
+                               f"though this may increase the filesize or decrease the quality.\n"
+                    if acodec and acodec["codec_name"] not in ["aac", "mp3"]:
+                        txt += f"The returned video's audio is in the `{vcodec['codec_name']}` " \
+                               f"({vcodec['codec_long_name']}) codec. Some devices cannot play this. " \
+                               f"You can use `{await prefix_function(self.bot, ctx.message, True)}reencode` " \
+                               f"to change the codec, " \
+                               f"though this may increase the filesize or decrease the quality."
+                    await msg.edit(content=f"{config.emojis['working']} Uploading to Discord...")
+                    await ctx.reply(txt, file=discord.File(r))
+                else:
+                    await ctx.reply(f"{config.emojis['warning']} No available downloads found within Discord's "
+                                    f"file upload limit.")
+                # os.remove(r)
+                await msg.delete()
         except youtube_dl.DownloadError as e:
             await ctx.reply(f"{config.emojis['2exclamation']} {e}")
 

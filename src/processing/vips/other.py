@@ -6,7 +6,7 @@ import pyvips
 import processing.ffmpeg
 import processing.ffprobe
 from processing.common import run_parallel, NonBugError
-from utils.tempfiles import TempFile
+from utils.tempfiles import reserve_tempfile
 import processing.vips.vipsutils
 from processing.vips.vipsutils import normalize
 
@@ -41,6 +41,6 @@ def jpeg(file, strength, stretch, quality):
         # save to jpeg and read back to image
         im = pyvips.Image.new_from_buffer(im.write_to_buffer(".jpg", Q=quality), ".jpg")
     # save
-    outfile = TempFile("png")
+    outfile = reserve_tempfile("png")
     im.pngsave(outfile)
     return outfile
