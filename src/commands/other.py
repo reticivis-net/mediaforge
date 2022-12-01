@@ -21,6 +21,7 @@ from utils.dpy import UnicodeEmojiConverter, showcog
 from utils.dpy import add_long_field
 from utils.scandiscord import imagesearch
 from utils.web import saveurls
+import utils.tempfiles
 
 
 class Other(commands.Cog, name="Other"):
@@ -366,14 +367,15 @@ class Other(commands.Cog, name="Other"):
         :param ctx: discord context
         :mediaparam media: Any media file.
         """
-        file = await imagesearch(ctx, 1)
-        if file:
-            file = await saveurls(file)
-            result = await processing.ffprobe.ffprobe(file[0])
-            await ctx.reply(f"`{result[1]}` `{result[2]}`\n```{result[0]}```")
-            # os.remove(file[0])
-        else:
-            await ctx.send(f"{config.emojis['x']} No file found.")
+        async with utils.tempfiles.TempFileSession():
+            file = await imagesearch(ctx, 1)
+            if file:
+                file = await saveurls(file)
+                result = await processing.ffprobe.ffprobe(file[0])
+                await ctx.reply(f"`{result[1]}` `{result[2]}`\n```{result[0]}```")
+                # os.remove(file[0])
+            else:
+                await ctx.send(f"{config.emojis['x']} No file found.")
 
     @commands.hybrid_command()
     async def feedback(self, ctx):
@@ -383,7 +385,7 @@ class Other(commands.Cog, name="Other"):
 
         :param ctx: discord context
         """
-        embed = discord.Embed(title="Feedatabase.dback",
+        embed = discord.Embed(title="Feedback",
                               description="Feedatabase.dback is best given via the GitHub repo, various "
                                           "links are provided below.",
                               color=discord.Color(0xD262BA))
@@ -401,7 +403,7 @@ class Other(commands.Cog, name="Other"):
                         value="Anything is welcome in the discussion page!\nhttps://github."
                               "com/HexCodeFFF/mediaforge/discussions", inline=False)
         embed.add_field(name="Why GitHub?",
-                        value="Using GitHub for feedatabase.dback makes it much easier to organize any i"
+                        value="Using GitHub for feedback makes it much easier to organize any i"
                               "ssues and to implement them into the bot's code.")
         await ctx.reply(embed=embed)
 

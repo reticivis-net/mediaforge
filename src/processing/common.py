@@ -6,8 +6,9 @@ import subprocess
 import sys
 import typing
 
+import utils.tempfiles
 from core.clogs import logger
-from utils.tempfiles import TempFile
+from utils.tempfiles import reserve_tempfile
 
 
 class NonBugError(Exception):
@@ -79,7 +80,7 @@ async def run_command(*args: str):
 
 
 async def tts(text: str, model: typing.Literal["male", "female", "retro"] = "male"):
-    ttswav = TempFile("wav")
+    ttswav = reserve_tempfile("wav")
     if model == "retro":
         await run_command("node", "tts/sam.js", "--moderncmu", "--wav", ttswav, text)
     else:
@@ -92,10 +93,19 @@ async def tts(text: str, model: typing.Literal["male", "female", "retro"] = "mal
             await run_command("./tts/mimic", "-voice",
                               "tts/mycroft_voice_4.0.flitevox" if model == "male" else "tts/cmu_us_slt.flitevox",
                               "-o", ttswav, "-t", text)
-    outname = TempFile("mp3")
+    outname = reserve_tempfile("mp3")
     await run_command("ffmpeg", "-hide_banner", "-i", ttswav, "-c:a", "libmp3lame", outname)
-    ttswav.deletesoon()
+
     return outname
+
+
+def handle_tfs_parallel(func: typing.Callable, *args, **kwargs):
+    try:
+        utils.tempfiles.session.set([])
+        res = func(*args, **kwargs)
+        return True, res, utils.tempfiles.session.get()
+    except Exception as e:
+        return False, e, utils.tempfiles.session.get()
 
 
 async def run_parallel(syncfunc: typing.Callable, *args, **kwargs):
@@ -107,4 +117,14 @@ async def run_parallel(syncfunc: typing.Callable, *args, **kwargs):
     """
     # creating a new process pool doesnt appear to have much overhead but re-using an existing one causes PAin
     with concurrent.futures.ProcessPoolExecutor(1) as pool:
-        return await asyncio.get_running_loop().run_in_executor(pool, functools.partial(syncfunc, *args, **kwargs))
+        success, res, files = await asyncio.get_running_loop().run_in_executor(
+            pool, functools.partial(handle_tfs_parallel, syncfunc, *args, **kwargs)
+        )
+    if files:
+        tfs = utils.tempfiles.session.get()
+        tfs += files
+        utils.tempfiles.session.set(tfs)
+    if success:
+        return res
+    else:
+        raise res

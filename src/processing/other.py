@@ -49,13 +49,13 @@ def ytdownload(vid, form):
         ydl.download([vid])
     filename = glob.glob(name + ".*")
     if len(filename) > 0:
-        return TempFile(filename[0])
+        return reserve_tempfile(filename[0])
     else:
         return None
 
 
 async def magickone(media, strength):
-    tosave = TempFile("png")
+    tosave = reserve_tempfile("png")
     await run_command("magick", media, "-liquid-rescale", f"{strength}%x{strength}%", tosave)
-    media.deletesoon()
+
     return tosave

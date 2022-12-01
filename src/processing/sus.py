@@ -4,7 +4,7 @@ import string
 
 from PIL import Image, ImageDraw, ImageFont
 
-from utils.tempfiles import TempFile
+from utils.tempfiles import reserve_tempfile
 
 # the y coordinate for where the text and the face split
 y_coord_split = 22
@@ -136,6 +136,6 @@ def sus(input_string: str):
         total_width += scan_line.width
     final_image = final_image.crop((0, 0, total_width, final_image.height))
     # final_image.show()
-    filename = TempFile("png")
+    filename = reserve_tempfile("png")
     final_image.save(filename)
     return filename

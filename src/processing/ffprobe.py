@@ -218,7 +218,7 @@ async def frame_n(video, n: int):
         raise NonBugError(f"Frame {n} does not exist.")
     if n == -1:
         n = framecount - 1
-    frame = TempFile("png")
+    frame = reserve_tempfile("png")
     await run_command("ffmpeg", "-hide_banner", "-i", video, "-vf", f"select='eq(n,{n})'", "-vframes", "1",
                       frame)
     return frame

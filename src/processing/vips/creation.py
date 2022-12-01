@@ -5,7 +5,7 @@ import pyvips
 from processing.vips.caption import twemoji
 from processing.vips.vipsutils import escape
 from processing.vips.vipsutils import normalize
-from utils.tempfiles import TempFile
+from utils.tempfiles import reserve_tempfile
 
 
 def yskysn(captions: typing.Sequence[str]):
@@ -62,7 +62,7 @@ def yskysn(captions: typing.Sequence[str]):
 
     out = im.composite2(text, pyvips.BlendMode.OVER)
     # save and return
-    outfile = TempFile("png")
+    outfile = reserve_tempfile("png")
     out.pngsave(outfile)
     return outfile
 
@@ -117,6 +117,6 @@ def f1984(captions: typing.Sequence[str]):
         im = im.composite2(normalize(pyvips.Image.new_from_file("rendering/images/1984/1984cover.png")),
                            pyvips.BlendMode.OVER)
 
-    outfile = TempFile("png")
+    outfile = reserve_tempfile("png")
     im.pngsave(outfile)
     return outfile
