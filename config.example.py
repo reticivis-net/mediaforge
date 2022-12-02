@@ -1,7 +1,7 @@
 # COPY THIS FILE INTO A FILE CALLED config.py AND CHANGE THE VALUES AS NEEDED.
 # discord API bot token https://discord.com/developers/applications
 bot_token = "EXAMPLE_TOKEN"
-# tenor API key https://tenor.com/developer/keyregistration
+# tenor API key https://developers.google.com/tenor/guides/quickstart#setup
 tenor_key = "EXAMPLE_KEY"
 # BotBlock tokens. see https://pypi.org/project/discordlists.py/
 bot_list_data = None

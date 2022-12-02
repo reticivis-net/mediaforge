@@ -32,13 +32,10 @@ async def handlemessagesave(m: discord.Message):
                 # https://github.com/esmBot/esmBot/blob/master/utils/imagedetect.js#L34
                 if (match := tenor_url_regex.fullmatch(embed.url)) is not None:
                     gif_id = match.group(2)
-                    tenor = await fetch(f"https://api.tenor.com/v1/gifs?ids={gif_id}&key={config.tenor_key}")
+                    tenor = await fetch(
+                        f"https://tenor.googleapis.com/v2/posts?ids={gif_id}&key={config.tenor_key}&limit=1")
                     tenor = json.loads(tenor)
-                    if 'error' in tenor:
-                        # await ctx.reply(f"{config.emojis['2exclamation']} Tenor Error! `{tenor['error']}`")
-                        logger.error(f"Tenor Error! `{tenor['error']}`")
-                    else:
-                        detectedfiles.append(tenor['results'][0]['media'][0]['mp4']['url'])
+                    detectedfiles.append(tenor['results'][0]['media_formats']['gif']['url'])
             elif embed.type in ["image", "video", "audio"]:
                 if await contentlength(embed.url):  # prevent adding youtube videos and such
                     detectedfiles.append(embed.url)
@@ -105,7 +102,7 @@ async def handletenor(m: discord.Message, ctx: commands.Context, gif=False):
         if m.embeds[0].type == "gifv":
             # https://github.com/esmBot/esmBot/blob/master/utils/imagedetect.js#L34
             tenor = await fetch(
-                f"https://api.tenor.com/v1/gifs?ids={m.embeds[0].url.split('-').pop()}&key={config.tenor_key}")
+                f"https://tenor.googleapis.com/v2/posts?ids={m.embeds[0].url.split('-').pop()}&key={config.tenor_key}")
             tenor = json.loads(tenor)
             if 'error' in tenor:
                 logger.error(tenor['error'])
@@ -113,9 +110,9 @@ async def handletenor(m: discord.Message, ctx: commands.Context, gif=False):
                 return False
             else:
                 if gif:
-                    return tenor['results'][0]['media'][0]['gif']['url']
+                    return tenor['results'][0]['media_formats']['gif']['url']
                 else:
-                    return tenor['results'][0]['media'][0]['mp4']['url']
+                    return tenor['results'][0]['media_formats']['mp4']['url']
     return None
 
 

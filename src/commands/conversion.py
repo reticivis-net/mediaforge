@@ -18,7 +18,7 @@ from core.process import process
 from processing.common import run_parallel
 from processing.other import ytdownload
 from utils.common import prefix_function
-from utils.dpy import UnicodeEmojiConverter, UnicodeEmojisConverter
+from utils.dpy import UnicodeEmojisConverter
 from utils.scandiscord import tenorsearch
 from utils.tempfiles import reserve_tempfile
 
@@ -85,7 +85,8 @@ class Conversion(commands.Cog, name="Conversion"):
         else:
             await ctx.send(f"{config.emojis['warning']} No valid user, guild, or message ID found.")
 
-    @commands.hybrid_command(aliases=["youtube", "youtubedownload", "youtubedl", "ytdownload", "download", "dl", "ytdl"])
+    @commands.hybrid_command(
+        aliases=["youtube", "youtubedownload", "youtubedl", "ytdownload", "download", "dl", "ytdl"])
     async def videodl(self, ctx, videourl, videoformat: typing.Literal["video", "audio"] = "video"):
         """
         Downloads a web hosted video from sites like youtube.
@@ -159,22 +160,19 @@ class Conversion(commands.Cog, name="Conversion"):
         """
         await process(ctx, processing.ffmpeg.toaudio, [["VIDEO", "AUDIO"]])
 
-    @commands.hybrid_command()
-    async def tenorgif(self, ctx):
+    @commands.hybrid_command(aliases=["tenorgif", "tenormp4", "rawtenor"])
+    async def tenorurl(self, ctx, gif: bool = True):
         """
-        Sends the GIF url for a tenor gif.
-        By default, tenor gifs are interpreted as MP4 files due to their superior quality.
-        This command gets the gif straight from tenor, making it faster than $videotogif,
-        however, some tenor gifs can be lower fps/quality than the converted video.
+        Sends the raw url for a tenor gif.
+        mp4 compression is nearly invisible compared to GIF compression which is very visible
 
+        :param gif: if true, sends GIF url. if false, sends mp4 url.
         :param ctx: discord context
         :mediaparam gif: any gif sent from tenor.
         """
-        logger.info("Getting tenor gif...")
-        file = await tenorsearch(ctx, True)
+        file = await tenorsearch(ctx, gif)
         if file:
             await ctx.send(file)
-            logger.info("Complete!")
         else:
             await ctx.send(f"{config.emojis['x']} No tenor gif found.")
 
