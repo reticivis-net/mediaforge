@@ -197,7 +197,7 @@ def tenor(captions: typing.Sequence[str], size: ImageSize):
         bottomtext = pyvips.Image.text(".", fontfile=twemoji)
         # generate text
         bottomtext = pyvips.Image.text(
-            f"<span foreground=\"white\">{captions[1].upper()}</span>",
+            f"<span foreground=\"white\">{captions[1]}</span>",
             font=f"Twemoji Color Emoji,Ubuntu {textsize}px",
             rgba=True,
             fontfile="rendering/fonts/Ubuntu-R.ttf",
@@ -225,7 +225,7 @@ def whisper(captions: typing.Sequence[str], size: ImageSize):
     text = pyvips.Image.text(".", fontfile=twemoji)
     # generate text
     text = pyvips.Image.text(
-        f"<span foreground=\"white\">{captions[0].upper()}</span>",
+        f"<span foreground=\"white\">{captions[0]}</span>",
         font=f"Twemoji Color Emoji,Upright {size.width // 6}px",
         rgba=True,
         fontfile="rendering/fonts/whisper.otf",
@@ -246,7 +246,7 @@ def snapchat(captions: typing.Sequence[str], size: ImageSize):
     text = pyvips.Image.text(".", fontfile=twemoji)
     # generate text
     text = pyvips.Image.text(
-        f"<span foreground=\"white\">{captions[0].upper()}</span>",
+        f"<span foreground=\"white\">{captions[0]}</span>",
         font=f"Twemoji Color Emoji,Helvetica Neue {size.width // 20}px",
         rgba=True,
         fontfile="rendering/fonts/HelveticaNeue.otf",

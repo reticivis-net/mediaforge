@@ -31,9 +31,9 @@ async def generic_caption_overlay(media: str, capfunc: callable, captions: typin
 
 def escape(arg: str | typing.Sequence[str]):
     if isinstance(arg, str):
-        return html.escape(arg)
+        return html.escape(arg, quote=False)
     else:
-        return [html.escape(s) for s in arg]
+        return [html.escape(s, quote=False) for s in arg]
 
 
 def outline(image: pyvips.Image, radius: int | None = None, color: typing.Sequence[int] | None = None) -> pyvips.Image:
