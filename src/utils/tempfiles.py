@@ -78,7 +78,7 @@ class TempFileSession:
     async def __aexit__(self, *_):
         files = session.get()
         logger.debug(f"TempFileSession exiting with {len(files)} files: {files}")
-        await asyncio.gather(*[aiofiles.os.remove(file) for file in files])
+        await asyncio.gather(*[aiofiles.os.remove(file) for file in files], return_exceptions=True)
         logger.debug(f"TempFileSession exited!")
 
 
