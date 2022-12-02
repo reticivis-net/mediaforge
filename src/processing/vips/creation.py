@@ -39,7 +39,7 @@ def yskysn(captions: typing.Sequence[str]):
         # generate text
         text = pyvips.Image.text(
             f"<span foreground='white'>"
-            f"{captions[0]}\n<span size='150%'>{captions[1]}</span>"
+            f"{captions[0].upper()}\n<span size='150%'>{captions[1].upper()}</span>"
             f"</span>",
             font=f"Twemoji Color Emoji,Tahoma Bold 56",
             rgba=True,
@@ -99,7 +99,7 @@ def f1984(captions: typing.Sequence[str]):
         date = pyvips.Image.text(".", fontfile=twemoji)
         # generate text
         date = pyvips.Image.text(
-            captions[1],
+            captions[1].upper(),
             font=f"Twemoji Color Emoji,ImpactMix",
             rgba=True,
             fontfile="rendering/fonts/ImpactMix.ttf",
