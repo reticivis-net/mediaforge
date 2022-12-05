@@ -19,9 +19,10 @@ RUN apt-get -y update
 
 # ffmpeg 5 isnt on stable for some reason so it has to be installed separately
 # libgif-dev is here because apt is weird see #128
-RUN apt-get -t testing --no-install-recommends install -y ffmpeg libgif-dev
+# libvips is here cause stable is old
+RUN apt-get -t testing --no-install-recommends install -y ffmpeg libgif-dev libvips-dev
 # most packages
-RUN apt-get -t stable --no-install-recommends install -y nano imagemagick nodejs libvips-dev
+RUN apt-get -t stable --no-install-recommends install -y nano imagemagick nodejs
 
 # weird bugs here
 RUN apt-mark hold usrmerge usr-is-merged
