@@ -1,16 +1,19 @@
 import asyncio
 import datetime
 import difflib
+import glob
 import io
 import traceback
 import urllib.parse
 
+import aiofiles.os
 import discord
 from aiohttp import client_exceptions as aiohttp_client_exceptions
 from discord.ext import commands
 
 import config
 import processing.common
+import utils.tempfiles
 from core.clogs import logger
 from utils.common import now, prefix_function, get_full_class_name
 
@@ -126,10 +129,20 @@ class ErrorHandlerCog(commands.Cog):
                 isinstance(commanderror.original, processing.common.NonBugError):
             await logandreply(f"{config.emojis['2exclamation']} {str(commanderror.original)[:1000]}")
         else:
-            if isinstance(commanderror, discord.ext.commands.errors.CommandInvokeError):
+            if isinstance(commanderror, discord.ext.commands.errors.CommandInvokeError) or \
+                    isinstance(commanderror, discord.ext.commands.HybridCommandError):
                 commanderror = commanderror.original
             logger.error(commanderror, exc_info=(type(commanderror), commanderror, commanderror.__traceback__))
-
+            if "OSError: [Errno 28] No space left on device" in str(commanderror):
+                logger.warn("No space left on device, forcibly clearing temp folder")
+                files = glob.glob(utils.tempfiles.temp_dir + "/*")
+                logger.warn(f"deleting {len(files)} files")
+                logger.debug(files)
+                fls = await asyncio.gather(*[aiofiles.os.remove(file) for file in files],
+                                           return_exceptions=True)
+                for f in fls:
+                    if isinstance(f, Exception):
+                        logger.debug(f)
             is_hosting_issue = isinstance(commanderror, (aiohttp_client_exceptions.ClientOSError,
                                                          aiohttp_client_exceptions.ServerDisconnectedError,
                                                          asyncio.exceptions.TimeoutError))

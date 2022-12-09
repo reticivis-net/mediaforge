@@ -11,6 +11,7 @@ from discord.ext import commands
 import config
 import processing.common
 import processing.other
+import utils.tempfiles
 from core import database, heartbeat
 from core.clogs import logger
 # from main import renderpool, bot, database.db, quote
@@ -98,8 +99,8 @@ class Debug(commands.Cog, name="Owner Only", command_attrs=dict(hidden=True)):
         """
         Clear the /temp folder
         """
-        l = len(glob.glob('temp/*'))
-        for f in glob.glob('temp/*'):
+        l = len(glob.glob(utils.tempfiles.temp_dir + "/*"))
+        for f in glob.glob(utils.tempfiles.temp_dir + "/*"):
             os.remove(f)
         await ctx.send(f"✅ Removed {l} files.")
 
@@ -176,7 +177,12 @@ class Debug(commands.Cog, name="Owner Only", command_attrs=dict(hidden=True)):
     async def sync(self, ctx):
         await ctx.reply(f"Synced {len(await self.bot.tree.sync())} command(s)")
 
-    @commands.hybrid_command()
+    @commands.command()
     @commands.is_owner()
-    async def test(self, ctx, strength: commands.Range[str, 1, 5]):
-        print(strength)
+    async def devshm(self, ctx):
+        await ctx.reply(await processing.common.run_command("ls", "/dev/shm/mediaforge"))
+
+    @commands.command()
+    @commands.is_owner()
+    async def sendfile(self, ctx, path):
+        await ctx.reply(file=discord.File(path))
