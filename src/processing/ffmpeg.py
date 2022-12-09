@@ -1,3 +1,4 @@
+import glob
 import math
 
 import discord
@@ -8,6 +9,7 @@ import config
 import processing.common
 import processing.vips.caption
 import processing.vips.vipsutils
+import utils.tempfiles
 from processing.ffprobe import *
 from utils.tempfiles import reserve_tempfile
 
@@ -114,7 +116,7 @@ async def twopasscapvideo(video, maxsize: int, audio_bitrate=128000):
         logger.info(f"trying to force {video} ({humanize.naturalsize(size)}) "
                     f"under {humanize.naturalsize(maxsize)} with tolerance {tolerance}. "
                     f"trying {humanize.naturalsize(target_video_bitrate / 8)}/s")
-        pass1log = reserve_tempfile("log")
+        pass1log = utils.tempfiles.temp_file_name()
         outfile = reserve_tempfile("mp4")
         await run_command('ffmpeg', '-y', '-i', video, '-c:v', 'h264', '-b:v', str(target_video_bitrate), '-pass', '1',
                           '-f', 'mp4', '-passlogfile', pass1log,
@@ -122,7 +124,9 @@ async def twopasscapvideo(video, maxsize: int, audio_bitrate=128000):
         await run_command('ffmpeg', '-i', video, '-c:v', 'h264', '-b:v', str(target_video_bitrate), '-pass', '2',
                           '-passlogfile', pass1log, '-c:a', 'aac', '-b:a', str(audio_bitrate), "-f", "mp4", "-movflags",
                           "+faststart", outfile)
-
+        # log files are pass1log-N.log and pass1log-N.log.mbtree where N is an int, easiest to just glob them all
+        for f in glob.glob(pass1log + "*"):
+            reserve_tempfile(f)
         if (size := os.path.getsize(outfile)) < maxsize:
 
             logger.info(f"successfully created {humanize.naturalsize(size)} video!")
