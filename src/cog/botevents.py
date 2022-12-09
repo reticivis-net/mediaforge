@@ -17,7 +17,7 @@ class BotEventsCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_shard_connect(self, shardid):
-        logger.info(f"Shard {shardid} connected")
+        logger.log(35, f"Shard {shardid} connected")
 
     @commands.Cog.listener()
     async def on_disconnect(self):
