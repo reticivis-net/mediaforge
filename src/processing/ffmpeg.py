@@ -985,8 +985,9 @@ async def motivate(media, captions: typing.Sequence[str]):
     await run_command("ffmpeg", "-i", media, "-i", text, "-filter_complex",
                       "[0]pad=w=iw+(iw/60):h=ih+(iw/60):x=(iw/120):y=(iw/120):color=black[0p0];"
                       "[0p0]pad=w=iw+(iw/30):h=ih+(iw/30):x=(iw/60):y=(iw/60):color=white[0p1];"
-                      "[0p1][1]vstack=inputs=2[s];"
-                      "[s]pad=w=iw+(iw/5):h=ih+(iw/10):x=(iw/10):y=(iw/10):color=black",
+                      "[0p1]pad=w=iw:h=ih+(iw/30):x=0:y=0[0p2];"
+                      "[0p2][1]vstack=inputs=2[s];"
+                      "[s]pad=w=iw+(iw/5):h=ih+(iw/10)+(iw/30):x=(iw/10):y=(iw/10):color=black",
                       "-c:v", "png", "-c:a", "copy", "-fps_mode", "vfr",
                       outfile)
 
