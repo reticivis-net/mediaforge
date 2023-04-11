@@ -1,15 +1,13 @@
 import typing
 
 import discord
-from discord import app_commands
 from discord.ext import commands
 
 import config
 import processing.ffmpeg
-from core.process import process
-from utils.common import prefix_function
-import processing.vips.other
 import processing.other
+import processing.vips.other
+from core.process import process
 
 
 class Media(commands.Cog, name="Editing"):
@@ -455,3 +453,16 @@ class Media(commands.Cog, name="Editing"):
         :mediaparam media: A video, image, or GIF file
         """
         await process(ctx, processing.vips.other.uncaption, [["VIDEO", "IMAGE", "GIF"]], frame_to_try, threshold)
+
+    @commands.hybrid_command()
+    async def speechbubble(self, ctx, position: typing.Literal["top", "bottom"] = "top",
+                           color: typing.Literal["transparent", "white", "black"] = "transparent"):
+        """
+        gives an image a speech bubble
+
+        :param ctx:
+        :param position: where to put the speech bubble. must be "top" or "bottom".
+        :param color: what color to make the speech bubble. must be "transparent", "white", or "black".
+        :mediaparam media: A video, image, or GIF file
+        """
+        await process(ctx, processing.ffmpeg.speech_bubble, [["VIDEO", "IMAGE", "GIF"]], position, color)

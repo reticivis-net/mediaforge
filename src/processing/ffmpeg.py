@@ -845,7 +845,6 @@ async def resize(image, width, height, delete_orig=True):
                       "-vf", f"scale='{width}:{height}',setsar=1:1", "-c:v", "png", "-pix_fmt", "yuva420p", "-c:a",
                       "copy", "-fps_mode", "vfr", out)
 
-
     if mt == "GIF":
         out = await mp4togif(out)
     elif mt == "VIDEO":
@@ -1174,6 +1173,44 @@ async def give_me_your_phone_now(media):
                       "[1][rescaled]overlay=x=150+((200-overlay_w)/2):y=350+((200-overlay_h)/2)", "-fps_mode", "vfr",
                       outfile)
 
+    if mt == "GIF":
+        outfile = await mp4togif(outfile)
+
+    return outfile
+
+
+async def speech_bubble(media, position: typing.Literal["top", "bottom"] = "top",
+                        color: typing.Literal["transparent", "white", "black"] = "transparent"):
+    mt = await mediatype(media)
+    exts = {
+        "VIDEO": "mp4",
+        "GIF": "mp4",
+        "IMAGE": "png"
+    }
+    outfile = reserve_tempfile(exts[mt])
+
+    if color == "transparent":
+        await run_command("ffmpeg", "-i", media, "-i", "rendering/images/speechbubble.png",
+                          "-filter_complex",
+                          # mask input media
+                          "[1:v][0:v]scale2ref[mask][media];"
+                          f"[mask]{'vflip,' if position == 'bottom' else ''}format=yuva420p,alphaextract,negate[mask2];"
+                          "[media][mask2]alphamerge",
+                          "-c:v", "png", "-c:a", "copy", "-fps_mode", "vfr", outfile)
+    else:
+        mask_filters = []
+        if position == "bottom":
+            mask_filters.append("vflip")
+        if color == "black":
+            mask_filters.append("negate")
+
+        await run_command("ffmpeg", "-i", media, "-i", "rendering/images/speechbubble.png",
+                          "-filter_complex",
+                          # mask input media
+                          "[1:v][0:v]scale2ref[mask][media];"
+                          f"[mask]{','.join(mask_filters)}[mask2];"
+                          "[media][mask2]overlay",
+                          "-c:v", "png", "-c:a", "copy", "-fps_mode", "vfr", outfile)
     if mt == "GIF":
         outfile = await mp4togif(outfile)
 
