@@ -1,4 +1,5 @@
 import datetime
+import textwrap
 import typing
 
 import aiohttp
@@ -46,7 +47,7 @@ def quote(string: str) -> str:
     :param string: string to quote
     :return: quoted string
     """
-    return re.sub("([\n\r]|^) *>* *", "\n> ", string)
+    return textwrap.indent(string, "> ")
 
 
 def now():
