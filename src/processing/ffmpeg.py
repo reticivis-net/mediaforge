@@ -1105,7 +1105,7 @@ async def trollface(media):
     outfile = reserve_tempfile(exts[mt])
     await run_command("ffmpeg", "-i", media,
                       "-i", "rendering/images/trollface/bottom.png",
-                      "-loop", "1", "-i", "rendering/images/trollface/mask.png",
+                      "-i", "rendering/images/trollface/mask.png",
                       "-i", "rendering/images/trollface/top.png",
                       "-filter_complex",
                       # resize input media
