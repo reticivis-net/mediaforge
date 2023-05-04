@@ -243,4 +243,7 @@ class Conversion(commands.Cog, name="Conversion"):
                 await ctx.reply(f"Failed to upload {url}: Code {e.status}: {e.message}")
 
         if urls:
-            await asyncio.gather(*[upload_url(url) for url in urls])
+            async with utils.tempfiles.TempFileSession():
+                await asyncio.gather(*[upload_url(url) for url in urls])
+        else:
+            raise commands.BadArgument("No emoji URLs found")
