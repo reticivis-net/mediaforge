@@ -1203,13 +1203,17 @@ async def speech_bubble(media, position: typing.Literal["top", "bottom"] = "top"
             mask_filters.append("vflip")
         if color == "black":
             mask_filters.append("negate")
+        if mask_filters:
+            mask_filter = f"[mask]{','.join(mask_filters)}[mask];"
+        else:
+            mask_filter = ""
 
         await run_command("ffmpeg", "-i", media, "-i", "rendering/images/speechbubble.png",
                           "-filter_complex",
                           # mask input media
                           "[1:v][0:v]scale2ref[mask][media];"
-                          f"[mask]{','.join(mask_filters)}[mask2];"
-                          "[media][mask2]overlay",
+                          f"{mask_filter}"
+                          "[media][mask]overlay",
                           "-c:v", "png", "-c:a", "copy", "-fps_mode", "vfr", outfile)
     if mt == "GIF":
         outfile = await mp4togif(outfile)
