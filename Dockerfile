@@ -1,4 +1,4 @@
-FROM python:3.11 AS builder
+FROM python:3.11.4 AS builder
 
 # automode
 ARG AUTOMODE="OFF"
@@ -9,25 +9,44 @@ ENV AUTOMODE=$AUTOMODE CONFIG=$CONFIG AUTOUPDATE=$AUTOUPDATE
 COPY . mediaforge
 # like cd but for docker
 WORKDIR mediaforge
-# the static deb here makes me nervous but the alternative is Really Weird so no
-RUN dpkg -i $(curl -w "%{filename_effective}" -LO "https://www.deb-multimedia.org/pool/main/d/deb-multimedia-keyring/deb-multimedia-keyring_2016.8.1_all.deb")
-# experimental/testing/unstable for ffmpeg and non-free/contrib for mbrola
-RUN printf "\ndeb https://deb.debian.org/debian bullseye contrib non-free\ndeb https://deb.debian.org/debian bookworm main\ndeb https://www.deb-multimedia.org bookworm main\n" >> "/etc/apt/sources.list.d/debian-extended.list"
 
-# apt
-RUN apt-get -y update
+# Install required dependencies for building
+RUN apt-get update && apt-get upgrade -y && apt-get install -y --no-install-recommends \
+    build-essential \
+    curl \
+    imagemagick \
+    libexpat1-dev \
+    libgirepository1.0-dev \
+    libglib2.0-dev \
+    libgif-dev \
+    nodejs \
+    pkg-config \
+    unzip \
+    yasm \
+    nano
+	
+# Install latest supported libvips-dev
+RUN apt-get install -y libvips42 gir1.2-vips-8.0 libfftw3-dev libpango1.0-dev gettext liborc-0.4-dev libmatio-dev libcfitsio-dev libopenslide-dev libgsf-1-dev libcgif-dev libpoppler-glib-dev libjxl-dev libimagequant-dev libheif-dev
+RUN dpkg -i $(curl -w "%{filename_effective}" -LO "http://http.us.debian.org/debian/pool/main/v/vips/gir1.2-vips-8.0_8.14.2-1_amd64.deb")
+RUN dpkg -i $(curl -w "%{filename_effective}" -LO "http://http.us.debian.org/debian/pool/main/v/vips/libvips42_8.14.2-1_amd64.deb")
+RUN dpkg -i $(curl -w "%{filename_effective}" -LO "http://http.us.debian.org/debian/pool/main/v/vips/libvips-dev_8.14.2-1_amd64.deb")
+RUN apt --fix-broken install
+RUN apt-get update && apt-get upgrade -y
+RUN apt-get install -y libvips-dev
 
-# ffmpeg 5 isnt on stable for some reason so it has to be installed separately
-# libgif-dev is here because apt is weird see #128
-# libvips is here cause stable is old
-RUN apt-get -t testing --no-install-recommends install -y ffmpeg libgif-dev libvips-dev
-# most packages
-RUN apt-get -t stable --no-install-recommends install -y nano imagemagick nodejs
+# Install ffmpeg from source
+RUN apt install -y libx264-dev
+RUN curl -LO "https://github.com/FFmpeg/FFmpeg/archive/refs/tags/n6.0.zip" \
+ && unzip n6.0.zip \
+ && cd FFmpeg-n6.0 \
+ && ./configure --enable-gpl --enable-libx264 \
+ && make -j$(nproc) \
+ && make -j$(nproc) install \
+ && cd /mediaforge \
+ && rm -rf FFmpeg-n6.0 n6.0.zip
 
 # weird bugs here
 RUN apt-mark hold usrmerge usr-is-merged
-# if i dont do this there are weird errors trying to build pip packages
-RUN apt-get -y upgrade
 
 RUN apt-get -y autoremove
 
@@ -42,6 +61,3 @@ ENV AM_I_IN_A_DOCKER_CONTAINER Yes
 
 ENTRYPOINT ["/bin/bash", "./dockerentry.sh"]
 #CMD ["/bin/bash", "./dockerentry.sh"]
-
-
-
