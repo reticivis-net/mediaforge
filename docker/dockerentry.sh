@@ -13,7 +13,6 @@ updategit() {
 updateapt() {
   echo "Updating APT Packages..."
   apt-get update -y
-  apt-get install -t experimental -y ffmpeg
   apt-get upgrade -y
   apt autoremove -y
   echo "Done!"
