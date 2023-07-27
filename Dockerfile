@@ -8,6 +8,7 @@ ENV AUTOMODE=$AUTOMODE CONFIG=$CONFIG AUTOUPDATE=$AUTOUPDATE
 
 # copy mediaforge code to container
 COPY . mediaforge
+RUN chmod +x /mediaforge/docker/*
 
 # we need non-free
 RUN printf "\ndeb https://deb.debian.org/debian bookworm contrib non-free" >> "/etc/apt/sources.list.d/debian-extended.list"
