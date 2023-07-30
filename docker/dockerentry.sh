@@ -24,13 +24,13 @@ updatepip() {
   python -m poetry install
 }
 updateffmpeg(){
-  ./buildffmpeg.sh
+  /mediaforge/docker/buildffmpeg.sh
 }
 updatevips(){
-  ./buildvips.sh
+  /mediaforge/docker/buildvips.sh
 }
 updateimagemagick(){
-  ./installimagemagick.sh
+  /mediaforge/docker/installimagemagick.sh
 }
 
 run() {
@@ -81,10 +81,10 @@ select fav in "${choices[@]}"; do
     updategit
     ;;
   "Rebuild FFmpeg")
-    buildffmpeg
+    updateffmpeg
   ;;
   "Rebuild libvips")
-    buildvips
+    updatevips
   ;;
   "Update ImageMagick")
     updateimagemagick
