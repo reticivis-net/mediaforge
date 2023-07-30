@@ -17,7 +17,7 @@ RUN printf "\ndeb https://deb.debian.org/debian bookworm contrib non-free" >> "/
 RUN apt-get -y update
 RUN apt-get -y upgrade
 # most packages
-RUN apt-get --no-install-recommends install -y nano imagemagick nodejs libgif-dev lsb-release software-properties-common
+RUN apt-get --no-install-recommends install -y nano nodejs libgif-dev lsb-release software-properties-common
 
 # ffmpeg
 # https://trac.ffmpeg.org/wiki/CompilationGuide/Ubuntu#FFmpeg
@@ -42,6 +42,10 @@ RUN apt-get --no-install-recommends install -y \
 RUN pip install --upgrade --user pip --no-warn-script-location --root-user-action=ignore
 RUN pip install meson --no-warn-script-location --root-user-action=ignore
 RUN bash -c /mediaforge/docker/buildvips.sh
+
+# imagemagick
+RUN apt-get install fuse libfuse2
+RUN bash -c /mediaforge/docker/installimagemagick.sh
 
 RUN apt-get -y autoremove
 

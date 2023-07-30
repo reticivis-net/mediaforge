@@ -29,6 +29,9 @@ updateffmpeg(){
 updatevips(){
   ./buildvips.sh
 }
+updateimagemagick(){
+  ./installimagemagick.sh
+}
 
 run() {
   # remote isnt set up by default when container is set up
@@ -56,7 +59,7 @@ fi
 
 # weird variable name thing for prompt
 PS3='What would you like to do? '
-choices=("Run MediaForge" "Edit Config" "Update/Rebuild All And Run" "Update MediaForge Code" "Rebuild FFmpeg" "Rebuild libvips" "Update APT Packages" "Update PIP Packages" "Debug Shell" "Quit")
+choices=("Run MediaForge" "Edit Config" "Update/Rebuild All And Run" "Update MediaForge Code" "Rebuild FFmpeg" "Rebuild libvips" "Update ImageMagick" "Update APT Packages" "Update PIP Packages" "Debug Shell" "Quit")
 select fav in "${choices[@]}"; do
   case $fav in
   "Run MediaForge")
@@ -71,6 +74,7 @@ select fav in "${choices[@]}"; do
     updatepip
     updateffmpeg
     updatevips
+    updateimagemagick
     run
     ;;
   "Update MediaForge Code")
@@ -81,6 +85,9 @@ select fav in "${choices[@]}"; do
   ;;
   "Rebuild libvips")
     buildvips
+  ;;
+  "Update ImageMagick")
+    updateimagemagick
   ;;
   "Update APT Packages")
     updateapt

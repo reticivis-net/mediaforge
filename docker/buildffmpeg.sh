@@ -1,6 +1,7 @@
 cd /
 wget -O ffmpeg-snapshot.tar.bz2 https://ffmpeg.org/releases/ffmpeg-snapshot.tar.bz2
 tar xjvf ffmpeg-snapshot.tar.bz2
+rm ffmpeg-snapshot.tar.bz2
 cd ffmpeg
 PKG_CONFIG_PATH="$HOME/ffmpeg_build/lib/pkgconfig" ./configure \
   --prefix="$HOME/ffmpeg_build" \
