@@ -24,12 +24,18 @@ updatepip() {
   python -m poetry install
 }
 updateffmpeg(){
+  # for backwards compatability
+  chmod +x /mediaforge/docker/*
   /mediaforge/docker/buildffmpeg.sh
 }
 updatevips(){
+  # for backwards compatability
+  chmod +x /mediaforge/docker/*
   /mediaforge/docker/buildvips.sh
 }
 updateimagemagick(){
+  # for backwards compatability
+  chmod +x /mediaforge/docker/*
   /mediaforge/docker/installimagemagick.sh
 }
 
