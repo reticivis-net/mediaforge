@@ -29,7 +29,7 @@ def ytdownload(vid, form):
         "outtmpl": f"{name}.%(ext)s",
         "default_search": "auto",
         "merge_output_format": "mp4",
-        "format": f'(bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/bestvideo+bestaudio/best)'
+        "format": f'(bestvideo[vcodec=h264]+bestaudio[ext=m4a]/best[vcodec=h264]/bestvideo+bestaudio/best)'
                   f'[filesize<?{config.file_upload_limit}]',
         "max_filesize": config.file_upload_limit,
         "logger": MyLogger(),  # this is stupid but its how ytdl works

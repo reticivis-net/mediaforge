@@ -61,14 +61,13 @@ down `CTRL+K` to clear the file and then use `CTRL+V` to paste in your config.
 
 ### to run
 
-run `docker ps -a` in your terminal to see the created docker image. your container should have a 12 character "ID",
-which you'll need to run it.
-
 run in your favorite terminal:
 
 ```shell
 docker start -ia mediaforge
 ```
+
+by default, MediaForge will await user input for 10 seconds before attempting to run the bot automatically.
 
 ### to stop
 
@@ -104,8 +103,8 @@ docker update --memory 9000M --memory-swap -1 --cpus "3.9" mediaforge
 
 this is designed to work with hosting providers where terminal control is not possible. There are 3 arguments to this
 mode that can be set as
-docker [build arguments](https://docs.docker.com/engine/reference/commandline/build/#set-build-time-variables---build-arg)
-or [environment variables](https://docs.docker.com/engine/reference/commandline/run/#set-environment-variables--e---env---env-file)
+docker [build arguments](https://docs.docker.com/engine/reference/commandline/build/#build-arg)
+or [environment variables](https://docs.docker.com/engine/reference/commandline/run/#env)
 .
 `AUTOMODE`: set to "ON" to enable automode
 `AUTOUPDATE`: set to "ON" to update code and packages every run

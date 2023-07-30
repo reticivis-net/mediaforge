@@ -62,58 +62,58 @@ if [ "$AUTOMODE" == "ON" ] && [ "$CONFIG" != "" ]; then
   run
   exit
 fi
-while true; do
-  read -t 10 -p "Press Enter to view options, or MediaForge will automatically start in 10 seconds." RESP
-  if [[ $? -gt 128 ]] ; then
+
+read -t 10 -p "Press Enter to view options, or MediaForge will automatically start in 10 seconds." RESP
+if [[ $? -gt 128 ]] ; then
+    run
+else
+  # weird variable name thing for prompt
+  PS3='What would you like to do? '
+  choices=("Run MediaForge" "Edit Config" "Update/Rebuild All And Run" "Update MediaForge Code" "Rebuild FFmpeg" "Rebuild libvips" "Update ImageMagick" "Update APT Packages" "Update PIP Packages" "Debug Shell" "Quit")
+  select fav in "${choices[@]}"; do
+    case $fav in
+    "Run MediaForge")
       run
-  else
-    # weird variable name thing for prompt
-    PS3='What would you like to do? '
-    choices=("Run MediaForge" "Edit Config" "Update/Rebuild All And Run" "Update MediaForge Code" "Rebuild FFmpeg" "Rebuild libvips" "Update ImageMagick" "Update APT Packages" "Update PIP Packages" "Debug Shell" "Quit")
-    select fav in "${choices[@]}"; do
-      case $fav in
-      "Run MediaForge")
-        run
-        ;;
-      "Edit Config")
-        nano config.py
-        ;;
-      "Update/Rebuild All And Run")
-        updategit
-        updateapt
-        updatepip
-        updateffmpeg
-        updatevips
-        updateimagemagick
-        run
-        ;;
-      "Update MediaForge Code")
-        updategit
-        ;;
-      "Rebuild FFmpeg")
-        updateffmpeg
       ;;
-      "Rebuild libvips")
-        updatevips
+    "Edit Config")
+      nano config.py
       ;;
-      "Update ImageMagick")
-        updateimagemagick
+    "Update/Rebuild All And Run")
+      updategit
+      updateapt
+      updatepip
+      updateffmpeg
+      updatevips
+      updateimagemagick
+      run
       ;;
-      "Update APT Packages")
-        updateapt
-        ;;
-      "Update PIP Packages")
-        updatepip
-        ;;
-      "Debug Shell")
-        /bin/bash
-        ;;
-      "Quit")
-        echo "Goodbye!"
-        exit
-        ;;
-      *) echo "invalid option $REPLY" ;;
-      esac
-    done
-  fi
-done
+    "Update MediaForge Code")
+      updategit
+      ;;
+    "Rebuild FFmpeg")
+      updateffmpeg
+    ;;
+    "Rebuild libvips")
+      updatevips
+    ;;
+    "Update ImageMagick")
+      updateimagemagick
+    ;;
+    "Update APT Packages")
+      updateapt
+      ;;
+    "Update PIP Packages")
+      updatepip
+      ;;
+    "Debug Shell")
+      /bin/bash
+      ;;
+    "Quit")
+      echo "Goodbye!"
+      exit
+      ;;
+    *) echo "invalid option $REPLY" ;;
+    esac
+  done
+fi
+
