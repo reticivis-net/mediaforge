@@ -9,7 +9,7 @@ import config
 import processing.common
 import processing.ffmpeg
 import processing.ffprobe
-from core import v2queue
+from core import queue
 from core.clogs import logger
 from utils.scandiscord import imagesearch
 from utils.web import saveurls
@@ -17,7 +17,7 @@ import utils.tempfiles
 
 
 async def process(ctx: commands.Context, func: callable, inputs: list, *args,
-                  resize=True, expectimage=True, uploadresult=True, queue=True, run_parallel=False, **kwargs):
+                  resize=True, expectimage=True, uploadresult=True, run_parallel=False, **kwargs):
     """
     The core function of the bot. Gathers media and sends it to the proper function.
 
@@ -30,7 +30,6 @@ async def process(ctx: commands.Context, func: callable, inputs: list, *args,
     :param expectimage: is func() supposed to return a result? if true, it expects an image. if false, can use a
         string.
     :param uploadresult: if true, uploads the result automatically.
-    :param queue: if true, command must wait for open slot in queue to process.
     :param run_parallel: for sync functions only, run without blocking
     :return: filename of processed media
     """
@@ -88,7 +87,7 @@ async def process(ctx: commands.Context, func: callable, inputs: list, *args,
                 # files are of correcte type, begin to process
                 else:
                     # only update with queue message if there is a queue
-                    if queue and v2queue.sem.locked():
+                    if queue.queue_enabled and queue.sem.locked():
                         await updatestatus("Your command is in the queue...")
 
                     # run func
@@ -119,12 +118,7 @@ async def process(ctx: commands.Context, func: callable, inputs: list, *args,
                             command_result = await processing.ffmpeg.assurefilesize(command_result)
                         return command_result
 
-                    # only queue if needed
-                    if queue:
-                        async with v2queue.sem:
-                            result = await run()
-                    else:
-                        result = await run()
+                    result = await queue.enqueue(run())
                     # check results are as expected
                     if expectimage:  # file expected
                         if not result:

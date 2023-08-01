@@ -9,6 +9,7 @@ from discord import app_commands
 from discord.ext import commands
 
 import config
+import core.queue
 import processing.common
 import processing.other
 import utils.tempfiles
@@ -186,3 +187,14 @@ class Debug(commands.Cog, name="Owner Only", command_attrs=dict(hidden=True)):
     @commands.is_owner()
     async def sendfile(self, ctx, path):
         await ctx.reply(file=discord.File(path))
+
+    @commands.command()
+    @commands.is_owner()
+    async def fillqueue(self, ctx: commands.Context):
+        async def wait():
+            await msg.edit(content="Command in queue.")
+            await asyncio.sleep(10)
+
+        msg = await ctx.reply("Command entering queue...")
+        await core.queue.enqueue(wait())
+        await msg.edit(content="Command out of queue.")

@@ -10,7 +10,8 @@ bot_list_data = None
 #             "token": "exampletoken"
 #         },
 # }
-# number of commands that can be processed at once. set to None to automatically use OS cpu core count
+# number of commands that can be processed at once. set to None to automatically use OS cpu core count.
+# set to -1 to remove limit.
 workers = None
 # manually specify tempdir rather than using OS's default
 # temp dir defaults to /dev/shm (in-memory) if available and this var is None

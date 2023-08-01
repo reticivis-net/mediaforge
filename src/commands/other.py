@@ -9,11 +9,12 @@ import regex as re
 from discord.ext import commands
 
 import config
-import core.v2queue
+import core.queue
 import processing.common
 import processing.ffmpeg
 import processing.ffprobe
 import utils.discordmisc
+import utils.tempfiles
 from core import database
 from core.process import process
 from utils.common import prefix_function
@@ -21,7 +22,6 @@ from utils.dpy import UnicodeEmojiConverter, showcog
 from utils.dpy import add_long_field
 from utils.scandiscord import imagesearch
 from utils.web import saveurls
-import utils.tempfiles
 
 
 class Other(commands.Cog, name="Other"):
@@ -144,8 +144,13 @@ class Other(commands.Cog, name="Other"):
         :param ctx: discord context
         """
         embed = discord.Embed(color=discord.Color(0xD262BA), title="Statistics")
-        embed.add_field(name="Queued Tasks", value=f"{core.v2queue.queued}")
-        embed.add_field(name="Number of tasks this instance can run at once", value=f"{core.v2queue.workers}")
+        if core.queue.queue_enabled:
+            embed.add_field(name="Running Commands", value=f"{min(core.queue.queued, core.queue.workers)}")
+            embed.add_field(name="Max Running Commands", value=f"{core.queue.workers}")
+            embed.add_field(name="Queued Commands", value=f"{max(0, core.queue.queued - core.queue.workers)}")
+        else:
+            embed.add_field(name="Running Commands", value=f"{core.queue.queued}")
+            embed.add_field(name="Number of tasks this instance can run at once", value=f"{core.queue.workers}")
         if isinstance(self.bot, discord.AutoShardedClient):
             embed.add_field(name="Total Bot Shards", value=f"{len(self.bot.shards)}")
         await ctx.reply(embed=embed)
