@@ -29,17 +29,17 @@ def ytdownload(vid, form):
         "outtmpl": f"{name}.%(ext)s",
         "default_search": "auto",
         "merge_output_format": "mp4",
-        "format": f'(bestvideo[vcodec=h264]+bestaudio[ext=m4a]/best[vcodec=h264]/bestvideo+bestaudio/best)'
-                  f'[filesize<?{config.file_upload_limit}]',
+        "format": f'(bestvideo+bestaudio/best)[filesize<?{config.file_upload_limit}]',
+        'format_sort': ['+acodec:mp3:aac', '+vcodec:h264'],  # prefer h264 and mp3/aac, discord embeds better
         "max_filesize": config.file_upload_limit,
         "logger": MyLogger(),  # this is stupid but its how ytdl works
     }
     if form == "audio":
         opts['format'] = f"bestaudio[filesize<{config.file_upload_limit}]"
-        opts['postprocessors'] = [{
-            'key': 'FFmpegExtractAudio',
-            'preferredcodec': 'mp3',
-        }]
+        # opts['postprocessors'] = [{
+        #     'key': 'FFmpegExtractAudio',
+        #     'preferredcodec': 'mp3',
+        # }]
     with youtube_dl.YoutubeDL(opts) as ydl:
         # manually exclude livestreams, cant find a better way to do this ¯\_(ツ)_/¯
         nfo = ydl.extract_info(vid, download=False)

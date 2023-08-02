@@ -114,9 +114,11 @@ class Conversion(commands.Cog, name="Conversion"):
                                f"format. You can use " \
                                f"`{await prefix_function(self.bot, ctx.message, True)}reencode` to change the codec, " \
                                f"though this may increase the filesize or decrease the quality.\n"
-                    if acodec and acodec["codec_name"] not in ["aac", "mp3"]:
-                        txt += f"The returned video's audio is in the `{vcodec['codec_name']}` " \
-                               f"({vcodec['codec_long_name']}) codec. Some devices cannot play this. " \
+                    if acodec and acodec["codec_name"] != "mp3":
+                        # people dont like aac but modern devices can play aac
+                        txt += f"The returned video's audio is in the `{acodec['codec_name']}` " \
+                               f"({acodec['codec_long_name']}) codec. " \
+                               f"{'Some devices cannot play this. ' if acodec['codec_name'] != 'aac' else ''}" \
                                f"You can use `{await prefix_function(self.bot, ctx.message, True)}reencode` " \
                                f"to change the codec, " \
                                f"though this may increase the filesize or decrease the quality."
