@@ -98,7 +98,7 @@ class Conversion(commands.Cog, name="Conversion"):
         """
         msg = await ctx.reply(f"{config.emojis['working']} Downloading from site...", mention_author=False)
         try:
-            async with utils.tempfiles.TempFileSession():
+            async with (utils.tempfiles.TempFileSession()):
                 r = await run_parallel(ytdownload, videourl, videoformat)
                 if r:
                     r = await processing.ffmpeg.assurefilesize(r, re_encode=False)
@@ -112,16 +112,19 @@ class Conversion(commands.Cog, name="Conversion"):
                         txt += f"The returned video is in the `{vcodec['codec_name']}` " \
                                f"({vcodec['codec_long_name']}) codec. Discord might not be able embed this " \
                                f"format. You can use " \
-                               f"`{await prefix_function(self.bot, ctx.message, True)}reencode` to change the codec, " \
-                               f"though this may increase the filesize or decrease the quality.\n"
-                    if acodec and acodec["codec_name"] != "mp3":
+                               f"`{await prefix_function(self.bot, ctx.message, True)}reencode` " \
+                               "to change the codec, though this may increase the filesize or decrease the quality.\n"
+                    if acodec and acodec["codec_name"] not in ["mp3", "aac"]:
                         # people dont like aac but modern devices can play aac
-                        txt += f"The returned video's audio is in the `{acodec['codec_name']}` " \
-                               f"({acodec['codec_long_name']}) codec. " \
-                               f"{'Some devices cannot play this. ' if acodec['codec_name'] != 'aac' else ''}" \
+                        txt += f"The returned audio is in the `{acodec['codec_name']}` " \
+                               f"({acodec['codec_long_name']}) codec. Some devices cannot embed or play this." \
                                f"You can use `{await prefix_function(self.bot, ctx.message, True)}reencode` " \
-                               f"to change the codec, " \
-                               f"though this may increase the filesize or decrease the quality."
+                               f"to change the codec, though this may increase the filesize or decrease the quality."
+                    if acodec and acodec["codec_name"] and acodec == "aac" and not vcodec:
+                        txt += f"The returned audio is in the `{acodec['codec_name']}` " \
+                               f"({acodec['codec_long_name']}) codec. " \
+                               f"You can use `{await prefix_function(self.bot, ctx.message, True)}reencode` " \
+                               f"to change the codec, though this may increase the filesize or decrease the quality."
                     await msg.edit(content=f"{config.emojis['working']} Uploading to Discord...")
                     await ctx.reply(txt, file=discord.File(r))
                 else:
