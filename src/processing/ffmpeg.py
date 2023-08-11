@@ -368,8 +368,8 @@ async def changefps(file, fps):
     """
     mt = await mediatype(file)
     outname = reserve_tempfile("mp4")
-    await run_command("ffmpeg", "-hide_banner", "-i", file, "-r", str(fps), "-c", "copy", "-c:v", "png", "-fps_mode",
-                      "vfr", outname)
+    await run_command("ffmpeg", "-hide_banner", "-i", file, "-r", str(fps), "-c:a", "copy", "-c:v", "png",
+                      outname)
     if mt == "GIF":
         outname = await mp4togif(outname)
 
