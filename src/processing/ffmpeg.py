@@ -890,10 +890,7 @@ async def tint(file, col: discord.Color):
 async def epicbirthday(text: str):
     out = reserve_tempfile("mp4")
     birthdaytext = await tts(text)
-    nameimage = reserve_tempfile("png")
-    raise NotImplementedError
-    # TODO: replace with modern caption
-    # await renderpool.renderpool.submit(captionfunctions.epicbirthdaytext, text, nameimage)
+    nameimage = await processing.common.run_parallel(processing.vips.creation.epicbirthdaytext, text)
     # when to show the text
     betweens = [
         "between(n,294,381)",
@@ -920,7 +917,7 @@ async def epicbirthday(text: str):
                       # combine audio
                       "[a0][d1][d2][d3][d4][d5] amix=inputs=6:normalize=0 [outa];"
                       # add text
-                      f"[0:v][2:v] overlay=enable='{'+'.join(betweens)}' [outv]",
+                      f"[0:v][2:v] overlay=enable='{'+'.join(betweens)}:x=(main_w-overlay_w)/2:y=(main_h-overlay_h)/2' [outv]",
                       # map to output
                       "-map", "[outv]",
                       "-map", "[outa]",

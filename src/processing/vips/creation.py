@@ -120,3 +120,21 @@ def f1984(captions: typing.Sequence[str]):
     outfile = reserve_tempfile("png")
     im.pngsave(outfile)
     return outfile
+
+
+def epicbirthdaytext(caption: str):
+    # technically redundant but adds twemoji font
+    text = pyvips.Image.text(".", fontfile=twemoji)
+    # generate text
+    text = pyvips.Image.text(
+        f"<span foreground=\"white\">{caption.upper()}</span>",
+        font=f"Twemoji Color Emoji,MarkerFeltWide",
+        rgba=True,
+        fontfile="rendering/fonts/MarkerFeltWide Regular.ttf",
+        align=pyvips.Align.CENTRE,
+        width=540,
+        height=260
+    )
+    outfile = reserve_tempfile("png")
+    text.pngsave(outfile)
+    return outfile

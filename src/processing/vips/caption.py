@@ -336,6 +336,3 @@ def twitter_text(captions: typing.Sequence[str], size: ImageSize, dark: bool):
     outfile = reserve_tempfile("png")
     out.pngsave(outfile)
     return outfile
-
-# print(esmcaption(["h👍💜🏳️‍🌈🏳️‍⚧️i"], 1000))
-# print(meme_text(["topto top topt otp otp top", "bottom"], ImageSize(1000, 1000)))
