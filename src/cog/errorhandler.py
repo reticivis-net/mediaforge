@@ -155,11 +155,15 @@ class ErrorHandlerCog(commands.Cog):
             embed = discord.Embed(color=0xed1c24, description=desc)
             embed.add_field(name=f"{config.emojis['2exclamation']} Report Issue to GitHub",
                             value=f"[Create New Issue](https://github.com/HexCodeFFF/mediaforge"
-                                  f"/issues/new?labels=bug&template=bug_report.md&title"
+                                  f"/issues/new?labels=bug&template=bug_report.yaml&title"
                                   f"={urllib.parse.quote(str(commanderror), safe='')[:848]})\n[View Issu"
                                   f"es](https://github.com/HexCodeFFF/mediaforge/issues)")
             with io.BytesIO() as buf:
-                trheader = f"DATETIME:{datetime.datetime.now()}\nCOMMAND:{ctx.message.content}\nTRACEBACK:\n"
+                if ctx.interaction:
+                    command = f"/{ctx.command} {ctx.kwargs}"
+                else:
+                    command = ctx.message.content
+                trheader = f"DATETIME:{datetime.datetime.now()}\nCOMMAND:{command}\nTRACEBACK:\n"
                 buf.write(bytes(trheader + ''.join(
                     traceback.format_exception(commanderror)), encoding='utf8'))
                 buf.seek(0)
