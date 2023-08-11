@@ -123,6 +123,7 @@ def f1984(captions: typing.Sequence[str]):
 
 
 def epicbirthdaytext(caption: str):
+    caption = escape(caption)
     # technically redundant but adds twemoji font
     text = pyvips.Image.text(".", fontfile=twemoji)
     # generate text
