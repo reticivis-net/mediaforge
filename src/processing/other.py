@@ -1,4 +1,6 @@
 import glob
+import re
+import traceback
 
 import yt_dlp as youtube_dl
 
@@ -24,6 +26,11 @@ def ytdownload(vid, form):
         name = f"{utils.tempfiles.temp_dir}/{utils.tempfiles.get_random_string(12)}"
         if len(glob.glob(name + ".*")) == 0:
             break
+
+    def live_filter(info, *, incomplete):
+        if info.get("is_live"):
+            return "Livestreams cannot be downloaded"
+
     opts = {
         "quiet": True,
         "outtmpl": f"{name}.%(ext)s",
@@ -33,6 +40,7 @@ def ytdownload(vid, form):
         'format_sort': ['+acodec:mp3:aac', '+vcodec:h264'],  # prefer h264 and mp3/aac, discord embeds better
         "max_filesize": config.file_upload_limit,
         "logger": MyLogger(),  # this is stupid but its how ytdl works
+        "match_filter": live_filter  # no livestreams because they break things
     }
     if form == "audio":
         opts['format'] = f"bestaudio[filesize<{config.file_upload_limit}]"
@@ -40,18 +48,21 @@ def ytdownload(vid, form):
         #     'key': 'FFmpegExtractAudio',
         #     'preferredcodec': 'mp3',
         # }]
-    with youtube_dl.YoutubeDL(opts) as ydl:
-        # manually exclude livestreams, cant find a better way to do this ¯\_(ツ)_/¯
-        nfo = ydl.extract_info(vid, download=False)
-        logger.debug(nfo)
-        if "is_live" in nfo and nfo["is_live"]:
-            raise youtube_dl.DownloadError("Livestreams cannot be downloaded.")
-        ydl.download([vid])
-    filename = glob.glob(name + ".*")
-    if len(filename) > 0:
-        return reserve_tempfile(filename[0])
-    else:
-        return None
+    try:
+        with youtube_dl.YoutubeDL(opts) as ydl:
+            ydl.download([vid])
+        filename = glob.glob(name + ".*")
+        if len(filename) > 0:
+            return reserve_tempfile(filename[0])
+        else:
+            return None
+    except youtube_dl.DownloadError as e:
+        # python tries to stringify terminal color characters which looks bad
+        ansi_escape = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
+        cleaned_error = ansi_escape.sub('', str(e))
+        # yt-dlp includes detailed HTTP errors that can't be pickled, quick and dirty workaround
+        raise youtube_dl.DownloadError(cleaned_error) from Exception(traceback.format_exception(e))
+
 
 
 async def magickone(media, strength):
