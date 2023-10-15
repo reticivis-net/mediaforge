@@ -1,6 +1,7 @@
 import os
 
 import discord
+import humanize
 
 import config
 from core.clogs import logger
