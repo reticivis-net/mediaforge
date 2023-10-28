@@ -12,7 +12,8 @@ from core import database
 
 
 async def fetch(url):
-    async with aiohttp.ClientSession(headers={'Connection': 'keep-alive'}, timeout=60 * 10) as session:
+    async with aiohttp.ClientSession(headers={'Connection': 'keep-alive'},
+                                     timeout=aiohttp.ClientTimeout(total=600)) as session:
         async with session.get(url) as response:
             if response.status != 200:
                 response.raise_for_status()
