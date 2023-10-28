@@ -4,7 +4,6 @@ import typing
 
 import aiohttp
 import discord
-import regex as re
 import requests
 from discord.ext import commands
 
@@ -13,7 +12,7 @@ from core import database
 
 
 async def fetch(url):
-    async with aiohttp.ClientSession(headers={'Connection': 'keep-alive'}) as session:
+    async with aiohttp.ClientSession(headers={'Connection': 'keep-alive'}, timeout=60 * 10) as session:
         async with session.get(url) as response:
             if response.status != 200:
                 response.raise_for_status()
