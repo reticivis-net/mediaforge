@@ -13,7 +13,7 @@ from core.clogs import logger
 from utils.common import fetch
 from utils.web import contentlength
 
-tenor_url_regex = re.compile(r"https?://tenor\.com/view/([\w\d]+-)*(\d+)/?")
+tenor_url_regex = re.compile(r"https?://tenor\.com/view/([^-]+-)*(\d+)/?")
 
 
 async def handlemessagesave(m: discord.Message):
