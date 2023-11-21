@@ -11,6 +11,10 @@ class CommandChecksCog(commands.Cog):
         self.bot: commands.Bot = bot
         # from ?tag cooldown mapping
         self._cd = commands.CooldownMapping.from_cooldown(1.0, config.cooldown, commands.BucketType.member)
+        self.bot.add_check(self.banned_users)
+        self.bot.add_check(self.block_filter)
+        self.bot.add_check(self.cooldown_check)
+
 
     # @commands.check
     async def banned_users(self, ctx: commands.Context):
@@ -41,9 +45,16 @@ class CommandChecksCog(commands.Cog):
         # this command is exempt because it only works on URLs and there have been issues with r/okbr
         if ctx.command.name == "videodl":
             return True
-        for block in config.blocked_words:
-            if block.lower() in ctx.message.content.lower():
-                raise commands.CheckFailure("Your command contains one or more blocked words.")
+        if ctx.interaction:
+            if "options" in ctx.interaction.data:
+                for arg in ctx.interaction.data["options"]:
+                    for block in config.blocked_words:
+                        if block.lower() in arg["value"].lower():
+                            raise commands.CheckFailure("Your command contains one or more blocked words.")
+        else:
+            for block in config.blocked_words:
+                if block.lower() in ctx.message.content.lower():
+                    raise commands.CheckFailure("Your command contains one or more blocked words.")
         return True
 
     # @commands.check
@@ -62,11 +73,3 @@ class CommandChecksCog(commands.Cog):
         if retry_after:
             raise commands.CommandOnCooldown(bucket, retry_after, commands.BucketType.user)
         return True
-
-    async def bot_check(self, ctx: commands.Context):
-        results = [
-            self.block_filter(ctx),
-            await self.cooldown_check(ctx),
-            await self.banned_users(ctx)
-        ]
-        return all(results)
