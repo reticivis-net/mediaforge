@@ -3,8 +3,8 @@ import aiohttp
 import humanize
 
 import config
-import processing.ffmpeg
 import processing.common
+import processing.ffmpeg
 from core.clogs import logger
 from utils.tempfiles import reserve_tempfile
 
@@ -28,7 +28,8 @@ async def saveurl(url: str) -> str:
     name = reserve_tempfile(extension)
 
     # https://github.com/aio-libs/aiohttp/issues/3904#issuecomment-632661245
-    async with aiohttp.ClientSession(headers={'Connection': 'keep-alive'}) as session:
+    async with aiohttp.ClientSession(headers={'Connection': 'keep-alive'},
+                                     timeout=aiohttp.ClientTimeout(total=600)) as session:
         # i used to make a head request to check size first, but for some reason head requests can be super slow
         async with session.get(url) as resp:
             if resp.status == 200:
