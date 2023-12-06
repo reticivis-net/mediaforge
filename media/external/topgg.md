@@ -1,4 +1,4 @@
-# ![MediaForge](https://raw.githubusercontent.com/HexCodeFFF/mediaforge/master/media/banner.png)
+# ![MediaForge](https://raw.githubusercontent.com/reticivis-net/mediaforge/master/media/banner.png)
 [![Discord Bots](https://top.gg/api/widget/status/780570413767983122.svg)](https://top.gg/bot/780570413767983122)
 [![Discord Bots](https://top.gg/api/widget/servers/780570413767983122.svg)](https://top.gg/bot/780570413767983122)
 [![Discord Bots](https://top.gg/api/widget/upvotes/780570413767983122.svg)](https://top.gg/bot/780570413767983122)

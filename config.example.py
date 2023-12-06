@@ -51,7 +51,7 @@ tips = {
     "File Formats": "MediaForge supports static image formats like PNG, animated image formats like GIF, and video "
                     "formats like MP4.",
     "Self-Hosting": "MediaForge is completely open source and anyone can host a clone "
-                    "themself!\nhttps://github.com/HexCodeFFF/mediaforge "
+                    "themself!\nhttps://github.com/reticivis-net/mediaforge "
 }
 # https://www.reddit.com/r/discordapp/comments/aflp3p/the_truth_about_discord_file_upload_limits/
 # configured upload limit, in bytes, for files.

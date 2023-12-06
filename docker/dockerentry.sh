@@ -5,7 +5,7 @@ updategit() {
   echo "Updating MediaForge Code..."
   if [ ! -d ".git" ]; then
     git init . --initial-branch=master
-    git remote add origin https://github.com/HexCodeFFF/mediaforge.git
+    git remote add origin https://github.com/reticivis-net/mediaforge.git
   fi
   git fetch --all
   git reset --hard origin/master

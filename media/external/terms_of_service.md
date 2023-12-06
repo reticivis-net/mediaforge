@@ -24,7 +24,7 @@ invoked the command claims full responsibility.
 
 MediaForge was programmed by a human, and therefore is susceptible to human and other forms of error. MediaForge makes
 no guarantee of 100% intended behavior. If you
-[report an issue on the GitHub](https://github.com/HexCodeFFF/mediaforge/issues), I will be more likely to attempt
+[report an issue on the GitHub](https://github.com/reticivis-net/mediaforge/issues), I will be more likely to attempt
 to correct the issue, though no guarantee is made.
 
 ## User and Server Bans
@@ -35,7 +35,7 @@ though typical reasons include spam, bigotry, or other misuses of the bot.
 ## GPL-3.0 license
 
 The MediaForge source code is licensed under the GNU General Public License
-v3.0. [Read more here](https://github.com/HexCodeFFF/mediaforge/blob/master/LICENSE).
+v3.0. [Read more here](https://github.com/reticivis-net/mediaforge/blob/master/LICENSE).
 
 ## Self-hosting
 

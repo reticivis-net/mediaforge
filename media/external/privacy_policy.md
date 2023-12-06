@@ -22,7 +22,7 @@ permanently stored.
 ## Self-Hosted Instances
 
 The ID of the official MediaForge bot is `780570413767983122`. MediaForge
-is [open-source](https://github.com/HexCodeFFF/mediaforge) and designed to be flexible for
+is [open-source](https://github.com/reticivis-net/mediaforge) and designed to be flexible for
 others to host their own copy of MediaForge. MediaForge makes no guarantee that any self-hosted copy of MediaForge
 follows the official privacy policy.
 

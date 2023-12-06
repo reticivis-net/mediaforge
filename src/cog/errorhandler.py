@@ -154,10 +154,10 @@ class ErrorHandlerCog(commands.Cog):
                 desc = "Please report this error with the attached traceback file to the GitHub."
             embed = discord.Embed(color=0xed1c24, description=desc)
             embed.add_field(name=f"{config.emojis['2exclamation']} Report Issue to GitHub",
-                            value=f"[Create New Issue](https://github.com/HexCodeFFF/mediaforge"
+                            value=f"[Create New Issue](https://github.com/reticivis-net/mediaforge"
                                   f"/issues/new?labels=bug&template=bug_report.yaml&title"
                                   f"={urllib.parse.quote(str(commanderror), safe='')[:848]})\n[View Issu"
-                                  f"es](https://github.com/HexCodeFFF/mediaforge/issues)")
+                                  f"es](https://github.com/reticivis-net/mediaforge/issues)")
             with io.BytesIO() as buf:
                 if ctx.interaction:
                     command = f"/{ctx.command} {ctx.kwargs}"

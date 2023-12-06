@@ -35,7 +35,7 @@ try:
 except ModuleNotFoundError as e:
     print("".join(traceback.format_exception(type(e), e, tb=e.__traceback__)), file=sys.stderr)
     sys.exit("MediaForge was unable to import the required libraries and files. Did you follow the self-hosting guide "
-             "on the GitHub? https://github.com/HexCodeFFF/mediaforge#to-self-host")
+             "on the GitHub? https://github.com/reticivis-net/mediaforge#to-self-host")
 
 # project files
 import core.database
@@ -61,7 +61,7 @@ from commands.other import Other
 docker = os.environ.get('AM_I_IN_A_DOCKER_CONTAINER', False)
 if not hasattr(config, "bot_token") or config.bot_token == "EXAMPLE_TOKEN":
     sys.exit("The bot token could not be found or hasn't been properly set. Be sure to follow the self-hosting "
-             "guide on GitHub. https://github.com/HexCodeFFF/mediaforge#to-self-host")
+             "guide on GitHub. https://github.com/reticivis-net/mediaforge#to-self-host")
 
 # make copy of .reply() function
 discord.Message.orig_reply = discord.Message.reply

@@ -37,7 +37,7 @@ class GuildBansCog(commands.Cog):
                     outtext += f".\n"
                 outtext += f"To appeal this, "
                 if self.bot.owner_id == 214511018204725248:  # my ID; public bot
-                    outtext += "raise an issue at https://github.com/HexCodeFFF/mediaforge/issues/new?assignees=" \
+                    outtext += "raise an issue at https://github.com/reticivis-net/mediaforge/issues/new?assignees=" \
                                "&labels=unban+request&template=unban_request_server.yaml&title=Unban+request+for" \
                                "+%3CYOUR+SERVER+HERE%3E"
                 else:
@@ -54,7 +54,7 @@ class GuildBansCog(commands.Cog):
                 outtext += f".\n"
             outtext += f"To appeal this, "
             if self.bot.owner_id == 214511018204725248:  # my ID; public bot
-                outtext += "raise an issue at https://github.com/HexCodeFFF/mediaforge/issues/new?assignees=" \
+                outtext += "raise an issue at https://github.com/reticivis-net/mediaforge/issues/new?assignees=" \
                            "&labels=unban+request&template=unban_request_server.yaml&title=Unban+request+for" \
                            "+%3CYOUR+SERVER+HERE%3E"
             else:
