@@ -4,7 +4,7 @@ mkdir vips
 tar -xf vips*.tar.xz -C vips --strip-components 1
 rm vips*.tar.xz
 cd vips
-meson setup build --libdir=lib --buildtype=release -Dintrospection=false
+meson setup build --libdir=lib --buildtype=release -Dintrospection=disabled
 cd build
 meson compile
 meson install
