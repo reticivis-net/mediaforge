@@ -943,6 +943,7 @@ async def crop(file, w, h, x, y):
 
 async def trim_top(file, trim_size):
     mt = await mediatype(file)
+    trim_size = trim_size + 1
     exts = {
         "VIDEO": "mp4",
         "GIF": "mp4",
