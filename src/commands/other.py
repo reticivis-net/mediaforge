@@ -268,16 +268,24 @@ class Other(commands.Cog, name="Other"):
         elif inquiry.lower() in (coglist := {k.lower(): v for k, v in self.bot.cogs.items() if showcog(v)}):
             # get the cog found
             cog = coglist[inquiry.lower()]
+            embeds = []
             embed = discord.Embed(title=cog.qualified_name,
                                   description=cog.description + f"\nRun `{prefix}help command` for "
                                                                 f"more information on a command.",
                                   color=discord.Color(0xD262BA))
             # add field with description for every command in the cog
             for cmd in sorted(cog.get_commands(), key=lambda x: x.name):
+                if len(embed.fields) >= 25:
+                    embeds.append(embed)
+                    embed = discord.Embed(title=cog.qualified_name,
+                                          description=cog.description + f"\nRun `{prefix}help command` for "
+                                                                        f"more information on a command.",
+                                          color=discord.Color(0xD262BA))
                 if not cmd.hidden:
                     desc = cmd.short_doc if cmd.short_doc else "No Description."
                     embed.add_field(name=f"{prefix}{cmd.name}", value=desc)
-            await ctx.reply(embed=embed)
+            embeds.append(embed)
+            await ctx.reply(embeds=embeds)
         else:
             # for every bot command
             for bot_cmd in self.bot.commands:

@@ -49,7 +49,7 @@ class CommandChecksCog(commands.Cog):
             if "options" in ctx.interaction.data:
                 for arg in ctx.interaction.data["options"]:
                     for block in config.blocked_words:
-                        if block.lower() in arg["value"].lower():
+                        if isinstance(arg, str) and block.lower() in arg["value"].lower():
                             raise commands.CheckFailure("Your command contains one or more blocked words.")
         else:
             for block in config.blocked_words:
