@@ -49,7 +49,7 @@ async def saveurl(url: str) -> str:
                 logger.error(f"aiohttp status {await resp.read()}")
                 resp.raise_for_status()
     if tenorgif and name:
-        name = await processing.ffmpeg.mp4togif(name)
+        name = await processing.ffmpeg.videotogif(name)
     return name
 
 

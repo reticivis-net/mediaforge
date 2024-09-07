@@ -87,9 +87,9 @@ async def forceaudio(video):
     if await hasaudio(video):
         return video
     else:
-        outname = reserve_tempfile("mp4")
-        await run_command("ffmpeg", "-hide_banner", "-i", video, "-f", "lavfi", "-i", "anullsrc", "-c:v", "png",
-                          "-c:a", "aac", "-map", "0:v", "-map", "1:a", "-shortest", "-fps_mode", "vfr", outname)
+        outname = reserve_tempfile("mkv")
+        await run_command("ffmpeg", "-hide_banner", "-i", video, "-f", "lavfi", "-i", "anullsrc", "-c:v", "ffv1",
+                          "-c:a", "flac", "-map", "0:v", "-map", "1:a", "-shortest", "-fps_mode", "vfr", outname)
 
         return outname
 
@@ -109,7 +109,7 @@ async def twopasscapvideo(video, maxsize: int, audio_bitrate=128000):
     duration = await get_duration(video)
     # bytes to bits
     target_total_bitrate = (maxsize * 8) / duration
-    for tolerance in [.98, .95, .90, .75, .5]:
+    for tolerance in [.98, .95, .90, .75, .5, .25, .1]:
         target_video_bitrate = (target_total_bitrate - audio_bitrate) * tolerance
         if target_video_bitrate <= 0:
             raise NonBugError("Cannot fit video into Discord.")
@@ -128,11 +128,9 @@ async def twopasscapvideo(video, maxsize: int, audio_bitrate=128000):
         for f in glob.glob(pass1log + "*"):
             reserve_tempfile(f)
         if (size := os.path.getsize(outfile)) < maxsize:
-
             logger.info(f"successfully created {humanize.naturalsize(size)} video!")
             return outfile
         else:
-
             logger.info(f"tolerance {tolerance} failed. output is {humanize.naturalsize(size)}")
     raise NonBugError(f"Unable to fit {video} within {humanize.naturalsize(maxsize)}")
 
@@ -148,7 +146,7 @@ async def intelligentdownsize(media, maxsize: int):
 
     size = os.path.getsize(media)
     w, h = await get_resolution(media)
-    for tolerance in [.98, .95, .90, .75, .5]:
+    for tolerance in [.98, .95, .90, .75, .5, .25, .1]:
         reduction_ratio = (maxsize / size) * tolerance
         # this took me longer to figure out than i am willing to admit
         new_w = math.floor(math.sqrt(reduction_ratio * (w ** 2)))
@@ -160,6 +158,7 @@ async def intelligentdownsize(media, maxsize: int):
             return resized
         else:
             logger.info(f"tolerance {tolerance} failed. output is {humanize.naturalsize(size)}")
+    raise NonBugError(f"Unable to fit {media} within {humanize.naturalsize(maxsize)}")
 
 
 async def assurefilesize(media, re_encode=True):
@@ -190,9 +189,9 @@ async def assurefilesize(media, re_encode=True):
         raise NonBugError(f"File is too big to upload.")
 
 
-async def mp4togif(mp4):
+async def videotogif(video):
     outname = reserve_tempfile("gif")
-    await run_command("ffmpeg", "-i", mp4,
+    await run_command("ffmpeg", "-i", video,
                       # prevent partial frames, makes filesize worse but fixes issues with transparency
                       "-gifflags", "-transdiff",
                       "-vf",
@@ -207,17 +206,26 @@ async def mp4togif(mp4):
     return outname
 
 
-async def reencode(mp4):  # reencodes mp4 as libx264 since the png format used cant be played by like literally anything
-    assert (mt := await mediatype(mp4)) in ["VIDEO", "GIF"], f"file {mp4} with type {mt} passed to reencode()"
+async def video_reencode(
+        video):  # reencodes mp4 as libx264 since the png format used cant be played by like literally anything
+    assert (mt := await mediatype(video)) in ["VIDEO", "GIF"], f"file {video} with type {mt} passed to reencode()"
     # only reencode if need to ;)
-    vcodec, acodec = await va_codecs(mp4)
+    vcodec, acodec = await va_codecs(video)
     vcode = ["copy"] if vcodec == "h264" else ["libx264", "-pix_fmt", "yuv420p", "-vf",
                                                "scale=ceil(iw/2)*2:ceil(ih/2)*2"]
     acode = ["copy"] if acodec == "aac" else ["aac", "-q:a", "2"]
     outname = reserve_tempfile("mp4")
-    await run_command("ffmpeg", "-hide_banner", "-i", mp4, "-c:v", *vcode, "-c:a", *acode,
+    await run_command("ffmpeg", "-hide_banner", "-i", video, "-c:v", *vcode, "-c:a", *acode,
                       "-max_muxing_queue_size", "9999", "-movflags", "+faststart", outname)
 
+    return outname
+
+
+async def audio_reencode(audio):
+    acodec = await get_acodec(audio)
+    acode = ["copy"] if acodec == "aac" else ["aac", "-q:a", "2"]
+    outname = reserve_tempfile("m4a")
+    await run_command("ffmpeg", "-hide_banner", "-i", audio, *acode, outname)
     return outname
 
 
@@ -226,12 +234,9 @@ async def allreencode(file):
     if mt == "IMAGE":
         return await mediatopng(file)
     elif mt == "VIDEO":
-        return await reencode(file)
+        return await video_reencode(file)
     elif mt == "AUDIO":
-        outname = reserve_tempfile("mp3")
-        await run_command("ffmpeg", "-hide_banner", "-i", file, "-c:a", "libmp3lame", outname)
-
-        return outname
+        return await audio_reencode(file)
     else:
         raise Exception(f"{file} of type {mt} cannot be re-encoded")
 
@@ -256,8 +261,8 @@ async def toaudio(media):
     :param media: video or audio ig
     :return: aac
     """
-    name = reserve_tempfile("mp3")  # discord wont embed aac
-    await run_command("ffmpeg", "-hide_banner", "-i", media, "-vn", name)
+    name = reserve_tempfile("m4a")  # discord wont embed aac
+    await run_command("ffmpeg", "-hide_banner", "-i", media, "-c:a", "aac", "-vn", name)
 
     return name
 
@@ -269,7 +274,7 @@ async def mediatopng(media):
     :return: png
     """
     outname = reserve_tempfile("png")
-    await run_command("ffmpeg", "-hide_banner", "-i", media, "-frames:v", "1", "-c:v", "png", "-pix_fmt", "yuva420p",
+    await run_command("ffmpeg", "-hide_banner", "-i", media, "-frames:v", "1", "-c:v", "png", "-pix_fmt", "rgba",
                       outname)
 
     return outname
@@ -286,22 +291,23 @@ async def speed(file, sp):
 
     mt = await mediatype(file)
     if mt == "AUDIO":
-        outname = reserve_tempfile("mp3")
+        outname = reserve_tempfile("m4a")
         duration = await get_duration(file)
         await run_command("ffmpeg", "-hide_banner", "-i", file, "-filter_complex",
-                          f"{expanded_atempo(sp)}", "-t", str(duration / float(sp)), "-c:a", "libmp3lame", outname)
+                          f"{expanded_atempo(sp)}", "-t", str(duration / float(sp)), "-c:a", "aac", outname)
     else:
-        outname = reserve_tempfile("mp4")
+        outname = reserve_tempfile("mkv")
         fps = await get_frame_rate(file)
         duration = await get_duration(file)
         await run_command("ffmpeg", "-hide_banner", "-i", await forceaudio(file), "-filter_complex",
                           f"[0:v]setpts=PTS/{sp},fps={fps}[v];[0:a]{expanded_atempo(sp)}[a]",
-                          "-map", "[v]", "-map", "[a]", "-t", str(duration / float(sp)), "-c:v", "png", "-fps_mode",
+                          "-map", "[v]", "-map", "[a]", "-t", str(duration / float(sp)), "-c:v", "ffv1", "-c:a", "flac",
+                          "-fps_mode",
                           "vfr", outname)
         if await count_frames(outname) < 2:
             raise NonBugError("Output file has less than 2 frames. Try reducing the speed.")
         if mt == "GIF":
-            outname = await mp4togif(outname)
+            outname = await videotogif(outname)
 
     return outname
 
@@ -313,12 +319,12 @@ async def reverse(file):
     :return: procesed media
     """
     mt = await mediatype(file)
-    outname = reserve_tempfile("mp4")
+    outname = reserve_tempfile("mkv")
     await run_command("ffmpeg", "-hide_banner", "-i", await forceaudio(file), "-vf", "reverse", "-af", "areverse",
-                      "-c:v", "png", "-fps_mode", "vfr", outname)
+                      "-c:v", "ffv1", "-fps_mode", "vfr", outname)
 
     if mt == "GIF":
-        outname = await mp4togif(outname)
+        outname = await videotogif(outname)
     return outname
 
 
@@ -330,13 +336,13 @@ async def random(file, frames: int):
     :return: procesed media
     """
     mt = await mediatype(file)
-    outname = reserve_tempfile("mp4")
+    outname = reserve_tempfile("mkv")
     #
     await run_command("ffmpeg", "-hide_banner", "-i", file, "-filter:v", f"random=frames={frames}",
-                      "-c:v", "png", "-fps_mode", "vfr", outname)
+                      "-c:v", "ffv1", "-fps_mode", "vfr", outname)
 
     if mt == "GIF":
-        outname = await mp4togif(outname)
+        outname = await videotogif(outname)
     return outname
 
 
@@ -349,13 +355,13 @@ async def quality(file, crf, qa):
     :return: processed media
     """
     mt = await mediatype(file)
-    outname = reserve_tempfile("mp4")
+    outname = reserve_tempfile("mkv")
     await run_command("ffmpeg", "-hide_banner", "-i", await forceaudio(file), "-crf", str(crf), "-c:a", "aac", "-b:a",
                       f"{qa}k", "-fps_mode", "vfr", outname)
 
     # png cannot be supported here because crf and qa are libx264 params lmao
     if mt == "GIF":
-        outname = await mp4togif(outname)
+        outname = await videotogif(outname)
     return outname
 
 
@@ -367,11 +373,11 @@ async def changefps(file, fps):
     :return: processed media
     """
     mt = await mediatype(file)
-    outname = reserve_tempfile("mp4")
-    await run_command("ffmpeg", "-hide_banner", "-i", file, "-r", str(fps), "-c:a", "copy", "-c:v", "png",
+    outname = reserve_tempfile("mkv")
+    await run_command("ffmpeg", "-hide_banner", "-i", file, "-r", str(fps), "-c:a", "copy", "-c:v", "ffv1",
                       outname)
     if mt == "GIF":
-        outname = await mp4togif(outname)
+        outname = await videotogif(outname)
 
     return outname
 
@@ -384,16 +390,16 @@ async def invert(file):
     """
     mt = await mediatype(file)
     exts = {
-        "VIDEO": "mp4",
-        "GIF": "mp4",
+        "VIDEO": "mkv",
+        "GIF": "mkv",
         "IMAGE": "png"
     }
     outname = reserve_tempfile(exts[mt])
-    await run_command("ffmpeg", "-hide_banner", "-i", file, "-vf", f"negate", "-c:v", "png", "-fps_mode", "vfr",
+    await run_command("ffmpeg", "-hide_banner", "-i", file, "-vf", f"negate", "-c:v", "ffv1", "-fps_mode", "vfr",
                       outname)
 
     if mt == "GIF":
-        outname = await mp4togif(outname)
+        outname = await videotogif(outname)
     return outname
 
 
@@ -407,13 +413,13 @@ async def pad(file):
     if mt == "IMAGE":
         outname = reserve_tempfile("png")
     else:
-        outname = reserve_tempfile("mp4")
+        outname = reserve_tempfile("mkv")
     await run_command("ffmpeg", "-hide_banner", "-i", file, "-vf",
                       "pad=width='max(iw,ih)':height='max(iw,ih)':x='(ih-iw)/2':y='(iw-ih)/2':color=white", "-c:v",
-                      "png", "-fps_mode", "vfr", outname)
+                      "ffv1", "-fps_mode", "vfr", outname)
 
     if mt == "GIF":
-        outname = await mp4togif(outname)
+        outname = await videotogif(outname)
     return outname
 
 
@@ -439,7 +445,7 @@ async def videoloop(file, loop):
     """
     mt = await mediatype(file)
     exts = {
-        "VIDEO": "mp4",
+        "VIDEO": "mkv",
         "GIF": "gif"
     }
     outname = reserve_tempfile(exts[mt])
@@ -456,10 +462,10 @@ async def imageaudio(file0, file1):
     """
     audio = file1
     image = file0
-    outname = reserve_tempfile("mp4")
+    outname = reserve_tempfile("mkv")
     duration = await get_duration(audio)  # it is a couple seconds too long without it :(
     await run_command("ffmpeg", "-hide_banner", "-i", audio, "-loop", "1", "-i", image, "-pix_fmt", "yuv420p", "-vf",
-                      "crop=trunc(iw/2)*2:trunc(ih/2)*2", "-c:v", "libx264", "-c:a", "aac", "-shortest", "-t",
+                      "crop=trunc(iw/2)*2:trunc(ih/2)*2", "-c:v", "ffv1", "-c:a", "flac", "-shortest", "-t",
                       str(duration), outname)
 
     return outname
@@ -480,34 +486,31 @@ async def addaudio(file0, file1, loops=0):
         return await imageaudio(file0, file1)
     elif mt == "GIF":
         # GIF case is like imageaudio, but with stream_loop instead of loop.
-        outname = reserve_tempfile("mp4")
+        outname = reserve_tempfile("mkv")
         if loops >= 0:
             # if the gif is set to loop a fixed amount of times, cut out at the longest stream.
             await run_command("ffmpeg", "-hide_banner", "-i", audio, "-stream_loop", str(loops), "-i", media,
-                              "-pix_fmt", "yuv420p", "-vf",
-                              "crop=trunc(iw/2)*2:trunc(ih/2)*2", "-c:v", "libx264", "-c:a", "aac", "-q:a", "2",
+                              "-c:v", "ffv1", "-c:a", "flac",
                               "-fps_mode", "vfr",
                               outname)
         else:
             # if it's set to loop infinitely, cut out when the audio ends.
             duration = await get_duration(audio)  # it is a couple seconds too long without it :(
             await run_command("ffmpeg", "-hide_banner", "-i", audio, "-stream_loop", str(loops), "-i", media,
-                              "-pix_fmt", "yuv420p", "-vf",
-                              "crop=trunc(iw/2)*2:trunc(ih/2)*2", "-c:v", "libx264", "-c:a", "aac", "-q:a", "2",
+                              "-c:v", "ffv1", "-c:a", "flac",
                               "-fps_mode", "vfr",
                               "-shortest", "-t", str(duration), outname)
     else:
         media = await forceaudio(media)
-        # yes, qa works backwards on aac vs mp3. no, i dont know why.
         if mt == "AUDIO":
-            outname = reserve_tempfile("mp3")
-            audiosettings = ["-c:a", "libmp3lame", "-q:a", "0"]
+            outname = reserve_tempfile("mka")
+            audiosettings = []
         else:
-            outname = reserve_tempfile("mp4")
-            audiosettings = ["-c:a", "aac", "-q:a", "2"]
+            outname = reserve_tempfile("mkv")
+            audiosettings = ["-c:v", "copy"]
         await run_command("ffmpeg", "-i", media, "-i", audio, "-max_muxing_queue_size", "4096", "-filter_complex",
                           "[0:a][1:a]amix=inputs=2:dropout_transition=100000:duration=longest[a];[a]volume=2[a]",
-                          "-map", "0:v?", "-map", "[a]", *audiosettings, outname)
+                          "-map", "0:v?", "-map", "[a]", *audiosettings, "-c:a", "flac", outname)
 
     return outname
 
@@ -518,31 +521,32 @@ async def concatv(file0, file1):
     :param files: [video, video]
     :return: combined video
     """
-    video0 = await forceaudio(file0)
-    fixedvideo0 = reserve_tempfile("mp4")
-    await run_command("ffmpeg", "-hide_banner", "-i", video0, "-c:v", "png", "-c:a", "copy", "-ar", "48000",
+    video0 = file0  # await forceaudio(file0)
+    fixedvideo0 = reserve_tempfile("mkv")
+    await run_command("ffmpeg", "-hide_banner", "-i", video0, "-map", "0:a?", "-c:v", "ffv1", "-c:a", "copy", "-ar",
+                      "48000",
                       "-max_muxing_queue_size", "4096", "-fps_mode", "vfr", fixedvideo0)
-    video1 = await forceaudio(file1)
+    video1 = file1  # await forceaudio(file1)
     w, h = await get_resolution(video0)
     fps = await get_frame_rate(video0)
-    fixedvideo1 = reserve_tempfile("mp4")
+    fixedvideo1 = reserve_tempfile("mkv")
 
     # https://superuser.com/a/1136305/1001487
-    await run_command("ffmpeg", "-hide_banner", "-i", video1, "-sws_flags",
+    await run_command("ffmpeg", "-hide_banner", "-i", video1, "-map", "0:a?", "-sws_flags",
                       "spline+accurate_rnd+full_chroma_int+full_chroma_inp", "-vf",
                       f"scale={w}:{h}:force_original_aspect_ratio=decrease,pad={w}:{h}:-2:-2:color=black", "-c:v",
-                      "png", "-c:a", "copy", "-ar", "48000", "-fps_mode", "vfr", fixedvideo1)
+                      "ffv1", "-c:a", "copy", "-ar", "48000", "-fps_mode", "vfr", fixedvideo1)
     fixedfixedvideo1 = await changefps(fixedvideo1, fps)
 
     concatdemuxer = reserve_tempfile("txt")
     with open(concatdemuxer, "w+") as f:
         f.write(f"file '{fixedvideo0}'\nfile '{fixedfixedvideo1}'")
-    outname = reserve_tempfile("mp4")
-    await run_command("ffmpeg", "-hide_banner", "-safe", "0", "-f", "concat", "-i", concatdemuxer, "-c:v", "png",
+    outname = reserve_tempfile("mkv")
+    await run_command("ffmpeg", "-hide_banner", "-safe", "0", "-f", "concat", "-i", concatdemuxer, "-c:v", "ffv1",
                       "-c:a", "copy", outname)
 
     if (await mediatype(file0)) == "GIF" and (await mediatype(file1)) == "GIF":
-        outname = await mp4togif(outname)
+        outname = await videotogif(outname)
     # for file in [video0, video1, fixedvideo1, fixedvideo0, fixedfixedvideo1, concatdemuxer]:
     #     os.remove(file)
     return outname
@@ -556,17 +560,18 @@ async def naive_vstack(file0, file1):
     if mts[0] == "IMAGE" and mts[1] == "IMAGE":
         return await processing.common.run_parallel(processing.vips.vipsutils.naive_stack, file0, file1)
     else:
-        out = reserve_tempfile("mp4")
+        out = reserve_tempfile("mkv")
         await run_command("ffmpeg", "-i", file0, "-i", file1, "-filter_complex",
-                          "[0]format=pix_fmts=yuva420p[0f];"
-                          "[1]format=pix_fmts=yuva420p[1f];"
-                          "[0f][1f]vstack=inputs=2", "-c:v", "png", "-fs", config.max_temp_file_size, "-fps_mode",
-                          "vfr", out)
+                          "[0]format=pix_fmts=rgba[0f];"
+                          "[1]format=pix_fmts=rgba[1f];"
+                          "[0f][1f]vstack=inputs=2", "-c:v", "ffv1",
+                          # "-fs", config.max_temp_file_size,
+                          "-fps_mode", "vfr", out)
 
         if "VIDEO" in mts:
             return out
         else:  # gif and image only
-            return await mp4togif(out)
+            return await videotogif(out)
         # return await processing.vips.vstack(file0, file1)
 
 
@@ -580,29 +585,30 @@ async def stack(file0, file1, style):
     mts = [await mediatype(file0), await mediatype(file1)]
     if mts[0] == "IMAGE" and mts[1] == "IMAGE":  # easier to just make this an edge case
         return await processing.common.run_parallel(processing.vips.vipsutils.stack, file0, file1, style)
+    file0, file1 = await repeat_shorter_video(file0, file1) # scale2ref is fucky
     if style == 'hstack':
         scaling_logic = "scale2ref=oh*mdar:ih"
     else:
         scaling_logic = "scale2ref=iw:ow/mdar"
 
     mixaudio = all(await asyncio.gather(hasaudio(file0), hasaudio(file1)))
-    outname = reserve_tempfile("mp4")
+    outname = reserve_tempfile("mkv")
     await run_command("ffmpeg", "-hide_banner", "-i", file0, "-i", file1,
                       "-filter_complex",
-                      f"[0]setpts=PTS-STARTPTS,format=yuva420p[0v];"
-                      f"[1]setpts=PTS-STARTPTS,format=yuva420p[1v];"
+                      f"[0]setpts=PTS-STARTPTS,format=rgba[0v];"
+                      f"[1]setpts=PTS-STARTPTS,format=rgba[1v];"
                       # rescale stacked
                       f"[1v][0v]{scaling_logic}[b][a];"
                       # stack
                       f"[a][b]{'h' if style == 'hstack' else 'v'}stack=inputs=2" + \
                       # mix audio
                       (f";amix=inputs=2:dropout_transition=0" if mixaudio else ""),
-                      "-c:v", "png", "-c:a", "aac", "-q:a", "2", "-fps_mode", "vfr", outname)
+                      "-c:v", "ffv1", "-c:a", "flac", "-q:a", "2", "-fps_mode", "vfr", outname)
 
     # for file in [video0, video1, fixedvideo1, fixedvideo0, fixedfixedvideo1]:
     #     os.remove(file)
     if mts[0] != "VIDEO" and mts[1] != "VIDEO":  # one or more gifs and no videos
-        outname = await mp4togif(outname)
+        outname = await videotogif(outname)
     return outname
 
 
@@ -619,19 +625,19 @@ async def overlay(file0, file1, alpha: float, mode: str = 'overlay'):
     assert 0 <= alpha <= 1
     mts = [await mediatype(file0), await mediatype(file1)]
 
-    outname = reserve_tempfile("mp4")
+    outname = reserve_tempfile("mkv")
     blendlogic = ""
     if mode == "overlay":
-        blendlogic = f"overlay"
+        blendlogic = f"overlay=format=auto"
     elif mode == "add":
         blendlogic = f"blend=all_mode='addition'"
 
     mixaudio = all(await asyncio.gather(hasaudio(file0), hasaudio(file1)))
-
+    file0, file1 = await repeat_shorter_video(file0, file1) # scale2ref is fucky
     await run_command("ffmpeg", "-hide_banner", "-i", file0, "-i", file1, "-filter_complex",
                       # clean inputs
-                      f"[0]setpts=PTS-STARTPTS,format=yuva420p[0v];"
-                      f"[1]setpts=PTS-STARTPTS,format=yuva420p,"
+                      f"[0]setpts=PTS-STARTPTS,format=rgba[0v];"
+                      f"[1]setpts=PTS-STARTPTS,format=rgba,"
                       # set alpha
                       f"colorchannelmixer=aa={alpha}[1v];"
                       # rescale overlay
@@ -640,7 +646,7 @@ async def overlay(file0, file1, alpha: float, mode: str = 'overlay'):
                       f"[a][b]{blendlogic}" + \
                       # mix audio
                       (f";amix=inputs=2:dropout_transition=0" if mixaudio else ""),
-                      "-c:v", "png", "-c:a", "aac", "-q:a", "2", "-fps_mode", "vfr", outname)
+                      "-c:v", "ffv1", "-c:a", "flac", "-fps_mode", "vfr", outname)
 
     # for file in [video0, video1, fixedvideo1, fixedvideo0, fixedfixedvideo1]:
     #     os.remove(file)
@@ -648,7 +654,7 @@ async def overlay(file0, file1, alpha: float, mode: str = 'overlay'):
         outname = await mediatopng(outname)
     # one or more gifs and no videos
     elif mts[0] != "VIDEO" and mts[1] != "VIDEO":
-        outname = await mp4togif(outname)
+        outname = await videotogif(outname)
     return outname
 
 
@@ -662,19 +668,19 @@ async def trim(file, length, start=0):
     """
     mt = await mediatype(file)
     exts = {
-        "AUDIO": "mp3",
-        "VIDEO": "mp4",
-        "GIF": "mp4"
+        "AUDIO": "mka",
+        "VIDEO": "mkv",
+        "GIF": "mkv"
     }
     dur = await get_duration(file)
     if start > dur:
         raise NonBugError(f"Trim start ({start}s) is outside the range of the file ({dur}s)")
     out = reserve_tempfile(exts[mt])
-    await run_command("ffmpeg", "-hide_banner", "-i", file, "-t", str(length), "-ss", str(start), "-c:v", "png",
-                      "-fps_mode", "vfr", out)
+    await run_command("ffmpeg", "-hide_banner", "-i", file, "-t", str(length), "-ss", str(start), "-c:v", "ffv1",
+                      "-map", "0:a?", "-c:a", "flac", "-fps_mode", "vfr", out)
 
     if mt == "GIF":
-        out = await mp4togif(out)
+        out = await videotogif(out)
     return out
 
 
@@ -732,16 +738,16 @@ async def rotate(file, rottype):
     }
     mt = await mediatype(file)
     exts = {
-        "VIDEO": "mp4",
-        "GIF": "mp4",
+        "VIDEO": "mkv",
+        "GIF": "mkv",
         "IMAGE": "png"
     }
     out = reserve_tempfile(exts[mt])
-    await run_command("ffmpeg", "-i", file, "-vf", types[rottype] + ",format=yuva420p", "-c:v", "png", "-fps_mode",
+    await run_command("ffmpeg", "-i", file, "-vf", types[rottype] + ",format=rgba", "-c:v", "ffv1", "-fps_mode",
                       "vfr", out)
 
     if mt == "GIF":
-        out = await mp4togif(out)
+        out = await videotogif(out)
     return out
 
 
@@ -749,7 +755,7 @@ async def volume(file, vol):
     mt = await mediatype(file)
     exts = {
         "AUDIO": "mp3",
-        "VIDEO": "mp4"
+        "VIDEO": "mkv"
     }
     out = reserve_tempfile(exts[mt])
     # convert vol % to db
@@ -787,17 +793,17 @@ def expanded_atempo(arg: float):
 async def vibrato(file, frequency=5, depth=0.5):  # https://ffmpeg.org/ffmpeg-filters.html#tremolo
     mt = await mediatype(file)
     exts = {
-        "AUDIO": "mp3",
-        "VIDEO": "mp4"
+        "AUDIO": "mka",
+        "VIDEO": "mkv"
     }
     out = reserve_tempfile(exts[mt])
     if mt == "AUDIO":
-        audiosettings = ["-c:a", "libmp3lame", "-q:a", "0"]
+        audiosettings = []
     else:
-        audiosettings = ["-c:a", "aac", "-q:a", "2", "-c:v", "copy"]
+        audiosettings = ["-c:v", "copy"]
 
-    await run_command("ffmpeg", "-i", file, "-af", f"vibrato=f={frequency}:d={depth}", "-strict", "-1", *audiosettings,
-                      out)
+    await run_command("ffmpeg", "-i", file, "-af", f"vibrato=f={frequency}:d={depth}", "-strict", "-1", "-c:a",
+                      "flac", *audiosettings, out)
 
     return out
 
@@ -805,8 +811,8 @@ async def vibrato(file, frequency=5, depth=0.5):  # https://ffmpeg.org/ffmpeg-fi
 async def pitch(file, p=12):
     mt = await mediatype(file)
     exts = {
-        "AUDIO": "mp3",
-        "VIDEO": "mp4"
+        "AUDIO": "mka",
+        "VIDEO": "mkv"
     }
     out = reserve_tempfile(exts[mt])
     # http://www.geekybob.com/post/Adjusting-Pitch-for-MP3-Files-with-FFmpeg
@@ -815,10 +821,11 @@ async def pitch(file, p=12):
     logger.debug((p, asetrate, atempo))
     af = f"asetrate=r={asetrate},{expanded_atempo(atempo)},aresample=48000"
     if mt == "AUDIO":
-        audiosettings = ["libmp3lame", "-q:a", "0"]
+        audiosettings = []
     else:
-        audiosettings = ["aac", "-q:a", "2", "-c:v", "copy"]
-    await run_command("ffmpeg", "-i", file, "-ar", "48000", "-af", af, "-strict", "-1", "-c:a", *audiosettings, out)
+        audiosettings = ["-c:v", "copy"]
+    await run_command("ffmpeg", "-i", file, "-ar", "48000", "-af", af, "-strict", "-1", "-c:a", "flac", *audiosettings,
+                      out)
 
     return out
 
@@ -834,43 +841,44 @@ async def resize(image, width, height, delete_orig=True):
     """
     mt = await mediatype(image)
     exts = {
-        "AUDIO": "mp3",
-        "VIDEO": "mp4",
-        "GIF": "mp4",
+        "AUDIO": "mka",
+        "VIDEO": "mkv",
+        "GIF": "mkv",
         "IMAGE": "png"
     }
     out = reserve_tempfile(exts[mt])
-    await run_command("ffmpeg", "-i", image, "-pix_fmt", "yuva420p", "-max_muxing_queue_size", "9999", "-sws_flags",
+    await run_command("ffmpeg", "-i", image, "-pix_fmt", "rgba", "-max_muxing_queue_size", "9999", "-sws_flags",
                       "spline+accurate_rnd+full_chroma_int+full_chroma_inp+bitexact",
-                      "-vf", f"scale='{width}:{height}',setsar=1:1", "-c:v", "png", "-pix_fmt", "yuva420p", "-c:a",
+                      "-vf", f"scale='{width}:{height}',setsar=1:1", "-c:v", "ffv1", "-pix_fmt", "rgba", "-c:a",
                       "copy", "-fps_mode", "vfr", out)
 
     if mt == "GIF":
-        out = await mp4togif(out)
+        out = await videotogif(out)
     elif mt == "VIDEO":
-        out = await reencode(out)
+        out = await video_reencode(out)
     return out
 
 
 async def hue(file, h: float):
     exts = {
-        "VIDEO": "mp4",
-        "GIF": "mp4",
+        "VIDEO": "mkv",
+        "GIF": "mkv",
         "IMAGE": "png"
     }
     mt = await mediatype(file)
     out = reserve_tempfile(exts[mt])
-    await run_command("ffmpeg", "-i", file, "-vf", f"hue=h={h},format=yuva420p", "-c:v", "png", "-fps_mode", "vfr", out)
+    await run_command("ffmpeg", "-i", file, "-vf", f"hue=h={h},format=rgba", "-c:v", "ffv1", "-fps_mode", "vfr",
+                      out)
 
     if mt == "GIF":
-        out = await mp4togif(out)
+        out = await videotogif(out)
     return out
 
 
 async def tint(file, col: discord.Color):
     exts = {
-        "VIDEO": "mp4",
-        "GIF": "mp4",
+        "VIDEO": "mkv",
+        "GIF": "mkv",
         "IMAGE": "png"
     }
     mt = await mediatype(file)
@@ -880,15 +888,15 @@ async def tint(file, col: discord.Color):
     await run_command("ffmpeg", "-i", file, "-vf",
                       f"hue=s=0,"  # make grayscale
                       f"lutrgb=r=val*{r}:g=val*{g}:b=val*{b}:a=val,"  # basically set white to our color 
-                      f"format=yuva420p", "-c:v", "png", "-fps_mode", "vfr", out)
+                      f"format=rgba", "-c:v", "ffv1", "-fps_mode", "vfr", out)
 
     if mt == "GIF":
-        out = await mp4togif(out)
+        out = await videotogif(out)
     return out
 
 
 async def epicbirthday(text: str):
-    out = reserve_tempfile("mp4")
+    out = reserve_tempfile("mkv")
     birthdaytext = await tts(text)
     nameimage = await processing.common.run_parallel(processing.vips.creation.epicbirthdaytext, text)
     # when to show the text
@@ -917,7 +925,7 @@ async def epicbirthday(text: str):
                       # combine audio
                       "[a0][d1][d2][d3][d4][d5] amix=inputs=6:normalize=0 [outa];"
                       # add text
-                      f"[0:v][2:v] overlay=enable='{'+'.join(betweens)}:x=(main_w-overlay_w)/2:y=(main_h-overlay_h)/2' [outv]",
+                      f"[0:v][2:v] overlay=format=autoenable='{'+'.join(betweens)}:x=(main_w-overlay_w)/2:y=(main_h-overlay_h)/2' [outv]",
                       # map to output
                       "-map", "[outv]",
                       "-map", "[outa]",
@@ -929,14 +937,14 @@ async def epicbirthday(text: str):
 async def crop(file, w, h, x, y):
     mt = await mediatype(file)
     exts = {
-        "VIDEO": "mp4",
-        "GIF": "mp4",
+        "VIDEO": "mkv",
+        "GIF": "mkv",
         "IMAGE": "png"
     }
     outname = reserve_tempfile(exts[mt])
-    await run_command('ffmpeg', '-i', file, '-filter:v', f'crop={w}:{h}:{x}:{y}', "-c:v", "png", outname)
+    await run_command('ffmpeg', '-i', file, '-filter:v', f'crop={w}:{h}:{x}:{y}', "-c:v", "ffv1", outname)
     if mt == "GIF":
-        outname = await mp4togif(outname)
+        outname = await videotogif(outname)
 
     return outname
 
@@ -944,17 +952,17 @@ async def crop(file, w, h, x, y):
 async def trim_top(file, trim_size):
     mt = await mediatype(file)
     exts = {
-        "VIDEO": "mp4",
-        "GIF": "mp4",
+        "VIDEO": "mkv",
+        "GIF": "mkv",
         "IMAGE": "png"
     }
     outname = reserve_tempfile(exts[mt])
-    await run_command('ffmpeg', '-i', file, '-filter:v', f'crop=out_h=ih-{trim_size}:y={trim_size}', "-c:v", "png",
+    await run_command('ffmpeg', '-i', file, '-filter:v', f'crop=out_h=ih-{trim_size}:y={trim_size}', "-c:v", "ffv1",
                       "-fps_mode", "vfr",
                       outname)
 
     if mt == "GIF":
-        outname = await mp4togif(outname)
+        outname = await videotogif(outname)
     return outname
 
 
@@ -973,8 +981,8 @@ async def motivate(media, captions: typing.Sequence[str]):
                                                 processing.vips.vipsutils.ImageSize(*await get_resolution(media)))
     mt = await mediatype(media)
     exts = {
-        "VIDEO": "mp4",
-        "GIF": "mp4",
+        "VIDEO": "mkv",
+        "GIF": "mkv",
         "IMAGE": "png"
     }
     outfile = reserve_tempfile(exts[mt])
@@ -984,24 +992,24 @@ async def motivate(media, captions: typing.Sequence[str]):
                       "[0p1]pad=w=iw:h=ih+(iw/30):x=0:y=0[0p2];"
                       "[0p2][1]vstack=inputs=2[s];"
                       "[s]pad=w=iw+(iw/5):h=ih+(iw/10)+(iw/30):x=(iw/10):y=(iw/10):color=black",
-                      "-c:v", "png", "-c:a", "copy", "-fps_mode", "vfr",
+                      "-c:v", "ffv1", "-c:a", "copy", "-fps_mode", "vfr",
                       outfile)
 
     if mt == "GIF":
-        outfile = await mp4togif(outfile)
+        outfile = await videotogif(outfile)
     return outfile
 
 
 async def naive_overlay(im1, im2):
     mts = [await mediatype(im1), await mediatype(im2)]
-    outname = reserve_tempfile("mp4")
-    await run_command("ffmpeg", "-i", im1, "-i", im2, "-filter_complex", "overlay", "-c:v", "png", "-fs",
+    outname = reserve_tempfile("mkv")
+    await run_command("ffmpeg", "-i", im1, "-i", im2, "-filter_complex", "overlay=format=auto", "-c:v", "ffv1", "-fs",
                       config.max_temp_file_size, "-fps_mode", "vfr", outname)
     if mts[0] == "IMAGE" and mts[1] == "IMAGE":
         outname = await mediatopng(outname)
     # one or more gifs and no videos
     elif mts[0] != "VIDEO" and mts[1] != "VIDEO":
-        outname = await mp4togif(outname)
+        outname = await videotogif(outname)
 
     return outname
 
@@ -1028,21 +1036,21 @@ async def freezemotivate(video, *caption):
 async def round_corners(media, border_radius=10):
     mt = await mediatype(media)
     exts = {
-        "VIDEO": "mp4",
-        "GIF": "mp4",
+        "VIDEO": "mkv",
+        "GIF": "mkv",
         "IMAGE": "png"
     }
     outfile = reserve_tempfile(exts[mt])
     # https://stackoverflow.com/a/62400465/9044183
     await run_command("ffmpeg", "-i", media, "-filter_complex",
-                      f"format=yuva420p,"
+                      f"format=rgba,"
                       f"geq=lum='p(X,Y)':a='"
                       f"if(gt(abs(W/2-X),W/2-{border_radius})*gt(abs(H/2-Y),"
                       f"H/2-{border_radius}),"
                       f"if(lte(hypot({border_radius}-(W/2-abs(W/2-X)),"
                       f"{border_radius}-(H/2-abs(H/2-Y))),"
                       f"{border_radius}),255,0),255)'",
-                      "-c:v", "png", "-c:a", "copy", "-fps_mode", "vfr",
+                      "-c:v", "ffv1", "-c:a", "copy", "-fps_mode", "vfr",
                       outfile)
 
     return outfile
@@ -1057,8 +1065,8 @@ async def twitter_caption(media, captions, dark=True):
                                                 processing.vips.vipsutils.ImageSize(width, height), dark)
     border_radius = width * (16 / 500)
     exts = {
-        "VIDEO": "mp4",
-        "GIF": "mp4",
+        "VIDEO": "mkv",
+        "GIF": "mkv",
         "IMAGE": "png"
     }
     outfile = reserve_tempfile(exts[mt])
@@ -1066,7 +1074,7 @@ async def twitter_caption(media, captions, dark=True):
                       # round corners
                       # https://stackoverflow.com/a/62400465/9044183
                       # copied from round_corners here for efficiency as 1 ffmpeg stream
-                      f"[0]format=yuva420p,"
+                      f"[0]format=rgba,"
                       f"geq=lum='p(X,Y)':a='"
                       f"if(gt(abs(W/2-X),W/2-{border_radius})*gt(abs(H/2-Y),"
                       f"H/2-{border_radius}),"
@@ -1084,19 +1092,19 @@ async def twitter_caption(media, captions, dark=True):
                       f"[stacked]split=2[bg][fg];"
                       f"[bg]drawbox=c={'#15202b' if dark else '#ffffff'}:replace=1:t=fill[bg];"
                       f"[bg][fg]overlay=format=auto",
-                      "-c:v", "png", "-c:a", "copy", "-fps_mode", "vfr",
+                      "-c:v", "ffv1", "-c:a", "copy", "-fps_mode", "vfr",
                       outfile)
 
     if mt == "GIF":
-        outfile = await mp4togif(outfile)
+        outfile = await videotogif(outfile)
     return outfile
 
 
 async def trollface(media):
     mt = await mediatype(media)
     exts = {
-        "VIDEO": "mp4",
-        "GIF": "mp4",
+        "VIDEO": "mkv",
+        "GIF": "mkv",
         "IMAGE": "png"
     }
     outfile = reserve_tempfile(exts[mt])
@@ -1111,13 +1119,13 @@ async def trollface(media):
                       "[2:v]alphaextract[mask];"
                       "[media][mask]alphamerge[media];"
                       # overlay bottom and top
-                      "[1:v][media]overlay[media];"
-                      "[media][3:v]overlay",
-                      "-c:v", "png", "-c:a", "copy", "-fps_mode", "vfr",
+                      "[1:v][media]overlay=format=auto[media];"
+                      "[media][3:v]overlay=format=auto",
+                      "-c:v", "ffv1", "-c:a", "copy", "-fps_mode", "vfr",
                       outfile)
 
     if mt == "GIF":
-        outfile = await mp4togif(outfile)
+        outfile = await videotogif(outfile)
     return outfile
 
 
@@ -1137,8 +1145,8 @@ def rgb_to_lightness(r, g, b):
 async def deepfry(media, brightness, contrast, sharpness, saturation, noise):
     mt = await mediatype(media)
     exts = {
-        "VIDEO": "mp4",
-        "GIF": "mp4",
+        "VIDEO": "mkv",
+        "GIF": "mkv",
         "IMAGE": "png"
     }
     outfile = reserve_tempfile(exts[mt])
@@ -1149,7 +1157,7 @@ async def deepfry(media, brightness, contrast, sharpness, saturation, noise):
                       f"noise=alls={noise}", "-fps_mode", "vfr", outfile)
 
     if mt == "GIF":
-        outfile = await mp4togif(outfile)
+        outfile = await videotogif(outfile)
 
     return outfile
 
@@ -1157,8 +1165,8 @@ async def deepfry(media, brightness, contrast, sharpness, saturation, noise):
 async def give_me_your_phone_now(media):
     mt = await mediatype(media)
     exts = {
-        "VIDEO": "mp4",
-        "GIF": "mp4",
+        "VIDEO": "mkv",
+        "GIF": "mkv",
         "IMAGE": "png"
     }
     outfile = reserve_tempfile(exts[mt])
@@ -1167,33 +1175,64 @@ async def give_me_your_phone_now(media):
                       # fit insize 200x200 box
                       "[0]scale=w=200:h=200:force_original_aspect_ratio=decrease[rescaled];"
                       # overlay centered at expected position
-                      "[1][rescaled]overlay=x=150+((200-overlay_w)/2):y=350+((200-overlay_h)/2)", "-fps_mode", "vfr",
+                      "[1][rescaled]overlay=format=auto=x=150+((200-overlay_w)/2):y=350+((200-overlay_h)/2)",
+                      "-fps_mode", "vfr",
                       outfile)
 
     if mt == "GIF":
-        outfile = await mp4togif(outfile)
+        outfile = await videotogif(outfile)
 
     return outfile
+
+
+async def repeat_shorter_video(video1, video2):
+    """
+    repeats last frame of the shorter video until the duration of the longer video
+    if someone has a better solution https://superuser.com/q/1854904/1001487
+    :return: processed media
+    """
+    im1 = await mediatype(video1) == "IMAGE"
+    im2 = await mediatype(video2) == "IMAGE"
+    if im1 and im2:
+        return video1, video2
+    dur1 = 0 if im1 else await get_duration(video1)
+    dur2 = 0 if im2 else await get_duration(video2)
+    if dur1 > dur2:
+        new_vid2 = reserve_tempfile("mkv")
+        # the +0.001 is a jank way to force it to round up and it WORKS
+        await run_command("ffmpeg", "-i", video2, "-vf", f"tpad=stop_mode=clone:stop_duration={dur1}",
+                          "-c:v", "ffv1", "-c:a", "flac", new_vid2)
+        return video1, new_vid2
+    elif dur2 > dur1:
+        new_vid1 = reserve_tempfile("mkv")
+        await run_command("ffmpeg", "-i", video1, "-vf", f"tpad=stop_mode=clone:stop_duration={dur2}",
+                          "-c:v", "ffv1", "-c:a", "flac", new_vid1)
+        return new_vid1, video2
+    else:  # == case
+        return video1, video2
 
 
 async def speech_bubble(media, position: typing.Literal["top", "bottom"] = "top",
                         color: typing.Literal["transparent", "white", "black"] = "transparent"):
     mt = await mediatype(media)
     exts = {
-        "VIDEO": "mp4",
-        "GIF": "mp4",
+        "VIDEO": "mkv",
+        "GIF": "mkv",
         "IMAGE": "png"
     }
     outfile = reserve_tempfile(exts[mt])
 
+    # scale2ref is fucky
+    media, bubble = await repeat_shorter_video(media, "rendering/images/speechbubble.png")
+
     if color == "transparent":
-        await run_command("ffmpeg", "-i", media, "-i", "rendering/images/speechbubble.png",
+        await run_command("ffmpeg", "-i", media, "-i", bubble,
                           "-filter_complex",
                           # mask input media
                           "[1:v][0:v]scale2ref[mask][media];"
-                          f"[mask]{'vflip,' if position == 'bottom' else ''}format=yuva420p,alphaextract,negate[mask2];"
+                          f"[mask]format=rgba,{'vflip,' if position == 'bottom' else ''}alphaextract,negate[mask2];"
                           "[media][mask2]alphamerge",
-                          "-c:v", "png", "-c:a", "copy", "-fps_mode", "vfr", outfile)
+                          "-c:v", "ffv1", "-c:a", "copy", "-fps_mode", "vfr", outfile)
     else:
         mask_filters = []
         if position == "bottom":
@@ -1205,14 +1244,15 @@ async def speech_bubble(media, position: typing.Literal["top", "bottom"] = "top"
         else:
             mask_filter = ""
 
-        await run_command("ffmpeg", "-i", media, "-i", "rendering/images/speechbubble.png",
+        await run_command("ffmpeg", "-i", media, "-i", bubble,
                           "-filter_complex",
-                          # mask input media
+                          # scale mask to size
                           "[1:v][0:v]scale2ref[mask][media];"
+                          # mask input media
                           f"{mask_filter}"
-                          "[media][mask]overlay",
-                          "-c:v", "png", "-c:a", "copy", "-fps_mode", "vfr", outfile)
+                          "[media][mask]overlay=format=auto",
+                          "-c:v", "ffv1", "-c:a", "copy", "-fps_mode", "vfr", outfile)
     if mt == "GIF":
-        outfile = await mp4togif(outfile)
+        outfile = await videotogif(outfile)
 
     return outfile

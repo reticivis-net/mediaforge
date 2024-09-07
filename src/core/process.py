@@ -78,9 +78,10 @@ async def process(ctx: commands.Context, func: callable, inputs: list, *args,
                     else:
                         # send warning for apng
                         if await processing.ffmpeg.is_apng(file):
-                            asyncio.create_task(ctx.reply(f"{config.emojis['warning']} Media #{i + 1} is an apng, w"
-                                                          f"hich FFmpeg and MediaForge have limited support for. Ex"
-                                                          f"pect errors.", delete_after=10))
+                            await asyncio.create_task(
+                                ctx.reply(f"{config.emojis['warning']} Media #{i + 1} is an apng, w"
+                                          f"hich FFmpeg and MediaForge have limited support for. Ex"
+                                          f"pect errors.", delete_after=10))
                         # resize if needed
                         if resize:
                             files[i] = await processing.ffmpeg.ensuresize(ctx, file, config.min_size, config.max_size)
@@ -114,7 +115,7 @@ async def process(ctx: commands.Context, func: callable, inputs: list, *args,
                         if expectimage and command_result:
                             mt = await processing.ffmpeg.mediatype(command_result)
                             if mt == "VIDEO":
-                                command_result = await processing.ffmpeg.reencode(command_result)
+                                command_result = await processing.ffmpeg.video_reencode(command_result)
                             command_result = await processing.ffmpeg.assurefilesize(command_result)
                         return command_result
 
