@@ -78,7 +78,7 @@ async def process(ctx: commands.Context, func: callable, inputs: list, *args,
                     else:
                         # send warning for apng
                         if await processing.ffmpeg.is_apng(file):
-                            await asyncio.create_task(
+                            asyncio.create_task(
                                 ctx.reply(f"{config.emojis['warning']} Media #{i + 1} is an apng, w"
                                           f"hich FFmpeg and MediaForge have limited support for. Ex"
                                           f"pect errors.", delete_after=10))
@@ -113,7 +113,7 @@ async def process(ctx: commands.Context, func: callable, inputs: list, *args,
                                 logger.warning(f"{func} is not coroutine")
                                 command_result = func(*args, **kwargs)
                         if expectimage and command_result:
-                            command_result = await processing.ffmpeg.allreencode(command_result)
+                            command_result = await processing.ffmpeg.allreencode(command_result, fail_if_gif=False)
                             command_result = await processing.ffmpeg.assurefilesize(command_result)
                         return command_result
 

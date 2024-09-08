@@ -101,7 +101,7 @@ class Conversion(commands.Cog, name="Conversion"):
             async with (utils.tempfiles.TempFileSession()):
                 r = await run_parallel(ytdownload, videourl, videoformat)
                 if r:
-                    r = await processing.ffmpeg.assurefilesize(r, re_encode=False)
+                    r = await processing.ffmpeg.assurefilesize(r)
                     if not r:
                         return
                     txt = ""

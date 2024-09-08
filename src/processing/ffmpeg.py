@@ -229,7 +229,7 @@ async def audio_reencode(audio):
     return outname
 
 
-async def allreencode(file):
+async def allreencode(file, fail_if_gif=True):
     mt = await mediatype(file)
     if mt == "IMAGE":
         return await mediatopng(file)
@@ -237,6 +237,8 @@ async def allreencode(file):
         return await video_reencode(file)
     elif mt == "AUDIO":
         return await audio_reencode(file)
+    elif mt == "GIF" and not fail_if_gif:
+        return file
     else:
         raise Exception(f"{file} of type {mt} cannot be re-encoded")
 
