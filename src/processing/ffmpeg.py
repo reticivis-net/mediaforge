@@ -225,7 +225,7 @@ async def audio_reencode(audio):
     acodec = await get_acodec(audio)
     acode = ["copy"] if acodec == "aac" else ["aac", "-q:a", "2"]
     outname = reserve_tempfile("m4a")
-    await run_command("ffmpeg", "-hide_banner", "-i", audio, *acode, outname)
+    await run_command("ffmpeg", "-hide_banner", "-i", audio, "-c:a", *acode, outname)
     return outname
 
 
