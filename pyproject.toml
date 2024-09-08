@@ -7,7 +7,11 @@ license = "GPL-3.0"
 
 [tool.poetry.dependencies]
 python = "^3.11"
-"discord.py" = { version = "^2.3.2", extras = ["speed"] }
+"discord.py" = "^2.3.2"
+# dpy extras minus aiodns
+Brotli = "*"
+orjson = ">=3.5.4"
+
 aiofiles = "^24.1.0"
 humanize = "^4.8.0"
 coloredlogs = "^15.0.1"

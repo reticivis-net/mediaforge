@@ -113,9 +113,7 @@ async def process(ctx: commands.Context, func: callable, inputs: list, *args,
                                 logger.warning(f"{func} is not coroutine")
                                 command_result = func(*args, **kwargs)
                         if expectimage and command_result:
-                            mt = await processing.ffmpeg.mediatype(command_result)
-                            if mt == "VIDEO":
-                                command_result = await processing.ffmpeg.video_reencode(command_result)
+                            command_result = await processing.ffmpeg.allreencode(command_result)
                             command_result = await processing.ffmpeg.assurefilesize(command_result)
                         return command_result
 
