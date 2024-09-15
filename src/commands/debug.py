@@ -79,6 +79,14 @@ class Debug(commands.Cog, name="Owner Only", command_attrs=dict(hidden=True)):
 
     @commands.command(hidden=True)
     @commands.is_owner()
+    async def longerror(self, _):
+        """
+        Raise an error
+        """
+        raise Exception("lorem ipsum"*1000)
+
+    @commands.command(hidden=True)
+    @commands.is_owner()
     async def errorafter5(self, _):
         """
         Raise an error after 5 seconds
