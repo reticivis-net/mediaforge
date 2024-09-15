@@ -499,15 +499,10 @@ async def addaudio(file0, file1, loops=0):
                               "-shortest", "-t", str(duration), outname)
     else:
         media = await forceaudio(media)
-        if mt == "AUDIO":
-            outname = reserve_tempfile("mka")
-            audiosettings = []
-        else:
-            outname = reserve_tempfile("mkv")
-            audiosettings = ["-c:v", "copy"]
+        outname = reserve_tempfile("mkv")
         await run_command("ffmpeg", "-i", media, "-i", audio, "-max_muxing_queue_size", "4096", "-filter_complex",
                           "[0:a][1:a]amix=inputs=2:dropout_transition=100000:duration=longest[a];[a]volume=2[a]",
-                          "-map", "0:v?", "-map", "[a]", *audiosettings, "-c:a", "flac", outname)
+                          "-map", "0:v?", "-map", "[a]", "-c:v", "copy", "-c:a", "flac", outname)
 
     return outname
 
@@ -520,7 +515,7 @@ async def concatv(file0, file1):
     """
     video0 = file0  # await forceaudio(file0)
     fixedvideo0 = reserve_tempfile("mkv")
-    await run_command("ffmpeg", "-hide_banner", "-i", video0, "-map", "0:a?", "-c:v", "ffv1", "-c:a", "copy", "-ar",
+    await run_command("ffmpeg", "-hide_banner", "-i", video0, "-c:v", "ffv1", "-c:a", "copy", "-ar",
                       "48000",
                       "-max_muxing_queue_size", "4096", "-fps_mode", "vfr", fixedvideo0)
     video1 = file1  # await forceaudio(file1)
@@ -529,7 +524,7 @@ async def concatv(file0, file1):
     fixedvideo1 = reserve_tempfile("mkv")
 
     # https://superuser.com/a/1136305/1001487
-    await run_command("ffmpeg", "-hide_banner", "-i", video1, "-map", "0:a?", "-sws_flags",
+    await run_command("ffmpeg", "-hide_banner", "-i", video1, "-sws_flags",
                       "spline+accurate_rnd+full_chroma_int+full_chroma_inp", "-vf",
                       f"scale={w}:{h}:force_original_aspect_ratio=decrease,pad={w}:{h}:-2:-2:color=black", "-c:v",
                       "ffv1", "-c:a", "copy", "-ar", "48000", "-fps_mode", "vfr", fixedvideo1)
@@ -670,7 +665,7 @@ async def trim(file, length, start=0):
     if start > dur:
         raise NonBugError(f"Trim start ({start}s) is outside the range of the file ({dur}s)")
     await run_command("ffmpeg", "-hide_banner", "-i", file, "-t", str(length), "-ss", str(start), "-c:v", "ffv1",
-                      "-map", "0:a?", "-c:a", "flac", "-fps_mode", "vfr", out)
+                       "-c:a", "flac", "-fps_mode", "vfr", out)
 
     if mt == "GIF":
         out = await videotogif(out)
@@ -777,13 +772,9 @@ def expanded_atempo(arg: float):
 async def vibrato(file, frequency=5, depth=0.5):  # https://ffmpeg.org/ffmpeg-filters.html#tremolo
     mt = await mediatype(file)
     out = reserve_tempfile("mkv")
-    if mt == "AUDIO":
-        audiosettings = []
-    else:
-        audiosettings = ["-c:v", "copy"]
 
-    await run_command("ffmpeg", "-i", file, "-af", f"vibrato=f={frequency}:d={depth}", "-strict", "-1", "-c:a",
-                      "flac", *audiosettings, out)
+    await run_command("ffmpeg", "-i", file, "-af", f"vibrato=f={frequency}:d={depth}", "-strict", "-1",
+                      "-c:v", "copy", "-c:a", "flac", out)
 
     return out
 
@@ -796,12 +787,8 @@ async def pitch(file, p=12):
     atempo = 2 ** (-p / 12)
     logger.debug((p, asetrate, atempo))
     af = f"asetrate=r={asetrate},{expanded_atempo(atempo)},aresample=48000"
-    if mt == "AUDIO":
-        audiosettings = []
-    else:
-        audiosettings = ["-c:v", "copy"]
-    await run_command("ffmpeg", "-i", file, "-ar", "48000", "-af", af, "-strict", "-1", "-c:a", "flac", *audiosettings,
-                      out)
+    await run_command("ffmpeg", "-i", file, "-ar", "48000", "-af", af, "-strict", "-1", "-c:v", "copy",
+                      "-c:a", "flac", out)
 
     return out
 
