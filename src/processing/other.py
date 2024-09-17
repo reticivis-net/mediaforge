@@ -38,7 +38,7 @@ def ytdownload(vid, form):
         "merge_output_format": "mp4",
         # try to fit in upload size, then fall back to max upload size
         "format": f'((bestvideo+bestaudio/best)[filesize_approx<{config.file_upload_limit}])/'
-                  f'((bestvideo+bestaudio/best)[filesize_approx<{config.max_file_size}])',
+                  f'((bestvideo+bestaudio/best)[filesize_approx<?{config.max_file_size}])',
         'format_sort': ['+acodec:mp3:aac', '+vcodec:h264'],  # prefer h264 and mp3/aac, discord embeds better
         "max_filesize": config.max_file_size,
         "logger": MyLogger(),  # this is stupid but its how ytdl works
@@ -46,7 +46,7 @@ def ytdownload(vid, form):
     }
     if form == "audio":
         opts['format'] = (f"bestaudio[filesize_approx<{config.file_upload_limit}]/"
-                          f"bestaudio[filesize_approx<{config.max_file_size}]")
+                          f"bestaudio[filesize_approx<?{config.max_file_size}]")
         # opts['postprocessors'] = [{
         #     'key': 'FFmpegExtractAudio',
         #     'preferredcodec': 'mp3',
