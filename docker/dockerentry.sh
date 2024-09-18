@@ -20,8 +20,8 @@ updateapt() {
 updatepip() {
   # remote isnt set up by default when container is set up
   echo "Updating PIP Packages..."
-  pip install --upgrade --user pip poetry --no-warn-script-location --root-user-action=ignore
-  python -m poetry install
+  pypy3 -m pip install --upgrade --user pip poetry --no-warn-script-location --root-user-action=ignore
+  pypy3 -m poetry update
 }
 updateffmpeg(){
   # for backwards compatability
@@ -42,7 +42,7 @@ updateimagemagick(){
 run() {
   # remote isnt set up by default when container is set up
   echo "Running..."
-  python -m poetry run python src/main.py
+  pypy3 -m poetry run pypy3 src/main.py
 }
 
 # mediaforge ascii art :3
