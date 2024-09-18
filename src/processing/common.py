@@ -115,8 +115,9 @@ async def run_parallel(syncfunc: typing.Callable, *args, **kwargs):
     :param syncfunc: the blocking function
     :return: the result of the blocking function
     """
-    # creating a new process pool doesnt appear to have much overhead but re-using an existing one causes PAin
-    with concurrent.futures.ProcessPoolExecutor(1) as pool:
+    # this is only used for essentially async code that just isnt asyncio, ie pyvips and ffmpeg, so a threadpool
+    # executor is fine
+    with concurrent.futures.ThreadPoolExecutor(1) as pool:
         success, res, files = await asyncio.get_running_loop().run_in_executor(
             pool, functools.partial(handle_tfs_parallel, syncfunc, *args, **kwargs)
         )
