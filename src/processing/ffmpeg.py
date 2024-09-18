@@ -212,7 +212,9 @@ async def video_reencode(
     # only reencode if need to ;)
     vcodec, acodec = await va_codecs(video)
     vcode = ["copy"] if vcodec == "h264" else ["libx264", "-pix_fmt", "yuv420p", "-vf",
-                                               "scale=ceil(iw/2)*2:ceil(ih/2)*2"]
+                                               "scale=ceil(iw/2)*2:ceil(ih/2)*2,"
+                                               # turns transparency into blackness
+                                               "premultiply=inplace=1"]
     acode = ["copy"] if acodec == "aac" else ["aac", "-q:a", "2"]
     outname = reserve_tempfile("mp4")
     await run_command("ffmpeg", "-hide_banner", "-i", video, "-c:v", *vcode, "-c:a", *acode,
@@ -257,6 +259,38 @@ async def giftomp4(gif):
     return outname
 
 
+def gif_output(f):
+    """
+    if the input is a gif, make the output a gif
+    """
+
+    async def wrapper(media, *args, **kwargs):
+        mt = await mediatype(media)
+        out = await f(media, *args, **kwargs)
+        if mt == "GIF":
+            out = await videotogif(out)
+        return out
+
+    return wrapper
+
+
+def dual_gif_output(f):
+    """
+    if there are two gifs, make the output a gif if its a good idea
+    """
+
+    async def wrapper(media1, media2, *args, **kwargs):
+        mt1 = await mediatype(media1)
+        mt2 = await mediatype(media2)
+        out = await f(media1, media2, *args, **kwargs)
+        # if there are gifs, but no videos, convert to gif
+        if (mt1 == "GIF" or mt2 == "GIF") and not (mt1 == "VIDEO" or mt2 == "VIDEO"):
+            out = await videotogif(out)
+        return out
+
+    return wrapper
+
+
 async def toaudio(media):
     """
     converts video to only audio
@@ -284,6 +318,7 @@ async def mediatopng(media):
 
 
 # https://stackoverflow.com/questions/65728616/how-to-get-ffmpeg-to-consistently-apply-speed-effect-to-first-few-frames
+@gif_output
 async def speed(file, sp):
     """
     changes speed of media
@@ -308,28 +343,24 @@ async def speed(file, sp):
                           "vfr", outname)
         if await count_frames(outname) < 2:
             raise NonBugError("Output file has less than 2 frames. Try reducing the speed.")
-        if mt == "GIF":
-            outname = await videotogif(outname)
 
     return outname
 
 
+@gif_output
 async def reverse(file):
     """
     reverses media (-1x speed)
     :param file: media
     :return: procesed media
     """
-    mt = await mediatype(file)
     outname = reserve_tempfile("mkv")
     await run_command("ffmpeg", "-hide_banner", "-i", await forceaudio(file), "-vf", "reverse", "-af", "areverse",
                       "-c:v", "ffv1", "-fps_mode", "vfr", outname)
-
-    if mt == "GIF":
-        outname = await videotogif(outname)
     return outname
 
 
+@gif_output
 async def random(file, frames: int):
     """
     shuffle frames
@@ -337,17 +368,14 @@ async def random(file, frames: int):
     :param frames: number of frames in internal cache
     :return: procesed media
     """
-    mt = await mediatype(file)
     outname = reserve_tempfile("mkv")
     #
     await run_command("ffmpeg", "-hide_banner", "-i", file, "-filter:v", f"random=frames={frames}",
                       "-c:v", "ffv1", "-fps_mode", "vfr", outname)
-
-    if mt == "GIF":
-        outname = await videotogif(outname)
     return outname
 
 
+@gif_output
 async def quality(file, crf, qa):
     """
     changes quality of videos/gifs with ffmpeg compression
@@ -356,17 +384,15 @@ async def quality(file, crf, qa):
     :param qa: audio bitrate
     :return: processed media
     """
-    mt = await mediatype(file)
     outname = reserve_tempfile("mkv")
     await run_command("ffmpeg", "-hide_banner", "-i", await forceaudio(file), "-crf", str(crf), "-c:a", "aac", "-b:a",
                       f"{qa}k", "-fps_mode", "vfr", outname)
 
     # png cannot be supported here because crf and qa are libx264 params lmao
-    if mt == "GIF":
-        outname = await videotogif(outname)
     return outname
 
 
+@gif_output
 async def changefps(file, fps):
     """
     changes FPS of media
@@ -374,32 +400,26 @@ async def changefps(file, fps):
     :param fps: FPS
     :return: processed media
     """
-    mt = await mediatype(file)
     outname = reserve_tempfile("mkv")
     await run_command("ffmpeg", "-hide_banner", "-i", file, "-r", str(fps), "-c:a", "copy", "-c:v", "ffv1",
                       outname)
-    if mt == "GIF":
-        outname = await videotogif(outname)
-
     return outname
 
 
+@gif_output
 async def invert(file):
     """
     inverts colors
     :param file: media
     :return: processed media
     """
-    mt = await mediatype(file)
     outname = reserve_tempfile("mkv")
     await run_command("ffmpeg", "-hide_banner", "-i", file, "-vf", f"negate", "-c:v", "ffv1", "-fps_mode", "vfr",
                       outname)
-
-    if mt == "GIF":
-        outname = await videotogif(outname)
     return outname
 
 
+@gif_output
 async def pad(file):
     """
     pads media into a square shape
@@ -414,9 +434,6 @@ async def pad(file):
     await run_command("ffmpeg", "-hide_banner", "-i", file, "-vf",
                       "pad=width='max(iw,ih)':height='max(iw,ih)':x='(ih-iw)/2':y='(iw-ih)/2':color=white", "-c:v",
                       "ffv1", "-fps_mode", "vfr", outname)
-
-    if mt == "GIF":
-        outname = await videotogif(outname)
     return outname
 
 
@@ -499,19 +516,15 @@ async def addaudio(file0, file1, loops=0):
                               "-shortest", "-t", str(duration), outname)
     else:
         media = await forceaudio(media)
-        if mt == "AUDIO":
-            outname = reserve_tempfile("mka")
-            audiosettings = []
-        else:
-            outname = reserve_tempfile("mkv")
-            audiosettings = ["-c:v", "copy"]
+        outname = reserve_tempfile("mkv")
         await run_command("ffmpeg", "-i", media, "-i", audio, "-max_muxing_queue_size", "4096", "-filter_complex",
                           "[0:a][1:a]amix=inputs=2:dropout_transition=100000:duration=longest[a];[a]volume=2[a]",
-                          "-map", "0:v?", "-map", "[a]", *audiosettings, "-c:a", "flac", outname)
+                          "-map", "0:v?", "-map", "[a]", "-c:v", "copy", "-c:a", "flac", outname)
 
     return outname
 
 
+@dual_gif_output
 async def concatv(file0, file1):
     """
     concatenates 2 videos
@@ -520,7 +533,7 @@ async def concatv(file0, file1):
     """
     video0 = file0  # await forceaudio(file0)
     fixedvideo0 = reserve_tempfile("mkv")
-    await run_command("ffmpeg", "-hide_banner", "-i", video0, "-map", "0:a?", "-c:v", "ffv1", "-c:a", "copy", "-ar",
+    await run_command("ffmpeg", "-hide_banner", "-i", video0, "-c:v", "ffv1", "-c:a", "copy", "-ar",
                       "48000",
                       "-max_muxing_queue_size", "4096", "-fps_mode", "vfr", fixedvideo0)
     video1 = file1  # await forceaudio(file1)
@@ -529,7 +542,7 @@ async def concatv(file0, file1):
     fixedvideo1 = reserve_tempfile("mkv")
 
     # https://superuser.com/a/1136305/1001487
-    await run_command("ffmpeg", "-hide_banner", "-i", video1, "-map", "0:a?", "-sws_flags",
+    await run_command("ffmpeg", "-hide_banner", "-i", video1, "-sws_flags",
                       "spline+accurate_rnd+full_chroma_int+full_chroma_inp", "-vf",
                       f"scale={w}:{h}:force_original_aspect_ratio=decrease,pad={w}:{h}:-2:-2:color=black", "-c:v",
                       "ffv1", "-c:a", "copy", "-ar", "48000", "-fps_mode", "vfr", fixedvideo1)
@@ -541,9 +554,6 @@ async def concatv(file0, file1):
     outname = reserve_tempfile("mkv")
     await run_command("ffmpeg", "-hide_banner", "-safe", "0", "-f", "concat", "-i", concatdemuxer, "-c:v", "ffv1",
                       "-c:a", "copy", outname)
-
-    if (await mediatype(file0)) == "GIF" and (await mediatype(file1)) == "GIF":
-        outname = await videotogif(outname)
     # for file in [video0, video1, fixedvideo1, fixedvideo0, fixedfixedvideo1, concatdemuxer]:
     #     os.remove(file)
     return outname
@@ -572,6 +582,7 @@ async def naive_vstack(file0, file1):
         # return await processing.vips.vstack(file0, file1)
 
 
+@dual_gif_output
 async def stack(file0, file1, style):
     """
     stacks media
@@ -607,11 +618,10 @@ async def stack(file0, file1, style):
 
     # for file in [video0, video1, fixedvideo1, fixedvideo0, fixedfixedvideo1]:
     #     os.remove(file)
-    if mts[0] != "VIDEO" and mts[1] != "VIDEO":  # one or more gifs and no videos
-        outname = await videotogif(outname)
     return outname
 
 
+@dual_gif_output
 async def overlay(file0, file1, alpha: float, mode: str = 'overlay'):
     """
     stacks media
@@ -650,12 +660,10 @@ async def overlay(file0, file1, alpha: float, mode: str = 'overlay'):
     #     os.remove(file)
     if mts[0] == "IMAGE" and mts[1] == "IMAGE":
         outname = await mediatopng(outname)
-    # one or more gifs and no videos
-    elif mts[0] != "VIDEO" and mts[1] != "VIDEO":
-        outname = await videotogif(outname)
     return outname
 
 
+@gif_output
 async def trim(file, length, start=0):
     """
     trims media to length seconds
@@ -664,16 +672,12 @@ async def trim(file, length, start=0):
     :param start: time in seconds to begin the trimmed video
     :return: processed media
     """
-    mt = await mediatype(file)
     out = reserve_tempfile("mkv")
     dur = await get_duration(file)
     if start > dur:
         raise NonBugError(f"Trim start ({start}s) is outside the range of the file ({dur}s)")
     await run_command("ffmpeg", "-hide_banner", "-i", file, "-t", str(length), "-ss", str(start), "-c:v", "ffv1",
-                      "-map", "0:a?", "-c:a", "flac", "-fps_mode", "vfr", out)
-
-    if mt == "GIF":
-        out = await videotogif(out)
+                      "-c:a", "flac", "-fps_mode", "vfr", out)
     return out
 
 
@@ -721,6 +725,7 @@ async def ensuresize(ctx, file, minsize, maxsize):
     return file
 
 
+@gif_output
 async def rotate(file, rottype):
     types = {  # command input to ffmpeg vf
         "90": "transpose=1",
@@ -729,13 +734,9 @@ async def rotate(file, rottype):
         "vflip": "vflip",
         "hflip": "hflip"
     }
-    mt = await mediatype(file)
     out = reserve_tempfile("mkv")
     await run_command("ffmpeg", "-i", file, "-vf", types[rottype] + ",format=rgba", "-c:v", "ffv1", "-fps_mode",
                       "vfr", out)
-
-    if mt == "GIF":
-        out = await videotogif(out)
     return out
 
 
@@ -775,37 +776,28 @@ def expanded_atempo(arg: float):
 
 
 async def vibrato(file, frequency=5, depth=0.5):  # https://ffmpeg.org/ffmpeg-filters.html#tremolo
-    mt = await mediatype(file)
     out = reserve_tempfile("mkv")
-    if mt == "AUDIO":
-        audiosettings = []
-    else:
-        audiosettings = ["-c:v", "copy"]
 
-    await run_command("ffmpeg", "-i", file, "-af", f"vibrato=f={frequency}:d={depth}", "-strict", "-1", "-c:a",
-                      "flac", *audiosettings, out)
+    await run_command("ffmpeg", "-i", file, "-af", f"vibrato=f={frequency}:d={depth}", "-strict", "-1",
+                      "-c:v", "copy", "-c:a", "flac", out)
 
     return out
 
 
 async def pitch(file, p=12):
-    mt = await mediatype(file)
     out = reserve_tempfile("mkv")
     # http://www.geekybob.com/post/Adjusting-Pitch-for-MP3-Files-with-FFmpeg
     asetrate = max(int(48000 * 2 ** (p / 12)), 1)
     atempo = 2 ** (-p / 12)
     logger.debug((p, asetrate, atempo))
     af = f"asetrate=r={asetrate},{expanded_atempo(atempo)},aresample=48000"
-    if mt == "AUDIO":
-        audiosettings = []
-    else:
-        audiosettings = ["-c:v", "copy"]
-    await run_command("ffmpeg", "-i", file, "-ar", "48000", "-af", af, "-strict", "-1", "-c:a", "flac", *audiosettings,
-                      out)
+    await run_command("ffmpeg", "-i", file, "-ar", "48000", "-af", af, "-strict", "-1", "-c:v", "copy",
+                      "-c:a", "flac", out)
 
     return out
 
 
+@gif_output
 async def resize(image, width, height):
     """
     resizes image
@@ -815,33 +807,24 @@ async def resize(image, width, height):
     :param height: new height, same as width
     :return: processed media
     """
-    mt = await mediatype(image)
     out = reserve_tempfile("mkv")
     await run_command("ffmpeg", "-i", image, "-max_muxing_queue_size", "9999", "-sws_flags",
                       "spline+accurate_rnd+full_chroma_int+full_chroma_inp+bitexact",
                       "-vf", f"scale='{width}:{height}',setsar=1:1", "-c:v", "ffv1", "-pix_fmt", "rgba", "-c:a",
                       "copy", "-fps_mode", "vfr", out)
-
-    if mt == "GIF":
-        out = await videotogif(out)
-    # elif mt == "VIDEO":
-    #     out = await video_reencode(out)
     return out
 
 
+@gif_output
 async def hue(file, h: float):
-    mt = await mediatype(file)
     out = reserve_tempfile("mkv")
     await run_command("ffmpeg", "-i", file, "-vf", f"hue=h={h},format=rgba", "-c:v", "ffv1", "-fps_mode", "vfr",
                       out)
-
-    if mt == "GIF":
-        out = await videotogif(out)
     return out
 
 
+@gif_output
 async def tint(file, col: discord.Color):
-    mt = await mediatype(file)
     out = reserve_tempfile("mkv")
     # https://stackoverflow.com/a/3380739/9044183
     r, g, b = map(lambda x: x / 255, col.to_rgb())
@@ -849,9 +832,6 @@ async def tint(file, col: discord.Color):
                       f"hue=s=0,"  # make grayscale
                       f"lutrgb=r=val*{r}:g=val*{g}:b=val*{b}:a=val,"  # basically set white to our color 
                       f"format=rgba", "-c:v", "ffv1", "-fps_mode", "vfr", out)
-
-    if mt == "GIF":
-        out = await videotogif(out)
     return out
 
 
@@ -894,25 +874,19 @@ async def epicbirthday(text: str):
     return out
 
 
+@gif_output
 async def crop(file, w, h, x, y):
-    mt = await mediatype(file)
     outname = reserve_tempfile("mkv")
     await run_command('ffmpeg', '-i', file, '-filter:v', f'crop={w}:{h}:{x}:{y}', "-c:v", "ffv1", outname)
-    if mt == "GIF":
-        outname = await videotogif(outname)
-
     return outname
 
 
+@gif_output
 async def trim_top(file, trim_size):
-    mt = await mediatype(file)
     outname = reserve_tempfile("mkv")
     await run_command('ffmpeg', '-i', file, '-filter:v', f'crop=out_h=ih-{trim_size}:y={trim_size}', "-c:v", "ffv1",
                       "-fps_mode", "vfr",
                       outname)
-
-    if mt == "GIF":
-        outname = await videotogif(outname)
     return outname
 
 
@@ -926,10 +900,10 @@ async def toapng(video):
     # await run_command("ffmpeg", "-i", video, "-f", "apng", "-plays", "0", outname)
 
 
+@gif_output
 async def motivate(media, captions: typing.Sequence[str]):
     text = await processing.common.run_parallel(processing.vips.caption.motivate_text, captions,
                                                 processing.vips.vipsutils.ImageSize(*await get_resolution(media)))
-    mt = await mediatype(media)
     outfile = reserve_tempfile("mkv")
     await run_command("ffmpeg", "-i", media, "-i", text, "-filter_complex",
                       "[0]pad=w=iw+(iw/60):h=ih+(iw/60):x=(iw/120):y=(iw/120):color=black[0p0];"
@@ -939,12 +913,10 @@ async def motivate(media, captions: typing.Sequence[str]):
                       "[s]pad=w=iw+(iw/5):h=ih+(iw/10)+(iw/30):x=(iw/10):y=(iw/10):color=black",
                       "-c:v", "ffv1", "-c:a", "copy", "-fps_mode", "vfr",
                       outfile)
-
-    if mt == "GIF":
-        outfile = await videotogif(outfile)
     return outfile
 
 
+@dual_gif_output
 async def naive_overlay(im1, im2):
     mts = [await mediatype(im1), await mediatype(im2)]
     outname = reserve_tempfile("mkv")
@@ -952,10 +924,6 @@ async def naive_overlay(im1, im2):
                       config.max_temp_file_size, "-fps_mode", "vfr", outname)
     if mts[0] == "IMAGE" and mts[1] == "IMAGE":
         outname = await mediatopng(outname)
-    # one or more gifs and no videos
-    elif mts[0] != "VIDEO" and mts[1] != "VIDEO":
-        outname = await videotogif(outname)
-
     return outname
 
 
@@ -978,6 +946,7 @@ async def freezemotivate(video, *caption):
     return await freezemotivateaudio(video, "rendering/what.mp3", *caption)
 
 
+@gif_output
 async def round_corners(media, border_radius=10):
     outfile = reserve_tempfile("mkv")
     # https://stackoverflow.com/a/62400465/9044183
@@ -991,12 +960,11 @@ async def round_corners(media, border_radius=10):
                       f"{border_radius}),255,0),255)'",
                       "-c:v", "ffv1", "-c:a", "copy", "-fps_mode", "vfr",
                       outfile)
-
     return outfile
 
 
+@gif_output
 async def twitter_caption(media, captions, dark=True):
-    mt = await mediatype(media)
     # get_resolution call is separate so we can use for border radius
     width, height = await get_resolution(media)
     # get text
@@ -1028,14 +996,11 @@ async def twitter_caption(media, captions, dark=True):
                       f"[bg][fg]overlay=format=auto",
                       "-c:v", "ffv1", "-c:a", "copy", "-fps_mode", "vfr",
                       outfile)
-
-    if mt == "GIF":
-        outfile = await videotogif(outfile)
     return outfile
 
 
+@gif_output
 async def trollface(media):
-    mt = await mediatype(media)
     outfile = reserve_tempfile("mkv")
     await run_command("ffmpeg", "-i", media,
                       "-i", "rendering/images/trollface/bottom.png",
@@ -1052,9 +1017,6 @@ async def trollface(media):
                       "[media][3:v]overlay=format=auto",
                       "-c:v", "ffv1", "-c:a", "copy", "-fps_mode", "vfr",
                       outfile)
-
-    if mt == "GIF":
-        outfile = await videotogif(outfile)
     return outfile
 
 
@@ -1071,25 +1033,20 @@ def rgb_to_lightness(r, g, b):
     return (minc + maxc) / 2.0
 
 
+@gif_output
 async def deepfry(media, brightness, contrast, sharpness, saturation, noise):
-    mt = await mediatype(media)
     outfile = reserve_tempfile("mkv")
 
     await run_command("ffmpeg", "-i", media, "-vf",
                       f"eq=contrast={contrast}:brightness={brightness}:saturation={saturation},"
                       f"unsharp=luma_msize_x=7:luma_msize_y=7:luma_amount={sharpness},"
                       f"noise=alls={noise}", "-fps_mode", "vfr", outfile)
-
-    if mt == "GIF":
-        outfile = await videotogif(outfile)
-
     return outfile
 
 
+@gif_output
 async def give_me_your_phone_now(media):
-    mt = await mediatype(media)
     outfile = reserve_tempfile("mkv")
-
     await run_command("ffmpeg", "-i", media, "-i", "rendering/images/givemeyourphone.jpg", "-filter_complex",
                       # fit insize 200x200 box
                       "[0]scale=w=200:h=200:force_original_aspect_ratio=decrease[rescaled];"
@@ -1097,10 +1054,6 @@ async def give_me_your_phone_now(media):
                       "[1][rescaled]overlay=format=auto=x=150+((200-overlay_w)/2):y=350+((200-overlay_h)/2)",
                       "-fps_mode", "vfr",
                       outfile)
-
-    if mt == "GIF":
-        outfile = await videotogif(outfile)
-
     return outfile
 
 
@@ -1136,6 +1089,7 @@ async def scale2ref(video, reference):
     return await resize(video, w, h)
 
 
+@gif_output
 async def speech_bubble(media, position: typing.Literal["top", "bottom"] = "top",
                         color: typing.Literal["transparent", "white", "black"] = "transparent"):
     mt = await mediatype(media)
@@ -1166,7 +1120,4 @@ async def speech_bubble(media, position: typing.Literal["top", "bottom"] = "top"
                           f"{mask_filter}"
                           "[0:v][1:v]overlay=format=auto",
                           "-c:v", "png" if mt == "IMAGE" else "ffv1", "-c:a", "copy", "-fps_mode", "vfr", outfile)
-    if mt == "GIF":
-        outfile = await videotogif(outfile)
-
     return outfile
