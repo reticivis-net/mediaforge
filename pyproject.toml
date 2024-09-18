@@ -4,13 +4,14 @@ version = "2.0.0"
 description = "A Discord bot for editing and creating videos, images, GIFs, and more!"
 authors = ["reticivis"]
 license = "GPL-3.0"
+package-mode = false
 
 [tool.poetry.dependencies]
-python = "^3.11"
+python = "^3.10"
 "discord.py" = "^2.3.2"
 # dpy extras minus aiodns
 Brotli = "*"
-orjson = ">=3.5.4"
+# orjson = ">=3.5.4"
 
 aiofiles = "^24.1.0"
 humanize = "^4.8.0"
