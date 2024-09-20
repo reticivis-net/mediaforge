@@ -117,7 +117,7 @@ async def run_parallel(syncfunc: typing.Callable, *args, **kwargs):
     """
     # this is only used for essentially async code that just isnt asyncio, ie pyvips and ffmpeg, so a threadpool
     # executor is fine
-    with concurrent.futures.ThreadPoolExecutor(1) as pool:
+    with concurrent.futures.ProcessPoolExecutor(1) as pool:
         success, res, files = await asyncio.get_running_loop().run_in_executor(
             pool, functools.partial(handle_tfs_parallel, syncfunc, *args, **kwargs)
         )
