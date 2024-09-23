@@ -1,4 +1,4 @@
-FROM pypy:3.10-bookworm AS builder
+FROM python:latest AS builder
 
 # automode
 ARG AUTOMODE="OFF"
@@ -36,7 +36,7 @@ RUN apt-get --no-install-recommends install -y  \
 # imagemagick
      fuse libfuse2
 # python packages
-RUN pypy3 -m pip install --user --upgrade --no-warn-script-location --root-user-action=ignore  \
+RUN python -m pip install --user --upgrade --no-warn-script-location --root-user-action=ignore  \
     pip poetry \
 # libvips
     meson
@@ -52,7 +52,7 @@ RUN bash -c /mediaforge/docker/buildvips.sh
 RUN bash -c /mediaforge/docker/installimagemagick.sh
 
 WORKDIR mediaforge
-RUN pypy3 -m poetry install
+RUN python -m poetry install
 
 RUN cp config.example.py config.py
 # so mediaforge knows to prompt with nano
