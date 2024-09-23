@@ -106,7 +106,7 @@ class Other(commands.Cog, name="Other"):
     @commands.guild_only()
     @commands.has_guild_permissions(manage_guild=True)
     @commands.bot_has_guild_permissions(manage_guild=True)
-    @commands.hybrid_command(aliases=["guildatabase.dbanner", "serverbanner", "banner"])
+    @commands.hybrid_command(aliases=["guildbanner", "serverbanner", "banner"])
     async def setbanner(self, ctx):
         """
         Sets a file as the server banner.
@@ -399,7 +399,7 @@ class Other(commands.Cog, name="Other"):
         :param ctx: discord context
         """
         embed = discord.Embed(title="Feedback",
-                              description="Feedatabase.dback is best given via the GitHub repo, various "
+                              description="Feedback is best given via the GitHub repo, various "
                                           "links are provided below.",
                               color=discord.Color(0xD262BA))
         embed.add_field(name="Report a bug",
