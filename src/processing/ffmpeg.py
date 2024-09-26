@@ -1,3 +1,4 @@
+import asyncio
 import glob
 import math
 
@@ -7,8 +8,7 @@ from discord.ext import commands
 
 import config
 import processing.common
-import processing.vips.caption
-import processing.vips.vipsutils
+import processing.vips as vips
 import utils.tempfiles
 from processing.ffprobe import *
 from utils.tempfiles import reserve_tempfile
@@ -565,7 +565,9 @@ async def naive_vstack(file0, file1):
     """
     mts = await asyncio.gather(mediatype(file0), mediatype(file1))
     if mts[0] == "IMAGE" and mts[1] == "IMAGE":
-        return await processing.common.run_parallel(processing.vips.vipsutils.naive_stack, file0, file1)
+        # sometimes can be ffv1 mkvs with 1 frame, which vips has no idea what to do with
+        file0, file1 = await asyncio.gather(mediatopng(file0), mediatopng(file1))
+        return await processing.common.run_parallel(vips.vipsutils.naive_stack, file0, file1)
     else:
         out = reserve_tempfile("mkv")
         await run_command("ffmpeg", "-i", file0, "-i", file1, "-filter_complex",
@@ -592,7 +594,9 @@ async def stack(file0, file1, style):
     """
     mts = [await mediatype(file0), await mediatype(file1)]
     if mts[0] == "IMAGE" and mts[1] == "IMAGE":  # easier to just make this an edge case
-        return await processing.common.run_parallel(processing.vips.vipsutils.stack, file0, file1, style)
+        # sometimes can be ffv1 mkvs with 1 frame, which vips has no idea what to do with
+        file0, file1 = await asyncio.gather(mediatopng(file0), mediatopng(file1))
+        return await processing.common.run_parallel(vips.vipsutils.stack, file0, file1, style)
     # file0, file1 = await repeat_shorter_video(file0, file1)  # scale2ref is fucky
     w0, h0 = await get_resolution(file0)
     w1, h1 = await get_resolution(file1)
@@ -707,9 +711,9 @@ async def ensuresize(ctx, file, minsize, maxsize):
         file = await resize(file, f"min(-1, {maxsize * 2})", minsize)
         w, h = await get_resolution(file)
         resized = True
-    if await ctx.bot.is_owner(ctx.author):
-        logger.debug(f"bot owner is exempt from downsize checks")
-        return file
+    # if await ctx.bot.is_owner(ctx.author):
+    #     logger.debug(f"bot owner is exempt from downsize checks")
+    #     return file
     if w > maxsize:
         file = await resize(file, maxsize, "-1")
         w, h = await get_resolution(file)
@@ -838,7 +842,7 @@ async def tint(file, col: discord.Color):
 async def epicbirthday(text: str):
     out = reserve_tempfile("mkv")
     birthdaytext = await tts(text)
-    nameimage = await processing.common.run_parallel(processing.vips.creation.epicbirthdaytext, text)
+    nameimage = await processing.common.run_parallel(vips.creation.epicbirthdaytext, text)
     # when to show the text
     betweens = [
         "between(n,294,381)",
@@ -902,8 +906,8 @@ async def toapng(video):
 
 @gif_output
 async def motivate(media, captions: typing.Sequence[str]):
-    text = await processing.common.run_parallel(processing.vips.caption.motivate_text, captions,
-                                                processing.vips.vipsutils.ImageSize(*await get_resolution(media)))
+    text = await processing.common.run_parallel(vips.caption.motivate_text, captions,
+                                                vips.vipsutils.ImageSize(*await get_resolution(media)))
     outfile = reserve_tempfile("mkv")
     await run_command("ffmpeg", "-i", media, "-i", text, "-filter_complex",
                       "[0]pad=w=iw+(iw/60):h=ih+(iw/60):x=(iw/120):y=(iw/120):color=black[0p0];"
@@ -968,8 +972,8 @@ async def twitter_caption(media, captions, dark=True):
     # get_resolution call is separate so we can use for border radius
     width, height = await get_resolution(media)
     # get text
-    text = await processing.common.run_parallel(processing.vips.caption.twitter_text, captions,
-                                                processing.vips.vipsutils.ImageSize(width, height), dark)
+    text = await processing.common.run_parallel(vips.caption.twitter_text, captions,
+                                                vips.vipsutils.ImageSize(width, height), dark)
     border_radius = width * (16 / 500)
     outfile = reserve_tempfile("mkv")
     await run_command("ffmpeg", "-i", media, "-i", text, "-filter_complex",
