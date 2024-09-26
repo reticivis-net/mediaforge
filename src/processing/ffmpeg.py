@@ -711,9 +711,9 @@ async def ensuresize(ctx, file, minsize, maxsize):
         file = await resize(file, f"min(-1, {maxsize * 2})", minsize)
         w, h = await get_resolution(file)
         resized = True
-    # if await ctx.bot.is_owner(ctx.author):
-    #     logger.debug(f"bot owner is exempt from downsize checks")
-    #     return file
+    if await ctx.bot.is_owner(ctx.author):
+        logger.debug(f"bot owner is exempt from downsize checks")
+        return file
     if w > maxsize:
         file = await resize(file, maxsize, "-1")
         w, h = await get_resolution(file)
