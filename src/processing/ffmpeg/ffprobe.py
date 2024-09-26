@@ -1,6 +1,8 @@
 import json
 import sys
+
 import apng
+
 if sys.platform == "win32":  # this hopefully wont cause any problems :>
     from winmagic import magic
 else:
@@ -222,3 +224,8 @@ async def frame_n(video, n: int):
     await run_command("ffmpeg", "-hide_banner", "-i", video, "-vf", f"select='eq(n,{n})'", "-vframes", "1",
                       frame)
     return frame
+
+
+async def hasaudio(video):
+    return bool(
+        await run_command("ffprobe", "-i", video, "-show_streams", "-select_streams", "a", "-loglevel", "panic"))

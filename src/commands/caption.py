@@ -1,6 +1,6 @@
 from discord.ext import commands
 
-import processing.ffmpeg
+import processing.ffmpeg.caption
 import processing.vips.caption
 
 import processing.vips.vipsutils
@@ -27,7 +27,7 @@ class Caption(commands.Cog, name="Captioning"):
         caption = caption.split("|")
         if len(caption) == 1:
             caption.append("")
-        await process(ctx, processing.ffmpeg.motivate, [["VIDEO", "GIF", "IMAGE"]], caption)
+        await process(ctx, processing.ffmpeg.caption.motivate, [["VIDEO", "GIF", "IMAGE"]], caption)
 
     @commands.hybrid_command(aliases=["toptextbottomtext", "impact", "adviceanimal"])
     async def meme(self, ctx, *, caption):
@@ -184,7 +184,7 @@ class Caption(commands.Cog, name="Captioning"):
         :param caption: The caption text.
         :mediaparam media: A video, gif, or image.
         """
-        await process(ctx, processing.ffmpeg.twitter_caption, [["VIDEO", "GIF", "IMAGE"]], caption, False)
+        await process(ctx, processing.ffmpeg.caption.twitter_caption, [["VIDEO", "GIF", "IMAGE"]], caption, False)
 
     @commands.hybrid_command(aliases=["twitterdark", "twitcapdark", "twittercapdark"])
     async def twittercaptiondark(self, ctx, *, caption):
@@ -195,7 +195,7 @@ class Caption(commands.Cog, name="Captioning"):
         :param caption: The caption text.
         :mediaparam media: A video, gif, or image.
         """
-        await process(ctx, processing.ffmpeg.twitter_caption, [["VIDEO", "GIF", "IMAGE"]], caption, True)
+        await process(ctx, processing.ffmpeg.caption.twitter_caption, [["VIDEO", "GIF", "IMAGE"]], caption, True)
 
     @commands.hybrid_command()
     async def freezemotivate(self, ctx, *, caption):
@@ -209,7 +209,7 @@ class Caption(commands.Cog, name="Captioning"):
         caption = caption.split("|")
         if len(caption) == 1:
             caption.append("")
-        await process(ctx, processing.ffmpeg.freezemotivate, [["VIDEO", "GIF"]], *caption)
+        await process(ctx, processing.ffmpeg.caption.freezemotivate, [["VIDEO", "GIF"]], *caption)
 
     @commands.hybrid_command()
     async def freezemotivateaudio(self, ctx, *, caption):
@@ -225,4 +225,4 @@ class Caption(commands.Cog, name="Captioning"):
         caption = caption.split("|")
         if len(caption) == 1:
             caption.append("")
-        await process(ctx, processing.ffmpeg.freezemotivateaudio, [["VIDEO", "GIF"], ["AUDIO"]], *caption)
+        await process(ctx, processing.ffmpeg.caption.freezemotivateaudio, [["VIDEO", "GIF"], ["AUDIO"]], *caption)

@@ -7,8 +7,10 @@ from discord.ext import commands
 
 import config
 import processing.common
-import processing.ffmpeg
-import processing.ffprobe
+import processing.ffmpeg.conversion
+import processing.ffmpeg.ensuresize
+
+import processing.ffmpeg.ffprobe
 from core import queue
 from core.clogs import logger
 from utils.scandiscord import imagesearch
@@ -68,7 +70,7 @@ async def process(ctx: commands.Context, func: callable, inputs: list, *args,
                 # check that each file is correct type
                 for i, file in enumerate(files):
                     # if file is incorrect type
-                    if (imtype := await processing.ffprobe.mediatype(file)) not in inputs[i]:
+                    if (imtype := await processing.ffmpeg.ffprobe.mediatype(file)) not in inputs[i]:
                         # send message and break
                         await ctx.reply(
                             f"{config.emojis['warning']} Media #{i + 1} is {imtype}, it must be: "
@@ -77,14 +79,14 @@ async def process(ctx: commands.Context, func: callable, inputs: list, *args,
                         break
                     else:
                         # send warning for apng
-                        if await processing.ffmpeg.is_apng(file):
+                        if await processing.ffmpeg.ffprobe.is_apng(file):
                             asyncio.create_task(
                                 ctx.reply(f"{config.emojis['warning']} Media #{i + 1} is an apng, w"
                                           f"hich FFmpeg and MediaForge have limited support for. Ex"
                                           f"pect errors.", delete_after=10))
                         # resize if needed
                         if resize:
-                            files[i] = await processing.ffmpeg.ensuresize(ctx, file, config.min_size, config.max_size)
+                            files[i] = await processing.ffmpeg.ffutils.ensuresize(ctx, file, config.min_size, config.max_size)
                 # files are of correcte type, begin to process
                 else:
                     # only update with queue message if there is a queue
@@ -99,7 +101,7 @@ async def process(ctx: commands.Context, func: callable, inputs: list, *args,
                         await updatestatus("Processing...")
                         # remove too long videossss
                         for i, f in enumerate(files):
-                            files[i] = await processing.ffmpeg.ensureduration(f, ctx)
+                            files[i] = await processing.ffmpeg.ensuresize.ensureduration(f, ctx)
                         # prepare args
                         if inputs:
                             args = files + list(args)
@@ -113,8 +115,8 @@ async def process(ctx: commands.Context, func: callable, inputs: list, *args,
                                 logger.warning(f"{func} is not coroutine")
                                 command_result = func(*args, **kwargs)
                         if expectimage and command_result:
-                            command_result = await processing.ffmpeg.allreencode(command_result, fail_if_gif=False)
-                            command_result = await processing.ffmpeg.assurefilesize(command_result)
+                            command_result = await processing.ffmpeg.conversion.allreencode(command_result, fail_if_gif=False)
+                            command_result = await processing.ffmpeg.ensuresize.assurefilesize(command_result)
                         return command_result
 
                     result = await queue.enqueue(run())

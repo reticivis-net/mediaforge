@@ -11,8 +11,8 @@ from discord.ext import commands
 import config
 import core.queue
 import processing.common
-import processing.ffmpeg
-import processing.ffprobe
+
+import processing.ffmpeg.ffprobe
 import utils.discordmisc
 import utils.tempfiles
 from core import database
@@ -384,7 +384,7 @@ class Other(commands.Cog, name="Other"):
             file = await imagesearch(ctx, 1)
             if file:
                 file = await saveurls(file)
-                result = await processing.ffprobe.ffprobe(file[0])
+                result = await processing.ffmpeg.ffprobe.ffprobe(file[0])
                 await ctx.reply(f"`{result[1]}` `{result[2]}`\n```{result[0]}```")
                 # os.remove(file[0])
             else:

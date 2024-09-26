@@ -4,7 +4,8 @@ import humanize
 
 import config
 import processing.common
-import processing.ffmpeg
+import processing.ffmpeg.conversion
+
 from core.clogs import logger
 from utils.tempfiles import reserve_tempfile
 
@@ -49,7 +50,7 @@ async def saveurl(url: str) -> str:
                 logger.error(f"aiohttp status {await resp.read()}")
                 resp.raise_for_status()
     if tenorgif and name:
-        name = await processing.ffmpeg.videotogif(name)
+        name = await processing.ffmpeg.conversion.videotogif(name)
     return name
 
 

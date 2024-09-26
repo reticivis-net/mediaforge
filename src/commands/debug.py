@@ -5,7 +5,6 @@ import os
 import typing
 
 import discord
-from discord import app_commands
 from discord.ext import commands
 
 import config
@@ -18,8 +17,6 @@ from core.clogs import logger
 # from main import renderpool, bot, database.db, quote
 from utils.common import fetch, quote
 from utils.dpy import showcog
-from utils.scandiscord import imagesearch
-from utils.web import saveurls
 
 
 class Debug(commands.Cog, name="Owner Only", command_attrs=dict(hidden=True)):

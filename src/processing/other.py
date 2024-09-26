@@ -6,7 +6,7 @@ import yt_dlp as youtube_dl
 
 import config
 import utils.tempfiles
-from processing.ffprobe import *
+from processing.ffmpeg.ffprobe import *
 
 
 class MyLogger(object):

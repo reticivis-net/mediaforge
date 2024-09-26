@@ -9,11 +9,12 @@ import yt_dlp as youtube_dl
 from discord.ext import commands
 
 import config
-import processing.ffmpeg
-import processing.ffprobe
+import processing.ffmpeg.conversion
+import processing.ffmpeg.ensuresize
+
+import processing.ffmpeg.ffprobe
 import utils.discordmisc
 import utils.web
-from core.clogs import logger
 from core.process import process
 from processing.common import run_parallel
 from processing.other import ytdownload
@@ -101,12 +102,12 @@ class Conversion(commands.Cog, name="Conversion"):
             async with (utils.tempfiles.TempFileSession()):
                 r = await run_parallel(ytdownload, videourl, videoformat)
                 if r:
-                    r = await processing.ffmpeg.assurefilesize(r)
+                    r = await processing.ffmpeg.ensuresize.assurefilesize(r)
                     if not r:
                         return
                     txt = ""
-                    vcodec = await processing.ffprobe.get_vcodec(r)
-                    acodec = await processing.ffprobe.get_acodec(r)
+                    vcodec = await processing.ffmpeg.ffprobe.get_vcodec(r)
+                    acodec = await processing.ffmpeg.ffprobe.get_acodec(r)
                     # sometimes returns av1 codec
                     if vcodec and vcodec["codec_name"] not in ["h264", "gif", "webp", "png", "jpeg"]:
                         txt += f"The returned video is in the `{vcodec['codec_name']}` " \
@@ -143,7 +144,7 @@ class Conversion(commands.Cog, name="Conversion"):
         :param ctx: discord context
         :mediaparam video: A video.
         """
-        await process(ctx, processing.ffmpeg.videotogif, [["VIDEO"]])
+        await process(ctx, processing.ffmpeg.conversion.videotogif, [["VIDEO"]])
 
     @commands.hybrid_command(aliases=["apng", "videotoapng", "giftoapng"])
     async def toapng(self, ctx):
@@ -153,7 +154,7 @@ class Conversion(commands.Cog, name="Conversion"):
         :param ctx: discord context
         :mediaparam video: A video or gif.
         """
-        await process(ctx, processing.ffmpeg.toapng, [["VIDEO", "GIF"]], resize=False)
+        await process(ctx, processing.ffmpeg.conversion.toapng, [["VIDEO", "GIF"]], resize=False)
 
     @commands.hybrid_command(aliases=["audio", "mp3", "tomp3", "aac", "toaac"])
     async def toaudio(self, ctx):
@@ -163,7 +164,7 @@ class Conversion(commands.Cog, name="Conversion"):
         :param ctx: discord context
         :mediaparam video: A video.
         """
-        await process(ctx, processing.ffmpeg.toaudio, [["VIDEO", "AUDIO"]])
+        await process(ctx, processing.ffmpeg.conversion.toaudio, [["VIDEO", "AUDIO"]])
 
     @commands.hybrid_command(aliases=["tenorgif", "tenormp4", "rawtenor"])
     async def tenorurl(self, ctx, gif: bool = True):
@@ -189,7 +190,7 @@ class Conversion(commands.Cog, name="Conversion"):
         :param ctx: discord context
         :mediaparam gif: A gif.
         """
-        await process(ctx, processing.ffmpeg.giftomp4, [["GIF"]])
+        await process(ctx, processing.ffmpeg.conversion.giftomp4, [["GIF"]])
 
     @commands.hybrid_command(aliases=["png", "mediatopng"])
     async def topng(self, ctx):
@@ -199,7 +200,7 @@ class Conversion(commands.Cog, name="Conversion"):
         :param ctx: discord context
         :mediaparam media: A video, gif, or image.
         """
-        await process(ctx, processing.ffmpeg.mediatopng, [["VIDEO", "GIF", "IMAGE"]])
+        await process(ctx, processing.ffmpeg.conversion.mediatopng, [["VIDEO", "GIF", "IMAGE"]])
 
     @commands.command(aliases=["emoji", "emojiimage", "emote", "emoteurl"])  # TODO: hybrid
     async def emojiurl(self, ctx, *custom_emojis: discord.PartialEmoji):

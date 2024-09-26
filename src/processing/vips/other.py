@@ -3,8 +3,8 @@ from statistics import mean
 
 import pyvips
 
-import processing.ffmpeg
-import processing.ffprobe
+
+import processing.ffmpeg.ffprobe
 from processing.common import run_parallel, NonBugError
 from utils.tempfiles import reserve_tempfile
 import processing.vips.vipsutils
@@ -23,9 +23,9 @@ def get_caption_height(file, tolerance: float):
 
 
 async def uncaption(file, frame_to_try: int, tolerance: float):
-    frame_to_try = await processing.ffmpeg.frame_n(file, frame_to_try)
+    frame_to_try = await processing.ffmpeg.ffprobe.frame_n(file, frame_to_try)
     cap_height = await run_parallel(get_caption_height, frame_to_try, tolerance)
-    return await processing.ffmpeg.trim_top(file, cap_height)
+    return await processing.ffmpeg.ffutils.trim_top(file, cap_height)
 
 
 def jpeg(file, strength, stretch, quality):

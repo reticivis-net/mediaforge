@@ -4,8 +4,7 @@ import typing
 
 import pyvips
 
-import processing.ffmpeg
-import processing.ffprobe
+import processing.ffmpeg.ffprobe
 from processing.common import run_parallel
 from utils.tempfiles import reserve_tempfile
 
@@ -17,16 +16,16 @@ class ImageSize:
 
 
 async def generic_caption_stack(media: str, capfunc: callable, captions: typing.Sequence[str], *args, reverse=False):
-    size = ImageSize(*await processing.ffprobe.get_resolution(media))
+    size = ImageSize(*await processing.ffmpeg.ffprobe.get_resolution(media))
     captext = await run_parallel(capfunc, *args, captions, size)
     args = (media, captext) if reverse else (captext, media)
-    return await processing.ffmpeg.naive_vstack(*args)
+    return await processing.ffmpeg.ffutils.naive_vstack(*args)
 
 
 async def generic_caption_overlay(media: str, capfunc: callable, captions: typing.Sequence[str], *args):
-    size = ImageSize(*await processing.ffprobe.get_resolution(media))
+    size = ImageSize(*await processing.ffmpeg.ffprobe.get_resolution(media))
     captext = await run_parallel(capfunc, captions, size, *args)
-    return await processing.ffmpeg.naive_overlay(media, captext)
+    return await processing.ffmpeg.ffutils.naive_overlay(media, captext)
 
 
 def escape(arg: str | typing.Sequence[str]):
