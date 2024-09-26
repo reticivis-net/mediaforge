@@ -865,7 +865,7 @@ async def epicbirthday(text: str):
                       # combine audio
                       "[a0][d1][d2][d3][d4][d5] amix=inputs=6:normalize=0 [outa];"
                       # add text
-                      f"[0:v][2:v] overlay=format=autoenable='{'+'.join(betweens)}:x=(main_w-overlay_w)/2:y=(main_h-overlay_h)/2' [outv]",
+                      f"[0:v][2:v] overlay=format=auto:enable='{'+'.join(betweens)}:x=(main_w-overlay_w)/2:y=(main_h-overlay_h)/2' [outv]",
                       # map to output
                       "-map", "[outv]",
                       "-map", "[outa]",
@@ -1051,7 +1051,7 @@ async def give_me_your_phone_now(media):
                       # fit insize 200x200 box
                       "[0]scale=w=200:h=200:force_original_aspect_ratio=decrease[rescaled];"
                       # overlay centered at expected position
-                      "[1][rescaled]overlay=format=auto=x=150+((200-overlay_w)/2):y=350+((200-overlay_h)/2)",
+                      "[1][rescaled]overlay=format=auto:x=150+((200-overlay_w)/2):y=350+((200-overlay_h)/2)",
                       "-fps_mode", "vfr",
                       outfile)
     return outfile
