@@ -1,5 +1,5 @@
 # ![MediaForge](media/external/banner.png)
-
+# [Invite MediaForge!](https://discord.com/oauth2/authorize?client_id=780570413767983122)
 [![MediaForge Discord](https://discordapp.com/api/guilds/803788965215338546/widget.png)](https://discord.gg/xwWjgyVqBz)
 [![uptime](https://app.statuscake.com/button/index.php?Track=6022597&Design=6)](https://uptime.statuscake.com/?TestID=JyWrfGfIjT)
 
