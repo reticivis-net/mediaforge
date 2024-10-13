@@ -1,22 +1,15 @@
 # ![MediaForge](media/external/banner.png)
 # [Invite MediaForge!](https://discord.com/oauth2/authorize?client_id=780570413767983122)
-[![MediaForge Discord](https://discordapp.com/api/guilds/803788965215338546/widget.png)](https://discord.gg/xwWjgyVqBz)
-[![uptime](https://app.statuscake.com/button/index.php?Track=6022597&Design=6)](https://uptime.statuscake.com/?TestID=JyWrfGfIjT)
 
-[//]: # ([![Discord Bots]&#40;https://top.gg/api/widget/status/780570413767983122.svg&#41;]&#40;https://top.gg/bot/780570413767983122&#41;)
+[![Discord Bots](https://top.gg/api/widget/780570413767983122.svg)](https://top.gg/bot/780570413767983122)
 
-[//]: # ([![Discord Bots]&#40;https://top.gg/api/widget/servers/780570413767983122.svg&#41;]&#40;https://top.gg/bot/780570413767983122&#41;)
-
-[//]: # ([![Discord Bots]&#40;https://top.gg/api/widget/upvotes/780570413767983122.svg&#41;]&#40;https://top.gg/bot/780570413767983122/vote&#41;)
-
-![Total Lines](https://img.shields.io/tokei/lines/github/reticivis-net/mediaforge)
+![Total Lines](https://img.shields.io/endpoint?url=https://ghloc.vercel.app/api/reticivis-net/mediaforge/badge?filter=.py&style=flat&label=Lines%20of%20Code)
 [![wakatime](https://wakatime.com/badge/github/reticivis-net/mediaforge.svg)](https://wakatime.com/badge/github/reticivis-net/mediaforge)
 [![stars](https://img.shields.io/github/stars/reticivis-net/mediaforge?style=social)](https://github.com/reticivis-net/mediaforge/stargazers)
+[![uptime](https://app.statuscake.com/button/index.php?Track=6022597&Design=6)](https://uptime.statuscake.com/?TestID=JyWrfGfIjT)
+[![MediaForge Discord](https://discordapp.com/api/guilds/803788965215338546/widget.png)](https://discord.gg/xwWjgyVqBz)
+
 [![built with immense swag](https://img.shields.io/static/v1?label=built+with&message=immense+swag&color=D262BA)](https://knowyourmeme.com/memes/trollface)
-
-[//]: # (![discord.py]&#40;https://img.shields.io/github/pipenv/locked/dependency-version/reticivis-net/mediaforge/nextcord&#41;)
-
-[//]: # (![python]&#40;https://img.shields.io/github/pipenv/locked/python-version/reticivis-net/mediaforge&#41;)
 
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/Q5Q75US4A)
 
