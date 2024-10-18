@@ -319,7 +319,7 @@ def twitter_text(captions: typing.Sequence[str], size: ImageSize, dark: bool):
         f"<span foreground=\"{'white' if dark else 'black'}\">{captions[0]}</span>",
         font=f"Twemoji Color Emoji,TwitterChirp {fontsize}px",
         rgba=True,
-        fontfile="rendering/fonts/chirp-regular-web.woff2",
+        fontfile="rendering/fonts/TwitterChirp.otf",
         align=pyvips.Align.LOW,
         width=size.width
     )
