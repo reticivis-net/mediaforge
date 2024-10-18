@@ -43,8 +43,10 @@ class Conversion(commands.Cog, name="Conversion"):
         :param filename: the new name of the file
         :mediaparam media: Any valid media.
         """
-        file = await process(ctx, lambda x: x, [["VIDEO", "GIF", "IMAGE", "AUDIO"]])
-        await ctx.reply(file=discord.File(file, filename=filename))
+        async with utils.tempfiles.TempFileSession():
+            urls = await utils.scandiscord.imagesearch(ctx, 1)
+            file = await utils.web.saveurl(urls[0])
+            await ctx.reply(file=discord.File(file, filename=filename))
 
     @commands.hybrid_command(aliases=["spoil", "censor", "cw", "tw"])
     async def spoiler(self, ctx):
@@ -54,8 +56,10 @@ class Conversion(commands.Cog, name="Conversion"):
         :param ctx: discord context
         :mediaparam media: Any valid media.
         """
-        file = await process(ctx, lambda x: x, [["VIDEO", "GIF", "IMAGE", "AUDIO"]])
-        await ctx.reply(file=discord.File(file, spoiler=True))
+        async with utils.tempfiles.TempFileSession():
+            urls = await utils.scandiscord.imagesearch(ctx, 1)
+            file = await utils.web.saveurl(urls[0])
+            await ctx.reply(file=discord.File(file, spoiler=True))
 
     @commands.hybrid_command(aliases=["avatar", "pfp", "profilepicture", "profilepic", "ayowhothismf", "av"])
     async def icon(self, ctx, *, body=None):

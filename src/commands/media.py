@@ -27,7 +27,10 @@ class Media(commands.Cog, name="Editing"):
         :param ctx: discord context
         :mediaparam media: Any valid media.
         """
-        await process(ctx, lambda x: x, [["VIDEO", "GIF", "IMAGE", "AUDIO"]])
+        async with utils.tempfiles.TempFileSession():
+            urls = await utils.scandiscord.imagesearch(ctx, 1)
+            file = await utils.web.saveurl(urls[0])
+            await ctx.reply(file=discord.File(file))
 
     @commands.hybrid_command(aliases=["clean", "remake"])
     async def reencode(self, ctx):
