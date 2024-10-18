@@ -81,7 +81,7 @@ def motivate_text(captions: typing.Sequence[str], size: ImageSize):
         # generate text
         toptext = pyvips.Image.text(
             f"<span foreground=\"white\">{captions[0]}</span>",
-            font=f"Twemoji Color Emoji,TimesNewRoman {textsize}px",
+            font=f"Twemoji Color Emoji,Times New Roman Cyr {textsize}px",
             rgba=True,
             fontfile="rendering/fonts/times new roman.ttf",
             align=pyvips.Align.CENTRE,
@@ -95,7 +95,7 @@ def motivate_text(captions: typing.Sequence[str], size: ImageSize):
         # generate text
         bottomtext = pyvips.Image.text(
             f"<span foreground=\"white\">{captions[1]}</span>",
-            font=f"Twemoji Color Emoji,TimesNewRoman {int(textsize * 0.4)}px",
+            font=f"Twemoji Color Emoji,Times New Roman Cyr {int(textsize * 0.4)}px",
             rgba=True,
             fontfile="rendering/fonts/times new roman.ttf",
             align=pyvips.Align.CENTRE,
