@@ -1,16 +1,17 @@
 from processing.common import run_command
-from processing.ffmpeg.ffprobe import mediatype, va_codecs, get_acodec, get_vcodec
+from processing.ffmpeg.ffprobe import mediatype, va_codecs, get_acodec, get_vcodec, get_frame_rate
 from utils.tempfiles import reserve_tempfile
 
 
 async def videotogif(video):
     outname = reserve_tempfile("gif")
+    fps = await get_frame_rate(video)
     await run_command("ffmpeg", "-i", video,
                       # prevent partial frames, makes filesize worse but fixes issues with transparency
                       "-gifflags", "-transdiff",
                       "-vf",
                       # cap fps because gifs are wackyyyyyy
-                      "fps=fps='min(source_fps,50)',"
+                      ("fps=fps=50," if fps > 50 else "") + \
                       # make and use nice palette
                       "split[s0][s1];[s0]palettegen=reserve_transparent=1[p];[s1][p]paletteuse=bayer",
                       # i fucking hate gifs so much man
