@@ -184,7 +184,7 @@ class Caption(commands.Cog, name="Captioning"):
         :param caption: The caption text.
         :mediaparam media: A video, gif, or image.
         """
-        await process(ctx, processing.ffmpeg.caption.twitter_caption, [["VIDEO", "GIF", "IMAGE"]], caption, False)
+        await process(ctx, processing.ffmpeg.caption.twitter_caption, [["VIDEO", "GIF", "IMAGE"]], [caption], False)
 
     @commands.hybrid_command(aliases=["twitterdark", "twitcapdark", "twittercapdark"])
     async def twittercaptiondark(self, ctx, *, caption):
@@ -195,7 +195,7 @@ class Caption(commands.Cog, name="Captioning"):
         :param caption: The caption text.
         :mediaparam media: A video, gif, or image.
         """
-        await process(ctx, processing.ffmpeg.caption.twitter_caption, [["VIDEO", "GIF", "IMAGE"]], caption, True)
+        await process(ctx, processing.ffmpeg.caption.twitter_caption, [["VIDEO", "GIF", "IMAGE"]], [caption], True)
 
     @commands.hybrid_command()
     async def freezemotivate(self, ctx, *, caption):
