@@ -39,6 +39,8 @@ async def handlemessagesave(m: discord.Message):
             elif embed.type in ["image", "video", "audio"]:
                 if await contentlength(embed.url):  # prevent adding youtube videos and such
                     detectedfiles.append(embed.url)
+                elif embed.type == "image" and await contentlength(embed.thumbnail.url):  # fix for modern embeds
+                    detectedfiles.append(embed.thumbnail.url)
     if len(m.attachments):
         for att in m.attachments:
             if not att.filename.endswith("txt"):  # it was reading traceback attachments >:(
