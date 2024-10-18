@@ -41,7 +41,7 @@ class Media(commands.Cog, name="Editing"):
         :param ctx: discord context
         :mediaparam media: A video, image, or audio file.
         """
-        await process(ctx, processing.ffmpeg.conversion.allreencode, [["VIDEO", "IMAGE", "AUDIO"]])
+        await process(ctx, processing.ffmpeg.conversion.forcereencode, [["VIDEO", "IMAGE", "AUDIO", "GIF"]])
 
     @commands.hybrid_command(aliases=["audioadd", "dub"])
     async def addaudio(self, ctx, loops: commands.Range[int, -1, 100] = -1):

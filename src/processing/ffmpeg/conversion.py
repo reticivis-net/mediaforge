@@ -59,6 +59,35 @@ async def allreencode(file, fail_if_gif=True):
         raise Exception(f"{file} of type {mt} cannot be re-encoded")
 
 
+async def forcereencode(file):
+    # cant use the other reencode functions cause this function never copies
+    mt = await mediatype(file)
+    if mt == "IMAGE":
+        outname = reserve_tempfile("png")
+        await run_command("ffmpeg", "-hide_banner", "-i", file, "-frames:v", "1", "-c:v",
+                          "png", "-pix_fmt", "rgba",
+                          outname)
+
+        return outname
+    elif mt == "VIDEO":
+        outname = reserve_tempfile("mp4")
+        await run_command("ffmpeg", "-hide_banner", "-i", file, "-c:v", "libx264", "-pix_fmt", "yuv420p", "-vf",
+                          "scale=ceil(iw/2)*2:ceil(ih/2)*2,"
+                          # turns transparency into blackness
+                          "premultiply=inplace=1", "-c:a", "aac", "-q:a", "2",
+                          "-max_muxing_queue_size", "9999", "-movflags", "+faststart", outname)
+
+        return outname
+    elif mt == "AUDIO":
+        outname = reserve_tempfile("m4a")
+        await run_command("ffmpeg", "-hide_banner", "-i", file, "-c:a", "aac", "-q:a", "2", outname)
+        return outname
+    elif mt == "GIF":
+        return await videotogif(file)
+    else:
+        raise Exception(f"{file} of type {mt} cannot be re-encoded")
+
+
 async def giftomp4(gif):
     """
     converts gif to mp4
