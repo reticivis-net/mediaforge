@@ -32,12 +32,18 @@ def jpeg(file, strength, stretch, quality):
     im = normalize(pyvips.Image.new_from_file(file))
     orig_w = im.width
     orig_h = im.height
-    for i in range(strength):
+    # do one less iteration if we are strecthing so it getsstretched back
+    for i in range(strength - 1 if stretch > 0 else strength):
         if stretch > 0:
             # resize to anywhere between (original image width ± stretch, original image height ± stretch)
             w_add = random.randint(-stretch, stretch)
             h_add = random.randint(-stretch, stretch)
             im = processing.vips.vipsutils.resize(im, orig_w + w_add, orig_h + h_add)
+        # save to jpeg and read back to image
+        im = pyvips.Image.new_from_buffer(im.write_to_buffer(".jpg", Q=quality), ".jpg")
+    if stretch > 0:
+        # resize back to original size
+        im = processing.vips.vipsutils.resize(im, orig_w, orig_h)
         # save to jpeg and read back to image
         im = pyvips.Image.new_from_buffer(im.write_to_buffer(".jpg", Q=quality), ".jpg")
     # save
