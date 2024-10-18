@@ -158,7 +158,7 @@ async def imageaudio(image, audio):
     :param files: [image, audio]
     :return: video
     """
-    image = await mediatopng(image) # -loop 1 only works with proper images
+    image = await mediatopng(image)  # -loop 1 only works with proper images
     outname = reserve_tempfile("mkv")
     duration = await get_duration(audio)  # it is a couple seconds too long without it :(
     await run_command("ffmpeg", "-hide_banner", "-i", audio, "-loop", "1", "-i", image, "-pix_fmt", "yuv420p", "-vf",
@@ -366,12 +366,16 @@ async def vibrato(file, frequency=5, depth=0.5):  # https://ffmpeg.org/ffmpeg-fi
 
 async def pitch(file, p=12):
     out = reserve_tempfile("mkv")
+    # https://stackoverflow.com/a/71898956/9044183
+    samplerate = await run_command("ffprobe", "-v", "error", "-select_streams", "a", "-of",
+                                   "default=noprint_wrappers=1:nokey=1", "-show_entries", "stream=sample_rate", file)
+    samplerate = int(samplerate)
     # http://www.geekybob.com/post/Adjusting-Pitch-for-MP3-Files-with-FFmpeg
-    asetrate = max(int(48000 * 2 ** (p / 12)), 1)
+    asetrate = max(int(samplerate * 2 ** (p / 12)), 1)
     atempo = 2 ** (-p / 12)
     logger.debug((p, asetrate, atempo))
-    af = f"asetrate=r={asetrate},{expanded_atempo(atempo)},aresample=48000"
-    await run_command("ffmpeg", "-i", file, "-ar", "48000", "-af", af, "-strict", "-1", "-c:v", "copy",
+    af = f"asetrate=r={asetrate},{expanded_atempo(atempo)},aresample={samplerate}"
+    await run_command("ffmpeg", "-i", file, "-af", af, "-strict", "-1", "-c:v", "copy",
                       "-c:a", "flac", out)
 
     return out
