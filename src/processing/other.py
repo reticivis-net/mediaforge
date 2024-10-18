@@ -6,6 +6,7 @@ import yt_dlp as youtube_dl
 
 import config
 import utils.tempfiles
+from processing.ffmpeg.conversion import mediatopng
 from processing.ffmpeg.ffprobe import *
 
 
@@ -70,6 +71,7 @@ def ytdownload(vid, form):
 
 async def magickone(media, strength):
     tosave = reserve_tempfile("png")
+    media = await mediatopng(media)
     await run_command("magick", media, "-liquid-rescale", f"{strength}%x{strength}%", tosave)
 
     return tosave
