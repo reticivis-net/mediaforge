@@ -22,7 +22,7 @@ def yskysn(captions: typing.Sequence[str]):
         f"<span foreground='white'>"
         f"{captions[0]}\n<span size='150%'>{captions[1]}</span>"
         f"</span>",
-        font=f"Twemoji Color Emoji,Tahoma Bold 56",
+        font=f"Tahoma Bold,Twemoji Color Emoji 56",
         rgba=True,
         fontfile="rendering/fonts/TAHOMABD.TTF",
         align=pyvips.Align.CENTRE,
@@ -41,7 +41,7 @@ def yskysn(captions: typing.Sequence[str]):
             f"<span foreground='white'>"
             f"{captions[0].upper()}\n<span size='150%'>{captions[1].upper()}</span>"
             f"</span>",
-            font=f"Twemoji Color Emoji,Tahoma Bold 56",
+            font=f"Tahoma Bold,Twemoji Color Emoji 56",
             rgba=True,
             fontfile="rendering/fonts/TAHOMABD.TTF",
             align=pyvips.Align.CENTRE,
@@ -82,7 +82,7 @@ def f1984(captions: typing.Sequence[str]):
     # generate text
     speech_bubble = pyvips.Image.text(
         captions[0],
-        font=f"Twemoji Color Emoji,Atkinson Hyperlegible Bold",
+        font=f"Atkinson Hyperlegible,Twemoji Color Emoji Bold",
         rgba=True,
         fontfile="rendering/fonts/AtkinsonHyperlegible-Bold.ttf",
         align=pyvips.Align.CENTRE,
