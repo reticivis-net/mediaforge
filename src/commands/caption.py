@@ -1,3 +1,4 @@
+import discord
 from discord.ext import commands
 
 import processing.ffmpeg.caption
@@ -16,7 +17,7 @@ class Caption(commands.Cog, name="Captioning"):
         self.bot = bot
 
     @commands.hybrid_command(aliases=["demotivate", "motivational", "demotivational", "inspire", "uninspire"])
-    async def motivate(self, ctx, *, caption):
+    async def motivate(self, ctx, *, caption: str, file: discord.Attachment | None = None,):
         """
         Captions media in the style of demotivational posters.
 
@@ -27,7 +28,7 @@ class Caption(commands.Cog, name="Captioning"):
         caption = caption.split("|")
         if len(caption) == 1:
             caption.append("")
-        await process(ctx, processing.ffmpeg.caption.motivate, [["VIDEO", "GIF", "IMAGE"]], caption)
+        await process(ctx, processing.ffmpeg.caption.motivate, [["VIDEO", "GIF", "IMAGE"]], caption, slashfiles=file)
 
     @commands.hybrid_command(aliases=["toptextbottomtext", "impact", "adviceanimal"])
     async def meme(self, ctx, *, caption):
@@ -125,7 +126,8 @@ class Caption(commands.Cog, name="Captioning"):
         :mediaparam media: A video, gif, or image.
         """
         await process(ctx, processing.vips.vipsutils.generic_caption_stack, [["VIDEO", "GIF", "IMAGE"]],
-                      processing.vips.caption.generic_image_caption, [caption], "rendering/images/Stuff.PNG", reverse=True)
+                      processing.vips.caption.generic_image_caption, [caption], "rendering/images/Stuff.PNG",
+                      reverse=True)
 
     @commands.hybrid_command(aliases=["eminemcaption", "eminemcap"])
     async def eminem(self, ctx, *, caption):
@@ -137,7 +139,8 @@ class Caption(commands.Cog, name="Captioning"):
         :mediaparam media: A video, gif, or image.
         """
         await process(ctx, processing.vips.vipsutils.generic_caption_stack, [["VIDEO", "GIF", "IMAGE"]],
-                      processing.vips.caption.generic_image_caption, [caption], "rendering/images/eminem.png", reverse=True)
+                      processing.vips.caption.generic_image_caption, [caption], "rendering/images/eminem.png",
+                      reverse=True)
 
     @commands.hybrid_command(aliases=["peter", "peterexplain", "petersay", "petergriffinexplain", "petergriffinsay"])
     async def petergriffin(self, ctx, *, caption):
@@ -149,7 +152,8 @@ class Caption(commands.Cog, name="Captioning"):
         :mediaparam media: A video, gif, or image.
         """
         await process(ctx, processing.vips.vipsutils.generic_caption_stack, [["VIDEO", "GIF", "IMAGE"]],
-                      processing.vips.caption.generic_image_caption, [caption], "rendering/images/Peter_Griffin.png", reverse=True)
+                      processing.vips.caption.generic_image_caption, [caption], "rendering/images/Peter_Griffin.png",
+                      reverse=True)
 
     @commands.hybrid_command(aliases=["bottomcap", "botcap"])
     async def bottomcaption(self, ctx, *, caption):

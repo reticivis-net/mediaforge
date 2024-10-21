@@ -10,18 +10,22 @@ from discord.ext import commands
 
 import config
 from core.clogs import logger
+from processing.vips.vipsutils import outline
 from utils.common import fetch
 from utils.web import contentlength
 
 tenor_url_regex = re.compile(r"https?://tenor\.com/view/([^-]+-)*(\d+)/?")
 
 
-async def handlemessagesave(m: discord.Message):
+async def handlemessagesave(m: discord.Message, ignoreatts: list[discord.Attachment] | None = None):
     """
     handles saving of media from discord messages
     :param m: a discord message
+    :param ignoreatts: list of discord attachments to ignore
     :return: list of file URLs detected in the message
     """
+    if ignoreatts is None:
+        ignoreatts = []
     # weird half-message thing that starts threads, get the actual parent message
     if m.type == discord.MessageType.thread_starter_message:
         m = m.reference.resolved
@@ -43,8 +47,9 @@ async def handlemessagesave(m: discord.Message):
                     detectedfiles.append(embed.thumbnail.url)
     if len(m.attachments):
         for att in m.attachments:
-            if not att.filename.endswith("txt"):  # it was reading traceback attachments >:(
-                detectedfiles.append(att.url)
+            if att not in ignoreatts:  # ignore duplicate atts
+                if not att.filename.endswith("txt"):  # it was reading traceback attachments >:(
+                    detectedfiles.append(att.url)
     if len(m.stickers):
         for sticker in m.stickers:
             if sticker.format != discord.StickerFormatType.lottie:
@@ -57,23 +62,24 @@ async def handlemessagesave(m: discord.Message):
     return detectedfiles
 
 
-async def imagesearch(ctx, nargs=1):
+async def imagesearch(ctx, nargs=1, ignore: list[discord.Attachment] | None = None):
     """
     searches the channel for nargs media
     :param ctx: command context
     :param nargs: amount of media to return
+    :param startfiles: start the search with these files, will be ignored from the current message
     :return: False if none or not enough media found, list of file paths if found
     """
     messageschecked = []
     outfiles = []
 
     m = ctx.message
-    if m not in messageschecked:
-        messageschecked.append(m)
-        hm = await handlemessagesave(m)
-        outfiles += hm
-        if len(outfiles) >= nargs:
-            return outfiles[:nargs]
+    messageschecked.append(m)
+    hm = await handlemessagesave(m, ignoreatts=ignore)
+    outfiles += hm
+    if len(outfiles) >= nargs:
+        return outfiles[:nargs]
+
     if ctx.message.reference:
         m = ctx.message.reference.resolved
         messageschecked.append(m)

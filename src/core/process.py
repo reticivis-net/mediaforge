@@ -19,6 +19,7 @@ import utils.tempfiles
 
 
 async def process(ctx: commands.Context, func: callable, inputs: list, *args,
+                  slashfiles: list[discord.Attachment] | None = None,
                   resize=True, expectimage=True, uploadresult=True, run_parallel=False, **kwargs):
     """
     The core function of the bot. Gathers media and sends it to the proper function.
@@ -61,7 +62,11 @@ async def process(ctx: commands.Context, func: callable, inputs: list, *args,
         async with utils.tempfiles.TempFileSession():
             # get media from channel
             if inputs:
-                urls = await imagesearch(ctx, len(inputs))
+                if isinstance(slashfiles, discord.Attachment):
+                    slashfiles = [slashfiles]
+                elif slashfiles is None:
+                    slashfiles = []
+                urls = await imagesearch(ctx, len(inputs), slashfiles)
                 files = await saveurls(urls)
             else:
                 files = []
@@ -86,7 +91,8 @@ async def process(ctx: commands.Context, func: callable, inputs: list, *args,
                                           f"pect errors.", delete_after=10))
                         # resize if needed
                         if resize:
-                            files[i] = await processing.ffmpeg.ffutils.ensuresize(ctx, file, config.min_size, config.max_size)
+                            files[i] = await processing.ffmpeg.ffutils.ensuresize(ctx, file, config.min_size,
+                                                                                  config.max_size)
                 # files are of correcte type, begin to process
                 else:
                     # only update with queue message if there is a queue
@@ -115,7 +121,8 @@ async def process(ctx: commands.Context, func: callable, inputs: list, *args,
                                 logger.warning(f"{func} is not coroutine")
                                 command_result = func(*args, **kwargs)
                         if expectimage and command_result:
-                            command_result = await processing.ffmpeg.conversion.allreencode(command_result, fail_if_gif=False)
+                            command_result = await processing.ffmpeg.conversion.allreencode(command_result,
+                                                                                            fail_if_gif=False)
                             command_result = await processing.ffmpeg.ensuresize.assurefilesize(command_result)
                         return command_result
 
