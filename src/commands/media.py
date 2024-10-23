@@ -8,6 +8,7 @@ import processing.ffmpeg.conversion
 
 import processing.other
 import processing.vips.other
+import utils
 from core.process import process
 
 

@@ -11,6 +11,7 @@ async def videotogif(video):
                       "-gifflags", "-transdiff",
                       "-vf",
                       # cap fps because gifs are wackyyyyyy
+                      # TODO: https://superuser.com/q/1854904/1001487
                       ("fps=fps=50," if fps > 50 else "") + \
                       # make and use nice palette
                       "split[s0][s1];[s0]palettegen=reserve_transparent=1[p];[s1][p]paletteuse=bayer",
