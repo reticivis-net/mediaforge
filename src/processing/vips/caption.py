@@ -51,7 +51,7 @@ def mediaforge_caption(captions: typing.Sequence[str], size: ImageSize):
     # generate text
     out = pyvips.Image.text(
         captions[0],
-        font=f"Atkinson Hyperlegible Bold,Twemoji Color Emoji {fontsize}px",
+        font=f"Atkinson Hyperlegible,Twemoji Color Emoji Bold {fontsize}px",
         rgba=True,
         fontfile="rendering/fonts/AtkinsonHyperlegible-Bold.ttf",
         align=pyvips.Align.CENTRE,
@@ -279,7 +279,7 @@ def generic_image_caption(image: str, captions: typing.Sequence[str], size: Imag
     # generate text
     out = pyvips.Image.text(
         captions[0],
-        font=f"Atkinson Hyperlegible Bold,Twemoji Color Emoji {fontsize}px",
+        font=f"Atkinson Hyperlegible,Twemoji Color Emoji Bold {fontsize}px",
         rgba=True,
         fontfile="rendering/fonts/AtkinsonHyperlegible-Bold.ttf",
         align=pyvips.Align.CENTRE,
