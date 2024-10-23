@@ -35,12 +35,12 @@ def escape(arg: str | typing.Sequence[str]):
         return [html.escape(s, quote=False) for s in arg]
 
 
-def outline(image: pyvips.Image, radius: int | None = None, color: typing.Sequence[int] | None = None) -> pyvips.Image:
+def outline(image: pyvips.Image, radius: int | float | None = None, color: typing.Sequence[int] | None = None) -> pyvips.Image:
     if color is None:
         color = [0, 0, 0]
     if radius is None:
-        radius = image.width // 1000
-    if radius <= 0:
+        radius = image.width / 1000
+    if radius <= 1:
         radius = 1
     # dilate the text with a squared-off gaussian mask
     # https://github.com/libvips/libvips/discussions/2123#discussioncomment-3950916

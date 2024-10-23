@@ -164,7 +164,7 @@ def meme(captions: typing.Sequence[str], size: ImageSize):
                                      x=((size.width - bottomtext.width) / 2),
                                      y=int((size.height * .975) - bottomtext.height))
 
-    overlay = outline(overlay, overlay.width // 200)
+    overlay = outline(overlay, overlay.width / 200)
     outfile = reserve_tempfile("png")
     overlay.pngsave(outfile)
     return outfile
@@ -209,7 +209,7 @@ def tenor(captions: typing.Sequence[str], size: ImageSize):
                                      x=((size.width - bottomtext.width) / 2),
                                      y=int((size.height * .975) - bottomtext.height))
 
-    overlay = outline(overlay, overlay.width // 250)
+    overlay = outline(overlay, overlay.width / 250)
     outfile = reserve_tempfile("png")
     overlay.pngsave(outfile)
     return outfile
@@ -235,7 +235,7 @@ def whisper(captions: typing.Sequence[str], size: ImageSize):
     )
     overlay = overlay_in_middle(overlay, text)
 
-    overlay = outline(overlay, overlay.width // 175)
+    overlay = outline(overlay, overlay.width / 175)
     outfile = reserve_tempfile("png")
     overlay.pngsave(outfile)
     return outfile
