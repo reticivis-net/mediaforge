@@ -146,12 +146,15 @@ async def va_codecs(filename):
         return None
 
 
-async def mediatype(image):
+async def mediatype(image:str):
     """
     Gets basic type of media
     :param image: filename of media
     :return: can be VIDEO, AUDIO, GIF, IMAGE or None (invalid or other).
     """
+    # tenor mp4s are gifs
+    if image.endswith(".tenor.mp4"):
+        return "GIF"
     # ffmpeg doesn't work well with detecting images so let PIL do that
     mime = magic.from_file(image, mime=True)
     try:

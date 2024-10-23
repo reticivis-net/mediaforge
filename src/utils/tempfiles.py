@@ -48,10 +48,10 @@ def temp_file_name(extension=None):
             return name
 
 
-def reserve_tempfile(arg):
+def reserve_tempfile(arg, force_extension=False):
     if arg is None:  # default
         arg = temp_file_name()
-    elif "." not in arg:  # just extension
+    elif "." not in arg or force_extension:  # just extension
         arg = temp_file_name(arg)
     # full filename otherwise
 

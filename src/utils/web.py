@@ -17,16 +17,17 @@ async def saveurl(url: str) -> str:
     :param url: web url of a file
     :return: path to file
     """
-    tenorgif = url.startswith("https://media.tenor.com") and url.endswith("/mp4")  # tenor >:(
     extension = None
-    if tenorgif:
-        extension = "mp4"
+    if url.startswith("TENOR|"):
+        extension = "tenor.mp4"  # these are mp4s but treated as gifs
+        url = url[6:]  # strip TENOR|
+
     if extension is None:
         after_slash = url.split("/")[-1].split("?")[0]
         if "." in after_slash:
             extension = after_slash.split(".")[-1]
         # extension will stay None if no extension detected.
-    name = reserve_tempfile(extension)
+    name = reserve_tempfile(extension, force_extension=True)
 
     # https://github.com/aio-libs/aiohttp/issues/3904#issuecomment-632661245
     async with aiohttp.ClientSession(headers={'Connection': 'keep-alive'},
@@ -49,8 +50,6 @@ async def saveurl(url: str) -> str:
                 logger.error(f"aiohttp status {resp.status}")
                 logger.error(f"aiohttp status {await resp.read()}")
                 resp.raise_for_status()
-    if tenorgif and name:
-        name = await processing.ffmpeg.conversion.videotogif(name)
     return name
 
 

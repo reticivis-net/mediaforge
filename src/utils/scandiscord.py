@@ -35,7 +35,7 @@ async def handlemessagesave(m: discord.Message):
                     tenor = await fetch(
                         f"https://tenor.googleapis.com/v2/posts?ids={gif_id}&key={config.tenor_key}&limit=1")
                     tenor = json.loads(tenor)
-                    detectedfiles.append(tenor['results'][0]['media_formats']['gif']['url'])
+                    detectedfiles.append("TENOR|" + tenor['results'][0]['media_formats']['mp4']['url'])
             elif embed.type in ["image", "video", "audio"]:
                 if await contentlength(embed.url):  # prevent adding youtube videos and such
                     detectedfiles.append(embed.url)
